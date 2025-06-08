@@ -1,7 +1,5 @@
 package com.dhimandasgupta.notemark.ui.screens
 
-import android.app.Activity
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,8 +21,7 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,37 +34,55 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
+import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun LauncherPane(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    windowSizeClass: WindowSizeClass,
+    navigateToAfterLogin: () -> Unit = {},
+    navigateToLogin: () -> Unit = {}
 ) {
-    val windowSizeClass = calculateWindowSizeClass(LocalActivity.current as Activity)
+    val layoutType = getDeviceLayoutType(windowSizeClass)
 
-    when(windowSizeClass.widthSizeClass) {
-        WindowWidthSizeClass.Compact -> {
-            LandingPanePortrait()
+    when(layoutType) {
+        DeviceLayoutType.PHONE_PORTRAIT -> {
+            LandingPanePortrait(
+                navigateToLogin = navigateToLogin
+            )
         }
-        WindowWidthSizeClass.Medium -> {
-            LandingPaneLandscape()
+
+        DeviceLayoutType.PHONE_LANDSCAPE -> {
+            LandingPaneLandscape(
+                navigateToLogin = navigateToLogin
+            )
         }
-        WindowWidthSizeClass.Expanded -> {
-            LandingPaneTablet()
+
+        DeviceLayoutType.TABLET_LAYOUT -> {
+            LandingPaneTablet(
+                navigateToLogin = navigateToLogin
+            )
         }
         else -> {
-            LandingPanePortrait()
+            LandingPanePortrait(
+                navigateToLogin = navigateToLogin
+            )
         }
     }
 }
 
 @Preview
 @Composable
-private fun LandingPanePortrait(modifier: Modifier = Modifier) {
+private fun LandingPanePortrait(
+    modifier: Modifier = Modifier,
+    navigateToLogin: () -> Unit = {}
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(color = colorScheme.background),
+            .background(color = colorResource(R.color.splash_blue).copy(alpha = 0.1f)),
     ) {
         Box(
             modifier = modifier
@@ -77,7 +92,7 @@ private fun LandingPanePortrait(modifier: Modifier = Modifier) {
             Image(
                 painter = painterResource(id = R.drawable.background),
                 contentDescription = null,
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.Crop,
                 modifier = modifier.fillMaxSize()
             )
         }
@@ -132,7 +147,7 @@ private fun LandingPanePortrait(modifier: Modifier = Modifier) {
             Spacer(Modifier.height(8.dp))
 
             OutlinedButton(
-                onClick = {},
+                onClick = { navigateToLogin() },
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
@@ -150,7 +165,10 @@ private fun LandingPanePortrait(modifier: Modifier = Modifier) {
     heightDp = 360
 )
 @Composable
-private fun LandingPaneLandscape(modifier: Modifier = Modifier) {
+private fun LandingPaneLandscape(
+    modifier: Modifier = Modifier,
+    navigateToLogin: () -> Unit = {}
+) {
     Row {
         Box(
             modifier = modifier
@@ -160,7 +178,7 @@ private fun LandingPaneLandscape(modifier: Modifier = Modifier) {
             Image(
                 painter = painterResource(id = R.drawable.background),
                 contentDescription = null,
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.Crop,
                 modifier = modifier.fillMaxSize()
             )
         }
@@ -169,7 +187,7 @@ private fun LandingPaneLandscape(modifier: Modifier = Modifier) {
             modifier = modifier
                 .fillMaxHeight()
                 .fillMaxWidth()
-                .background(colorResource(R.color.splash_blue))
+                .background(color = colorResource(R.color.splash_blue_background))
                 .padding(start = 16.dp, top = 32.dp, bottom = 32.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -222,7 +240,7 @@ private fun LandingPaneLandscape(modifier: Modifier = Modifier) {
                 Spacer(Modifier.height(8.dp))
 
                 OutlinedButton(
-                    onClick = {},
+                    onClick = { navigateToLogin() },
                     modifier = modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
@@ -242,7 +260,10 @@ private fun LandingPaneLandscape(modifier: Modifier = Modifier) {
     device = Devices.TABLET // Or Devices.NEXUS_10, etc.
 )
 @Composable
-private fun LandingPaneTablet(modifier: Modifier = Modifier) {
+private fun LandingPaneTablet(
+    modifier: Modifier = Modifier,
+    navigateToLogin: () -> Unit = {}
+) {
     Column {
         Box(
             modifier = modifier
@@ -252,7 +273,7 @@ private fun LandingPaneTablet(modifier: Modifier = Modifier) {
             Image(
                 painter = painterResource(id = R.drawable.background),
                 contentDescription = null,
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.Crop,
                 modifier = modifier.fillMaxSize()
             )
         }
@@ -261,7 +282,7 @@ private fun LandingPaneTablet(modifier: Modifier = Modifier) {
             modifier = modifier
                 .fillMaxHeight()
                 .fillMaxWidth()
-                .background(colorResource(R.color.splash_blue))
+                .background(colorResource(R.color.splash_blue_background))
                 .padding(start = 16.dp, top = 16.dp, bottom = 0.dp, end = 16.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -314,7 +335,7 @@ private fun LandingPaneTablet(modifier: Modifier = Modifier) {
                 Spacer(Modifier.height(8.dp))
 
                 OutlinedButton(
-                    onClick = {},
+                    onClick = { navigateToLogin() },
                     modifier = modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)

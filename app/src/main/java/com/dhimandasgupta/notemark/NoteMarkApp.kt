@@ -18,7 +18,7 @@ class NoteMarkApp : Application() {
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG) {
-            enableStrictMode()
+            //enableStrictMode()
         }
 
         createNotificationChannel()
