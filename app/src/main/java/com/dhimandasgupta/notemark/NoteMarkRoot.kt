@@ -1,9 +1,7 @@
 package com.dhimandasgupta.notemark
 
-import android.app.Activity
-import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -14,7 +12,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.screens.LauncherPane
 import com.dhimandasgupta.notemark.ui.screens.LoginPane
 import com.dhimandasgupta.notemark.ui.screens.RegistrationPane
@@ -24,6 +21,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun NoteMarkRoot(
     navController: NavHostController,
+    windowSizeClass: WindowSizeClass,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -32,20 +30,23 @@ fun NoteMarkRoot(
         modifier = modifier
     ) {
         NoteMarkGraph(
-            navController = navController
+            navController = navController,
+            windowSizeClass = windowSizeClass
         )
     }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 private fun NavGraphBuilder.NoteMarkGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    windowSizeClass: WindowSizeClass
 ) {
     navigation<NoteMarkDestination.RootDestination>(
         startDestination = NoteMarkDestination.LauncherDestination
     ) {
         composable<NoteMarkDestination.LauncherDestination> {
             LauncherPane(
+                windowSizeClass = windowSizeClass,
                 navigateToAfterLogin = {},
                 navigateToLogin = {
                     navController.navigate(NoteMarkDestination.LoginDestination)
@@ -54,8 +55,6 @@ private fun NavGraphBuilder.NoteMarkGraph(
         }
 
         composable<NoteMarkDestination.LoginDestination> {
-            val actualActivity = LocalActivity.current
-            val windowSizeClass = calculateWindowSizeClass(actualActivity as Activity)
             LoginPane(
                 windowSizeClass = windowSizeClass,
                 navigateToAfterLogin = {},
@@ -66,14 +65,11 @@ private fun NavGraphBuilder.NoteMarkGraph(
         }
 
         composable<NoteMarkDestination.RegistrationDestination> {
-            val actualActivity = LocalActivity.current
-            val windowSizeClass = calculateWindowSizeClass(actualActivity as Activity)
             RegistrationPane(
                 windowSizeClass = windowSizeClass,
                 navigateToLogin = {
                     navController.navigate(NoteMarkDestination.LoginDestination)
-                },
-                navigateToRegistration = {}
+                }
             )
         }
     }

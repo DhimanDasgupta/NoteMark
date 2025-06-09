@@ -8,17 +8,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
@@ -42,10 +43,10 @@ import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.PhoneLandscapePreview
-import com.dhimandasgupta.notemark.ui.common.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.common.TabletExpandedPreview
 import com.dhimandasgupta.notemark.ui.common.TabletMediumPreview
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
@@ -68,9 +69,13 @@ fun LoginPane(
                     modifier = Modifier
                         .padding(
                             top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-                            start = WindowInsets.systemBars.asPaddingValues()
+                            start = WindowInsets
+                                .systemBars.union(WindowInsets.displayCutout)
+                                .asPaddingValues()
                                 .calculateLeftPadding(LayoutDirection.Ltr),
-                            end = WindowInsets.systemBars.asPaddingValues()
+                            end = WindowInsets
+                                .systemBars.union(WindowInsets.displayCutout)
+                                .asPaddingValues()
                                 .calculateRightPadding(LayoutDirection.Ltr)
                         )
                         .clip(
@@ -183,7 +188,7 @@ private fun LeftPane(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun RightPane(
+private fun RightPane(
     modifier: Modifier = Modifier,
     navigateToRegistration: () -> Unit = {}
 ) {
@@ -231,7 +236,7 @@ fun RightPane(
             )
         )
 
-        Button(
+        NoteMarkButton(
             onClick = {},
             modifier = modifier.fillMaxWidth()
         ) {
