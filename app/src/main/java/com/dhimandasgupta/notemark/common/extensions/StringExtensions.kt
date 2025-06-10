@@ -10,7 +10,7 @@ fun String.isValidEmail(): Boolean {
  * A simple username validation.
  * Allows alphanumeric chars, underscore, and hyphen. Length 3-20.
  */
-fun String.isSimpleUsernameValid(): Boolean {
+fun String.isUsernameValid(): Boolean {
     val usernameRegex = """^[a-zA-Z0-9_-]{3,20}$""".toRegex()
     return this.matches(usernameRegex)
 }

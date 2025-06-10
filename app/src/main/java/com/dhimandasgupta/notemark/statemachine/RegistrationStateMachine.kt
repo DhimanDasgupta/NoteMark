@@ -1,6 +1,7 @@
 package com.dhimandasgupta.notemark.statemachine
 
 import androidx.compose.runtime.Immutable
+import com.dhimandasgupta.notemark.common.extensions.isUsernameValid
 import com.dhimandasgupta.notemark.common.extensions.isValidEmail
 import com.dhimandasgupta.notemark.common.extensions.isValidPassword
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.EmailEntered
@@ -15,6 +16,7 @@ data class RegistrationState(
     val email: String = "",
     val password: String = "",
     val repeatPassword: String = "",
+    val userNameValid: Boolean? = false,
     val emailValid: Boolean? = false,
     val passwordValid: Boolean? = false,
     val registrationEnabled: Boolean = false
@@ -59,6 +61,7 @@ class RegistrationStateMachine : StateMachine<RegistrationState, RegistrationAct
 }
 
 private fun RegistrationState.validateAndReturn(): RegistrationState = this.copy(
+    userNameValid = userName.isUsernameValid(),
     emailValid = email.isValidEmail(),
     passwordValid = password.isValidPassword(),
     registrationEnabled = emailValid == true && passwordValid == true && repeatPassword == password
