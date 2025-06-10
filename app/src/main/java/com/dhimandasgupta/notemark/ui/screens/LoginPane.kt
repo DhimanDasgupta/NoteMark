@@ -35,12 +35,18 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.statemachine.LoginAction
+import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailEntered
+import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordEntered
+import com.dhimandasgupta.notemark.statemachine.LoginState
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.common.TabletExpandedPreview
@@ -54,10 +60,12 @@ fun LoginPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
     navigateToAfterLogin: () -> Unit = {},
-    navigateToRegistration: () -> Unit = {}
+    navigateToRegistration: () -> Unit = {},
+    loginState: LoginState,
+    loginAction: (LoginAction) -> Unit = {},
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .background(color = colorResource(R.color.splash_blue))
             .fillMaxSize()
     ) {
@@ -104,7 +112,9 @@ fun LoginPane(
                                 end = WindowInsets.systemBars.asPaddingValues()
                                     .calculateRightPadding(LayoutDirection.Ltr)
                             ),
-                        navigateToRegistration = navigateToRegistration
+                        navigateToRegistration = navigateToRegistration,
+                        loginState = loginState,
+                        loginAction = loginAction
                     )
                 }
             }
@@ -132,7 +142,9 @@ fun LoginPane(
                 ) {
                     LeftPane()
                     RightPane(
-                        navigateToRegistration = navigateToRegistration
+                        navigateToRegistration = navigateToRegistration,
+                        loginState = loginState,
+                        loginAction = loginAction
                     )
                 }
             }
@@ -160,7 +172,9 @@ fun LoginPane(
                 ) {
                     LeftPane()
                     RightPane(
-                        navigateToRegistration = navigateToRegistration
+                        navigateToRegistration = navigateToRegistration,
+                        loginState = loginState,
+                        loginAction = loginAction
                     )
                 }
             }
@@ -169,7 +183,9 @@ fun LoginPane(
 }
 
 @Composable
-private fun LeftPane(modifier: Modifier = Modifier) {
+private fun LeftPane(
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -190,7 +206,9 @@ private fun LeftPane(modifier: Modifier = Modifier) {
 @Composable
 private fun RightPane(
     modifier: Modifier = Modifier,
-    navigateToRegistration: () -> Unit = {}
+    navigateToRegistration: () -> Unit = {},
+    loginState: LoginState,
+    loginAction: (LoginAction) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -205,9 +223,12 @@ private fun RightPane(
         )
 
         OutlinedTextField(
-            value = "",
-            onValueChange = {},
+            value = loginState.email,
+            onValueChange = { loginAction(EmailEntered(it)) },
             modifier = Modifier.fillMaxWidth(),
+            visualTransformation = VisualTransformation.None,
+            placeholder = { Text("Enter your email here") },
+            maxLines = 1,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Unspecified,
                 imeAction = ImeAction.Next
@@ -224,9 +245,12 @@ private fun RightPane(
         )
 
         OutlinedTextField(
-            value = "",
-            onValueChange = {},
+            value = loginState.password,
+            onValueChange = { loginAction(PasswordEntered(it)) },
             modifier = Modifier.fillMaxWidth(),
+            visualTransformation = PasswordVisualTransformation(),
+            placeholder = { Text("Enter your Password here") },
+            maxLines = 1,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Unspecified,
                 imeAction = ImeAction.Done
@@ -238,7 +262,8 @@ private fun RightPane(
 
         NoteMarkButton(
             onClick = {},
-            modifier = modifier.fillMaxWidth()
+            modifier = modifier.fillMaxWidth(),
+            enabled = loginState.loginEnabled
         ) {
             Text(text = "Log In")
         }
@@ -266,7 +291,9 @@ private fun PreviewTabletLandscapeDirect() {
         modifier = Modifier,
         windowSizeClass = WindowSizeClass.calculateFromSize(
             size = DpSize(1280.dp, 800.dp)
-        )
+        ),
+        loginState = LoginState(),
+        loginAction = {}
     )
 }
 
@@ -278,7 +305,9 @@ private fun PreviewTabletPortraitDirect() {
         modifier = Modifier,
         windowSizeClass = WindowSizeClass.calculateFromSize(
             size = DpSize(1280.dp, 800.dp)
-        )
+        ),
+        loginState = LoginState(),
+        loginAction = {}
     )
 }
 
@@ -290,7 +319,9 @@ private fun PreviewPhonePortraitDirect() {
         modifier = Modifier,
         windowSizeClass = WindowSizeClass.calculateFromSize(
             size = DpSize(600.dp, 900.dp)
-        )
+        ),
+        loginState = LoginState(),
+        loginAction = {}
     )
 }
 
@@ -302,6 +333,8 @@ private fun PreviewPhoneLandscapeDirect() {
         modifier = Modifier,
         windowSizeClass = WindowSizeClass.calculateFromSize(
             size = DpSize(780.dp, 360.dp)
-        )
+        ),
+        loginState = LoginState(),
+        loginAction = {}
     )
 }

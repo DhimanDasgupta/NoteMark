@@ -146,7 +146,8 @@ private fun LandingPanePortrait(
                 onClick = {},
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
+                enabled = true
             ) {
                 Text(text = "Get Started")
             }
@@ -157,7 +158,8 @@ private fun LandingPanePortrait(
                 onClick = { navigateToLogin() },
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
+                enabled = true
             ) {
                 Text(text = "Log in")
             }
@@ -236,7 +238,8 @@ private fun LandingPaneLandscape(
                 onClick = {},
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
+                enabled = true
             ) {
                 Text(text = "Get Started")
             }
@@ -247,7 +250,8 @@ private fun LandingPaneLandscape(
                 onClick = { navigateToLogin() },
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
+                enabled = true
             ) {
                 Text(text = "Log in")
             }
@@ -324,7 +328,8 @@ private fun LandingPaneTablet(
                 onClick = {},
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
+                enabled = true
             ) {
                 Text(text = "Get Started")
             }
@@ -335,7 +340,8 @@ private fun LandingPaneTablet(
                 onClick = { navigateToLogin() },
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
+                enabled = true
             ) {
                 Text(text = "Log in")
             }

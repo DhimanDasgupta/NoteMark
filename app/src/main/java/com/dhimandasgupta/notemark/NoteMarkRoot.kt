@@ -3,20 +3,20 @@ package com.dhimandasgupta.notemark
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.ViewModel
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.dhimandasgupta.notemark.presenter.AppPresenter
+import com.dhimandasgupta.notemark.presenter.LoginPresenter
+import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
 import com.dhimandasgupta.notemark.ui.screens.LauncherPane
 import com.dhimandasgupta.notemark.ui.screens.LoginPane
 import com.dhimandasgupta.notemark.ui.screens.RegistrationPane
 import kotlinx.serialization.Serializable
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @Composable
 fun NoteMarkRoot(
@@ -24,6 +24,11 @@ fun NoteMarkRoot(
     windowSizeClass: WindowSizeClass,
     modifier: Modifier = Modifier
 ) {
+    val appPresenter = koinInject<AppPresenter>()
+
+    val  appUiModel = appPresenter.uiModel()
+    val  appEvents = appPresenter::processEvent
+
     NavHost(
         navController = navController,
         startDestination = NoteMarkDestination.RootDestination,
@@ -55,21 +60,45 @@ private fun NavGraphBuilder.NoteMarkGraph(
         }
 
         composable<NoteMarkDestination.LoginDestination> {
+            val loginPresenter = koinInject<LoginPresenter>()
+
+            val loginUiModel = loginPresenter.uiModel()
+            val loginEvents = loginPresenter::processEvent
+
             LoginPane(
                 windowSizeClass = windowSizeClass,
                 navigateToAfterLogin = {},
                 navigateToRegistration = {
-                    navController.navigate(NoteMarkDestination.RegistrationDestination)
-                }
+                    navController.navigate(NoteMarkDestination.RegistrationDestination) {
+                        popUpTo(NoteMarkDestination.LoginDestination) {
+                            inclusive = true
+                        }
+                    }
+                },
+                loginState = loginUiModel,
+                loginAction = loginEvents,
+                modifier = Modifier
             )
         }
 
         composable<NoteMarkDestination.RegistrationDestination> {
+            val registrationPresenter = koinInject<RegistrationPresenter>()
+
+            val registrationUiModel = registrationPresenter.uiModel()
+            val registrationAction = registrationPresenter::processEvent
+
             RegistrationPane(
+                modifier = Modifier,
                 windowSizeClass = windowSizeClass,
                 navigateToLogin = {
-                    navController.navigate(NoteMarkDestination.LoginDestination)
-                }
+                    navController.navigate(NoteMarkDestination.LoginDestination) {
+                        popUpTo(NoteMarkDestination.RegistrationDestination) {
+                            inclusive = true
+                        }
+                    }
+                },
+                registrationState = registrationUiModel,
+                registrationAction = registrationAction
             )
         }
     }
@@ -87,15 +116,4 @@ object NoteMarkDestination {
 
     @Serializable
     data object RegistrationDestination
-}
-
-@Composable
-inline fun <reified T : ViewModel> NavBackStackEntry.sharedKoinViewModel(
-    navController: NavHostController
-): T {
-    val navGraphRoute = destination.parent?.route ?: koinViewModel<T>()
-    val parentEntry = remember(this) {
-        navController.getBackStackEntry(navGraphRoute)
-    }
-    return koinViewModel<T>(viewModelStoreOwner = parentEntry)
 }

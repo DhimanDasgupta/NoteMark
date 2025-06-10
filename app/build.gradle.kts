@@ -79,8 +79,17 @@ dependencies {
     testImplementation(libs.androidx.room.testing)
 
     // Koin
-    implementation(libs.bundles.koin)
-    implementation(libs.bundles.koin.compose)
+    implementation(project.dependencies.platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.koin.androidx.compose.navigation)
+
+    // Flow Redux
+    implementation(libs.flow.redux.jvm)
+
+    // Molecule
+    implementation(libs.molecule)
 
     // Kotlinx Serialization JSON
     implementation(libs.kotlinx.serialization.json)

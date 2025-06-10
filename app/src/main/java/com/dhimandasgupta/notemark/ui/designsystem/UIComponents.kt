@@ -17,13 +17,15 @@ import kotlin.Unit
 fun NoteMarkButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
+    enabled: Boolean = false,
     content: @Composable RowScope.() -> Unit
 ) {
     Button(
         modifier = modifier,
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.splash_blue))
+        colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.splash_blue)),
+        enabled = enabled
     ) {
         content()
     }
@@ -33,13 +35,15 @@ fun NoteMarkButton(
 fun NoteMarkOutlinedButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
+    enabled: Boolean = false,
     content: @Composable RowScope.() -> Unit
 ) {
     OutlinedButton(
         modifier = modifier,
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-        border = BorderStroke(1.dp, colorResource(R.color.splash_blue))
+        border = BorderStroke(1.dp, colorResource(R.color.splash_blue)),
+        enabled = enabled
     ) {
          content()
     }
