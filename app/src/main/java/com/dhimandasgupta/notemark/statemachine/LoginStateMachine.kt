@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.extensions.isValidEmail
 import com.dhimandasgupta.notemark.common.extensions.isValidPassword
 import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailEntered
+import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailFocusChanged
 import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordEntered
 import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -13,7 +14,9 @@ data class LoginState(
     val email: String = "",
     val password: String = "",
     val emailValid: Boolean? = false,
+    val emailError: String? = null,
     val passwordValid: Boolean? = false,
+    val passwordError: String? = null,
     val loginEnabled: Boolean = false
 )
 
@@ -21,6 +24,8 @@ data class LoginState(
 sealed interface LoginAction {
     data class EmailEntered(val email: String) : LoginAction
     data class PasswordEntered(val password: String) : LoginAction
+    data object EmailFocusChanged : LoginAction
+    data object PasswordFocusChanged : LoginAction
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -35,6 +40,20 @@ class LoginStateMachine : StateMachine<LoginState, LoginAction>(defaultLoginStat
                 on<PasswordEntered> { action, state ->
                     val modifiedState = state.snapshot.copy(password = action.password)
                     state.mutate { modifiedState.validateAndReturn() }
+                }
+                on<EmailFocusChanged> { action, state ->
+                    val newStateWithValidationApplied = state.snapshot.validateAndReturn()
+                    val modifiedState = newStateWithValidationApplied.copy(
+                        emailError = if (newStateWithValidationApplied.emailValid == false) "Please enter valid email" else null
+                    )
+                    state.mutate { modifiedState }
+                }
+                on<LoginAction.PasswordFocusChanged> { action, state ->
+                    val newStateWithValidationApplied = state.snapshot.validateAndReturn()
+                    val modifiedState = newStateWithValidationApplied.copy(
+                        passwordError = if (newStateWithValidationApplied.passwordValid == false) "Please enter password" else null
+                    )
+                    state.mutate { modifiedState }
                 }
             }
         }

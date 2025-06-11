@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
@@ -27,9 +28,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,7 +46,9 @@ import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.statemachine.LoginAction
 import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailEntered
+import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailFocusChanged
 import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordEntered
+import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordFocusChanged
 import com.dhimandasgupta.notemark.statemachine.LoginState
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
@@ -101,7 +106,8 @@ fun LoginPane(
                         )
                         .background(colorScheme.background)
                         .fillMaxSize()
-                        .padding(all = 16.dp),
+                        .padding(all = 16.dp)
+                        .verticalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     LeftPane(
@@ -232,7 +238,11 @@ private fun RightPane(
         OutlinedTextField(
             value = loginState.email,
             onValueChange = { loginAction(EmailEntered(it)) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    if (!focusState.hasFocus) loginAction(EmailFocusChanged)
+                },
             visualTransformation = VisualTransformation.None,
             placeholder = { Text("Enter your email here") },
             maxLines = 1,
@@ -245,6 +255,10 @@ private fun RightPane(
             )
         )
 
+        loginState.emailError?.let { error ->
+            Text(text = error, style = typography.labelSmall, color = colorScheme.error)
+        }
+
         Text(
             text = "Password",
             style = typography.bodySmall,
@@ -254,7 +268,13 @@ private fun RightPane(
         OutlinedTextField(
             value = loginState.password,
             onValueChange = { loginAction(PasswordEntered(it)) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    if (!focusState.hasFocus) {
+                        loginAction(PasswordFocusChanged)
+                    }
+                },
             visualTransformation = PasswordVisualTransformation(),
             placeholder = { Text("Enter your Password here") },
             maxLines = 1,
@@ -266,6 +286,10 @@ private fun RightPane(
                 onNext = { focusManager.clearFocus(true) }
             )
         )
+
+        loginState.passwordError?.let { error ->
+            Text(text = error, style = typography.labelSmall, color = colorScheme.error)
+        }
 
         NoteMarkButton(
             onClick = {},

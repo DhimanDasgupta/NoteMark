@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +44,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction
+import com.dhimandasgupta.notemark.statemachine.RegistrationAction.*
 import com.dhimandasgupta.notemark.statemachine.RegistrationState
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
@@ -230,8 +232,12 @@ private fun RightPane(
 
         OutlinedTextField(
             value = registrationState.userName,
-            onValueChange = { registrationAction(RegistrationAction.UserNameEntered(it)) },
-            modifier = Modifier.fillMaxWidth(),
+            onValueChange = { registrationAction(UserNameEntered(it)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    if (!focusState.hasFocus) registrationAction(UserNameFocusChanged)
+                },
             maxLines = 1,
             visualTransformation = VisualTransformation.None,
             placeholder = { Text("Enter your user name here") },
@@ -244,6 +250,10 @@ private fun RightPane(
             )
         )
 
+        registrationState.userNameError?.let { error ->
+            Text(text = error, style = typography.labelSmall, color = colorScheme.error)
+        }
+
         Text(
             text = "Email",
             style = typography.bodySmall,
@@ -252,8 +262,12 @@ private fun RightPane(
 
         OutlinedTextField(
             value = registrationState.email,
-            onValueChange = { registrationAction(RegistrationAction.EmailEntered(it)) },
-            modifier = Modifier.fillMaxWidth(),
+            onValueChange = { registrationAction(EmailEntered(it)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    if (!focusState.hasFocus) registrationAction(EmailFocusChanged)
+                },
             maxLines = 1,
             visualTransformation = VisualTransformation.None,
             placeholder = { Text("Enter your email here") },
@@ -266,6 +280,10 @@ private fun RightPane(
             )
         )
 
+        registrationState.emailError?.let { error ->
+            Text(text = error, style = typography.labelSmall, color = colorScheme.error)
+        }
+
         Text(
             text = "Password",
             style = typography.bodySmall,
@@ -274,8 +292,12 @@ private fun RightPane(
 
         OutlinedTextField(
             value = registrationState.password,
-            onValueChange = { registrationAction(RegistrationAction.PasswordEntered(it)) },
-            modifier = Modifier.fillMaxWidth(),
+            onValueChange = { registrationAction(PasswordEntered(it)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    if (!focusState.hasFocus) registrationAction(PasswordFocusChanged)
+                },
             maxLines = 1,
             visualTransformation = PasswordVisualTransformation(),
             placeholder = { Text("Enter your password here") },
@@ -288,6 +310,10 @@ private fun RightPane(
             )
         )
 
+        registrationState.passwordError?.let { error ->
+            Text(text = error, style = typography.labelSmall, color = colorScheme.error)
+        }
+
         Text(
             text = "Repeat password",
             style = typography.bodySmall,
@@ -296,8 +322,13 @@ private fun RightPane(
 
         OutlinedTextField(
             value = registrationState.repeatPassword,
-            onValueChange = { registrationAction(RegistrationAction.RepeatPasswordEntered(it)) },
-            modifier = Modifier.fillMaxWidth(),maxLines = 1,
+            onValueChange = { registrationAction(RepeatPasswordEntered(it)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    if (!focusState.hasFocus) registrationAction(RepeatPasswordFocusChanged)
+                },
+            maxLines = 1,
             visualTransformation = PasswordVisualTransformation(),
             placeholder = { Text("Retype your password here") },
             keyboardOptions = KeyboardOptions(
@@ -308,6 +339,10 @@ private fun RightPane(
                 onDone = { focusManager.clearFocus(true) }
             )
         )
+
+        registrationState.repeatPasswordError?.let { error ->
+            Text(text = error, style = typography.labelSmall, color = colorScheme.error)
+        }
 
         NoteMarkButton(
             onClick = {},
