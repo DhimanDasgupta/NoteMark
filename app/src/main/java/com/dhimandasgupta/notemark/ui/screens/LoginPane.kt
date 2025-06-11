@@ -38,8 +38,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
@@ -47,12 +45,21 @@ import com.dhimandasgupta.notemark.statemachine.LoginAction
 import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailEntered
 import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordEntered
 import com.dhimandasgupta.notemark.statemachine.LoginState
+import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
+import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
+import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
+import com.dhimandasgupta.notemark.ui.TabletExpandedPortraitPreview
+import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
+import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
-import com.dhimandasgupta.notemark.ui.common.PhoneLandscapePreview
-import com.dhimandasgupta.notemark.ui.common.TabletExpandedPreview
-import com.dhimandasgupta.notemark.ui.common.TabletMediumPreview
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
+import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
+import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
+import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
+import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
+import com.dhimandasgupta.notemark.ui.phoneLandscape
+import com.dhimandasgupta.notemark.ui.phonePortrait
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
@@ -284,57 +291,67 @@ private fun RightPane(
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@Preview(name = "Tablet Landscape", showSystemUi = true)
+@PhonePortraitPreview
 @Composable
-private fun PreviewTabletLandscapeDirect() {
+private fun PhonePortraitPreview() {
     LoginPane(
         modifier = Modifier,
-        windowSizeClass = WindowSizeClass.calculateFromSize(
-            size = DpSize(1280.dp, 800.dp)
-        ),
-        loginState = LoginState(),
-        loginAction = {}
-    )
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletExpandedPreview
-@Composable
-private fun PreviewTabletPortraitDirect() {
-    LoginPane(
-        modifier = Modifier,
-        windowSizeClass = WindowSizeClass.calculateFromSize(
-            size = DpSize(1280.dp, 800.dp)
-        ),
-        loginState = LoginState(),
-        loginAction = {}
-    )
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletMediumPreview
-@Composable
-private fun PreviewPhonePortraitDirect() {
-    LoginPane(
-        modifier = Modifier,
-        windowSizeClass = WindowSizeClass.calculateFromSize(
-            size = DpSize(600.dp, 900.dp)
-        ),
-        loginState = LoginState(),
-        loginAction = {}
+        windowSizeClass = phonePortrait,
+        loginState = LoginState()
     )
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @PhoneLandscapePreview
 @Composable
-private fun PreviewPhoneLandscapeDirect() {
+private fun PhoneLandscapePreview() {
     LoginPane(
         modifier = Modifier,
-        windowSizeClass = WindowSizeClass.calculateFromSize(
-            size = DpSize(780.dp, 360.dp)
-        ),
-        loginState = LoginState(),
-        loginAction = {}
+        windowSizeClass = phoneLandscape,
+        loginState = LoginState()
+    )
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@TabletMediumPortraitPreview
+@Composable
+private fun TabletMediumPortraitPreview() {
+    LoginPane(
+        modifier = Modifier,
+        windowSizeClass = mediumTabletPortrait,
+        loginState = LoginState()
+    )
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@TabletMediumLandscapePreview
+@Composable
+private fun TabletMediumLandscapePreview() {
+    LoginPane(
+        modifier = Modifier,
+        windowSizeClass = mediumTabletLandscape,
+        loginState = LoginState()
+    )
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@TabletExpandedPortraitPreview
+@Composable
+private fun TabletExpandedPortraitPreview() {
+    LoginPane(
+        modifier = Modifier,
+        windowSizeClass = extendedTabletPortrait,
+        loginState = LoginState()
+    )
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@TabletExpandedLandscapePreview
+@Composable
+private fun TabletExpandedLandscapePreview() {
+    LoginPane(
+        modifier = Modifier,
+        windowSizeClass = extendedTabletLandscape,
+        loginState = LoginState()
     )
 }

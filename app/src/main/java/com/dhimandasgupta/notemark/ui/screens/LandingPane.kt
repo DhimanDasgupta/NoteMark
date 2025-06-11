@@ -33,18 +33,25 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
+import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
+import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
+import com.dhimandasgupta.notemark.ui.TabletExpandedPortraitPreview
+import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
+import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
-import com.dhimandasgupta.notemark.ui.common.PhoneLandscapePreview
-import com.dhimandasgupta.notemark.ui.common.TabletExpandedPreview
-import com.dhimandasgupta.notemark.ui.common.TabletMediumPreview
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkOutlinedButton
+import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
+import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
+import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
+import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
+import com.dhimandasgupta.notemark.ui.phoneLandscape
+import com.dhimandasgupta.notemark.ui.phonePortrait
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
@@ -64,19 +71,23 @@ fun LauncherPane(
         when(layoutType) {
             DeviceLayoutType.PHONE_PORTRAIT -> {
                 LandingPanePortrait(
-                    navigateToLogin = navigateToLogin
+                    navigateToLogin = navigateToLogin,
+                    deviceLayoutType = layoutType
+
                 )
             }
 
             DeviceLayoutType.PHONE_LANDSCAPE -> {
                 LandingPaneLandscape(
-                    navigateToLogin = navigateToLogin
+                    navigateToLogin = navigateToLogin,
+                    deviceLayoutType = layoutType
                 )
             }
 
             DeviceLayoutType.TABLET_LAYOUT -> {
                 LandingPaneTablet(
-                    navigateToLogin = navigateToLogin
+                    navigateToLogin = navigateToLogin,
+                    deviceLayoutType = layoutType
                 )
             }
         }
@@ -86,6 +97,7 @@ fun LauncherPane(
 @Composable
 private fun LandingPanePortrait(
     modifier: Modifier = Modifier,
+    deviceLayoutType: DeviceLayoutType,
     navigateToLogin: () -> Unit = {}
 ) {
     Column(
@@ -96,10 +108,10 @@ private fun LandingPanePortrait(
             painter = painterResource(id = R.drawable.bg_phone_portrait),
             contentDescription = null,
             contentScale = ContentScale.FillHeight,
-            modifier = modifier.aspectRatio(0.66f)
+            modifier = modifier.aspectRatio(0.8f)
         )
 
-        Column(
+        ForegroundPane(
             modifier = modifier
                 .clip(
                     RoundedCornerShape(
@@ -116,62 +128,17 @@ private fun LandingPanePortrait(
                         .displayCutout.union(WindowInsets.navigationBars)
                         .asPaddingValues()
                         .calculateBottomPadding()
-                )
-        ) {
-            Spacer(Modifier.height(16.dp))
-
-            Text(
-                text = stringResource(R.string.landing_info_one),
-                style = typography.headlineLarge,
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .wrapContentSize(Alignment.Center)
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            Text(
-                text = stringResource(R.string.landing_info_two),
-                style = typography.bodySmall,
-                modifier = modifier
-                    .wrapContentSize()
-                    .padding(horizontal = 16.dp)
-                    .wrapContentSize(Alignment.Center)
-            )
-
-            Spacer(Modifier.height(32.dp))
-
-            NoteMarkButton(
-                onClick = {},
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                enabled = true
-            ) {
-                Text(text = "Get Started")
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            NoteMarkOutlinedButton(
-                onClick = { navigateToLogin() },
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                enabled = true
-            ) {
-                Text(text = "Log in")
-            }
-
-            Spacer(Modifier.height(32.dp))
-        }
+                ),
+            navigateToLogin = navigateToLogin,
+            deviceLayoutType = deviceLayoutType
+        )
     }
 }
 
 @Composable
 private fun LandingPaneLandscape(
     modifier: Modifier = Modifier,
+    deviceLayoutType: DeviceLayoutType,
     navigateToLogin: () -> Unit = {}
 ) {
     Row(
@@ -186,7 +153,7 @@ private fun LandingPaneLandscape(
             modifier = modifier.fillMaxHeight()
         )
 
-        Column (
+        ForegroundPane(
             modifier = modifier
                 .wrapContentSize(
                     align = Alignment.Center
@@ -206,64 +173,18 @@ private fun LandingPaneLandscape(
                         .asPaddingValues()
                         .calculateRightPadding(LayoutDirection.Ltr),
                     bottom = 32.dp,
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Spacer(Modifier.height(32.dp))
-
-            Text(
-                text = stringResource(R.string.landing_info_one),
-                style = typography.headlineLarge,
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .wrapContentSize(Alignment.Center)
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            Text(
-                text = stringResource(R.string.landing_info_two),
-                style = typography.bodySmall,
-                modifier = modifier
-                    .wrapContentSize()
-                    .padding(horizontal = 16.dp)
-                    .wrapContentSize(Alignment.Center)
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            NoteMarkButton(
-                onClick = {},
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                enabled = true
-            ) {
-                Text(text = "Get Started")
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            NoteMarkOutlinedButton(
-                onClick = { navigateToLogin() },
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                enabled = true
-            ) {
-                Text(text = "Log in")
-            }
-
-            Spacer(Modifier.height(32.dp))
-        }
+                )
+                .fillMaxHeight(0.85f),
+            navigateToLogin = navigateToLogin,
+            deviceLayoutType = deviceLayoutType
+        )
     }
 }
 
 @Composable
 private fun LandingPaneTablet(
     modifier: Modifier = Modifier,
+    deviceLayoutType: DeviceLayoutType,
     navigateToLogin: () -> Unit = {}
 ) {
     Box(
@@ -275,12 +196,10 @@ private fun LandingPaneTablet(
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
             modifier = Modifier
-                .aspectRatio(0.62f)
+                .aspectRatio(0.5f)
         )
 
-        Column (
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Bottom,
+        ForegroundPane(
             modifier = modifier
                 .fillMaxWidth(0.75f)
                 .clip(
@@ -298,103 +217,130 @@ private fun LandingPaneTablet(
                         .navigationBars.union(WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateBottomPadding()
-                )
+                ),
+            navigateToLogin = navigateToLogin,
+            deviceLayoutType = deviceLayoutType
+        )
+    }
+}
+
+@Composable
+fun ForegroundPane(
+    modifier: Modifier = Modifier,
+    navigateToLogin: () -> Unit = {},
+    deviceLayoutType: DeviceLayoutType
+) {
+    Column(
+        modifier = modifier
+            .padding(top = 8.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = when(deviceLayoutType) {
+            DeviceLayoutType.TABLET_LAYOUT -> Alignment.CenterHorizontally
+            else -> Alignment.Start
+        }
+    ) {
+        Text(
+            text = stringResource(R.string.landing_info_one),
+            style = typography.headlineLarge,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .wrapContentSize(Alignment.Center)
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        Text(
+            text = stringResource(R.string.landing_info_two),
+            style = typography.bodySmall,
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(horizontal = 16.dp)
+                .wrapContentSize(Alignment.Center)
+        )
+
+        Spacer(Modifier.height(24.dp))
+
+        NoteMarkButton(
+            onClick = {},
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            enabled = true
         ) {
-            Spacer(Modifier.height(16.dp))
+            Text(text = "Get Started")
+        }
 
-            Text(
-                text = stringResource(R.string.landing_info_one),
-                style = typography.headlineLarge,
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .wrapContentSize(Alignment.Center)
-            )
+        Spacer(Modifier.height(8.dp))
 
-            Spacer(Modifier.height(8.dp))
-
-            Text(
-                text = stringResource(R.string.landing_info_two),
-                style = typography.bodySmall,
-                modifier = modifier
-                    .wrapContentSize()
-                    .padding(horizontal = 16.dp)
-                    .wrapContentSize(Alignment.Center)
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            NoteMarkButton(
-                onClick = {},
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                enabled = true
-            ) {
-                Text(text = "Get Started")
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            NoteMarkOutlinedButton(
-                onClick = { navigateToLogin() },
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                enabled = true
-            ) {
-                Text(text = "Log in")
-            }
-
-            Spacer(Modifier.height(16.dp))
+        NoteMarkOutlinedButton(
+            onClick = { navigateToLogin() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            enabled = true
+        ) {
+            Text(text = "Log in")
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@Preview(name = "Tablet Landscape", showSystemUi = true)
+@PhonePortraitPreview
 @Composable
-private fun PreviewTabletLandscapeDirect() {
+private fun PhonePortraitPreview() {
     LauncherPane(
         modifier = Modifier,
-        windowSizeClass = WindowSizeClass.calculateFromSize(
-            size = DpSize(1280.dp, 800.dp)
-        )
-    )
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletExpandedPreview
-@Composable
-private fun PreviewTabletPortraitDirect() {
-    LauncherPane(
-        modifier = Modifier,
-        windowSizeClass = WindowSizeClass.calculateFromSize(
-            size = DpSize(1280.dp, 800.dp)
-        )
-    )
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletMediumPreview
-@Composable
-private fun PreviewPhonePortraitDirect() {
-    LauncherPane(
-        modifier = Modifier,
-        windowSizeClass = WindowSizeClass.calculateFromSize(
-            size = DpSize(600.dp, 900.dp)
-        )
+        windowSizeClass = phonePortrait
     )
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @PhoneLandscapePreview
 @Composable
-private fun PreviewPhoneLandscapeDirect() {
+private fun PhoneLandscapePreview() {
     LauncherPane(
         modifier = Modifier,
-        windowSizeClass = WindowSizeClass.calculateFromSize(
-            size = DpSize(780.dp, 360.dp)
-        )
+        windowSizeClass = phoneLandscape
+    )
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@TabletMediumPortraitPreview
+@Composable
+private fun TabletMediumPortraitPreview() {
+    LauncherPane(
+        modifier = Modifier,
+        windowSizeClass = mediumTabletPortrait
+    )
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@TabletMediumLandscapePreview
+@Composable
+private fun TabletMediumLandscapePreview() {
+    LauncherPane(
+        modifier = Modifier,
+        windowSizeClass = mediumTabletLandscape
+    )
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@TabletExpandedPortraitPreview
+@Composable
+private fun TabletExpandedPortraitPreview() {
+    LauncherPane(
+        modifier = Modifier,
+        windowSizeClass = extendedTabletPortrait
+    )
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@TabletExpandedLandscapePreview
+@Composable
+private fun TabletExpandedLandscapePreview() {
+    LauncherPane(
+        modifier = Modifier,
+        windowSizeClass = extendedTabletLandscape
     )
 }

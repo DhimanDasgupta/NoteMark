@@ -5,7 +5,6 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.tooling.preview.Preview
 
 // Enum to represent the different layout types
 enum class DeviceLayoutType {
@@ -56,15 +55,3 @@ fun getDeviceLayoutType(windowSizeClass: WindowSizeClass): DeviceLayoutType {
         }
     }
 }
-
-@Preview(name = "Phone Portrait", widthDp = 360, heightDp = 780, showBackground = true)
-annotation class PhonePortraitPreview
-
-@Preview(name = "Phone Landscape", widthDp = 780, heightDp = 360, showBackground = true)
-annotation class PhoneLandscapePreview
-
-@Preview(name = "Tablet (Medium)", widthDp = 600, heightDp = 900, showBackground = true)
-annotation class TabletMediumPreview
-
-@Preview(name = "Tablet (Expanded)", widthDp = 1280, heightDp = 800, showBackground = true)
-annotation class TabletExpandedPreview
