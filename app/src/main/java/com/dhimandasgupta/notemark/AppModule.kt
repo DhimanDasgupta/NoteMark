@@ -1,5 +1,8 @@
 package com.dhimandasgupta.notemark
 
+import com.dhimandasgupta.notemark.network.NoteMarkApi
+import com.dhimandasgupta.notemark.network.storage.InMemoryTokenStorage
+import com.dhimandasgupta.notemark.network.storage.TokenStorage
 import com.dhimandasgupta.notemark.presenter.AppPresenter
 import com.dhimandasgupta.notemark.presenter.LoginPresenter
 import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
@@ -11,7 +14,9 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val appModule = module {
-    singleOf(::AppStateMachine)
+    single<TokenStorage> { InMemoryTokenStorage() }
+    singleOf(::NoteMarkApi)
+    single { AppStateMachine(noteMarkApi = get(), tokenStorage = get()) }
     factoryOf(::AppPresenter)
 
     factoryOf(::LoginStateMachine)

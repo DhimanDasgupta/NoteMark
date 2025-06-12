@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -224,6 +225,8 @@ private fun RightPane(
     loginAction: (LoginAction) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(Unit) { focusManager.clearFocus(true) }
 
     Column(
         modifier = modifier,
