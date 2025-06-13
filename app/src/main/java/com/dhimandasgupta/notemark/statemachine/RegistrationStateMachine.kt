@@ -6,7 +6,6 @@ import com.dhimandasgupta.notemark.common.extensions.isValidEmail
 import com.dhimandasgupta.notemark.common.extensions.isValidPassword
 import com.dhimandasgupta.notemark.network.NoteMarkApi
 import com.dhimandasgupta.notemark.network.model.RegisterRequest
-import com.dhimandasgupta.notemark.network.storage.TokenStorage
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.EmailEntered
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.EmailFocusChanged
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.PasswordEntered

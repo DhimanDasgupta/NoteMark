@@ -5,14 +5,11 @@ import com.dhimandasgupta.notemark.common.extensions.isValidEmail
 import com.dhimandasgupta.notemark.common.extensions.isValidPassword
 import com.dhimandasgupta.notemark.network.NoteMarkApi
 import com.dhimandasgupta.notemark.network.model.LoginRequest
-import com.dhimandasgupta.notemark.network.model.RegisterRequest
-import com.dhimandasgupta.notemark.network.storage.TokenStorage
 import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailEntered
 import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailFocusChanged
 import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordEntered
-import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
+import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 
 @Immutable
 data class LoginState(
