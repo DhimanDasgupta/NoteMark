@@ -4,6 +4,9 @@ import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.extensions.isUsernameValid
 import com.dhimandasgupta.notemark.common.extensions.isValidEmail
 import com.dhimandasgupta.notemark.common.extensions.isValidPassword
+import com.dhimandasgupta.notemark.network.NoteMarkApi
+import com.dhimandasgupta.notemark.network.model.RegisterRequest
+import com.dhimandasgupta.notemark.network.storage.TokenStorage
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.EmailEntered
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.EmailFocusChanged
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.PasswordEntered
@@ -28,6 +31,7 @@ data class RegistrationState(
     val repeatPasswordValid: Boolean? = false,
     val repeatPasswordError: String? = null,
     val registrationEnabled: Boolean = false,
+    val registrationSuccess: Boolean? = null
 )
 
 
@@ -40,10 +44,14 @@ sealed interface RegistrationAction {
     data object EmailFocusChanged : RegistrationAction
     data object PasswordFocusChanged : RegistrationAction
     data object RepeatPasswordFocusChanged : RegistrationAction
+    data object RegisterClicked : RegistrationAction
+    data object RegistrationChangeStatusConsumed: RegistrationAction
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class RegistrationStateMachine : StateMachine<RegistrationState, RegistrationAction>(defaultRegistrationState) {
+class RegistrationStateMachine(
+    val noteMarkApi: NoteMarkApi
+) : StateMachine<RegistrationState, RegistrationAction>(defaultRegistrationState) {
     init {
         spec {
             inState<RegistrationState> {
@@ -90,6 +98,22 @@ class RegistrationStateMachine : StateMachine<RegistrationState, RegistrationAct
                         repeatPasswordError = if (newStateWithValidationApplied.repeatPasswordValid == false) "Please enter same password here" else null
                     )
                     state.mutate { modifiedState }
+                }
+                on<RegistrationAction.RegisterClicked> { action, state ->
+                    noteMarkApi.register(
+                        RegisterRequest(
+                            userName = state.snapshot.userName,
+                            email = state.snapshot.email,
+                            password = state.snapshot.password
+                        )
+                    ).fold(onSuccess = {
+                        state.mutate { state.snapshot.copy(registrationSuccess = true) }
+                    }, onFailure = {
+                        state.mutate { state.snapshot.copy(registrationSuccess = false) }
+                    })
+                }
+                on<RegistrationAction.RegistrationChangeStatusConsumed> { action, state ->
+                    state.mutate { state.snapshot.copy(registrationSuccess = null) }
                 }
             }
         }

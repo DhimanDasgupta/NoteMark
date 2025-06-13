@@ -3,11 +3,16 @@ package com.dhimandasgupta.notemark.statemachine
 import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.extensions.isValidEmail
 import com.dhimandasgupta.notemark.common.extensions.isValidPassword
+import com.dhimandasgupta.notemark.network.NoteMarkApi
+import com.dhimandasgupta.notemark.network.model.LoginRequest
+import com.dhimandasgupta.notemark.network.model.RegisterRequest
+import com.dhimandasgupta.notemark.network.storage.TokenStorage
 import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailEntered
 import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailFocusChanged
 import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordEntered
 import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 
 @Immutable
 data class LoginState(
@@ -17,7 +22,8 @@ data class LoginState(
     val emailError: String? = null,
     val passwordValid: Boolean? = false,
     val passwordError: String? = null,
-    val loginEnabled: Boolean = false
+    val loginEnabled: Boolean = false,
+    val loginSuccess: Boolean? = null
 )
 
 
@@ -26,10 +32,15 @@ sealed interface LoginAction {
     data class PasswordEntered(val password: String) : LoginAction
     data object EmailFocusChanged : LoginAction
     data object PasswordFocusChanged : LoginAction
+    data object LoginClicked : LoginAction
+    data object HideLoginButton : LoginAction
+    data object LoginChangeConsumed: LoginAction
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LoginStateMachine : StateMachine<LoginState, LoginAction>(defaultLoginState) {
+class LoginStateMachine(
+    val noteMarkApi: NoteMarkApi
+) : StateMachine<LoginState, LoginAction>(defaultLoginState) {
     init {
         spec {
             inState<LoginState> {
@@ -54,6 +65,25 @@ class LoginStateMachine : StateMachine<LoginState, LoginAction>(defaultLoginStat
                         passwordError = if (newStateWithValidationApplied.passwordValid == false) "Please enter password" else null
                     )
                     state.mutate { modifiedState }
+                }
+                on<LoginAction.HideLoginButton> { action, state ->
+                    val modifiedState = state.snapshot.copy(loginEnabled = false)
+                    state.mutate { modifiedState }
+                }
+                on<LoginAction.LoginClicked> { action, state ->
+                    noteMarkApi.login(
+                        LoginRequest(
+                            email = state.snapshot.email,
+                            password = state.snapshot.password
+                        )
+                    ).fold(onSuccess = {
+                        state.mutate { state.snapshot.copy(loginSuccess = true, loginEnabled = true) }
+                    }, onFailure = {
+                        state.mutate { state.snapshot.copy(loginSuccess = false, loginEnabled = true) }
+                    })
+                }
+                on<LoginAction.LoginChangeConsumed> { action, state ->
+                    state.mutate { state.snapshot.copy(loginSuccess = null) }
                 }
             }
         }

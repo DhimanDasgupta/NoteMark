@@ -3,7 +3,6 @@ package com.dhimandasgupta.notemark
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -76,8 +75,8 @@ private fun NavGraphBuilder.NoteMarkGraph(
                         }
                     }
                 },
-                loginState = remember { loginUiModel },
-                loginAction = remember { loginEvents },
+                loginState = loginUiModel,
+                loginAction = loginEvents,
                 modifier = Modifier
             )
         }
@@ -98,8 +97,8 @@ private fun NavGraphBuilder.NoteMarkGraph(
                         }
                     }
                 },
-                registrationState = remember { registrationUiModel },
-                registrationAction = remember { registrationAction },
+                registrationState = registrationUiModel,
+                registrationAction = registrationAction,
             )
         }
     }

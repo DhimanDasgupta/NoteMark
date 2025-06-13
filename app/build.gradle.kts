@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,18 +9,30 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
 }
 
+// Create a Properties object to hold our values
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+
+// Load the properties if the file exists
+if (localPropertiesFile.exists() && localPropertiesFile.isFile) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
 android {
     namespace = "com.dhimandasgupta.notemark"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.dhimandasgupta.alarmclock"
+        applicationId = "com.dhimandasgupta.notemark"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = libs.versions.versionCode.get().toInt()
         versionName = libs.versions.versionName.get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val headerValue = localProperties.getProperty("HEADER_VALUE_FOR_NOTE_MARK_API", "")
+        buildConfigField("String", "HEADER_VALUE_FOR_NOTE_MARK_API", "\"$headerValue\"")
 
         buildTypes {
             getByName("debug") {

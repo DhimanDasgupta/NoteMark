@@ -1,5 +1,7 @@
 package com.dhimandasgupta.notemark.ui.screens
 
+import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
@@ -29,7 +30,6 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
@@ -48,6 +48,8 @@ import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.statemachine.LoginAction
 import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailEntered
 import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailFocusChanged
+import com.dhimandasgupta.notemark.statemachine.LoginAction.HideLoginButton
+import com.dhimandasgupta.notemark.statemachine.LoginAction.LoginClicked
 import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordEntered
 import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordFocusChanged
 import com.dhimandasgupta.notemark.statemachine.LoginState
@@ -225,8 +227,15 @@ private fun RightPane(
     loginAction: (LoginAction) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
+    val context = LocalActivity.current
 
     LaunchedEffect(Unit) { focusManager.clearFocus(true) }
+
+    LaunchedEffect(loginState.loginSuccess) {
+        if (loginState.loginSuccess == null) return@LaunchedEffect
+        Toast.makeText(context, if (loginState.loginSuccess == true) "Registration successful" else "Registration failed", Toast.LENGTH_SHORT).show()
+        loginAction(LoginAction.LoginChangeConsumed)
+    }
 
     Column(
         modifier = modifier,
@@ -244,7 +253,7 @@ private fun RightPane(
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged { focusState ->
-                    if (!focusState.hasFocus) loginAction(EmailFocusChanged)
+                    if (focusState.hasFocus) loginAction(EmailFocusChanged)
                 },
             visualTransformation = VisualTransformation.None,
             placeholder = { Text("Enter your email here") },
@@ -274,7 +283,7 @@ private fun RightPane(
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged { focusState ->
-                    if (!focusState.hasFocus) {
+                    if (focusState.hasFocus) {
                         loginAction(PasswordFocusChanged)
                     }
                 },
@@ -286,7 +295,13 @@ private fun RightPane(
                 imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(
-                onNext = { focusManager.clearFocus(true) }
+                onDone = {
+                    if (loginState.loginEnabled) {
+                        loginAction(HideLoginButton)
+                        loginAction(LoginClicked)
+                    }
+                    focusManager.clearFocus(true)
+                }
             )
         )
 
@@ -295,7 +310,10 @@ private fun RightPane(
         }
 
         NoteMarkButton(
-            onClick = {},
+            onClick = {
+                loginAction(HideLoginButton)
+                loginAction(LoginClicked)
+            },
             modifier = modifier.fillMaxWidth(),
             enabled = loginState.loginEnabled
         ) {

@@ -1,5 +1,6 @@
 package com.dhimandasgupta.notemark.network
 
+import com.dhimandasgupta.notemark.BuildConfig
 import com.dhimandasgupta.notemark.network.model.AuthResponse
 import com.dhimandasgupta.notemark.network.model.LoginRequest
 import com.dhimandasgupta.notemark.network.model.RefreshRequest
@@ -16,21 +17,13 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.ensureActive
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.coroutineContext
 
 class NoteMarkApi(
     private val tokenStorage: TokenStorage
 ) {
-    private val authClient = HttpClient(Android) {
-        install(ContentNegotiation) {
-            json()
-        }
-        defaultRequest {
-            url(BASE_URL)
-            header("X-User-Email", YOUR_DEV_CAMPUS_EMAIL)
-        }
-    }
-
     val client = HttpClient(Android) {
         install(ContentNegotiation) {
             json(Json {
@@ -53,7 +46,7 @@ class NoteMarkApi(
                         return@refreshTokens null
                     }
 
-                    val response: AuthResponse = authClient.post("/api/auth/refresh") {
+                    val response: AuthResponse = client.post("/api/auth/refresh") {
                         contentType(ContentType.Application.Json)
                         setBody(RefreshRequest(refreshToken = currentTokens.refreshToken!!))
                         // Optional: uncomment for easier testing
@@ -72,21 +65,37 @@ class NoteMarkApi(
         defaultRequest {
             url(BASE_URL)
             header("X-User-Email", YOUR_DEV_CAMPUS_EMAIL)
-            // header("Debug", "true")
+            header("Debug", "true")
         }
     }
 
-    suspend fun register(request: RegisterRequest) {
-        // Registration is a non-authenticated call
-        authClient.post("/api/auth/register") {
-            contentType(ContentType.Application.Json)
-            setBody(request)
+    suspend fun register(request: RegisterRequest): Result<Unit> {
+        return try {
+            val response = client.post("/api/auth/register") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    Result.success(Unit)
+                }
+                HttpStatusCode.Conflict -> {
+                    Result.failure(Exception("User already exists"))
+                }
+                else -> {
+                    Result.failure(Exception("Something went wrong"))
+                }
+            }
+        } catch (e: Exception) {
+            coroutineContext.ensureActive()
+            Result.failure(e)
         }
     }
 
     suspend fun login(request: LoginRequest): Result<Unit> {
         return try {
-            val response: AuthResponse = authClient.post("/api/auth/login") {
+            val response: AuthResponse = client.post("/api/auth/login") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }.body()
@@ -94,7 +103,8 @@ class NoteMarkApi(
             val tokens = BearerTokens(response.accessToken, response.refreshToken)
             tokenStorage.saveTokens(tokens)
             Result.success(Unit)
-        } catch (e: ClientRequestException) {
+        } catch (e: Exception) {
+            coroutineContext.ensureActive()
             Result.failure(e)
         }
     }
@@ -105,6 +115,6 @@ class NoteMarkApi(
 
     companion object {
         private const val BASE_URL = "https://notemark.pl-coding.com"
-        private const val YOUR_DEV_CAMPUS_EMAIL = "your-email@example.com"
+        private const val YOUR_DEV_CAMPUS_EMAIL = BuildConfig.HEADER_VALUE_FOR_NOTE_MARK_API
     }
 }

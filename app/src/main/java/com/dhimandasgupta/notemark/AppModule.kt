@@ -19,9 +19,9 @@ val appModule = module {
     single { AppStateMachine(noteMarkApi = get(), tokenStorage = get()) }
     factoryOf(::AppPresenter)
 
-    factoryOf(::LoginStateMachine)
+    factory { LoginStateMachine(noteMarkApi = get()) }
     factoryOf(::LoginPresenter)
 
-    factoryOf(::RegistrationStateMachine)
+    factory { RegistrationStateMachine(noteMarkApi = get()) }
     factoryOf(::RegistrationPresenter)
 }

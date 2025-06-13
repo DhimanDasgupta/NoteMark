@@ -1,5 +1,7 @@
 package com.dhimandasgupta.notemark.ui.screens
 
+import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -220,8 +223,15 @@ private fun RightPane(
     registrationAction: (RegistrationAction) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
+    val context = LocalActivity.current
 
     LaunchedEffect(Unit) { focusManager.clearFocus(true) }
+
+    LaunchedEffect(registrationState.registrationSuccess) {
+        if (registrationState.registrationSuccess == null) return@LaunchedEffect
+        Toast.makeText(context, if (registrationState.registrationSuccess == true) "Registration successful" else "Registration failed", Toast.LENGTH_SHORT).show()
+        registrationAction(RegistrationChangeStatusConsumed)
+    }
 
     Column(
         modifier = modifier,
@@ -339,7 +349,12 @@ private fun RightPane(
                 imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(
-                onDone = { focusManager.clearFocus(true) }
+                onDone = {
+                    if (registrationState.registrationEnabled) {
+                        registrationAction(RegisterClicked)
+                    }
+                    focusManager.clearFocus(true)
+                }
             )
         )
 

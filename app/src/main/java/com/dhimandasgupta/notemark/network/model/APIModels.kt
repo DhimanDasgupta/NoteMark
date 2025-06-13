@@ -1,10 +1,12 @@
 package com.dhimandasgupta.notemark.network.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class RegisterRequest(
-    val username: String,
+    @SerialName("username")
+    val userName: String,
     val email: String,
     val password: String
 )
