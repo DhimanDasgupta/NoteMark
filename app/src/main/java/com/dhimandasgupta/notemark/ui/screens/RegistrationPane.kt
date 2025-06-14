@@ -229,7 +229,7 @@ private fun RightPane(
     val focusManager = LocalFocusManager.current
     val context = LocalActivity.current
 
-    LaunchedEffect(Unit) { focusManager.clearFocus(true) }
+    LaunchedEffect(Unit) { focusManager.clearFocus() }
 
     LaunchedEffect(registrationState.registrationSuccess) {
         if (registrationState.registrationSuccess == null) return@LaunchedEffect
@@ -294,7 +294,7 @@ private fun RightPane(
                 imeAction = ImeAction.Next
             ),
             keyboardActions = KeyboardActions(
-                onNext = { focusManager.moveFocus(FocusDirection.Next) }
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
             )
         )
 
@@ -324,7 +324,7 @@ private fun RightPane(
                 imeAction = ImeAction.Next
             ),
             keyboardActions = KeyboardActions(
-                onNext = { focusManager.moveFocus(FocusDirection.Next) }
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
             )
         )
 
@@ -358,6 +358,7 @@ private fun RightPane(
                     if (registrationState.registrationEnabled) {
                         registrationAction(RegisterClicked)
                     }
+                    focusManager.moveFocus(FocusDirection.Down)
                     keyboardController?.hide()
                     focusManager.clearFocus(true)
                 }
@@ -369,7 +370,11 @@ private fun RightPane(
         }
 
         NoteMarkButton(
-            onClick = {},
+            onClick = {
+                keyboardController?.hide()
+                focusManager.clearFocus(true)
+                registrationAction(RegisterClicked)
+            },
             modifier = Modifier
                 .fillMaxWidth(),
             enabled = registrationState.registrationEnabled

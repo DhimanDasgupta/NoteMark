@@ -237,7 +237,7 @@ private fun RightPane(
     val focusManager = LocalFocusManager.current
     val context = LocalActivity.current
 
-    LaunchedEffect(Unit) { focusManager.clearFocus(true) }
+    LaunchedEffect(Unit) { focusManager.clearFocus() }
 
     LaunchedEffect(loginState.loginSuccess) {
         if (loginState.loginSuccess == null) return@LaunchedEffect
@@ -274,7 +274,7 @@ private fun RightPane(
                 imeAction = ImeAction.Next
             ),
             keyboardActions = KeyboardActions(
-                onNext = { focusManager.moveFocus(FocusDirection.Next) }
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
             )
         )
 
@@ -311,6 +311,7 @@ private fun RightPane(
                         loginAction(HideLoginButton)
                         loginAction(LoginClicked)
                     }
+                    focusManager.moveFocus(FocusDirection.Down)
                     keyboardController?.hide()
                     focusManager.clearFocus(true)
                 }
@@ -323,6 +324,8 @@ private fun RightPane(
 
         NoteMarkButton(
             onClick = {
+                keyboardController?.hide()
+                focusManager.clearFocus(true)
                 loginAction(HideLoginButton)
                 loginAction(LoginClicked)
             },
