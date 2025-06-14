@@ -43,7 +43,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -65,6 +64,8 @@ import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkPasswordTextField
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTextField
 import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
 import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
 import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
@@ -248,75 +249,36 @@ private fun RightPane(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(
-            text = "Email",
-            style = typography.bodySmall,
-            fontWeight = FontWeight.Medium
+        NoteMarkTextField(
+            modifier = Modifier.fillMaxWidth(),
+            label = "Email",
+            enteredText = loginState.email,
+            hintText = "Enter your email here",
+            explanationText = "Please enter valid email",
+            showExplanationText = true,
+            onTextChanged = { loginAction(EmailEntered(it)) },
+            onFocusGained = { loginAction(EmailFocusChanged) },
+            onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
 
-        OutlinedTextField(
-            value = loginState.email,
-            onValueChange = { loginAction(EmailEntered(it)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .onFocusChanged { focusState ->
-                    if (focusState.hasFocus) loginAction(EmailFocusChanged)
-                },
-            visualTransformation = VisualTransformation.None,
-            placeholder = { Text("Enter your email here") },
-            maxLines = 1,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Unspecified,
-                imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { focusManager.moveFocus(FocusDirection.Down) }
-            )
-        )
-
-        loginState.emailError?.let { error ->
-            Text(text = error, style = typography.labelSmall, color = colorScheme.error)
-        }
-
-        Text(
-            text = "Password",
-            style = typography.bodySmall,
-            fontWeight = FontWeight.Medium
-        )
-
-        OutlinedTextField(
-            value = loginState.password,
-            onValueChange = { loginAction(PasswordEntered(it)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .onFocusChanged { focusState ->
-                    if (focusState.hasFocus) {
-                        loginAction(PasswordFocusChanged)
-                    }
-                },
-            visualTransformation = PasswordVisualTransformation(),
-            placeholder = { Text("Enter your Password here") },
-            maxLines = 1,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Unspecified,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    if (loginState.loginEnabled) {
-                        loginAction(HideLoginButton)
-                        loginAction(LoginClicked)
-                    }
-                    focusManager.moveFocus(FocusDirection.Down)
-                    keyboardController?.hide()
-                    focusManager.clearFocus(true)
+        NoteMarkPasswordTextField(
+            modifier = Modifier.fillMaxWidth(),
+            label = "Password",
+            enteredText = loginState.password,
+            hintText = "Enter your Password here",
+            explanationText = "Please enter password",
+            showExplanationText = true,
+            onTextChanged = { loginAction(PasswordEntered(it)) },
+            onFocusGained = { loginAction(PasswordFocusChanged) },
+            onDoneClicked = {
+                if (loginState.loginEnabled) {
+                    loginAction(HideLoginButton)
+                    loginAction(LoginClicked)
                 }
-            )
+                focusManager.moveFocus(FocusDirection.Enter)
+                keyboardController?.hide()
+                focusManager.clearFocus(true) }
         )
-
-        loginState.passwordError?.let { error ->
-            Text(text = error, style = typography.labelSmall, color = colorScheme.error)
-        }
 
         NoteMarkButton(
             onClick = {

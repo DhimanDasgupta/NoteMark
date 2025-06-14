@@ -22,12 +22,9 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -37,15 +34,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -62,6 +54,8 @@ import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkPasswordTextField
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTextField
 import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
 import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
 import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
@@ -238,132 +232,60 @@ private fun RightPane(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = "Username",
-            style = typography.bodySmall,
-            fontWeight = FontWeight.Medium
+        NoteMarkTextField(
+            modifier = Modifier.fillMaxWidth(),
+            label = "Username",
+            enteredText = registrationState.userName,
+            hintText = "Enter your user name here",
+            explanationText = "Please enter valid username",
+            showExplanationText = true,
+            onTextChanged = { registrationAction(UserNameEntered(it)) },
+            onFocusGained = { registrationAction(UserNameFocusChanged) },
+            onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
 
-        OutlinedTextField(
-            value = registrationState.userName,
-            onValueChange = { registrationAction(UserNameEntered(it)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .onFocusChanged { focusState ->
-                    if (focusState.hasFocus) registrationAction(UserNameFocusChanged)
-                },
-            maxLines = 1,
-            visualTransformation = VisualTransformation.None,
-            placeholder = { Text("Enter your user name here") },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Unspecified,
-                imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { focusManager.moveFocus(FocusDirection.Next) }
-            )
+        NoteMarkTextField(
+            modifier = Modifier.fillMaxWidth(),
+            label = "Email",
+            enteredText = registrationState.email,
+            hintText = "Enter your email here",
+            explanationText = "Please enter valid email",
+            showExplanationText = true,
+            onTextChanged = { registrationAction(EmailEntered(it)) },
+            onFocusGained = { registrationAction(EmailFocusChanged) },
+            onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
 
-        registrationState.userNameError?.let { error ->
-            Text(text = error, style = typography.labelSmall, color = colorScheme.error)
-        }
-
-        Text(
-            text = "Email",
-            style = typography.bodySmall,
-            fontWeight = FontWeight.Medium
+        NoteMarkPasswordTextField(
+            modifier = Modifier.fillMaxWidth(),
+            label = "Password",
+            enteredText = registrationState.password,
+            hintText = "Enter your password here",
+            explanationText = "Please enter password",
+            showExplanationText = true,
+            onTextChanged = { registrationAction(PasswordEntered(it)) },
+            onFocusGained = { registrationAction(PasswordFocusChanged) },
+            onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
 
-        OutlinedTextField(
-            value = registrationState.email,
-            onValueChange = { registrationAction(EmailEntered(it)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .onFocusChanged { focusState ->
-                    if (focusState.hasFocus) registrationAction(EmailFocusChanged)
-                },
-            maxLines = 1,
-            visualTransformation = VisualTransformation.None,
-            placeholder = { Text("Enter your email here") },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { focusManager.moveFocus(FocusDirection.Down) }
-            )
-        )
-
-        registrationState.emailError?.let { error ->
-            Text(text = error, style = typography.labelSmall, color = colorScheme.error)
-        }
-
-        Text(
-            text = "Password",
-            style = typography.bodySmall,
-            fontWeight = FontWeight.Medium
-        )
-
-        OutlinedTextField(
-            value = registrationState.password,
-            onValueChange = { registrationAction(PasswordEntered(it)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .onFocusChanged { focusState ->
-                    if (focusState.hasFocus) registrationAction(PasswordFocusChanged)
-                },
-            maxLines = 1,
-            visualTransformation = PasswordVisualTransformation(),
-            placeholder = { Text("Enter your password here") },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { focusManager.moveFocus(FocusDirection.Down) }
-            )
-        )
-
-        registrationState.passwordError?.let { error ->
-            Text(text = error, style = typography.labelSmall, color = colorScheme.error)
-        }
-
-        Text(
-            text = "Repeat password",
-            style = typography.bodySmall,
-            fontWeight = FontWeight.Medium
-        )
-
-        OutlinedTextField(
-            value = registrationState.repeatPassword,
-            onValueChange = { registrationAction(RepeatPasswordEntered(it)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .onFocusChanged { focusState ->
-                    if (!focusState.hasFocus) registrationAction(RepeatPasswordFocusChanged)
-                },
-            maxLines = 1,
-            visualTransformation = PasswordVisualTransformation(),
-            placeholder = { Text("Retype your password here") },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    if (registrationState.registrationEnabled) {
-                        registrationAction(RegisterClicked)
-                    }
-                    focusManager.moveFocus(FocusDirection.Down)
-                    keyboardController?.hide()
-                    focusManager.clearFocus(true)
+        NoteMarkPasswordTextField(
+            modifier = Modifier.fillMaxWidth(),
+            label = "Repeat password",
+            enteredText = registrationState.password,
+            hintText = "Retype your password here",
+            explanationText = "Please enter same password here",
+            showExplanationText = true,
+            onTextChanged = { registrationAction(RepeatPasswordEntered(it)) },
+            onFocusGained = { registrationAction(RepeatPasswordFocusChanged) },
+            onDoneClicked = {
+                if (registrationState.registrationEnabled) {
+                    registrationAction(RegisterClicked)
                 }
-            )
+                focusManager.moveFocus(FocusDirection.Exit)
+                keyboardController?.hide()
+                focusManager.clearFocus(true)
+            }
         )
-
-        registrationState.repeatPasswordError?.let { error ->
-            Text(text = error, style = typography.labelSmall, color = colorScheme.error)
-        }
 
         NoteMarkButton(
             onClick = {
