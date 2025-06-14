@@ -16,7 +16,7 @@ import org.koin.dsl.module
 val appModule = module {
     single { TokenManager(androidContext()) }
     singleOf(::NoteMarkApi)
-    single { AppStateMachine(tokenManager = get()) }
+    single { AppStateMachine(applicationContext = androidContext(), tokenManager = get()) }
     factoryOf(::AppPresenter)
 
     factory { LoginStateMachine(noteMarkApi = get()) }

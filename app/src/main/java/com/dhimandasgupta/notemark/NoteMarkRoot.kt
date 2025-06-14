@@ -12,7 +12,10 @@ import androidx.navigation.navigation
 import com.dhimandasgupta.notemark.presenter.AppPresenter
 import com.dhimandasgupta.notemark.presenter.LoginPresenter
 import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
+import com.dhimandasgupta.notemark.statemachine.AppAction
+import com.dhimandasgupta.notemark.statemachine.AppState
 import com.dhimandasgupta.notemark.ui.screens.LauncherPane
+import com.dhimandasgupta.notemark.ui.screens.LoggedInPane
 import com.dhimandasgupta.notemark.ui.screens.LoginPane
 import com.dhimandasgupta.notemark.ui.screens.RegistrationPane
 import kotlinx.serialization.Serializable
@@ -35,6 +38,8 @@ fun NoteMarkRoot(
         modifier = modifier
     ) {
         NoteMarkGraph(
+            appUiModel = appUiModel,
+            appEvents = appEvents,
             navController = navController,
             windowSizeClass = windowSizeClass
         )
@@ -43,6 +48,8 @@ fun NoteMarkRoot(
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 private fun NavGraphBuilder.NoteMarkGraph(
+    appUiModel: AppState,
+    appEvents: (AppAction) -> Unit,
     navController: NavHostController,
     windowSizeClass: WindowSizeClass
 ) {
@@ -52,9 +59,19 @@ private fun NavGraphBuilder.NoteMarkGraph(
         composable<NoteMarkDestination.LauncherDestination> {
             LauncherPane(
                 windowSizeClass = windowSizeClass,
-                navigateToAfterLogin = {},
+                navigateToAfterLogin = {
+                    navController.navigate(NoteMarkDestination.LoggedInDestination) {
+                        popUpTo(NoteMarkDestination.LauncherDestination) {
+                            inclusive = true
+                        }
+                    }
+                },
                 navigateToLogin = {
-                    navController.navigate(NoteMarkDestination.LoginDestination)
+                    navController.navigate(NoteMarkDestination.LoginDestination) {
+                        popUpTo(NoteMarkDestination.LauncherDestination) {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }
@@ -67,7 +84,13 @@ private fun NavGraphBuilder.NoteMarkGraph(
 
             LoginPane(
                 windowSizeClass = windowSizeClass,
-                navigateToAfterLogin = {},
+                navigateToAfterLogin = {
+                    navController.navigate(NoteMarkDestination.LoggedInDestination) {
+                        popUpTo(NoteMarkDestination.LoginDestination) {
+                            inclusive = true
+                        }
+                    }
+                },
                 navigateToRegistration = {
                     navController.navigate(NoteMarkDestination.RegistrationDestination) {
                         popUpTo(NoteMarkDestination.LoginDestination) {
@@ -101,6 +124,22 @@ private fun NavGraphBuilder.NoteMarkGraph(
                 registrationAction = registrationAction,
             )
         }
+
+        composable<NoteMarkDestination.LoggedInDestination> {
+            LoggedInPane(
+                modifier = Modifier,
+                windowSizeClass = windowSizeClass,
+                appState = appUiModel,
+                logoutClicked = {
+                    appEvents(AppAction.AppLogout)
+                    navController.navigate(NoteMarkDestination.LauncherDestination) {
+                        popUpTo(NoteMarkDestination.LoggedInDestination) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -116,4 +155,7 @@ object NoteMarkDestination {
 
     @Serializable
     data object RegistrationDestination
+
+    @Serializable
+    data object LoggedInDestination
 }

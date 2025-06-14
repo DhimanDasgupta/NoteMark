@@ -1,0 +1,127 @@
+package com.dhimandasgupta.notemark.ui.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.unit.dp
+import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.statemachine.AppState
+import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
+import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
+import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
+import com.dhimandasgupta.notemark.ui.TabletExpandedPortraitPreview
+import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
+import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkOutlinedButton
+import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
+import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
+import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
+import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
+import com.dhimandasgupta.notemark.ui.phoneLandscape
+import com.dhimandasgupta.notemark.ui.phonePortrait
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@Composable
+fun LoggedInPane(
+    modifier: Modifier = Modifier,
+    windowSizeClass: WindowSizeClass,
+    appState: AppState,
+    logoutClicked: () -> Unit = {},
+) {
+    Box(
+        modifier = modifier
+            .background(color = colorResource(R.color.splash_blue_background))
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        if (appState.bearerTokens != null) {
+            NoteMarkOutlinedButton(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(horizontal = 16.dp),
+                onClick = logoutClicked,
+                enabled = true
+            ) {
+                Text("Logout")
+            }
+        } else {
+            Text("Upcoming....", style = MaterialTheme.typography.displayLarge)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@PhonePortraitPreview
+@Composable
+private fun PhonePortraitPreview() {
+    LoggedInPane(
+        modifier = Modifier,
+        windowSizeClass = phonePortrait,
+        appState = AppState()
+    )
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@PhoneLandscapePreview
+@Composable
+private fun PhoneLandscapePreview() {
+    LoggedInPane(
+        modifier = Modifier,
+        windowSizeClass = phoneLandscape,
+        appState = AppState()
+    )
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@TabletMediumPortraitPreview
+@Composable
+private fun TabletMediumPortraitPreview() {
+    LoggedInPane(
+        modifier = Modifier,
+        windowSizeClass = mediumTabletPortrait,
+        appState = AppState()
+    )
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@TabletMediumLandscapePreview
+@Composable
+private fun TabletMediumLandscapePreview() {
+    LoggedInPane(
+        modifier = Modifier,
+        windowSizeClass = mediumTabletLandscape,
+        appState = AppState()
+    )
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@TabletExpandedPortraitPreview
+@Composable
+private fun TabletExpandedPortraitPreview() {
+    LoggedInPane(
+        modifier = Modifier,
+        windowSizeClass = extendedTabletPortrait,
+        appState = AppState()
+    )
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@TabletExpandedLandscapePreview
+@Composable
+private fun TabletExpandedLandscapePreview() {
+    LoggedInPane(
+        modifier = Modifier,
+        windowSizeClass = extendedTabletLandscape,
+        appState = AppState()
+    )
+}

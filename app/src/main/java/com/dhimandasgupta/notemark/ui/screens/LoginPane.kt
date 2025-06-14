@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -131,6 +132,7 @@ fun LoginPane(
                                     .calculateRightPadding(LayoutDirection.Ltr)
                             ),
                         navigateToRegistration = navigateToRegistration,
+                        navigateToAfterLogin = navigateToAfterLogin,
                         loginState = loginState,
                         loginAction = loginAction
                     )
@@ -161,6 +163,7 @@ fun LoginPane(
                     LeftPane()
                     RightPane(
                         navigateToRegistration = navigateToRegistration,
+                        navigateToAfterLogin = navigateToAfterLogin,
                         loginState = loginState,
                         loginAction = loginAction
                     )
@@ -191,6 +194,7 @@ fun LoginPane(
                     LeftPane()
                     RightPane(
                         navigateToRegistration = navigateToRegistration,
+                        navigateToAfterLogin = navigateToAfterLogin,
                         loginState = loginState,
                         loginAction = loginAction
                     )
@@ -227,7 +231,9 @@ private fun RightPane(
     navigateToRegistration: () -> Unit = {},
     loginState: LoginState,
     loginAction: (LoginAction) -> Unit = {},
+    navigateToAfterLogin: () -> Unit = {},
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     val context = LocalActivity.current
 
@@ -235,8 +241,11 @@ private fun RightPane(
 
     LaunchedEffect(loginState.loginSuccess) {
         if (loginState.loginSuccess == null) return@LaunchedEffect
-        Toast.makeText(context, if (loginState.loginSuccess == true) "Registration successful" else "Registration failed", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, if (loginState.loginSuccess == true) "Login successful" else "Login failed", Toast.LENGTH_SHORT).show()
         loginAction(LoginAction.LoginChangeConsumed)
+        if (loginState.loginSuccess == true) {
+            navigateToAfterLogin()
+        }
     }
 
     Column(
@@ -302,6 +311,7 @@ private fun RightPane(
                         loginAction(HideLoginButton)
                         loginAction(LoginClicked)
                     }
+                    keyboardController?.hide()
                     focusManager.clearFocus(true)
                 }
             )

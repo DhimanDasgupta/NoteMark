@@ -39,6 +39,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -224,6 +225,7 @@ private fun RightPane(
     registrationState: RegistrationState,
     registrationAction: (RegistrationAction) -> Unit
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     val context = LocalActivity.current
 
@@ -231,8 +233,9 @@ private fun RightPane(
 
     LaunchedEffect(registrationState.registrationSuccess) {
         if (registrationState.registrationSuccess == null) return@LaunchedEffect
-        Toast.makeText(context, if (registrationState.registrationSuccess == true) "Registration successful" else "Registration failed", Toast.LENGTH_SHORT).show()
         registrationAction(RegistrationChangeStatusConsumed)
+        Toast.makeText(context, if (registrationState.registrationSuccess == true) "Registration successful" else "Registration failed", Toast.LENGTH_SHORT).show()
+        navigateToLogin()
     }
 
     Column(
@@ -355,6 +358,7 @@ private fun RightPane(
                     if (registrationState.registrationEnabled) {
                         registrationAction(RegisterClicked)
                     }
+                    keyboardController?.hide()
                     focusManager.clearFocus(true)
                 }
             )
