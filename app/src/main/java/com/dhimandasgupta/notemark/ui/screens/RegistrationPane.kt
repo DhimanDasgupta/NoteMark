@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
@@ -37,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
@@ -90,14 +90,6 @@ fun RegistrationPane(
                     modifier = Modifier
                         .padding(
                             top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-                            start = WindowInsets
-                                .systemBars.union(WindowInsets.displayCutout)
-                                .asPaddingValues()
-                                .calculateLeftPadding(LayoutDirection.Ltr),
-                            end = WindowInsets
-                                .systemBars.union(WindowInsets.displayCutout)
-                                .asPaddingValues()
-                                .calculateRightPadding(LayoutDirection.Ltr)
                         )
                         .clip(
                             RoundedCornerShape(
@@ -115,16 +107,20 @@ fun RegistrationPane(
                     LeftPane(
                         modifier = Modifier
                             .safeContentPadding()
-                            .fillMaxWidth(0.5f)
+                            .fillMaxWidth(0.4f)
                     )
                     RightPane(
                         modifier = Modifier
                             .padding(
                                 top = WindowInsets.systemBars.asPaddingValues()
                                     .calculateTopPadding(),
-                                start = WindowInsets.systemBars.asPaddingValues()
+                                start = WindowInsets
+                                    .systemBars.union(WindowInsets.displayCutout)
+                                    .asPaddingValues()
                                     .calculateLeftPadding(LayoutDirection.Ltr),
-                                end = WindowInsets.systemBars.asPaddingValues()
+                                end = WindowInsets
+                                    .systemBars.union(WindowInsets.displayCutout)
+                                    .asPaddingValues()
                                     .calculateRightPadding(LayoutDirection.Ltr)
                             ),
                         navigateToLogin = navigateToLogin,
@@ -393,7 +389,11 @@ private fun RightPane(
             color = colorScheme.primary
         )
 
-        Spacer(modifier = Modifier.imePadding())
+        Spacer(
+            modifier = Modifier
+                .height(32.dp)
+                .imePadding()
+        )
     }
 }
 

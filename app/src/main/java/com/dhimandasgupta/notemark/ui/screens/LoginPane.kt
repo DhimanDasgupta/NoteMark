@@ -95,14 +95,6 @@ fun LoginPane(
                     modifier = Modifier
                         .padding(
                             top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-                            start = WindowInsets
-                                .systemBars.union(WindowInsets.displayCutout)
-                                .asPaddingValues()
-                                .calculateLeftPadding(LayoutDirection.Ltr),
-                            end = WindowInsets
-                                .systemBars.union(WindowInsets.displayCutout)
-                                .asPaddingValues()
-                                .calculateRightPadding(LayoutDirection.Ltr)
                         )
                         .clip(
                             RoundedCornerShape(
@@ -119,16 +111,20 @@ fun LoginPane(
                     LeftPane(
                         modifier = Modifier
                             .safeContentPadding()
-                            .fillMaxWidth(0.5f)
+                            .fillMaxWidth(0.4f)
                     )
                     RightPane(
                         modifier = Modifier
                             .padding(
                                 top = WindowInsets.systemBars.asPaddingValues()
                                     .calculateTopPadding(),
-                                start = WindowInsets.systemBars.asPaddingValues()
+                                start = WindowInsets
+                                    .systemBars.union(WindowInsets.displayCutout)
+                                    .asPaddingValues()
                                     .calculateLeftPadding(LayoutDirection.Ltr),
-                                end = WindowInsets.systemBars.asPaddingValues()
+                                end = WindowInsets
+                                    .systemBars.union(WindowInsets.displayCutout)
+                                    .asPaddingValues()
                                     .calculateRightPadding(LayoutDirection.Ltr)
                             ),
                         navigateToRegistration = navigateToRegistration,
