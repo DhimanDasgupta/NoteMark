@@ -5,7 +5,7 @@ import com.dhimandasgupta.notemark.network.model.AuthResponse
 import com.dhimandasgupta.notemark.network.model.LoginRequest
 import com.dhimandasgupta.notemark.network.model.RefreshRequest
 import com.dhimandasgupta.notemark.network.model.RegisterRequest
-import com.dhimandasgupta.notemark.network.storage.TokenStorage
+import com.dhimandasgupta.notemark.network.storage.TokenManager
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
@@ -18,11 +18,12 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 import kotlin.coroutines.coroutineContext
 
 class NoteMarkApi(
-    private val tokenStorage: TokenStorage
+    private val tokenManager: TokenManager
 ) {
     val client = HttpClient(Android) {
         install(ContentNegotiation) {
@@ -37,11 +38,11 @@ class NoteMarkApi(
         install(Auth) {
             bearer {
                 loadTokens {
-                    tokenStorage.getTokens()
+                    tokenManager.getToken().first()
                 }
 
                 refreshTokens {
-                    val currentTokens = tokenStorage.getTokens()
+                    val currentTokens = tokenManager.getToken().first()
                     if (currentTokens == null) {
                         return@refreshTokens null
                     }
@@ -54,8 +55,7 @@ class NoteMarkApi(
                     }.body()
 
                     val newTokens = BearerTokens(response.accessToken, response.refreshToken)
-                    tokenStorage.saveTokens(newTokens)
-                    tokenStorage.saveTokens(newTokens)
+                    tokenManager.saveToken(newTokens)
                     newTokens
                 }
             }
@@ -101,7 +101,7 @@ class NoteMarkApi(
             }.body()
 
             val tokens = BearerTokens(response.accessToken, response.refreshToken)
-            tokenStorage.saveTokens(tokens)
+            tokenManager.saveToken(tokens)
             Result.success(Unit)
         } catch (e: Exception) {
             coroutineContext.ensureActive()
@@ -110,7 +110,7 @@ class NoteMarkApi(
     }
 
     suspend fun logout() {
-        tokenStorage.clearTokens()
+        tokenManager.clearToken()
     }
 
     companion object {

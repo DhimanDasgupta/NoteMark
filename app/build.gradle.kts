@@ -109,6 +109,9 @@ dependencies {
     // Kotlinx Serialization JSON
     implementation(libs.kotlinx.serialization.json)
 
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("androidx.datastore:datastore-preferences-android:1.1.7")
+
     // Ktor
     implementation(platform(libs.ktor.bom))
     implementation(libs.ktor.client.android)
