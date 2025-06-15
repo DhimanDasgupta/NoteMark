@@ -3,7 +3,7 @@ package com.dhimandasgupta.notemark.statemachine
 import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.extensions.isValidEmail
 import com.dhimandasgupta.notemark.common.extensions.isValidPassword
-import com.dhimandasgupta.notemark.network.NoteMarkApi
+import com.dhimandasgupta.notemark.network.api.NoteMarkApi
 import com.dhimandasgupta.notemark.network.model.LoginRequest
 import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailEntered
 import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordEntered
@@ -83,7 +83,7 @@ private fun LoginState.validateNonEmptyInputs(): LoginState = this.copy(
 )
 
 private fun LoginState.validateInputs(): LoginState {
-    var updatedLoginState = this.copy(emailError = if (!email.isValidEmail()) "Please enter valid email" else null)
+    var updatedLoginState = this.copy(emailError = if (!email.isValidEmail()) "Invalid email provided" else null)
     updatedLoginState = updatedLoginState.copy(passwordError = if (!password.isValidPassword()) "Please enter password" else null)
     return updatedLoginState
 }

@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.network
+package com.dhimandasgupta.notemark.network.api
 
 import com.dhimandasgupta.notemark.BuildConfig
 import com.dhimandasgupta.notemark.network.model.AuthResponse
@@ -22,10 +22,45 @@ import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 import kotlin.coroutines.coroutineContext
 
-class NoteMarkApi(
+interface NoteMarkApi {
+    /**
+     * The underlying Ktor HttpClient.
+     * Consider if exposing the raw client is necessary, or if specific operations
+     * are sufficient for the interface's contract.
+     * If you don't need to directly access/manipulate the client from outside
+     * via the interface, you might omit this.
+     */
+    val client: HttpClient // Optional: See note above
+
+    /**
+     * Registers a new user.
+     *
+     * @param request The registration details.
+     * @return A [Result] indicating success or failure of the registration.
+     */
+    suspend fun register(request: RegisterRequest): Result<Unit>
+
+    /**
+     * Logs in an existing user.
+     * On successful login, authentication tokens should be handled internally
+     * (e.g., saved via TokenManager).
+     *
+     * @param request The login credentials.
+     * @return A [Result] indicating success or failure of the login.
+     */
+    suspend fun login(request: LoginRequest): Result<Unit>
+
+    /**
+     * Logs out the current user.
+     * This should typically clear any stored authentication tokens.
+     */
+    suspend fun logout()
+}
+
+class NoteMarkApiImpl(
     private val tokenManager: TokenManager
-) {
-    val client = HttpClient(Android) {
+) : NoteMarkApi {
+    override val client = HttpClient(Android) {
         install(ContentNegotiation) {
             json(Json {
                 ignoreUnknownKeys = true
@@ -69,7 +104,7 @@ class NoteMarkApi(
         }
     }
 
-    suspend fun register(request: RegisterRequest): Result<Unit> {
+    override suspend fun register(request: RegisterRequest): Result<Unit> {
         return try {
             val response = client.post("/api/auth/register") {
                 contentType(ContentType.Application.Json)
@@ -93,7 +128,7 @@ class NoteMarkApi(
         }
     }
 
-    suspend fun login(request: LoginRequest): Result<Unit> {
+    override suspend fun login(request: LoginRequest): Result<Unit> {
         return try {
             val response: AuthResponse = client.post("/api/auth/login") {
                 contentType(ContentType.Application.Json)
@@ -109,7 +144,7 @@ class NoteMarkApi(
         }
     }
 
-    suspend fun logout() {
+    override suspend fun logout() {
         tokenManager.clearToken()
     }
 

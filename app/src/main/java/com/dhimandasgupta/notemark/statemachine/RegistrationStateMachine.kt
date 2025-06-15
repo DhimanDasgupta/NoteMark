@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.extensions.isUsernameValid
 import com.dhimandasgupta.notemark.common.extensions.isValidEmail
 import com.dhimandasgupta.notemark.common.extensions.isValidPassword
-import com.dhimandasgupta.notemark.network.NoteMarkApi
+import com.dhimandasgupta.notemark.network.api.NoteMarkApi
 import com.dhimandasgupta.notemark.network.model.RegisterRequest
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.EmailEntered
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.PasswordEntered
@@ -101,9 +101,9 @@ private fun RegistrationState.validateNonEmptyInputs(): RegistrationState = this
 )
 
 private fun RegistrationState.validateInputs(): RegistrationState {
-    var updatedRegistrationState = this.copy(userNameError = if (!userName.isUsernameValid()) "Please enter valid username" else null)
-    updatedRegistrationState = updatedRegistrationState.copy(emailError = if (!email.isValidEmail()) "Please enter valid email" else null)
-    updatedRegistrationState = updatedRegistrationState.copy(passwordError = if (!password.isValidPassword()) "Please valid enter password" else null)
-    updatedRegistrationState = updatedRegistrationState.copy(repeatPasswordError = if (!repeatPassword.isValidPassword()) "Password and repeat password should match" else null)
+    var updatedRegistrationState = this.copy(userNameError = if (!userName.isUsernameValid()) "Username must be at least 3 characters" else null)
+    updatedRegistrationState = updatedRegistrationState.copy(emailError = if (!email.isValidEmail()) "Invalid email provided" else null)
+    updatedRegistrationState = updatedRegistrationState.copy(passwordError = if (!password.isValidPassword()) "Password must be at least 8 characters and include a number or symbol" else null)
+    updatedRegistrationState = updatedRegistrationState.copy(repeatPasswordError = if (!repeatPassword.isValidPassword()) "Password must be at least 8 characters and include a number or symbol" else null)
     return updatedRegistrationState
 }

@@ -12,7 +12,31 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth_tokens")
 
-class TokenManager(private val context: Context) {
+interface TokenManager {
+    /**
+     * Saves the Bearer Token.
+     *
+     * @param token The Bearer Token to be saved.
+     */
+    suspend fun saveToken(token: BearerTokens)
+
+    /**
+     * Retrieves the Bearer Token as a Flow.
+     * Using a Flow allows observing changes to the token in real-time.
+     *
+     * @return A Flow that emits the stored Bearer Token, or null if it doesn't exist.
+     */
+    fun getToken(): Flow<BearerTokens?>
+
+    /**
+     * Clears the Bearer Token from storage.
+     */
+    suspend fun clearToken()
+}
+
+class TokenManagerImpl(
+    private val context: Context
+) : TokenManager {
     companion object {
         private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
         private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
@@ -24,7 +48,7 @@ class TokenManager(private val context: Context) {
      *
      * @param token The Bearer Token to be saved.
      */
-    suspend fun saveToken(token: BearerTokens) {
+    override suspend fun saveToken(token: BearerTokens) {
         context.dataStore.edit { preferences ->
             preferences[ACCESS_TOKEN_KEY] = token.accessToken
             token.refreshToken?.let { preferences[REFRESH_TOKEN_KEY] = it }
@@ -37,7 +61,7 @@ class TokenManager(private val context: Context) {
      *
      * @return A Flow that emits the stored Bearer Token, or null if it doesn't exist.
      */
-    fun getToken(): Flow<BearerTokens?> {
+    override fun getToken(): Flow<BearerTokens?> {
         return context.dataStore.data.map { preferences ->
             val accessToken = preferences[ACCESS_TOKEN_KEY]
             val refreshToken = preferences[REFRESH_TOKEN_KEY]
@@ -57,7 +81,7 @@ class TokenManager(private val context: Context) {
      * The `edit` function is a transactional suspend function.
      *
      */
-    suspend fun clearToken() {
+    override suspend fun clearToken() {
         context.dataStore.edit {  preferences ->
             preferences.clear()
         }
