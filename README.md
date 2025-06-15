@@ -1,4 +1,4 @@
-# This is an experiment with #FlowRedux and #Molecue
+# This is an experiment with [FlowRedux](https://github.com/freeletics/FlowRedux) and [Molecule](https://github.com/cashapp/molecule)
 
 # App State Machine
 ```
