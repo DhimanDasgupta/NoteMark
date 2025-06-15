@@ -209,7 +209,7 @@ fun NoteMarkPasswordTextField(
             )
         )
 
-        if (showExplanationText && explanationText.isNotBlank()) {
+        if (showExplanationText && explanationText.isNotEmpty()) {
             Text(text = explanationText, style = typography.labelSmall, color = colorScheme.error)
         }
     }

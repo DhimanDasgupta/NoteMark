@@ -21,12 +21,9 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -35,25 +32,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.statemachine.LoginAction
 import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailEntered
-import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailFocusChanged
 import com.dhimandasgupta.notemark.statemachine.LoginAction.HideLoginButton
 import com.dhimandasgupta.notemark.statemachine.LoginAction.LoginClicked
 import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordEntered
-import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordFocusChanged
 import com.dhimandasgupta.notemark.statemachine.LoginState
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
@@ -254,10 +245,9 @@ private fun RightPane(
             label = "Email",
             enteredText = loginState.email,
             hintText = "Enter your email here",
-            explanationText = "Please enter valid email",
-            showExplanationText = true,
+            explanationText = loginState.emailError ?: "",
+            showExplanationText = loginState.emailError?.isNotEmpty() == true,
             onTextChanged = { loginAction(EmailEntered(it)) },
-            onFocusGained = { loginAction(EmailFocusChanged) },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
 
@@ -266,10 +256,9 @@ private fun RightPane(
             label = "Password",
             enteredText = loginState.password,
             hintText = "Enter your Password here",
-            explanationText = "Please enter password",
-            showExplanationText = true,
+            explanationText = loginState.passwordError ?: "",
+            showExplanationText = loginState.passwordError?.isNotEmpty() == true,
             onTextChanged = { loginAction(PasswordEntered(it)) },
-            onFocusGained = { loginAction(PasswordFocusChanged) },
             onDoneClicked = {
                 if (loginState.loginEnabled) {
                     loginAction(HideLoginButton)

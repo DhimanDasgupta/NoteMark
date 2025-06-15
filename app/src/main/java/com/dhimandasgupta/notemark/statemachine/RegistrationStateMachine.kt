@@ -7,13 +7,10 @@ import com.dhimandasgupta.notemark.common.extensions.isValidPassword
 import com.dhimandasgupta.notemark.network.NoteMarkApi
 import com.dhimandasgupta.notemark.network.model.RegisterRequest
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.EmailEntered
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.EmailFocusChanged
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.PasswordEntered
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.PasswordFocusChanged
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.RepeatPasswordEntered
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameFocusChanged
-import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 
 @Immutable
 data class RegistrationState(
@@ -21,13 +18,9 @@ data class RegistrationState(
     val email: String = "",
     val password: String = "",
     val repeatPassword: String = "",
-    val userNameValid: Boolean? = false,
     val userNameError: String? = null,
-    val emailValid: Boolean? = false,
     val emailError: String? = null,
-    val passwordValid: Boolean? = false,
     val passwordError: String? = null,
-    val repeatPasswordValid: Boolean? = false,
     val repeatPasswordError: String? = null,
     val registrationEnabled: Boolean = false,
     val registrationSuccess: Boolean? = null
@@ -39,10 +32,6 @@ sealed interface RegistrationAction {
     data class EmailEntered(val email: String) : RegistrationAction
     data class PasswordEntered(val password: String) : RegistrationAction
     data class RepeatPasswordEntered(val repeatPassword: String) : RegistrationAction
-    data object UserNameFocusChanged : RegistrationAction
-    data object EmailFocusChanged : RegistrationAction
-    data object PasswordFocusChanged : RegistrationAction
-    data object RepeatPasswordFocusChanged : RegistrationAction
     data object RegisterClicked : RegistrationAction
     data object RegistrationChangeStatusConsumed: RegistrationAction
 }
@@ -56,49 +45,33 @@ class RegistrationStateMachine(
             inState<RegistrationState> {
                 on<RegistrationAction.UserNameEntered> { action, state ->
                     val modifiedState = state.snapshot.copy(userName = action.userName)
-                    state.mutate { modifiedState.validateAndReturn() }
+                    state.mutate { modifiedState.validateNonEmptyInputs() }
                 }
                 on<EmailEntered> { action, state ->
                     val modifiedState = state.snapshot.copy(email = action.email)
-                    state.mutate { modifiedState.validateAndReturn() }
+                    state.mutate { modifiedState.validateNonEmptyInputs() }
                 }
                 on<PasswordEntered> { action, state ->
                     val modifiedState = state.snapshot.copy(password = action.password)
-                    state.mutate { modifiedState.validateAndReturn() }
+                    state.mutate { modifiedState.validateNonEmptyInputs() }
                 }
                 on<RepeatPasswordEntered> { action, state ->
                     val modifiedState = state.snapshot.copy(repeatPassword = action.repeatPassword)
-                    state.mutate { modifiedState.validateAndReturn() }
-                }
-                on<UserNameFocusChanged> { action, state ->
-                    val newStateWithValidationApplied = state.snapshot.validateAndReturn()
-                    val modifiedState = newStateWithValidationApplied.copy(
-                        userNameError = if (newStateWithValidationApplied.userNameValid == false) "Please enter valid username" else null
-                    )
-                    state.mutate { modifiedState }
-                }
-                on<EmailFocusChanged> { action, state ->
-                    val newStateWithValidationApplied = state.snapshot.validateAndReturn()
-                    val modifiedState = newStateWithValidationApplied.copy(
-                        emailError = if (newStateWithValidationApplied.emailValid == false) "Please enter valid email" else null
-                    )
-                    state.mutate { modifiedState }
-                }
-                on<PasswordFocusChanged> { action, state ->
-                    val newStateWithValidationApplied = state.snapshot.validateAndReturn()
-                    val modifiedState = newStateWithValidationApplied.copy(
-                        passwordError = if (newStateWithValidationApplied.passwordValid == false) "Please enter password" else null
-                    )
-                    state.mutate { modifiedState }
-                }
-                on<RegistrationAction.RepeatPasswordFocusChanged> { action, state ->
-                    val newStateWithValidationApplied = state.snapshot.validateAndReturn()
-                    val modifiedState = newStateWithValidationApplied.copy(
-                        repeatPasswordError = if (newStateWithValidationApplied.repeatPasswordValid == false) "Please enter same password here" else null
-                    )
-                    state.mutate { modifiedState }
+                    state.mutate { modifiedState.validateNonEmptyInputs() }
                 }
                 on<RegistrationAction.RegisterClicked> { action, state ->
+                    val modifiedState = state.snapshot.validateInputs()
+
+                    if (modifiedState.userNameError != null) {
+                        return@on state.mutate { modifiedState }
+                    }
+
+                    if (modifiedState.emailError?.isNotEmpty() == true
+                        && modifiedState.passwordError?.isNotEmpty() == true
+                        && modifiedState.repeatPasswordError?.isNotEmpty() == true) {
+                        return@on state.mutate { modifiedState }
+                    }
+
                     noteMarkApi.register(
                         RegisterRequest(
                             userName = state.snapshot.userName,
@@ -123,10 +96,14 @@ class RegistrationStateMachine(
     }
 }
 
-private fun RegistrationState.validateAndReturn(): RegistrationState = this.copy(
-    userNameValid = userName.isUsernameValid(),
-    emailValid = email.isValidEmail(),
-    passwordValid = password.isValidPassword(),
-    repeatPasswordValid = repeatPassword.isValidPassword(),
-    registrationEnabled = emailValid == true && passwordValid == true && repeatPassword == password
+private fun RegistrationState.validateNonEmptyInputs(): RegistrationState = this.copy(
+    registrationEnabled = userName.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && repeatPassword.isNotEmpty()
 )
+
+private fun RegistrationState.validateInputs(): RegistrationState {
+    var updatedRegistrationState = this.copy(userNameError = if (!userName.isUsernameValid()) "Please enter valid username" else null)
+    updatedRegistrationState = updatedRegistrationState.copy(emailError = if (!email.isValidEmail()) "Please enter valid email" else null)
+    updatedRegistrationState = updatedRegistrationState.copy(passwordError = if (!password.isValidPassword()) "Please valid enter password" else null)
+    updatedRegistrationState = updatedRegistrationState.copy(repeatPasswordError = if (!repeatPassword.isValidPassword()) "Password and repeat password should match" else null)
+    return updatedRegistrationState
+}

@@ -237,10 +237,9 @@ private fun RightPane(
             label = "Username",
             enteredText = registrationState.userName,
             hintText = "Enter your user name here",
-            explanationText = "Please enter valid username",
-            showExplanationText = true,
+            explanationText = registrationState.userNameError ?: "",
+            showExplanationText = registrationState.userNameError?.isNotEmpty() == true,
             onTextChanged = { registrationAction(UserNameEntered(it)) },
-            onFocusGained = { registrationAction(UserNameFocusChanged) },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
 
@@ -249,10 +248,9 @@ private fun RightPane(
             label = "Email",
             enteredText = registrationState.email,
             hintText = "Enter your email here",
-            explanationText = "Please enter valid email",
-            showExplanationText = true,
+            explanationText = registrationState.emailError ?: "",
+            showExplanationText = registrationState.emailError?.isNotEmpty() == true,
             onTextChanged = { registrationAction(EmailEntered(it)) },
-            onFocusGained = { registrationAction(EmailFocusChanged) },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
 
@@ -261,10 +259,9 @@ private fun RightPane(
             label = "Password",
             enteredText = registrationState.password,
             hintText = "Enter your password here",
-            explanationText = "Please enter password",
-            showExplanationText = true,
+            explanationText = registrationState.passwordError ?: "",
+            showExplanationText = registrationState.passwordError?.isNotEmpty() == true,
             onTextChanged = { registrationAction(PasswordEntered(it)) },
-            onFocusGained = { registrationAction(PasswordFocusChanged) },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
 
@@ -273,10 +270,9 @@ private fun RightPane(
             label = "Repeat password",
             enteredText = registrationState.repeatPassword,
             hintText = "Retype your password here",
-            explanationText = "Please enter same password here",
-            showExplanationText = true,
+            explanationText = registrationState.repeatPasswordError ?: "",
+            showExplanationText = registrationState.repeatPasswordError?.isNotEmpty() == true,
             onTextChanged = { registrationAction(RepeatPasswordEntered(it)) },
-            onFocusGained = { registrationAction(RepeatPasswordFocusChanged) },
             onDoneClicked = {
                 if (registrationState.registrationEnabled) {
                     registrationAction(RegisterClicked)
