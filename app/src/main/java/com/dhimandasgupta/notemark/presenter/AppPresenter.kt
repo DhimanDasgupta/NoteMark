@@ -28,6 +28,13 @@ class AppPresenter(
             }
         }
 
+        // Send the Events to the State Machine through Actions
+        LaunchedEffect(key1 = Unit) {
+            events.collect { event ->
+                appStateMachine.dispatch(event)
+            }
+        }
+
         return applicationState
     }
 

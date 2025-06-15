@@ -89,7 +89,7 @@ fun NoteMarkTextField(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.Start
     ) {
         label?.let {
@@ -147,7 +147,7 @@ fun NoteMarkPasswordTextField(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.Start
     ) {
         label?.let {
@@ -162,7 +162,7 @@ fun NoteMarkPasswordTextField(
             value = enteredText,
             onValueChange = onTextChanged,
             trailingIcon = {
-                if (!showPassword) {
+                if (showPassword) {
                     Icon(
                         painter = painterResource(R.drawable.ic_eye_off),
                         modifier = Modifier
@@ -193,7 +193,7 @@ fun NoteMarkPasswordTextField(
                 .onFocusChanged { focusState ->
                     if (focusState.hasFocus) onFocusGained
                 },
-            visualTransformation = if (showPassword) PasswordVisualTransformation() else VisualTransformation.None,
+            visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
             placeholder = { Text(hintText) },
             maxLines = 1,
             colors = OutlinedTextFieldDefaults.colors().copy(

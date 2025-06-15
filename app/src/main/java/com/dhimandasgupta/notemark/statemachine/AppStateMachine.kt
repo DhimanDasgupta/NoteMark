@@ -41,7 +41,7 @@ class AppStateMachine(
                 on<AppAction.ConnectionStateConsumed> { _, state ->
                     state.mutate { state.snapshot.copy(connectionState = null) }
                 }
-                on<AppAction.AppLogout> { _, state -> // This needs to be checked.....TODO
+                on<AppAction.AppLogout> { _, state ->
                     tokenManager.clearToken()
                     //state.mutate { state.snapshot.copy(bearerTokens = null) }
                     state.noChange()

@@ -271,7 +271,7 @@ private fun RightPane(
         NoteMarkPasswordTextField(
             modifier = Modifier.fillMaxWidth(),
             label = "Repeat password",
-            enteredText = registrationState.password,
+            enteredText = registrationState.repeatPassword,
             hintText = "Retype your password here",
             explanationText = "Please enter same password here",
             showExplanationText = true,

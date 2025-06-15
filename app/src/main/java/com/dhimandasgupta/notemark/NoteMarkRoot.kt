@@ -49,7 +49,7 @@ fun NoteMarkRoot(
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 private fun NavGraphBuilder.NoteMarkGraph(
     appUiModel: AppState,
-    appEvents: (AppAction) -> Unit,
+    appEvents: (AppAction) -> Unit = {},
     navController: NavHostController,
     windowSizeClass: WindowSizeClass
 ) {
