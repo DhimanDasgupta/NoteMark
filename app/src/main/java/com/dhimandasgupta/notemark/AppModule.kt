@@ -1,9 +1,8 @@
 package com.dhimandasgupta.notemark
 
+import UserManagerImpl
 import com.dhimandasgupta.notemark.network.api.NoteMarkApi
 import com.dhimandasgupta.notemark.network.api.NoteMarkApiImpl
-import com.dhimandasgupta.notemark.network.storage.TokenManager
-import com.dhimandasgupta.notemark.network.storage.TokenManagerImpl
 import com.dhimandasgupta.notemark.presenter.AppPresenter
 import com.dhimandasgupta.notemark.presenter.LoginPresenter
 import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
@@ -17,9 +16,9 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val appModule = module {
-    singleOf(::TokenManagerImpl) bind TokenManager::class
+    singleOf(::UserManagerImpl) bind UserManager::class
     singleOf(::NoteMarkApiImpl) bind NoteMarkApi::class
-    single { AppStateMachine(applicationContext = androidContext(), tokenManager = get()) }
+    single { AppStateMachine(applicationContext = androidContext(), userManager = get()) }
     singleOf(::AppPresenter)
 
     factory { LoginStateMachine(noteMarkApi = get()) }

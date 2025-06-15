@@ -19,7 +19,7 @@ class AppPresenter(
 
     @Composable
     fun uiModel(): AppState {
-        var applicationState by remember { mutableStateOf(defaultAppState) }
+        var applicationState: AppState by remember { mutableStateOf(defaultAppState) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {

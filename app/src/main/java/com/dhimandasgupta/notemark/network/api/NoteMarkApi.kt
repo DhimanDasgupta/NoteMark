@@ -1,11 +1,12 @@
 package com.dhimandasgupta.notemark.network.api
 
+import LoggedInUser
+import UserManager
 import com.dhimandasgupta.notemark.BuildConfig
 import com.dhimandasgupta.notemark.network.model.AuthResponse
 import com.dhimandasgupta.notemark.network.model.LoginRequest
 import com.dhimandasgupta.notemark.network.model.RefreshRequest
 import com.dhimandasgupta.notemark.network.model.RegisterRequest
-import com.dhimandasgupta.notemark.network.storage.TokenManager
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
@@ -58,7 +59,7 @@ interface NoteMarkApi {
 }
 
 class NoteMarkApiImpl(
-    private val tokenManager: TokenManager
+    private val userManager: UserManager
 ) : NoteMarkApi {
     override val client = HttpClient(Android) {
         install(ContentNegotiation) {
@@ -73,24 +74,29 @@ class NoteMarkApiImpl(
         install(Auth) {
             bearer {
                 loadTokens {
-                    tokenManager.getToken().first()
+                    userManager.getUser().first()?.bearerTokens
                 }
 
                 refreshTokens {
-                    val currentTokens = tokenManager.getToken().first()
+                    val currentTokens = userManager.getUser().first()?.bearerTokens
                     if (currentTokens == null) {
                         return@refreshTokens null
                     }
 
                     val response: AuthResponse = client.post("/api/auth/refresh") {
                         contentType(ContentType.Application.Json)
-                        setBody(RefreshRequest(refreshToken = currentTokens.refreshToken!!))
+                        setBody(RefreshRequest(refreshToken = currentTokens.refreshToken ?: ""))
                         // Optional: uncomment for easier testing
                         // header("Debug", "true")
                     }.body()
 
                     val newTokens = BearerTokens(response.accessToken, response.refreshToken)
-                    tokenManager.saveToken(newTokens)
+                    userManager.saveUser(
+                        loggerInUser = LoggedInUser(
+                            userName = response.userName,
+                            bearerTokens = newTokens
+                        )
+                    )
                     newTokens
                 }
             }
@@ -136,7 +142,12 @@ class NoteMarkApiImpl(
             }.body()
 
             val tokens = BearerTokens(response.accessToken, response.refreshToken)
-            tokenManager.saveToken(tokens)
+            userManager.saveUser(
+                loggerInUser = LoggedInUser(
+                    userName = response.userName,
+                    bearerTokens = tokens
+                )
+            )
             Result.success(Unit)
         } catch (e: Exception) {
             coroutineContext.ensureActive()
@@ -145,7 +156,7 @@ class NoteMarkApiImpl(
     }
 
     override suspend fun logout() {
-        tokenManager.clearToken()
+        userManager.clearUser()
     }
 
     companion object {

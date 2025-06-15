@@ -1,5 +1,7 @@
 package com.dhimandasgupta.notemark
 
+import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
@@ -14,6 +16,7 @@ import com.dhimandasgupta.notemark.presenter.LoginPresenter
 import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
 import com.dhimandasgupta.notemark.statemachine.AppAction
 import com.dhimandasgupta.notemark.statemachine.AppState
+import com.dhimandasgupta.notemark.statemachine.NonLoggedInState
 import com.dhimandasgupta.notemark.ui.screens.LauncherPane
 import com.dhimandasgupta.notemark.ui.screens.LoggedInPane
 import com.dhimandasgupta.notemark.ui.screens.LoginPane
@@ -57,9 +60,15 @@ private fun NavGraphBuilder.NoteMarkGraph(
         startDestination = NoteMarkDestination.LauncherDestination
     ) {
         composable<NoteMarkDestination.LauncherDestination> {
+            val context  = LocalActivity.current
+
             LauncherPane(
                 windowSizeClass = windowSizeClass,
                 navigateToAfterLogin = {
+                    if (appUiModel is NonLoggedInState) {
+                        Toast.makeText(context, "Oops!!! Please login first to get started", Toast.LENGTH_LONG).show()
+                        return@LauncherPane
+                    }
                     navController.navigate(NoteMarkDestination.LoggedInDestination) {
                         popUpTo(NoteMarkDestination.LauncherDestination) {
                             inclusive = true

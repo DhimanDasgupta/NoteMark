@@ -72,22 +72,24 @@ fun LauncherPane(
             DeviceLayoutType.PHONE_PORTRAIT -> {
                 LandingPanePortrait(
                     navigateToLogin = navigateToLogin,
-                    deviceLayoutType = layoutType
-
+                    deviceLayoutType = layoutType,
+                    navigateToAfterLogin = navigateToAfterLogin
                 )
             }
 
             DeviceLayoutType.PHONE_LANDSCAPE -> {
                 LandingPaneLandscape(
                     navigateToLogin = navigateToLogin,
-                    deviceLayoutType = layoutType
+                    deviceLayoutType = layoutType,
+                    navigateToAfterLogin = navigateToAfterLogin
                 )
             }
 
             DeviceLayoutType.TABLET_LAYOUT -> {
                 LandingPaneTablet(
                     navigateToLogin = navigateToLogin,
-                    deviceLayoutType = layoutType
+                    deviceLayoutType = layoutType,
+                    navigateToAfterLogin = navigateToAfterLogin
                 )
             }
         }
@@ -98,6 +100,7 @@ fun LauncherPane(
 private fun LandingPanePortrait(
     modifier: Modifier = Modifier,
     deviceLayoutType: DeviceLayoutType,
+    navigateToAfterLogin: () -> Unit = {},
     navigateToLogin: () -> Unit = {}
 ) {
     Column(
@@ -130,7 +133,8 @@ private fun LandingPanePortrait(
                         .calculateBottomPadding()
                 ),
             navigateToLogin = navigateToLogin,
-            deviceLayoutType = deviceLayoutType
+            deviceLayoutType = deviceLayoutType,
+            navigateToAfterLogin = navigateToAfterLogin
         )
     }
 }
@@ -139,6 +143,7 @@ private fun LandingPanePortrait(
 private fun LandingPaneLandscape(
     modifier: Modifier = Modifier,
     deviceLayoutType: DeviceLayoutType,
+    navigateToAfterLogin: () -> Unit = {},
     navigateToLogin: () -> Unit = {}
 ) {
     Row(
@@ -176,7 +181,8 @@ private fun LandingPaneLandscape(
                 )
                 .fillMaxHeight(0.85f),
             navigateToLogin = navigateToLogin,
-            deviceLayoutType = deviceLayoutType
+            deviceLayoutType = deviceLayoutType,
+            navigateToAfterLogin = navigateToAfterLogin
         )
     }
 }
@@ -185,6 +191,7 @@ private fun LandingPaneLandscape(
 private fun LandingPaneTablet(
     modifier: Modifier = Modifier,
     deviceLayoutType: DeviceLayoutType,
+    navigateToAfterLogin: () -> Unit = {},
     navigateToLogin: () -> Unit = {}
 ) {
     Box(
@@ -219,7 +226,8 @@ private fun LandingPaneTablet(
                         .calculateBottomPadding()
                 ),
             navigateToLogin = navigateToLogin,
-            deviceLayoutType = deviceLayoutType
+            deviceLayoutType = deviceLayoutType,
+            navigateToAfterLogin = navigateToAfterLogin
         )
     }
 }
@@ -227,6 +235,7 @@ private fun LandingPaneTablet(
 @Composable
 fun ForegroundPane(
     modifier: Modifier = Modifier,
+    navigateToAfterLogin: () -> Unit = {},
     navigateToLogin: () -> Unit = {},
     deviceLayoutType: DeviceLayoutType
 ) {
@@ -262,7 +271,7 @@ fun ForegroundPane(
         Spacer(Modifier.height(24.dp))
 
         NoteMarkButton(
-            onClick = {},
+            onClick = navigateToAfterLogin,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),

@@ -20,7 +20,9 @@ data class LoginRequest(
 @Serializable
 data class AuthResponse(
     val accessToken: String,
-    val refreshToken: String
+    val refreshToken: String,
+    @SerialName("username")
+    val userName: String
 )
 
 @Serializable

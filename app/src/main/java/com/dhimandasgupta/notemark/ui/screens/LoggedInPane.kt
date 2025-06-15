@@ -16,6 +16,8 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.statemachine.AppState
+import com.dhimandasgupta.notemark.statemachine.LoggedInState
+import com.dhimandasgupta.notemark.statemachine.NonLoggedInState
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
@@ -44,18 +46,21 @@ fun LoggedInPane(
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        if (appState.bearerTokens != null) {
-            NoteMarkOutlinedButton(
-                modifier = Modifier
-                    .wrapContentSize()
-                    .padding(horizontal = 16.dp),
-                onClick = logoutClicked,
-                enabled = true
-            ) {
-                Text("Logout")
+        when (appState) {
+            is NonLoggedInState -> {
+                Text("Upcoming....", style = MaterialTheme.typography.displayLarge)
             }
-        } else {
-            Text("Upcoming....", style = MaterialTheme.typography.displayLarge)
+            is LoggedInState -> {
+                NoteMarkOutlinedButton(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .padding(horizontal = 16.dp),
+                    onClick = logoutClicked,
+                    enabled = true
+                ) {
+                    Text("Logout ${appState.loggedInUser}")
+                }
+            }
         }
     }
 }
@@ -67,7 +72,7 @@ private fun PhonePortraitPreview() {
     LoggedInPane(
         modifier = Modifier,
         windowSizeClass = phonePortrait,
-        appState = AppState()
+        appState = NonLoggedInState(null)
     )
 }
 
@@ -78,7 +83,7 @@ private fun PhoneLandscapePreview() {
     LoggedInPane(
         modifier = Modifier,
         windowSizeClass = phoneLandscape,
-        appState = AppState()
+        appState = NonLoggedInState(null)
     )
 }
 
@@ -89,7 +94,7 @@ private fun TabletMediumPortraitPreview() {
     LoggedInPane(
         modifier = Modifier,
         windowSizeClass = mediumTabletPortrait,
-        appState = AppState()
+        appState = NonLoggedInState(null)
     )
 }
 
@@ -100,7 +105,7 @@ private fun TabletMediumLandscapePreview() {
     LoggedInPane(
         modifier = Modifier,
         windowSizeClass = mediumTabletLandscape,
-        appState = AppState()
+        appState = NonLoggedInState(null)
     )
 }
 
@@ -111,7 +116,7 @@ private fun TabletExpandedPortraitPreview() {
     LoggedInPane(
         modifier = Modifier,
         windowSizeClass = extendedTabletPortrait,
-        appState = AppState()
+        appState = NonLoggedInState(null)
     )
 }
 
@@ -122,6 +127,6 @@ private fun TabletExpandedLandscapePreview() {
     LoggedInPane(
         modifier = Modifier,
         windowSizeClass = extendedTabletLandscape,
-        appState = AppState()
+        appState = NonLoggedInState(null)
     )
 }
