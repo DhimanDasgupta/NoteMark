@@ -57,6 +57,7 @@ import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkPasswordTextField
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTextField
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
 import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
 import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
@@ -94,7 +95,7 @@ fun LoginPane(
                                 topEnd = 16.dp
                             )
                         )
-                        .background(colorScheme.background)
+                        .background(colorScheme.surfaceContainerLowest)
                         .fillMaxSize()
                         .padding(all = 16.dp)
                         .verticalScroll(rememberScrollState()),
@@ -142,7 +143,7 @@ fun LoginPane(
                                 topEnd = 16.dp
                             )
                         )
-                        .background(colorScheme.background)
+                        .background(colorScheme.surfaceContainerLowest)
                         .fillMaxSize()
                         .padding(start = 64.dp, end = 64.dp, top = 64.dp)
                         .verticalScroll(rememberScrollState()),
@@ -173,7 +174,7 @@ fun LoginPane(
                                 topEnd = 16.dp
                             )
                         )
-                        .background(colorScheme.background)
+                        .background(colorScheme.surfaceContainerLowest)
                         .fillMaxSize()
                         .padding(all = 16.dp)
                         .verticalScroll(rememberScrollState()),
@@ -202,13 +203,13 @@ private fun LeftPane(
     ) {
         Text(
             text = "Log In",
-            style = typography.headlineLarge
+            style = typography.titleLarge
         )
 
         Text(
             text = "Capture your thoughts and ideas",
-            style = typography.bodySmall,
-            color = typography.headlineLarge.color.copy(alpha = 0.5f)
+            style = typography.bodyLarge,
+            color = colorScheme.onSurfaceVariant
         )
     }
 }
@@ -246,7 +247,6 @@ private fun RightPane(
             enteredText = loginState.email,
             hintText = "Enter your email here",
             explanationText = loginState.emailError ?: "",
-            showExplanationText = loginState.emailError?.isNotEmpty() == true,
             onTextChanged = { loginAction(EmailEntered(it)) },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
@@ -257,7 +257,6 @@ private fun RightPane(
             enteredText = loginState.password,
             hintText = "Enter your Password here",
             explanationText = loginState.passwordError ?: "",
-            showExplanationText = loginState.passwordError?.isNotEmpty() == true,
             onTextChanged = { loginAction(PasswordEntered(it)) },
             onDoneClicked = {
                 if (loginState.loginEnabled) {
@@ -279,12 +278,15 @@ private fun RightPane(
             modifier = modifier.fillMaxWidth(),
             enabled = loginState.loginEnabled
         ) {
-            Text(text = "Log In")
+            Text(
+                text = "Log In",
+                style = typography.titleSmall
+            )
         }
 
         Text(
             text = "Don't have an account?",
-            style = typography.bodySmall,
+            style = typography.titleSmall,
             fontWeight = FontWeight.Normal,
             modifier = Modifier
                 .fillMaxSize()
@@ -303,64 +305,76 @@ private fun RightPane(
 @PhonePortraitPreview
 @Composable
 private fun PhonePortraitPreview() {
-    LoginPane(
-        modifier = Modifier,
-        windowSizeClass = phonePortrait,
-        loginState = LoginState()
-    )
+    NoteMarkTheme {
+        LoginPane(
+            modifier = Modifier,
+            windowSizeClass = phonePortrait,
+            loginState = LoginState()
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @PhoneLandscapePreview
 @Composable
 private fun PhoneLandscapePreview() {
-    LoginPane(
-        modifier = Modifier,
-        windowSizeClass = phoneLandscape,
-        loginState = LoginState()
-    )
+    NoteMarkTheme {
+        LoginPane(
+            modifier = Modifier,
+            windowSizeClass = phoneLandscape,
+            loginState = LoginState()
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletMediumPortraitPreview
 @Composable
 private fun TabletMediumPortraitPreview() {
-    LoginPane(
-        modifier = Modifier,
-        windowSizeClass = mediumTabletPortrait,
-        loginState = LoginState()
-    )
+    NoteMarkTheme {
+        LoginPane(
+            modifier = Modifier,
+            windowSizeClass = mediumTabletPortrait,
+            loginState = LoginState()
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletMediumLandscapePreview
 @Composable
 private fun TabletMediumLandscapePreview() {
-    LoginPane(
-        modifier = Modifier,
-        windowSizeClass = mediumTabletLandscape,
-        loginState = LoginState()
-    )
+    NoteMarkTheme {
+        LoginPane(
+            modifier = Modifier,
+            windowSizeClass = mediumTabletLandscape,
+            loginState = LoginState()
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletExpandedPortraitPreview
 @Composable
 private fun TabletExpandedPortraitPreview() {
-    LoginPane(
-        modifier = Modifier,
-        windowSizeClass = extendedTabletPortrait,
-        loginState = LoginState()
-    )
+    NoteMarkTheme {
+        LoginPane(
+            modifier = Modifier,
+            windowSizeClass = extendedTabletPortrait,
+            loginState = LoginState()
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletExpandedLandscapePreview
 @Composable
 private fun TabletExpandedLandscapePreview() {
-    LoginPane(
-        modifier = Modifier,
-        windowSizeClass = extendedTabletLandscape,
-        loginState = LoginState()
-    )
+    NoteMarkTheme {
+        LoginPane(
+            modifier = Modifier,
+            windowSizeClass = extendedTabletLandscape,
+            loginState = LoginState()
+        )
+    }
 }

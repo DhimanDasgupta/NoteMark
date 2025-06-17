@@ -56,6 +56,7 @@ import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkPasswordTextField
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTextField
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
 import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
 import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
@@ -91,7 +92,7 @@ fun RegistrationPane(
                                 topEnd = 16.dp
                             )
                         )
-                        .background(colorScheme.background)
+                        .background(colorScheme.surfaceContainerLowest)
                         .fillMaxSize()
                         .padding(all = 16.dp)
                         .verticalScroll(rememberScrollState()),
@@ -139,7 +140,7 @@ fun RegistrationPane(
                                 topEnd = 16.dp
                             )
                         )
-                        .background(colorScheme.background)
+                        .background(colorScheme.surfaceContainerLowest)
                         .fillMaxSize()
                         .padding(start = 128.dp, end = 128.dp, top = 128.dp)
                         .verticalScroll(rememberScrollState()),
@@ -171,7 +172,7 @@ fun RegistrationPane(
                                 topEnd = 16.dp
                             )
                         )
-                        .background(colorScheme.background)
+                        .background(colorScheme.surfaceContainerLowest)
                         .fillMaxSize()
                         .padding(all = 16.dp)
                         .verticalScroll(rememberScrollState()),
@@ -197,13 +198,13 @@ private fun LeftPane(modifier: Modifier = Modifier) {
     ) {
         Text(
             text = "Create account",
-            style = typography.headlineLarge
+            style = typography.titleLarge
         )
 
         Text(
             text = "Capture your thoughts and ideas",
-            style = typography.bodySmall,
-            color = typography.bodySmall.color.copy(alpha = 0.5f)
+            style = typography.bodyLarge,
+            color = colorScheme.onSurfaceVariant
         )
     }
 }
@@ -238,7 +239,6 @@ private fun RightPane(
             enteredText = registrationState.userName,
             hintText = "Enter your user name here",
             explanationText = registrationState.userNameError ?: "",
-            showExplanationText = registrationState.userNameError?.isNotEmpty() == true,
             onTextChanged = { registrationAction(UserNameEntered(it)) },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
@@ -249,7 +249,6 @@ private fun RightPane(
             enteredText = registrationState.email,
             hintText = "Enter your email here",
             explanationText = registrationState.emailError ?: "",
-            showExplanationText = registrationState.emailError?.isNotEmpty() == true,
             onTextChanged = { registrationAction(EmailEntered(it)) },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
@@ -260,7 +259,6 @@ private fun RightPane(
             enteredText = registrationState.password,
             hintText = "Enter your password here",
             explanationText = registrationState.passwordError ?: "",
-            showExplanationText = registrationState.passwordError?.isNotEmpty() == true,
             onTextChanged = { registrationAction(PasswordEntered(it)) },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
@@ -271,7 +269,6 @@ private fun RightPane(
             enteredText = registrationState.repeatPassword,
             hintText = "Retype your password here",
             explanationText = registrationState.repeatPasswordError ?: "",
-            showExplanationText = registrationState.repeatPasswordError?.isNotEmpty() == true,
             onTextChanged = { registrationAction(RepeatPasswordEntered(it)) },
             onDoneClicked = {
                 if (registrationState.registrationEnabled) {
@@ -293,12 +290,15 @@ private fun RightPane(
                 .fillMaxWidth(),
             enabled = registrationState.registrationEnabled
         ) {
-            Text(text = "Create account")
+            Text(
+                text = "Create account",
+                style = typography.titleSmall
+            )
         }
 
         Text(
             text = "Already have and account?",
-            style = typography.bodySmall,
+            style = typography.titleSmall,
             fontWeight = FontWeight.Normal,
             modifier = Modifier.fillMaxSize().clickable {
                 navigateToLogin()
@@ -319,64 +319,76 @@ private fun RightPane(
 @PhonePortraitPreview
 @Composable
 private fun PhonePortraitPreview() {
-    RegistrationPane(
-        modifier = Modifier,
-        windowSizeClass = phonePortrait,
-        registrationState = RegistrationState()
-    )
+    NoteMarkTheme {
+        RegistrationPane(
+            modifier = Modifier,
+            windowSizeClass = phonePortrait,
+            registrationState = RegistrationState()
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @PhoneLandscapePreview
 @Composable
 private fun PhoneLandscapePreview() {
-    RegistrationPane(
-        modifier = Modifier,
-        windowSizeClass = phoneLandscape,
-        registrationState = RegistrationState()
-    )
+    NoteMarkTheme {
+        RegistrationPane(
+            modifier = Modifier,
+            windowSizeClass = phoneLandscape,
+            registrationState = RegistrationState()
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletMediumPortraitPreview
 @Composable
 private fun TabletMediumPortraitPreview() {
-    RegistrationPane(
-        modifier = Modifier,
-        windowSizeClass = mediumTabletPortrait,
-        registrationState = RegistrationState()
-    )
+    NoteMarkTheme {
+        RegistrationPane(
+            modifier = Modifier,
+            windowSizeClass = mediumTabletPortrait,
+            registrationState = RegistrationState()
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletMediumLandscapePreview
 @Composable
 private fun TabletMediumLandscapePreview() {
-    RegistrationPane(
-        modifier = Modifier,
-        windowSizeClass = mediumTabletLandscape,
-        registrationState = RegistrationState()
-    )
+    NoteMarkTheme {
+        RegistrationPane(
+            modifier = Modifier,
+            windowSizeClass = mediumTabletLandscape,
+            registrationState = RegistrationState()
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletExpandedPortraitPreview
 @Composable
 private fun TabletExpandedPortraitPreview() {
-    RegistrationPane(
-        modifier = Modifier,
-        windowSizeClass = extendedTabletPortrait,
-        registrationState = RegistrationState()
-    )
+    NoteMarkTheme {
+        RegistrationPane(
+            modifier = Modifier,
+            windowSizeClass = extendedTabletPortrait,
+            registrationState = RegistrationState()
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletExpandedLandscapePreview
 @Composable
 private fun TabletExpandedLandscapePreview() {
-    RegistrationPane(
-        modifier = Modifier,
-        windowSizeClass = extendedTabletLandscape,
-        registrationState = RegistrationState()
-    )
+    NoteMarkTheme {
+        RegistrationPane(
+            modifier = Modifier,
+            windowSizeClass = extendedTabletLandscape,
+            registrationState = RegistrationState()
+        )
+    }
 }

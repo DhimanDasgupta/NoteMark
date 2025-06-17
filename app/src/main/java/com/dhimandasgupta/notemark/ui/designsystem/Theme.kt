@@ -2,7 +2,10 @@ package com.dhimandasgupta.notemark.ui.designsystem
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -10,19 +13,39 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 
-private val DarkColorScheme = darkColorScheme(
-    primary = blue,
-    surface = surface,
-    background = Color.DarkGray,
-    secondary = textSecondary
+val LightColorScheme = lightColorScheme(
+    primary = Primary,
+    surface = Surface,
+    surfaceContainerLowest = SurfaceLowest,
+    background = Background,
+    onSurface = OnSurface,
+    onSurfaceVariant = OnSurfaceVariant
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = blue,
-    surface = surface,
-    background = Color.White,
-    secondary = textSecondary
+private val DarkColorScheme = lightColorScheme(
+    primary = PrimaryDark,
+    surface = SurfaceDark,
+    surfaceContainerLowest = SurfaceLowestDark,
+    background = BackgroundDark,
+    onSurface = OnSurfaceDark,
+    onSurfaceVariant = OnSurfaceVariantDark
+)
+
+@Composable
+fun extendedColor(light: Color, dark: Color): Color {
+    return if(isSystemInDarkTheme()) dark else light
+}
+
+val ColorScheme.extraColor: Color @Composable get() = extendedColor(
+    light = Color(0xFF000000),
+    dark = Color(0xFFFFFFFF)
+)
+
+val Shapes = Shapes(
+    extraSmall = RoundedCornerShape(5.dp),
+    medium = RoundedCornerShape(15.dp)
 )
 
 @Composable
@@ -43,8 +66,9 @@ fun NoteMarkTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = LightColorScheme,
         typography = Typography,
+        shapes = Shapes,
         content = content
     )
 }

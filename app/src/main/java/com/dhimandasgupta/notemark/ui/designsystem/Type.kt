@@ -1,6 +1,7 @@
 package com.dhimandasgupta.notemark.ui.designsystem
 
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -9,46 +10,56 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.dhimandasgupta.notemark.R
 
-private val montserrat = FontFamily(
+private val SpaceGrotesk = FontFamily(
     Font(
-        resId = R.font.montserrat_medium,
-        weight = FontWeight.Medium,
-        loadingStrategy = FontLoadingStrategy.Async
-    ),
-    Font(
-        resId = R.font.montserrat_semibold,
-        weight = FontWeight.SemiBold,
+        resId = R.font.space_grotesk_bold,
+        weight = FontWeight.Bold,
         loadingStrategy = FontLoadingStrategy.Async
     )
 )
 
-// Set of Material typography styles to start with
-val Typography = Typography(
-    displayMedium = TextStyle(
-        fontFamily = montserrat,
-        fontWeight = FontWeight.Medium,
-        fontSize = 42.sp
+private val Inter = FontFamily(
+    Font(
+        resId = R.font.inter_regular,
+        weight = FontWeight.Normal,
+        loadingStrategy = FontLoadingStrategy.Async
     ),
-    titleLarge = TextStyle(
-        fontFamily = montserrat,
-        fontWeight = FontWeight.Medium,
-        fontSize = 24.sp
+    Font(
+        resId = R.font.inter_medium,
+        weight = FontWeight.Medium,
+        loadingStrategy = FontLoadingStrategy.Async
+    )
+)
+
+val Typography: Typography @Composable get() = Typography(
+    bodyLarge = TextStyle(
+        fontFamily = Inter,
+        fontWeight = FontWeight.Normal,
+        fontSize = 17.sp,
+        lineHeight = 24.sp
     ),
     bodyMedium = TextStyle(
-        fontFamily = montserrat,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 16.sp,
-        lineHeight = 19.5.sp
-    ),
-    labelMedium = TextStyle(
-        fontFamily = montserrat,
+        fontFamily = Inter,
         fontWeight = FontWeight.Medium,
-        fontSize = 16.sp
+        fontSize = 15.sp,
+        lineHeight = 20.sp
     ),
-    labelSmall = TextStyle(
-        fontFamily = montserrat,
+    bodySmall = TextStyle(
+        fontFamily = Inter,
+        fontWeight = FontWeight.Normal,
+        fontSize = 15.sp,
+        lineHeight = 20.sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = SpaceGrotesk,
+        fontWeight = FontWeight.Bold,
+        fontSize = 32.sp,
+        lineHeight = 36.sp
+    ),
+    titleSmall = TextStyle(
+        fontFamily = SpaceGrotesk,
         fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 17.sp
-    )
+        fontSize = 17.sp,
+        lineHeight = 24.sp
+    ),
 )

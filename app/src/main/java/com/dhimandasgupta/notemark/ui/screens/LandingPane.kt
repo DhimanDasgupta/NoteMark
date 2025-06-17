@@ -46,6 +46,7 @@ import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkOutlinedButton
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
 import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
 import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
@@ -122,7 +123,7 @@ private fun LandingPanePortrait(
                         topEnd = 16.dp
                     )
                 )
-                .background(colorScheme.background)
+                .background(colorScheme.surface)
                 .padding(
                     start = 16.dp,
                     top = 16.dp,
@@ -169,7 +170,7 @@ private fun LandingPaneLandscape(
                         bottomStart = 16.dp
                     )
                 )
-                .background(colorScheme.background)
+                .background(colorScheme.surface)
                 .padding(
                     start = 32.dp,
                     top = 32.dp,
@@ -215,7 +216,7 @@ private fun LandingPaneTablet(
                         topEnd = 16.dp
                     )
                 )
-                .background(colorScheme.background)
+                .background(colorScheme.surface)
                 .padding(
                     start = 16.dp,
                     top = 16.dp,
@@ -250,7 +251,7 @@ fun ForegroundPane(
     ) {
         Text(
             text = stringResource(R.string.landing_info_one),
-            style = typography.headlineLarge,
+            style = typography.titleLarge,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
@@ -261,7 +262,8 @@ fun ForegroundPane(
 
         Text(
             text = stringResource(R.string.landing_info_two),
-            style = typography.bodySmall,
+            style = typography.bodyLarge,
+            color = colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .wrapContentSize()
                 .padding(horizontal = 16.dp)
@@ -277,7 +279,10 @@ fun ForegroundPane(
                 .padding(horizontal = 16.dp),
             enabled = true
         ) {
-            Text(text = "Get Started")
+            Text(
+                text = "Get Started",
+                style = typography.titleSmall
+            )
         }
 
         Spacer(Modifier.height(8.dp))
@@ -289,7 +294,10 @@ fun ForegroundPane(
                 .padding(horizontal = 16.dp),
             enabled = true
         ) {
-            Text(text = "Log in")
+            Text(
+                text = "Log in",
+                style = typography.titleSmall
+            )
         }
     }
 }
@@ -298,58 +306,70 @@ fun ForegroundPane(
 @PhonePortraitPreview
 @Composable
 private fun PhonePortraitPreview() {
-    LauncherPane(
-        modifier = Modifier,
-        windowSizeClass = phonePortrait
-    )
+    NoteMarkTheme {
+        LauncherPane(
+            modifier = Modifier,
+            windowSizeClass = phonePortrait
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @PhoneLandscapePreview
 @Composable
 private fun PhoneLandscapePreview() {
-    LauncherPane(
-        modifier = Modifier,
-        windowSizeClass = phoneLandscape
-    )
+    NoteMarkTheme {
+        LauncherPane(
+            modifier = Modifier,
+            windowSizeClass = phoneLandscape
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletMediumPortraitPreview
 @Composable
 private fun TabletMediumPortraitPreview() {
-    LauncherPane(
-        modifier = Modifier,
-        windowSizeClass = mediumTabletPortrait
-    )
+    NoteMarkTheme {
+        LauncherPane(
+            modifier = Modifier,
+            windowSizeClass = mediumTabletPortrait
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletMediumLandscapePreview
 @Composable
 private fun TabletMediumLandscapePreview() {
-    LauncherPane(
-        modifier = Modifier,
-        windowSizeClass = mediumTabletLandscape
-    )
+    NoteMarkTheme {
+        LauncherPane(
+            modifier = Modifier,
+            windowSizeClass = mediumTabletLandscape
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletExpandedPortraitPreview
 @Composable
 private fun TabletExpandedPortraitPreview() {
-    LauncherPane(
-        modifier = Modifier,
-        windowSizeClass = extendedTabletPortrait
-    )
+    NoteMarkTheme {
+        LauncherPane(
+            modifier = Modifier,
+            windowSizeClass = extendedTabletPortrait
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletExpandedLandscapePreview
 @Composable
 private fun TabletExpandedLandscapePreview() {
-    LauncherPane(
-        modifier = Modifier,
-        windowSizeClass = extendedTabletLandscape
-    )
+    NoteMarkTheme {
+        LauncherPane(
+            modifier = Modifier,
+            windowSizeClass = extendedTabletLandscape
+        )
+    }
 }

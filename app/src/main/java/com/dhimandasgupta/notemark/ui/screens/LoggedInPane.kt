@@ -25,6 +25,7 @@ import com.dhimandasgupta.notemark.ui.TabletExpandedPortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkOutlinedButton
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
 import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
 import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
@@ -69,64 +70,76 @@ fun LoggedInPane(
 @PhonePortraitPreview
 @Composable
 private fun PhonePortraitPreview() {
-    LoggedInPane(
-        modifier = Modifier,
-        windowSizeClass = phonePortrait,
-        appState = NonLoggedInState(null)
-    )
+    NoteMarkTheme {
+        LoggedInPane(
+            modifier = Modifier,
+            windowSizeClass = phonePortrait,
+            appState = NonLoggedInState(null)
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @PhoneLandscapePreview
 @Composable
 private fun PhoneLandscapePreview() {
-    LoggedInPane(
-        modifier = Modifier,
-        windowSizeClass = phoneLandscape,
-        appState = NonLoggedInState(null)
-    )
+    NoteMarkTheme {
+        LoggedInPane(
+            modifier = Modifier,
+            windowSizeClass = phoneLandscape,
+            appState = NonLoggedInState(null)
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletMediumPortraitPreview
 @Composable
 private fun TabletMediumPortraitPreview() {
-    LoggedInPane(
-        modifier = Modifier,
-        windowSizeClass = mediumTabletPortrait,
-        appState = NonLoggedInState(null)
-    )
+    NoteMarkTheme {
+        LoggedInPane(
+            modifier = Modifier,
+            windowSizeClass = mediumTabletPortrait,
+            appState = NonLoggedInState(null)
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletMediumLandscapePreview
 @Composable
 private fun TabletMediumLandscapePreview() {
-    LoggedInPane(
-        modifier = Modifier,
-        windowSizeClass = mediumTabletLandscape,
-        appState = NonLoggedInState(null)
-    )
+    NoteMarkTheme {
+        LoggedInPane(
+            modifier = Modifier,
+            windowSizeClass = mediumTabletLandscape,
+            appState = NonLoggedInState(null)
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletExpandedPortraitPreview
 @Composable
 private fun TabletExpandedPortraitPreview() {
-    LoggedInPane(
-        modifier = Modifier,
-        windowSizeClass = extendedTabletPortrait,
-        appState = NonLoggedInState(null)
-    )
+    NoteMarkTheme {
+        LoggedInPane(
+            modifier = Modifier,
+            windowSizeClass = extendedTabletPortrait,
+            appState = NonLoggedInState(null)
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @TabletExpandedLandscapePreview
 @Composable
 private fun TabletExpandedLandscapePreview() {
-    LoggedInPane(
-        modifier = Modifier,
-        windowSizeClass = extendedTabletLandscape,
-        appState = NonLoggedInState(null)
-    )
+    NoteMarkTheme {
+        LoggedInPane(
+            modifier = Modifier,
+            windowSizeClass = extendedTabletLandscape,
+            appState = NonLoggedInState(null)
+        )
+    }
 }

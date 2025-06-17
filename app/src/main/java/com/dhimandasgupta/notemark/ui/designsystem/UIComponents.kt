@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,7 +50,7 @@ fun NoteMarkButton(
         modifier = modifier,
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.splash_blue)),
+        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary, disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.12f)),
         enabled = enabled
     ) {
         content()
@@ -67,7 +68,7 @@ fun NoteMarkOutlinedButton(
         modifier = modifier,
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-        border = BorderStroke(1.dp, colorResource(R.color.splash_blue)),
+        border = BorderStroke(1.dp, colorScheme.primary),
         enabled = enabled
     ) {
          content()
@@ -81,7 +82,7 @@ fun NoteMarkTextField(
     enteredText: String = "",
     hintText: String = "",
     explanationText: String = "",
-    showExplanationText: Boolean = false,
+    errorText: String = "",
     onTextChanged: (String) -> Unit = {},
     onFocusGained: () -> Unit = {},
     onNextClicked: (() -> Unit)? = null,
@@ -95,8 +96,7 @@ fun NoteMarkTextField(
         label?.let {
             Text(
                 text = label,
-                style = typography.bodySmall,
-                fontWeight = FontWeight.Medium
+                style = typography.bodyMedium
             )
         }
 
@@ -112,7 +112,8 @@ fun NoteMarkTextField(
             placeholder = { Text(hintText) },
             maxLines = 1,
             colors = OutlinedTextFieldDefaults.colors().copy(
-                focusedTextColor = colorResource(R.color.splash_blue)
+                focusedContainerColor = colorScheme.surfaceContainerLowest,
+                unfocusedContainerColor = colorScheme.surface
             ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Unspecified,
@@ -124,8 +125,12 @@ fun NoteMarkTextField(
             )
         )
 
-        if (showExplanationText && explanationText.isNotBlank()) {
-            Text(text = explanationText, style = typography.labelSmall, color = colorScheme.error)
+        if (explanationText.isNotBlank()) {
+            Text(text = explanationText, style = typography.bodySmall, color = colorScheme.onSurfaceVariant)
+        }
+
+        if (errorText.isNotBlank()) {
+            Text(text = errorText, style = typography.bodySmall, color = colorScheme.error)
         }
     }
 }
@@ -137,7 +142,7 @@ fun NoteMarkPasswordTextField(
     enteredText: String = "",
     hintText: String = "",
     explanationText: String = "",
-    showExplanationText: Boolean = false,
+    errorText: String = "",
     onTextChanged: (String) -> Unit = {},
     onFocusGained: () -> Unit = {},
     onNextClicked: (() -> Unit)? = null,
@@ -153,8 +158,7 @@ fun NoteMarkPasswordTextField(
         label?.let {
             Text(
                 text = label,
-                style = typography.bodySmall,
-                fontWeight = FontWeight.Medium
+                style = typography.bodyMedium
             )
         }
 
@@ -197,7 +201,8 @@ fun NoteMarkPasswordTextField(
             placeholder = { Text(hintText) },
             maxLines = 1,
             colors = OutlinedTextFieldDefaults.colors().copy(
-                focusedTextColor = colorResource(R.color.splash_blue)
+                focusedContainerColor = colorScheme.surfaceContainerLowest,
+                unfocusedContainerColor = colorScheme.surface
             ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
@@ -209,8 +214,12 @@ fun NoteMarkPasswordTextField(
             )
         )
 
-        if (showExplanationText && explanationText.isNotEmpty()) {
-            Text(text = explanationText, style = typography.labelSmall, color = colorScheme.error)
+        if (explanationText.isNotEmpty()) {
+            Text(text = explanationText, style = typography.bodySmall, color = colorScheme.onSurfaceVariant)
+        }
+
+        if (errorText.isNotBlank()) {
+            Text(text = errorText, style = typography.bodySmall, color = colorScheme.error)
         }
     }
 }
