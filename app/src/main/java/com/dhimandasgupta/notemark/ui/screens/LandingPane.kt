@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
@@ -195,21 +196,23 @@ private fun LandingPaneTablet(
     navigateToAfterLogin: () -> Unit = {},
     navigateToLogin: () -> Unit = {}
 ) {
-    Box(
+    Column(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.bg_tablet),
+            painter = painterResource(id = R.drawable.bg_phone_landscape),
             contentDescription = null,
-            contentScale = ContentScale.FillWidth,
+            contentScale = ContentScale.Fit,
             modifier = Modifier
+                .weight(1f)
                 .aspectRatio(0.5f)
         )
 
         ForegroundPane(
             modifier = modifier
-                .fillMaxWidth(0.75f)
+                .fillMaxWidth(0.85f)
                 .clip(
                     RoundedCornerShape(
                         topStart = 16.dp,

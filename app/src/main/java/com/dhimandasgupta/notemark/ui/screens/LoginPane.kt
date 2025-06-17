@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
@@ -29,6 +30,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
@@ -97,9 +99,9 @@ fun LoginPane(
                         )
                         .background(colorScheme.surfaceContainerLowest)
                         .fillMaxSize()
-                        .padding(all = 16.dp)
-                        .verticalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(all = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.Top
                 ) {
                     LeftPane(
                         modifier = Modifier
@@ -107,7 +109,7 @@ fun LoginPane(
                             .fillMaxWidth(0.4f)
                     )
                     RightPane(
-                        modifier = Modifier
+                        modifier =Modifier
                             .padding(
                                 top = WindowInsets.systemBars.asPaddingValues()
                                     .calculateTopPadding(),
@@ -119,7 +121,8 @@ fun LoginPane(
                                     .systemBars.union(WindowInsets.displayCutout)
                                     .asPaddingValues()
                                     .calculateRightPadding(LayoutDirection.Ltr)
-                            ),
+                            )
+                            .verticalScroll(rememberScrollState()),
                         navigateToRegistration = navigateToRegistration,
                         navigateToAfterLogin = navigateToAfterLogin,
                         loginState = loginState,
@@ -150,6 +153,7 @@ fun LoginPane(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     LeftPane()
+                    Spacer(modifier = Modifier.height(16.dp))
                     RightPane(
                         navigateToRegistration = navigateToRegistration,
                         navigateToAfterLogin = navigateToAfterLogin,
@@ -181,6 +185,7 @@ fun LoginPane(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     LeftPane()
+                    Spacer(modifier = Modifier.height(16.dp))
                     RightPane(
                         navigateToRegistration = navigateToRegistration,
                         navigateToAfterLogin = navigateToAfterLogin,
@@ -275,7 +280,7 @@ private fun RightPane(
                 loginAction(HideLoginButton)
                 loginAction(LoginClicked)
             },
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             enabled = loginState.loginEnabled
         ) {
             Text(

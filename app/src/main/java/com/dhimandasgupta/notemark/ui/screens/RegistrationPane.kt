@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -94,15 +95,15 @@ fun RegistrationPane(
                         )
                         .background(colorScheme.surfaceContainerLowest)
                         .fillMaxSize()
-                        .padding(all = 16.dp)
-                        .verticalScroll(rememberScrollState()),
+                        .padding(all = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.Top
                 ) {
                     LeftPane(
                         modifier = Modifier
                             .safeContentPadding()
                             .fillMaxWidth(0.4f)
+                            .wrapContentHeight(align = Alignment.Top)
                     )
                     RightPane(
                         modifier = Modifier
@@ -117,7 +118,8 @@ fun RegistrationPane(
                                     .systemBars.union(WindowInsets.displayCutout)
                                     .asPaddingValues()
                                     .calculateRightPadding(LayoutDirection.Ltr)
-                            ),
+                            )
+                            .verticalScroll(rememberScrollState()),
                         navigateToLogin = navigateToLogin,
                         registrationState = registrationState,
                         registrationAction = registrationAction
@@ -148,6 +150,7 @@ fun RegistrationPane(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     LeftPane()
+                    Spacer(modifier = Modifier.height(16.dp))
                     RightPane(
                         modifier = Modifier.fillMaxWidth(),
                         navigateToLogin = navigateToLogin,
@@ -179,6 +182,7 @@ fun RegistrationPane(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     LeftPane()
+                    Spacer(modifier = Modifier.height(16.dp))
                     RightPane(
                         navigateToLogin = navigateToLogin,
                         registrationState = registrationState,

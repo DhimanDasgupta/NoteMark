@@ -1,6 +1,7 @@
 package com.dhimandasgupta.notemark.ui.designsystem
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,9 +17,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,18 +27,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
-import kotlin.Unit
 
 @Composable
 fun NoteMarkButton(
@@ -100,12 +100,21 @@ fun NoteMarkTextField(
             )
         }
 
-        OutlinedTextField(
+        var hasFocus by rememberSaveable { mutableStateOf(false) }
+
+        TextField(
             value = enteredText,
             onValueChange = onTextChanged,
             modifier = Modifier
                 .fillMaxWidth()
+                .clip(Shapes.medium)
+                .border(
+                    width = if (hasFocus) 1.dp else 0.dp,
+                    color = if (hasFocus) colorScheme.primary else colorScheme.surface,
+                    shape = Shapes.medium
+                )
                 .onFocusChanged { focusState ->
+                    hasFocus = focusState.hasFocus
                     if (focusState.hasFocus) onFocusGained
                 },
             visualTransformation = VisualTransformation.None,
@@ -113,7 +122,11 @@ fun NoteMarkTextField(
             maxLines = 1,
             colors = OutlinedTextFieldDefaults.colors().copy(
                 focusedContainerColor = colorScheme.surfaceContainerLowest,
-                unfocusedContainerColor = colorScheme.surface
+                unfocusedContainerColor = colorScheme.surface,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                errorIndicatorColor = Color.Transparent,
             ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Unspecified,
@@ -148,6 +161,7 @@ fun NoteMarkPasswordTextField(
     onNextClicked: (() -> Unit)? = null,
     onDoneClicked: (() -> Unit)? = null
 ) {
+    var hasFocus by rememberSaveable { mutableStateOf(false) }
     var showPassword by rememberSaveable { mutableStateOf(false) }
 
     Column(
@@ -162,7 +176,7 @@ fun NoteMarkPasswordTextField(
             )
         }
 
-        OutlinedTextField(
+        TextField(
             value = enteredText,
             onValueChange = onTextChanged,
             trailingIcon = {
@@ -176,7 +190,7 @@ fun NoteMarkPasswordTextField(
                             }
                         ,
                         contentDescription = "Hide Password",
-                        tint = colorResource(R.color.splash_blue)
+                        tint = colorScheme.onSurfaceVariant
                     )
                 } else {
                     Icon(
@@ -188,13 +202,20 @@ fun NoteMarkPasswordTextField(
                             }
                         ,
                         contentDescription = "Show Password",
-                        tint = colorResource(R.color.splash_blue)
+                        tint = colorScheme.onSurfaceVariant
                     )
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
+                .clip(Shapes.medium)
+                .border(
+                    width = if (hasFocus) 1.dp else 0.dp,
+                    color = if (hasFocus) colorScheme.primary else colorScheme.surface,
+                    shape = Shapes.medium
+                )
                 .onFocusChanged { focusState ->
+                    hasFocus = focusState.hasFocus
                     if (focusState.hasFocus) onFocusGained
                 },
             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
@@ -202,7 +223,13 @@ fun NoteMarkPasswordTextField(
             maxLines = 1,
             colors = OutlinedTextFieldDefaults.colors().copy(
                 focusedContainerColor = colorScheme.surfaceContainerLowest,
-                unfocusedContainerColor = colorScheme.surface
+                unfocusedContainerColor = colorScheme.surface,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                errorIndicatorColor = Color.Transparent,
+                unfocusedPlaceholderColor = colorScheme.onSurfaceVariant,
+                focusedPlaceholderColor = colorScheme.onSurface
             ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
