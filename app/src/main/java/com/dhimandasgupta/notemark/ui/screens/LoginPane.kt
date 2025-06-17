@@ -251,7 +251,6 @@ private fun RightPane(
             label = "Email",
             enteredText = loginState.email,
             hintText = "Enter your email here",
-            explanationText = loginState.emailError ?: "",
             onTextChanged = { loginAction(EmailEntered(it)) },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
@@ -261,7 +260,6 @@ private fun RightPane(
             label = "Password",
             enteredText = loginState.password,
             hintText = "Enter your Password here",
-            explanationText = loginState.passwordError ?: "",
             onTextChanged = { loginAction(PasswordEntered(it)) },
             onDoneClicked = {
                 if (loginState.loginEnabled) {

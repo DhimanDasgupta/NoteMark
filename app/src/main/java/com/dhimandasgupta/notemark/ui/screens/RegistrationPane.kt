@@ -242,7 +242,9 @@ private fun RightPane(
             label = "Username",
             enteredText = registrationState.userName,
             hintText = "Enter your user name here",
-            explanationText = registrationState.userNameError ?: "",
+            onFocusGained = { registrationAction(UserNameFiledInFocus(registrationState.userName)) },
+            explanationText = registrationState.userNameExplanation ?: "",
+            errorText = registrationState.userNameError ?: "",
             onTextChanged = { registrationAction(UserNameEntered(it)) },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
@@ -252,7 +254,7 @@ private fun RightPane(
             label = "Email",
             enteredText = registrationState.email,
             hintText = "Enter your email here",
-            explanationText = registrationState.emailError ?: "",
+            errorText = registrationState.emailError ?: "",
             onTextChanged = { registrationAction(EmailEntered(it)) },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
@@ -262,7 +264,9 @@ private fun RightPane(
             label = "Password",
             enteredText = registrationState.password,
             hintText = "Enter your password here",
-            explanationText = registrationState.passwordError ?: "",
+            explanationText = registrationState.passwordExplanation ?: "",
+            errorText = registrationState.passwordError ?: "",
+            onFocusGained = { registrationAction(PasswordFiledInFocus(registrationState.password)) },
             onTextChanged = { registrationAction(PasswordEntered(it)) },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
@@ -273,6 +277,7 @@ private fun RightPane(
             enteredText = registrationState.repeatPassword,
             hintText = "Retype your password here",
             explanationText = registrationState.repeatPasswordError ?: "",
+            errorText = registrationState.repeatPasswordError ?: "",
             onTextChanged = { registrationAction(RepeatPasswordEntered(it)) },
             onDoneClicked = {
                 if (registrationState.registrationEnabled) {

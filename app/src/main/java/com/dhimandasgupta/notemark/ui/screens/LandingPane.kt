@@ -284,7 +284,7 @@ fun ForegroundPane(
         ) {
             Text(
                 text = "Get Started",
-                style = typography.titleSmall
+                style = typography.titleSmall,
             )
         }
 

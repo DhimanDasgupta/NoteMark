@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -30,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -115,7 +115,7 @@ fun NoteMarkTextField(
                 )
                 .onFocusChanged { focusState ->
                     hasFocus = focusState.hasFocus
-                    if (focusState.hasFocus) onFocusGained
+                    if (focusState.hasFocus) onFocusGained()
                 },
             visualTransformation = VisualTransformation.None,
             placeholder = { Text(hintText) },
@@ -138,12 +138,21 @@ fun NoteMarkTextField(
             )
         )
 
-        if (explanationText.isNotBlank()) {
-            Text(text = explanationText, style = typography.bodySmall, color = colorScheme.onSurfaceVariant)
+        if (explanationText.isNotEmpty()) {
+            Text(
+                text = explanationText,
+                style = typography.bodySmall,
+                color = colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
         }
 
-        if (errorText.isNotBlank()) {
-            Text(text = errorText, style = typography.bodySmall, color = colorScheme.error)
+        if (errorText.isNotEmpty()) {
+            Text(
+                text = errorText,
+                style = typography.bodySmall,
+                color = colorScheme.error
+            )
         }
     }
 }
@@ -185,6 +194,7 @@ fun NoteMarkPasswordTextField(
                         painter = painterResource(R.drawable.ic_eye_off),
                         modifier = Modifier
                             .size(32.dp)
+                            .padding(4.dp)
                             .clickable {
                                 showPassword = !showPassword
                             }
@@ -197,6 +207,7 @@ fun NoteMarkPasswordTextField(
                         painter = painterResource(R.drawable.ic_eye_open),
                         modifier = Modifier
                             .size(32.dp)
+                            .padding(4.dp)
                             .clickable {
                                 showPassword = !showPassword
                             }
@@ -216,7 +227,7 @@ fun NoteMarkPasswordTextField(
                 )
                 .onFocusChanged { focusState ->
                     hasFocus = focusState.hasFocus
-                    if (focusState.hasFocus) onFocusGained
+                    if (focusState.hasFocus) onFocusGained()
                 },
             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
             placeholder = { Text(hintText) },
@@ -242,11 +253,20 @@ fun NoteMarkPasswordTextField(
         )
 
         if (explanationText.isNotEmpty()) {
-            Text(text = explanationText, style = typography.bodySmall, color = colorScheme.onSurfaceVariant)
+            Text(
+                text = explanationText,
+                style = typography.bodySmall,
+                color = colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
         }
 
-        if (errorText.isNotBlank()) {
-            Text(text = errorText, style = typography.bodySmall, color = colorScheme.error)
+        if (errorText.isNotEmpty()) {
+            Text(
+                text = errorText,
+                style = typography.bodySmall,
+                color = colorScheme.error
+            )
         }
     }
 }
