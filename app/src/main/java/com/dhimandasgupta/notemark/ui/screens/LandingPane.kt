@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -17,9 +18,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
@@ -285,6 +286,8 @@ fun ForegroundPane(
             Text(
                 text = "Get Started",
                 style = typography.titleSmall,
+                modifier = Modifier
+                    .requiredHeight(IntrinsicSize.Min)
             )
         }
 
@@ -299,7 +302,9 @@ fun ForegroundPane(
         ) {
             Text(
                 text = "Log in",
-                style = typography.titleSmall
+                style = typography.titleSmall,
+                modifier = Modifier
+                    .requiredHeight(IntrinsicSize.Min)
             )
         }
     }

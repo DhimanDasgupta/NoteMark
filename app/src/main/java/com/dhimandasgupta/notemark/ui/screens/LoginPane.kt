@@ -244,13 +244,13 @@ private fun RightPane(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         NoteMarkTextField(
             modifier = Modifier.fillMaxWidth(),
             label = "Email",
             enteredText = loginState.email,
-            hintText = "Enter your email here",
+            hintText = "john.doe@gmail.com",
             onTextChanged = { loginAction(EmailEntered(it)) },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
@@ -259,7 +259,7 @@ private fun RightPane(
             modifier = Modifier.fillMaxWidth(),
             label = "Password",
             enteredText = loginState.password,
-            hintText = "Enter your Password here",
+            hintText = "Password",
             onTextChanged = { loginAction(PasswordEntered(it)) },
             onDoneClicked = {
                 if (loginState.loginEnabled) {
@@ -282,7 +282,7 @@ private fun RightPane(
             enabled = loginState.loginEnabled
         ) {
             Text(
-                text = "Log In",
+                text = "Log in",
                 style = typography.titleSmall
             )
         }

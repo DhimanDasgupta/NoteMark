@@ -85,6 +85,7 @@ fun NoteMarkTextField(
     errorText: String = "",
     onTextChanged: (String) -> Unit = {},
     onFocusGained: () -> Unit = {},
+    onFocusLost: () -> Unit = {},
     onNextClicked: (() -> Unit)? = null,
     onDoneClicked: (() -> Unit)? = null
 ) {
@@ -115,7 +116,7 @@ fun NoteMarkTextField(
                 )
                 .onFocusChanged { focusState ->
                     hasFocus = focusState.hasFocus
-                    if (focusState.hasFocus) onFocusGained()
+                    if (focusState.hasFocus) onFocusGained() else onFocusLost()
                 },
             visualTransformation = VisualTransformation.None,
             placeholder = { Text(hintText) },
@@ -167,6 +168,7 @@ fun NoteMarkPasswordTextField(
     errorText: String = "",
     onTextChanged: (String) -> Unit = {},
     onFocusGained: () -> Unit = {},
+    onFocusLost: () -> Unit = {},
     onNextClicked: (() -> Unit)? = null,
     onDoneClicked: (() -> Unit)? = null
 ) {
@@ -191,19 +193,6 @@ fun NoteMarkPasswordTextField(
             trailingIcon = {
                 if (showPassword) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_eye_off),
-                        modifier = Modifier
-                            .size(32.dp)
-                            .padding(4.dp)
-                            .clickable {
-                                showPassword = !showPassword
-                            }
-                        ,
-                        contentDescription = "Hide Password",
-                        tint = colorScheme.onSurfaceVariant
-                    )
-                } else {
-                    Icon(
                         painter = painterResource(R.drawable.ic_eye_open),
                         modifier = Modifier
                             .size(32.dp)
@@ -212,8 +201,21 @@ fun NoteMarkPasswordTextField(
                                 showPassword = !showPassword
                             }
                         ,
+                        contentDescription = "Hide Password",
+                        tint = colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_eye_off),
+                        modifier = Modifier
+                            .size(32.dp)
+                            .padding(4.dp)
+                            .clickable {
+                                showPassword = !showPassword
+                            }
+                        ,
                         contentDescription = "Show Password",
-                        tint = colorScheme.onSurfaceVariant
+                        tint = colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
                     )
                 }
             },
@@ -227,7 +229,7 @@ fun NoteMarkPasswordTextField(
                 )
                 .onFocusChanged { focusState ->
                     hasFocus = focusState.hasFocus
-                    if (focusState.hasFocus) onFocusGained()
+                    if (focusState.hasFocus) onFocusGained() else onFocusLost()
                 },
             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
             placeholder = { Text(hintText) },

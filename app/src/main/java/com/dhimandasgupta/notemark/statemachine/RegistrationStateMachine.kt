@@ -13,6 +13,7 @@ import com.dhimandasgupta.notemark.statemachine.RegistrationAction.RegisterClick
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.RepeatPasswordEntered
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameEntered
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameFiledInFocus
+import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameFiledLostFocus
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 
@@ -36,6 +37,7 @@ data class RegistrationState(
 sealed interface RegistrationAction {
     data class UserNameEntered(val userName: String) : RegistrationAction
     data class UserNameFiledInFocus(val userName: String) : RegistrationAction
+    data class UserNameFiledLostFocus(val userName: String) : RegistrationAction
     data class EmailEntered(val email: String) : RegistrationAction
     data class PasswordEntered(val password: String) : RegistrationAction
     data class PasswordFiledInFocus(val password: String) : RegistrationAction
@@ -65,6 +67,20 @@ class RegistrationStateMachine(
                     }
                     state.mutate { modifiedState }
                 }
+                on<UserNameFiledLostFocus> { action, state ->
+                    val modifiedState = if (action.userName.isUsernameValid()) {
+                        state.snapshot.copy(
+                            userNameExplanation = null,
+                            userNameError = null
+                        )
+                    } else {
+                        state.snapshot.copy(
+                            userNameExplanation = null,
+                            userNameError = "Username must be at least 3 characters"
+                        )
+                    }
+                    state.mutate { modifiedState }
+                }
                 on<UserNameEntered> { action, state ->
                     val modifiedState = state.snapshot.copy(userName = action.userName, userNameExplanation = if (action.userName.isEmpty()) "Use between 3 and 20 characters for your username" else null)
                     state.mutate { modifiedState.validateNonEmptyInputs() }
@@ -74,25 +90,37 @@ class RegistrationStateMachine(
                     state.mutate { modifiedState.validateNonEmptyInputs() }
                 }
                 on<PasswordFiledInFocus> { action, state ->
-                    val modifiedState = if (action.password.isEmpty()) {
-                        state.snapshot.copy(
-                            passwordExplanation = "Use 8+ characters with a number or symbol for better security",
-                            passwordError = null
-                        )
-                    } else {
-                        state.snapshot.copy(
-                            passwordExplanation = null,
-                            passwordError = null
-                        )
-                    }
+                    val modifiedState = state.snapshot.copy(
+                        passwordExplanation = if (action.password.isEmpty())
+                            "Use 8+ characters with a number or symbol for better security"
+                        else
+                            null,
+                        passwordError = null
+                    )
                     state.mutate { modifiedState }
                 }
                 on<PasswordEntered> { action, state ->
-                    val modifiedState = state.snapshot.copy(password = action.password, passwordExplanation = if (action.password.isEmpty()) "Use 8+ characters with a number or symbol for better security" else null)
+                    val modifiedState = state.snapshot.copy(
+                        password = action.password,
+                        passwordExplanation = if (action.password.isEmpty())
+                            "Use 8+ characters with a number or symbol for better security"
+                        else
+                            null,
+                        repeatPasswordError = if (action.password != state.snapshot.repeatPassword)
+                            "Passwords do not match"
+                        else
+                            null
+                    )
                     state.mutate { modifiedState.validateNonEmptyInputs() }
                 }
                 on<RepeatPasswordEntered> { action, state ->
-                    val modifiedState = state.snapshot.copy(repeatPassword = action.repeatPassword)
+                    var modifiedState = state.snapshot.copy(repeatPassword = action.repeatPassword)
+                    modifiedState = modifiedState.copy(
+                        repeatPasswordError = if (action.repeatPassword != state.snapshot.password)
+                            "Passwords do not match"
+                        else
+                            null
+                    )
                     state.mutate { modifiedState.validateNonEmptyInputs() }
                 }
                 on<RegisterClicked> { action, state ->

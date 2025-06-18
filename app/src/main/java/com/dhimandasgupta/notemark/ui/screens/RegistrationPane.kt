@@ -44,7 +44,15 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.*
+import com.dhimandasgupta.notemark.statemachine.RegistrationAction.EmailEntered
+import com.dhimandasgupta.notemark.statemachine.RegistrationAction.PasswordEntered
+import com.dhimandasgupta.notemark.statemachine.RegistrationAction.PasswordFiledInFocus
+import com.dhimandasgupta.notemark.statemachine.RegistrationAction.RegisterClicked
+import com.dhimandasgupta.notemark.statemachine.RegistrationAction.RegistrationChangeStatusConsumed
+import com.dhimandasgupta.notemark.statemachine.RegistrationAction.RepeatPasswordEntered
+import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameEntered
+import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameFiledInFocus
+import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameFiledLostFocus
 import com.dhimandasgupta.notemark.statemachine.RegistrationState
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
@@ -235,14 +243,15 @@ private fun RightPane(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         NoteMarkTextField(
             modifier = Modifier.fillMaxWidth(),
             label = "Username",
             enteredText = registrationState.userName,
-            hintText = "Enter your user name here",
+            hintText = "John.doe",
             onFocusGained = { registrationAction(UserNameFiledInFocus(registrationState.userName)) },
+            onFocusLost = { registrationAction(UserNameFiledLostFocus(registrationState.userName)) },
             explanationText = registrationState.userNameExplanation ?: "",
             errorText = registrationState.userNameError ?: "",
             onTextChanged = { registrationAction(UserNameEntered(it)) },
@@ -253,7 +262,7 @@ private fun RightPane(
             modifier = Modifier.fillMaxWidth(),
             label = "Email",
             enteredText = registrationState.email,
-            hintText = "Enter your email here",
+            hintText = "john.doe@gmail.com",
             errorText = registrationState.emailError ?: "",
             onTextChanged = { registrationAction(EmailEntered(it)) },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
@@ -263,7 +272,7 @@ private fun RightPane(
             modifier = Modifier.fillMaxWidth(),
             label = "Password",
             enteredText = registrationState.password,
-            hintText = "Enter your password here",
+            hintText = "Password",
             explanationText = registrationState.passwordExplanation ?: "",
             errorText = registrationState.passwordError ?: "",
             onFocusGained = { registrationAction(PasswordFiledInFocus(registrationState.password)) },
@@ -275,8 +284,7 @@ private fun RightPane(
             modifier = Modifier.fillMaxWidth(),
             label = "Repeat password",
             enteredText = registrationState.repeatPassword,
-            hintText = "Retype your password here",
-            explanationText = registrationState.repeatPasswordError ?: "",
+            hintText = "Password",
             errorText = registrationState.repeatPasswordError ?: "",
             onTextChanged = { registrationAction(RepeatPasswordEntered(it)) },
             onDoneClicked = {
