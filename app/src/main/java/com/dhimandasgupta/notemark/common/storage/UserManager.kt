@@ -9,55 +9,17 @@ import io.ktor.client.plugins.auth.providers.BearerTokens
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-/**
- * Data class representing a logged-in user's essential information.
- * This includes the username and the Ktor [BearerTokens] for authentication.
- * Marked as [Immutable] for potential Compose UI optimizations.
- *
- * @property userName The display name or identifier of the logged-in user.
- * @property bearerTokens The [BearerTokens] containing the access and refresh tokens for the user.
- */
 @Immutable
 data class LoggedInUser(
     val userName: String,
     val bearerTokens: BearerTokens
 )
 
-/**
- * Extension property to provide a [DataStore] instance for storing [Preferences].
- * This DataStore is specifically used for persisting authentication tokens.
- * The DataStore instance is named "auth_tokens".
- */
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth_tokens")
 
-/**
- * Interface defining the contract for managing user authentication state and related data.
- * This includes saving user information upon login, retrieving the current user's data,
- * and clearing user data upon logout.
- */
 interface UserManager {
-    /**
-     * Saves the details of a logged-in user.
-     * This typically involves persisting the [LoggedInUser] information, including tokens.
-     *
-     * @param loggerInUser The [LoggedInUser] object containing the user's details and tokens.
-     */
     suspend fun saveUser(loggerInUser: LoggedInUser)
-
-    /**
-     * Retrieves the current [LoggedInUser] as a [Flow].
-     * Using a [Flow] allows observers to react to changes in the user's login state
-     * (e.g., login, logout, token refresh).
-     *
-     * @return A [Flow] that emits the current [LoggedInUser] if one exists, or `null` otherwise.
-     */
     fun getUser(): Flow<LoggedInUser?>
-
-    /**
-     * Clears all stored information related to the current user.
-     * This is typically called during a logout process to remove authentication tokens
-     * and user details from persistent storage.
-     */
     suspend fun clearUser()
 }
 

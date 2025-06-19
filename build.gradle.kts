@@ -5,4 +5,5 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.google.devtools.ksp) apply false
     alias(libs.plugins.kotlinx.serialization) apply false
+    alias(libs.plugins.sqlDelight) apply false
 }

@@ -1,12 +1,13 @@
-package com.dhimandasgupta.notemark.network.api
+package com.dhimandasgupta.notemark.data.remote.api
 
 import LoggedInUser
 import UserManager
 import com.dhimandasgupta.notemark.BuildConfig
-import com.dhimandasgupta.notemark.network.model.AuthResponse
-import com.dhimandasgupta.notemark.network.model.LoginRequest
-import com.dhimandasgupta.notemark.network.model.RefreshRequest
-import com.dhimandasgupta.notemark.network.model.RegisterRequest
+import com.dhimandasgupta.notemark.data.remote.model.AuthResponse
+import com.dhimandasgupta.notemark.data.remote.model.LoginRequest
+import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
+import com.dhimandasgupta.notemark.data.remote.model.RegisterRequest
+import com.dhimandasgupta.notemark.database.NoteEntity
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
@@ -24,38 +25,18 @@ import kotlinx.serialization.json.Json
 import kotlin.coroutines.coroutineContext
 
 interface NoteMarkApi {
-    /**
-     * The underlying Ktor HttpClient.
-     * Consider if exposing the raw client is necessary, or if specific operations
-     * are sufficient for the interface's contract.
-     * If you don't need to directly access/manipulate the client from outside
-     * via the interface, you might omit this.
-     */
     val client: HttpClient // Optional: See note above
 
-    /**
-     * Registers a new user.
-     *
-     * @param request The registration details.
-     * @return A [Result] indicating success or failure of the registration.
-     */
+    /** Auth Purpose methods */
     suspend fun register(request: RegisterRequest): Result<Unit>
-
-    /**
-     * Logs in an existing user.
-     * On successful login, authentication tokens should be handled internally
-     * (e.g., saved via TokenManager).
-     *
-     * @param request The login credentials.
-     * @return A [Result] indicating success or failure of the login.
-     */
     suspend fun login(request: LoginRequest): Result<Unit>
-
-    /**
-     * Logs out the current user.
-     * This should typically clear any stored authentication tokens.
-     */
     suspend fun logout()
+
+    /** CRUD purpose methods */
+    suspend fun getNotes(pageNumber: Int = -1, pageSize: Int = 20): List<NoteEntity>
+    suspend fun createNote(noteEntity: NoteEntity): NoteEntity
+    suspend fun updateNote(title: String, content: String, noteEntity: NoteEntity): NoteEntity
+    suspend fun deleteNote(noteEntity: NoteEntity): HttpStatusCode
 }
 
 class NoteMarkApiImpl(
@@ -158,6 +139,27 @@ class NoteMarkApiImpl(
     override suspend fun logout() {
         userManager.clearUser()
     }
+
+    override suspend fun getNotes(
+        pageNumber: Int,
+        pageSize: Int
+    ): List<NoteEntity>  = client.get("/api/notes").body<List<NoteEntity>>()
+
+    override suspend fun createNote(noteEntity: NoteEntity) = client.post("/api/notes") {
+        contentType(ContentType.Application.Json)
+        setBody(noteEntity)
+    }.body<NoteEntity>()
+
+    override suspend fun updateNote(
+        title: String,
+        content: String,
+        noteEntity: NoteEntity
+    ) = client.put("/api/notes") {
+        contentType(ContentType.Application.Json)
+        setBody(noteEntity.copy(title = title, content = content))
+    }.body<NoteEntity>()
+
+    override suspend fun deleteNote(noteEntity: NoteEntity) =  client.delete("/api/notes/${noteEntity.id}").status
 
     companion object {
         private const val BASE_URL = "https://notemark.pl-coding.com"

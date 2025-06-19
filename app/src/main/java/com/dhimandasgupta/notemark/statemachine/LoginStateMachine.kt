@@ -3,8 +3,8 @@ package com.dhimandasgupta.notemark.statemachine
 import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.extensions.isValidEmail
 import com.dhimandasgupta.notemark.common.extensions.isValidPassword
-import com.dhimandasgupta.notemark.network.api.NoteMarkApi
-import com.dhimandasgupta.notemark.network.model.LoginRequest
+import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
+import com.dhimandasgupta.notemark.data.remote.model.LoginRequest
 import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailEntered
 import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordEntered
 import kotlinx.coroutines.ExperimentalCoroutinesApi

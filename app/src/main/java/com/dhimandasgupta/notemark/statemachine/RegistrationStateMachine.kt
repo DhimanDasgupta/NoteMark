@@ -4,8 +4,8 @@ import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.extensions.isUsernameValid
 import com.dhimandasgupta.notemark.common.extensions.isValidEmail
 import com.dhimandasgupta.notemark.common.extensions.isValidPassword
-import com.dhimandasgupta.notemark.network.api.NoteMarkApi
-import com.dhimandasgupta.notemark.network.model.RegisterRequest
+import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
+import com.dhimandasgupta.notemark.data.remote.model.RegisterRequest
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.EmailEntered
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.PasswordEntered
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.PasswordFiledInFocus
@@ -82,7 +82,13 @@ class RegistrationStateMachine(
                     state.mutate { modifiedState }
                 }
                 on<UserNameEntered> { action, state ->
-                    val modifiedState = state.snapshot.copy(userName = action.userName, userNameExplanation = if (action.userName.isEmpty()) "Use between 3 and 20 characters for your username" else null)
+                    val modifiedState = state.snapshot.copy(
+                        userName = action.userName,
+                        userNameExplanation = if (action.userName.isEmpty())
+                            "Use between 3 and 20 characters for your username"
+                        else
+                            null
+                    )
                     state.mutate { modifiedState.validateNonEmptyInputs() }
                 }
                 on<EmailEntered> { action, state ->
@@ -165,9 +171,29 @@ private fun RegistrationState.validateNonEmptyInputs(): RegistrationState = this
 )
 
 private fun RegistrationState.validateInputs(): RegistrationState {
-    var updatedRegistrationState = this.copy(userNameError = if (!userName.isUsernameValid()) "Username must be at least 3 characters" else null)
-    updatedRegistrationState = updatedRegistrationState.copy(emailError = if (!email.isValidEmail()) "Invalid email provided" else null)
-    updatedRegistrationState = updatedRegistrationState.copy(passwordError = if (!password.isValidPassword()) "Password must be at least 8 characters and include a number or symbol" else null)
-    updatedRegistrationState = updatedRegistrationState.copy(repeatPasswordError = if (!repeatPassword.isValidPassword()) "Password must be at least 8 characters and include a number or symbol" else null)
+    var updatedRegistrationState = this.copy(
+        userNameError = if (!userName.isUsernameValid())
+            "Username must be at least 3 characters"
+        else
+            null
+    )
+    updatedRegistrationState = updatedRegistrationState.copy(
+        emailError = if (!email.isValidEmail())
+            "Invalid email provided"
+        else
+            null
+    )
+    updatedRegistrationState = updatedRegistrationState.copy(
+        passwordError = if (!password.isValidPassword())
+            "Password must be at least 8 characters and include a number or symbol"
+        else
+            null
+    )
+    updatedRegistrationState = updatedRegistrationState.copy(
+        repeatPasswordError = if (!repeatPassword.isValidPassword())
+            "Password must be at least 8 characters and include a number or symbol"
+        else
+            null
+    )
     return updatedRegistrationState
 }

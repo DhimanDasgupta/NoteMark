@@ -6,6 +6,7 @@ import android.content.Context
 import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
+import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -33,12 +34,17 @@ sealed interface AppAction {
 @OptIn(ExperimentalCoroutinesApi::class)
 class AppStateMachine(
     val applicationContext: Context,
-    val userManager: UserManager
+    val userManager: UserManager,
+    val noteMarkRepository: NoteMarkRepository
 ) : StateMachine<AppState, AppAction>(defaultAppState) {
 
     init {
         spec {
             inState<NonLoggedInState> {
+                collectWhileInState(noteMarkRepository.getAllNotes()) { notes, state ->
+                    print("All Note: $notes")
+                    state.noChange()
+                }
                 // All Flows while in the app state should be collected here
                 collectWhileInState(userManager.getUser()) { user, state ->
                     user?.let { nonNullUser ->
@@ -63,6 +69,7 @@ class AppStateMachine(
                     state.mutate { state.snapshot.copy(connectionState = null) }
                 }
                 on<AppAction.AppLogout> { _, state ->
+                    noteMarkRepository.deleteAllNotes()
                     userManager.clearUser()
                     state.override { NonLoggedInState(connectionState = state.snapshot.connectionState) }
                 }

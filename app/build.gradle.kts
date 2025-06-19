@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.sqlDelight)
 }
 
 // Create a Properties object to hold our values
@@ -69,6 +70,14 @@ android {
     }
 }
 
+sqldelight {
+    databases {
+        create("NoteMarkDatabase") {
+            packageName.set("com.dhimandasgupta.notemark.database")
+        }
+    }
+}
+
 dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.material3.window.size.android)
@@ -109,8 +118,14 @@ dependencies {
     // Kotlinx Serialization JSON
     implementation(libs.kotlinx.serialization.json)
 
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
-    implementation("androidx.datastore:datastore-preferences-android:1.1.7")
+    // SQL Delight
+    implementation(libs.sql.delight.runtime)
+    implementation(libs.sql.delight.android.driver)
+    implementation(libs.sql.delight.coroutines.extensions)
+
+    // Datastore
+    implementation(libs.datastore.preferences)
+    implementation(libs.datastore.preferences.android)
 
     // Ktor
     implementation(platform(libs.ktor.bom))

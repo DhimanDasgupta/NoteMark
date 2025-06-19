@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.network.model
+package com.dhimandasgupta.notemark.data.remote.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
