@@ -12,7 +12,7 @@ interface NoteMarkLocalDataSource {
     fun getAllNotes(): Flow<List<NoteEntity>>
     suspend fun getNoteById(noteId: String): NoteEntity?
     suspend fun createNote(noteEntity: NoteEntity): NoteEntity?
-    suspend fun updateNote(title: String, content: String, noteEntity: NoteEntity): NoteEntity?
+    suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): NoteEntity?
     suspend fun insertNotes(noteEntities: List<NoteEntity>): Boolean
     suspend fun deleteNote(noteEntity: NoteEntity): Boolean
     suspend fun deleteAllNotes(): Boolean
@@ -33,12 +33,12 @@ class NoteMarkLocalDataSourceImpl(
         return@withContext queries.getNoteById(noteId).executeAsOneOrNull()
     }
 
-    override suspend fun updateNote(title: String, content: String, noteEntity: NoteEntity): NoteEntity = withContext(Dispatchers.IO) {
+    override suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): NoteEntity = withContext(Dispatchers.IO) {
         val result = queries.updateNote(
             noteEntity.id,
             title,
             content,
-            "" // TODO: Set lastEditedAt
+            lastEditedAt
         )
 
         return@withContext (if (result.value == 1L) {

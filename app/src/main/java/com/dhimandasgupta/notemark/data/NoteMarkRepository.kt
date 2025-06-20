@@ -11,7 +11,7 @@ interface NoteMarkRepository {
     fun getAllNotes(): Flow<List<NoteEntity>>
     suspend fun getNoteById(noteId: String): NoteEntity?
     suspend fun createNote(noteEntity: NoteEntity): NoteEntity?
-    suspend fun updateNote(title: String, content: String, noteEntity: NoteEntity): NoteEntity?
+    suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): NoteEntity?
     suspend fun insertNotes(noteEntities: List<NoteEntity>): Boolean
     suspend fun deleteNote(noteEntity: NoteEntity): Boolean
     suspend fun deleteAllNotes(): Boolean
@@ -37,10 +37,16 @@ class NoteMarkRepositoryImpl(
     override suspend fun updateNote(
         title: String,
         content: String,
+        lastEditedAt: String,
         noteEntity: NoteEntity
     ) = try {
-        val note = remoteDataSource.updateNote(title, content, noteEntity)
-        localDataSource.updateNote(title, content, note)
+        val note = remoteDataSource.updateNote(
+            title = title,
+            content = content,
+            lastEditedAt = lastEditedAt,
+            noteEntity = noteEntity
+        )
+        localDataSource.updateNote(title, content, lastEditedAt, note)
         note
     } catch (_: Exception) {
         coroutineContext.ensureActive()

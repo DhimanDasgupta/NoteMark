@@ -8,7 +8,7 @@ interface NoteMarkApiDataSource {
     suspend fun getAllNotes(): List<NoteEntity>
     suspend fun getNoteById(noteId: String): NoteEntity?
     suspend fun createNote(noteEntity: NoteEntity): NoteEntity
-    suspend fun updateNote(title: String, content: String, noteEntity: NoteEntity): NoteEntity
+    suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): NoteEntity
     suspend fun deleteNote(noteEntity: NoteEntity): Boolean
 }
 
@@ -21,9 +21,10 @@ class NoteMarkApiDataSourceImpl(
 
     override suspend fun createNote(noteEntity: NoteEntity) = noteMarkApi.createNote(noteEntity)
 
-    override suspend fun updateNote(title: String, content: String, noteEntity: NoteEntity) = noteMarkApi.updateNote(
+    override suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity) = noteMarkApi.updateNote(
         title = title,
         content = content,
+        lastEditedAt = lastEditedAt,
         noteEntity = noteEntity
     )
 

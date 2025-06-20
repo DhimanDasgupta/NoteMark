@@ -35,7 +35,7 @@ interface NoteMarkApi {
     /** CRUD purpose methods */
     suspend fun getNotes(pageNumber: Int = -1, pageSize: Int = 20): List<NoteEntity>
     suspend fun createNote(noteEntity: NoteEntity): NoteEntity
-    suspend fun updateNote(title: String, content: String, noteEntity: NoteEntity): NoteEntity
+    suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): NoteEntity
     suspend fun deleteNote(noteEntity: NoteEntity): HttpStatusCode
 }
 
@@ -153,10 +153,11 @@ class NoteMarkApiImpl(
     override suspend fun updateNote(
         title: String,
         content: String,
+        lastEditedAt: String,
         noteEntity: NoteEntity
     ) = client.put("/api/notes") {
         contentType(ContentType.Application.Json)
-        setBody(noteEntity.copy(title = title, content = content))
+        setBody(noteEntity.copy(title = title, content = content, lastEditedAt = lastEditedAt))
     }.body<NoteEntity>()
 
     override suspend fun deleteNote(noteEntity: NoteEntity) =  client.delete("/api/notes/${noteEntity.id}").status
