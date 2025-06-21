@@ -78,8 +78,8 @@ class UserManagerImpl(
                 LoggedInUser(
                     userName = userName,
                     bearerTokens = BearerTokens(
-                        accessToken = accessToken, // Removed .toString() as it's already String
-                        refreshToken = refreshToken  // Removed .toString() as it's already String
+                        accessToken = accessToken,
+                        refreshToken = refreshToken
                     )
                 )
             } else {

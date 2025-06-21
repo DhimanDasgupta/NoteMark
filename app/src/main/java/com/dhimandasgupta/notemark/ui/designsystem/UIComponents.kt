@@ -1,21 +1,31 @@
 package com.dhimandasgupta.notemark.ui.designsystem
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -30,12 +40,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 
@@ -270,5 +282,64 @@ fun NoteMarkPasswordTextField(
                 color = colorScheme.error
             )
         }
+    }
+}
+
+@Composable
+fun NoteMarkToolbarButton(
+    modifier: Modifier = Modifier,
+    title: String,
+    onClick: () -> Unit = {}
+) {
+    Box(
+        modifier = modifier
+            .clip(shape = shapes.extraSmall)
+            .background(color = colorScheme.primary)
+            .clickable {
+                onClick()
+            }
+    ) {
+        Text(
+            text = title.uppercase(),
+            style = typography.titleMedium,
+            color = colorScheme.onPrimary,
+            modifier = modifier.padding(all = 4.dp)
+        )
+    }
+}
+
+@Composable
+fun NoteMarkFAB(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    FloatingActionButton(
+        onClick = onClick,
+        shape = shapes.medium,
+        modifier = modifier
+            .padding(
+                end =  WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                    .asPaddingValues()
+                    .calculateEndPadding(LayoutDirection.Ltr),
+                bottom = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                    .asPaddingValues()
+                    .calculateBottomPadding()
+            )
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color(0XFF58A1F8), Color(0xFF5A4CF7))
+                ),
+                shape = shapes.medium
+            ),
+        contentColor = Color.Transparent,
+        containerColor = Color.Transparent
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_plus_icon),
+            contentDescription = "Add Note",
+            tint = colorScheme.onPrimary,
+            modifier = Modifier
+                .padding(all = 8.dp)
+        )
     }
 }

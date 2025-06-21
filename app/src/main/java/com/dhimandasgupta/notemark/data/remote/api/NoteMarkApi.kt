@@ -2,137 +2,162 @@ package com.dhimandasgupta.notemark.data.remote.api
 
 import LoggedInUser
 import UserManager
-import com.dhimandasgupta.notemark.BuildConfig
 import com.dhimandasgupta.notemark.data.remote.model.AuthResponse
 import com.dhimandasgupta.notemark.data.remote.model.LoginRequest
-import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
+import com.dhimandasgupta.notemark.data.remote.model.Note
+import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.data.remote.model.RegisterRequest
+import com.dhimandasgupta.notemark.data.toNote
 import com.dhimandasgupta.notemark.database.NoteEntity
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.engine.android.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.auth.*
-import io.ktor.client.plugins.auth.providers.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.logging.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.auth.providers.BearerTokens
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
+import io.ktor.client.request.url
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.json.Json
 import kotlin.coroutines.coroutineContext
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+
+class UserAlreadyExistsException(
+    message: String = "User already exists"
+) : Exception(message)
+class ApiGenericException(
+    message: String = "Something went wrong with the API request",
+    cause: Throwable? = null
+) : Exception(message, cause)
+
+class AuthenticationException(
+    message: String = "Authentication failed",
+    cause: Throwable? = null
+) : Exception(message, cause)
 
 interface NoteMarkApi {
-    val client: HttpClient // Optional: See note above
-
     /** Auth Purpose methods */
     suspend fun register(request: RegisterRequest): Result<Unit>
     suspend fun login(request: LoginRequest): Result<Unit>
     suspend fun logout()
 
     /** CRUD purpose methods */
-    suspend fun getNotes(pageNumber: Int = -1, pageSize: Int = 20): List<NoteEntity>
-    suspend fun createNote(noteEntity: NoteEntity): NoteEntity
-    suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): NoteEntity
-    suspend fun deleteNote(noteEntity: NoteEntity): HttpStatusCode
+    suspend fun getNotes(pageNumber: Int = -1, pageSize: Int = 20): Result<NoteResponse>
+    suspend fun createNote(noteEntity: NoteEntity): Result<Note>
+    suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): Result<Note>
+    suspend fun deleteNote(noteEntity: NoteEntity): Result<Unit>
 }
 
 class NoteMarkApiImpl(
+    val client: HttpClient,
     private val userManager: UserManager
 ) : NoteMarkApi {
-    override val client = HttpClient(Android) {
-        install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-            })
-        }
-        install(Logging) {
-            level = LogLevel.ALL
-        }
-
-        install(Auth) {
-            bearer {
-                loadTokens {
-                    userManager.getUser().first()?.bearerTokens
-                }
-
-                refreshTokens {
-                    val currentTokens = userManager.getUser().first()?.bearerTokens
-                    if (currentTokens == null) {
-                        return@refreshTokens null
-                    }
-
-                    val response: AuthResponse = client.post("/api/auth/refresh") {
-                        contentType(ContentType.Application.Json)
-                        setBody(RefreshRequest(refreshToken = currentTokens.refreshToken ?: ""))
-                        // Optional: uncomment for easier testing
-                        // header("Debug", "true")
-                    }.body()
-
-                    val newTokens = BearerTokens(response.accessToken, response.refreshToken)
-                    userManager.saveUser(
-                        loggerInUser = LoggedInUser(
-                            userName = response.userName,
-                            bearerTokens = newTokens
-                        )
-                    )
-                    newTokens
-                }
-            }
-        }
-
-        // Default request configuration for all calls made with this client
-        defaultRequest {
-            url(BASE_URL)
-            header("X-User-Email", YOUR_DEV_CAMPUS_EMAIL)
-            header("Debug", "true")
-        }
-    }
-
     override suspend fun register(request: RegisterRequest): Result<Unit> {
         return try {
-            val response = client.post("/api/auth/register") {
+            val response = client.post {
+                url { "/api/auth/register" }
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }
 
+            // HttpResponseValidator should ideally handle non-2xx responses by throwing.
+            // If it doesn't, or you want more specific handling here:
             when (response.status) {
-                HttpStatusCode.OK -> {
-                    Result.success(Unit)
-                }
-                HttpStatusCode.Conflict -> {
-                    Result.failure(Exception("User already exists"))
-                }
-                else -> {
-                    Result.failure(Exception("Something went wrong"))
-                }
+                HttpStatusCode.OK -> Result.success(Unit)
+                HttpStatusCode.Conflict -> Result.failure(UserAlreadyExistsException())
+                // Consider handling other specific statuses like BadRequest, Unauthorized, etc.
+                else -> Result.failure(ApiGenericException("Registration failed with status: ${response.status.value}"))
             }
-        } catch (e: Exception) {
+        } catch (e: AuthenticationException) {
+            Result.failure(AuthenticationException("Authentication failed: ${e.message}", e))
+        } catch (e: ClientRequestException) { // Ktor exception for 4xx/5xx
             coroutineContext.ensureActive()
-            Result.failure(e)
+            when (e.response.status) {
+                HttpStatusCode.Conflict -> Result.failure(UserAlreadyExistsException())
+                HttpStatusCode.Unauthorized -> Result.failure(AuthenticationException("Authentication failed: ${e.message}", e))
+                else -> Result.failure(ApiGenericException("Registration failed: ${e.message}", e))
+            }
+        } catch (e: Exception) { // Catch other potential exceptions (network, serialization)
+            coroutineContext.ensureActive()
+            Result.failure(ApiGenericException("An unexpected error occurred during registration", e))
         }
     }
 
     override suspend fun login(request: LoginRequest): Result<Unit> {
         return try {
-            val response: AuthResponse = client.post("/api/auth/login") {
+            val response = client.post {
+                url("/api/auth/login")
                 contentType(ContentType.Application.Json)
                 setBody(request)
-            }.body()
+            } // Ktor will throw for non-2xx if not handled by HttpResponseValidator
 
-            val tokens = BearerTokens(response.accessToken, response.refreshToken)
-            userManager.saveUser(
-                loggerInUser = LoggedInUser(
-                    userName = response.userName,
-                    bearerTokens = tokens
-                )
-            )
-            Result.success(Unit)
+            // HttpResponseValidator should ideally handle non-2xx responses by throwing.
+            // If it doesn't, or you want more specific handling here:
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val authResponse = response.body<AuthResponse>()
+                    // Save user only after successful response parsing
+                    val tokens = BearerTokens(authResponse.accessToken, authResponse.refreshToken)
+                    userManager.saveUser(
+                        loggerInUser = LoggedInUser(
+                            userName = authResponse.username,
+                            bearerTokens = tokens
+                        )
+                    )
+                    Result.success(Unit)
+                }
+                else -> Result.failure(ApiGenericException("Registration failed with status: ${response.status.value}"))
+            }
+        } catch (e: AuthenticationException) {
+            Result.failure(AuthenticationException("Authentication failed: ${e.message}", e))
+        } catch (e: ClientRequestException) { // Ktor exception for 4xx/5xx
+            coroutineContext.ensureActive()
+            when (e.response.status) {
+                HttpStatusCode.Unauthorized -> Result.failure(AuthenticationException("Authentication failed: ${e.message}", e))
+                else -> Result.failure(ApiGenericException("Login failed: ${e.message}", e))
+            }
+        } catch (e: Exception) { // Catch other potential exceptions (network, serialization)
+            coroutineContext.ensureActive()
+            Result.failure(ApiGenericException("An unexpected error occurred during registration", e))
+        }
+    }
+
+    override suspend fun getNotes(pageNumber: Int, pageSize: Int): Result<NoteResponse> {
+        return try {
+            val response = client.get {
+                url("/api/notes")
+                contentType(ContentType.Application.Json)
+                parameter("pageNumber", pageNumber.toString())
+                parameter("pageSize", pageSize.toString())
+                header("Authorization", "Bearer ${userManager.getUser().first()?.bearerTokens?.accessToken}")
+            }
+
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val noteResponse = response.body<NoteResponse>()
+                    Result.success(noteResponse)
+                }
+                else -> Result.failure(ApiGenericException("Registration failed with status: ${response.status.value}"))
+            }
+        } catch (e: AuthenticationException) {
+            Result.failure(AuthenticationException("Authentication failed: ${e.message}", e))
+        } catch (e: ClientRequestException) {
+            coroutineContext.ensureActive()
+            when (e.response.status) {
+                HttpStatusCode.Unauthorized -> Result.failure(AuthenticationException("Authentication failed: ${e.message}", e))
+                else -> Result.failure(ApiGenericException("Fetch Notes failed: ${e.message}", e))
+            }
         } catch (e: Exception) {
             coroutineContext.ensureActive()
-            Result.failure(e)
+            Result.failure(ApiGenericException("An unexpected error occurred during registration", e))
         }
     }
 
@@ -140,30 +165,93 @@ class NoteMarkApiImpl(
         userManager.clearUser()
     }
 
-    override suspend fun getNotes(
-        pageNumber: Int,
-        pageSize: Int
-    ): List<NoteEntity>  = client.get("/api/notes").body<List<NoteEntity>>()
+    @OptIn(ExperimentalUuidApi::class)
+    override suspend fun createNote(noteEntity: NoteEntity): Result<Note> {
+        return try {
+            val response = client.post {
+                url("/api/notes")
+                contentType(ContentType.Application.Json)
+                setBody(noteEntity.toNote().copy(uuid = Uuid.random().toHexDashString()))
+                header("Authorization", "Bearer ${userManager.getUser().first()?.bearerTokens?.accessToken}")
+            }
 
-    override suspend fun createNote(noteEntity: NoteEntity) = client.post("/api/notes") {
-        contentType(ContentType.Application.Json)
-        setBody(noteEntity)
-    }.body<NoteEntity>()
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val note = response.body<Note>()
+                    Result.success(note)
+                }
+                else -> Result.failure(ApiGenericException("Create Note failed with status: ${response.status.value}"))
+            }
+        } catch (e: AuthenticationException) {
+            Result.failure(AuthenticationException("Authentication failed: ${e.message}", e))
+        } catch (e: ClientRequestException) {
+            coroutineContext.ensureActive()
+            when (e.response.status) {
+                HttpStatusCode.Unauthorized -> Result.failure(AuthenticationException("Authentication failed: ${e.message}", e))
+                else -> Result.failure(ApiGenericException("Create Note failed: ${e.message}", e))
+            }
+        } catch (e: Exception) {
+            coroutineContext.ensureActive()
+            Result.failure(ApiGenericException("An unexpected error occurred during registration", e))
+        }
+    }
 
     override suspend fun updateNote(
         title: String,
         content: String,
         lastEditedAt: String,
         noteEntity: NoteEntity
-    ) = client.put("/api/notes") {
-        contentType(ContentType.Application.Json)
-        setBody(noteEntity.copy(title = title, content = content, lastEditedAt = lastEditedAt))
-    }.body<NoteEntity>()
+    ): Result<Note> {
+        return try {
+            val response = client.put {
+                url("/api/notes")
+                contentType(ContentType.Application.Json)
+                setBody(noteEntity.copy(title = title, content = content, lastEditedAt = lastEditedAt).toNote())
+            }
 
-    override suspend fun deleteNote(noteEntity: NoteEntity) =  client.delete("/api/notes/${noteEntity.id}").status
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val note = response.body<Note>()
+                    Result.success(note)
+                }
+                else -> Result.failure(ApiGenericException("Registration failed with status: ${response.status.value}"))
+            }
+        } catch (e: AuthenticationException) {
+            Result.failure(AuthenticationException("Authentication failed: ${e.message}", e))
+        } catch (e: ClientRequestException) {
+            coroutineContext.ensureActive()
+            when (e.response.status) {
+                HttpStatusCode.Unauthorized -> Result.failure(AuthenticationException("Authentication failed: ${e.message}", e))
+                else -> Result.failure(ApiGenericException("Update failed: ${e.message}", e))
+            }
+        } catch (e: Exception) {
+            coroutineContext.ensureActive()
+            Result.failure(ApiGenericException("An unexpected error occurred during registration", e))
+        }
+    }
 
-    companion object {
-        private const val BASE_URL = "https://notemark.pl-coding.com"
-        private const val YOUR_DEV_CAMPUS_EMAIL = BuildConfig.HEADER_VALUE_FOR_NOTE_MARK_API
+    override suspend fun deleteNote(noteEntity: NoteEntity): Result<Unit> {
+        return try {
+            val response = client.delete {
+                url("/api/notes/${noteEntity.id}")
+                contentType(ContentType.Application.Json)
+            }
+
+            when (response.status) {
+                HttpStatusCode.OK -> Result.success(Unit)
+                else -> Result.failure(ApiGenericException("Registration failed with status: ${response.status.value}"))
+            }
+        } catch (e: AuthenticationException) {
+            Result.failure(AuthenticationException("Authentication failed: ${e.message}", e))
+        } catch (e: ClientRequestException) {
+            coroutineContext.ensureActive()
+            when (e.response.status) {
+                HttpStatusCode.Unauthorized -> Result.failure(AuthenticationException("Authentication failed: ${e.message}", e))
+                else -> Result.failure(ApiGenericException("Delete Note failed: ${e.message}", e))
+            }
+        } catch (e: Exception) {
+            coroutineContext.ensureActive()
+            Result.failure(ApiGenericException("An unexpected error occurred during registration", e))
+        }
     }
 }

@@ -144,7 +144,7 @@ class RegistrationStateMachine(
 
                     noteMarkApi.register(
                         RegisterRequest(
-                            userName = state.snapshot.userName,
+                            username = state.snapshot.userName,
                             email = state.snapshot.email,
                             password = state.snapshot.password
                         )

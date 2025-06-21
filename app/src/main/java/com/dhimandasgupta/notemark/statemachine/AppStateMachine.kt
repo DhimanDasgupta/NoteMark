@@ -41,10 +41,6 @@ class AppStateMachine(
     init {
         spec {
             inState<NonLoggedInState> {
-                collectWhileInState(noteMarkRepository.getAllNotes()) { notes, state ->
-                    print("All Note: $notes")
-                    state.noChange()
-                }
                 // All Flows while in the app state should be collected here
                 collectWhileInState(userManager.getUser()) { user, state ->
                     user?.let { nonNullUser ->
@@ -61,6 +57,9 @@ class AppStateMachine(
                 }
             }
             inState<LoggedInState> {
+                onEnterEffect { state ->
+                    noteMarkRepository.getRemoteNotes()
+                }
                 collectWhileInState(applicationContext.observeConnectivityAsFlow()) { connected, state ->
                     state.mutate { state.snapshot.copy(connectionState = connected) }
                 }
@@ -69,7 +68,7 @@ class AppStateMachine(
                     state.mutate { state.snapshot.copy(connectionState = null) }
                 }
                 on<AppAction.AppLogout> { _, state ->
-                    noteMarkRepository.deleteAllNotes()
+                    noteMarkRepository.deleteAllLocalNotes()
                     userManager.clearUser()
                     state.override { NonLoggedInState(connectionState = state.snapshot.connectionState) }
                 }

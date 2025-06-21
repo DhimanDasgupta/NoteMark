@@ -3,7 +3,7 @@ package com.dhimandasgupta.notemark.common
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
-import java.util.Date
+import java.util.Locale
 import kotlin.time.ExperimentalTime
 
 fun getCurrentIso8601Timestamp(): String {
@@ -12,13 +12,20 @@ fun getCurrentIso8601Timestamp(): String {
 }
 
 @OptIn(ExperimentalTime::class)
-fun convertIso8601ToDate(isoString: String): Date? {
-    try {
-        val offsetDateTime =
-            OffsetDateTime.parse(isoString, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        val instant: java.time.Instant? = offsetDateTime.toInstant()
-        return Date.from(instant)
-    } catch (_: DateTimeParseException) {
-        return null
+fun convertIsoOffsetToReadableFormat(isoOffsetDateTimeString: String): String {
+    return try {
+        val offsetDateTime = OffsetDateTime.parse(isoOffsetDateTimeString, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        val targetFormatterCurrentYear = DateTimeFormatter.ofPattern("dd MMM", Locale.getDefault())
+        val targetFormatterPreviousYear = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.getDefault())
+
+        if (offsetDateTime.year == OffsetDateTime.now().year) {
+            offsetDateTime.format(targetFormatterCurrentYear)
+        } else {
+            offsetDateTime.format(targetFormatterPreviousYear)
+        }
+    } catch (e: DateTimeParseException) {
+        ""
+    } catch (e: Exception) {
+        ""
     }
 }

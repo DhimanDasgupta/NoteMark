@@ -10,9 +10,10 @@ import kotlinx.coroutines.withContext
 
 interface NoteMarkLocalDataSource {
     fun getAllNotes(): Flow<List<NoteEntity>>
-    suspend fun getNoteById(noteId: String): NoteEntity?
+    suspend fun getNoteById(noteId: Long): NoteEntity?
+    suspend fun getNoteByUUID(uuid: String): NoteEntity?
     suspend fun createNote(noteEntity: NoteEntity): NoteEntity?
-    suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): NoteEntity?
+    suspend fun updateNote(title: String, content: String, lastEditedAt: String, id: Long): NoteEntity?
     suspend fun insertNotes(noteEntities: List<NoteEntity>): Boolean
     suspend fun deleteNote(noteEntity: NoteEntity): Boolean
     suspend fun deleteAllNotes(): Boolean
@@ -29,20 +30,24 @@ class NoteMarkLocalDataSourceImpl(
             .mapToList(Dispatchers.IO)
     }
 
-    override suspend fun getNoteById(noteId: String): NoteEntity? = withContext(Dispatchers.IO) {
+    override suspend fun getNoteById(noteId: Long): NoteEntity? = withContext(Dispatchers.IO) {
         return@withContext queries.getNoteById(noteId).executeAsOneOrNull()
     }
 
-    override suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): NoteEntity = withContext(Dispatchers.IO) {
+    override suspend fun getNoteByUUID(uuid: String): NoteEntity? = withContext(Dispatchers.IO) {
+        return@withContext queries.getNoteByUUID(uuid).executeAsOneOrNull()
+    }
+
+    override suspend fun updateNote(title: String, content: String, lastEditedAt: String, id: Long): NoteEntity = withContext(Dispatchers.IO) {
         val result = queries.updateNote(
-            noteEntity.id,
             title,
             content,
-            lastEditedAt
+            lastEditedAt,
+            id
         )
 
         return@withContext (if (result.value == 1L) {
-            noteEntity
+            queries.getNoteById(id).executeAsOne()
         } else {
             null
         }) as NoteEntity
@@ -50,11 +55,11 @@ class NoteMarkLocalDataSourceImpl(
 
     override suspend fun createNote(noteEntity: NoteEntity): NoteEntity = withContext(Dispatchers.IO) {
         val result = queries.insertNote(
-            noteEntity.id,
             noteEntity.title,
             noteEntity.content,
             noteEntity.createdAt,
-            noteEntity.lastEditedAt
+            noteEntity.lastEditedAt,
+            noteEntity.uuid
         )
 
         return@withContext (if (result.value == 1L) {
@@ -67,15 +72,12 @@ class NoteMarkLocalDataSourceImpl(
     override suspend fun insertNotes(noteEntities: List<NoteEntity>) = withContext(Dispatchers.IO) {
         val result = queries.transactionWithResult {
             noteEntities.forEach { noteEntity ->
-                if (noteEntity.id.isEmpty()) {
-                    rollback(false)
-                }
                 queries.insertNote(
-                    noteEntity.id,
                     noteEntity.title,
                     noteEntity.content,
                     noteEntity.createdAt,
-                    noteEntity.lastEditedAt
+                    noteEntity.lastEditedAt,
+                    noteEntity.uuid
                 )
             }
             return@transactionWithResult true

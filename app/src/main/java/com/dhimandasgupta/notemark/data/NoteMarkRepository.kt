@@ -9,12 +9,14 @@ import kotlin.coroutines.coroutineContext
 
 interface NoteMarkRepository {
     fun getAllNotes(): Flow<List<NoteEntity>>
-    suspend fun getNoteById(noteId: String): NoteEntity?
+    suspend fun getRemoteNotes(): List<NoteEntity>
+    suspend fun getNoteById(noteId: Long): NoteEntity?
+    suspend fun getNoteByUUID(uuid: String): NoteEntity?
     suspend fun createNote(noteEntity: NoteEntity): NoteEntity?
     suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): NoteEntity?
     suspend fun insertNotes(noteEntities: List<NoteEntity>): Boolean
     suspend fun deleteNote(noteEntity: NoteEntity): Boolean
-    suspend fun deleteAllNotes(): Boolean
+    suspend fun deleteAllLocalNotes(): Boolean
 }
 
 class NoteMarkRepositoryImpl(
@@ -23,15 +25,32 @@ class NoteMarkRepositoryImpl(
 ) : NoteMarkRepository {
     override fun getAllNotes(): Flow<List<NoteEntity>> = localDataSource.getAllNotes()
 
-    override suspend fun getNoteById(noteId: String) = localDataSource.getNoteById(noteId)
+    override suspend fun getRemoteNotes(): List<NoteEntity> {
+        val remoteNotes = remoteDataSource.getAllNotes()
+        remoteNotes.getOrNull()?.notes?.let { notes ->
+            val notesToBeSavedInDB = notes.map { note -> note.toNoteEntity() }
+            return if (localDataSource.insertNotes(notesToBeSavedInDB)) {
+                notesToBeSavedInDB
+            } else
+                emptyList()
+        }
+        return emptyList()
+    }
 
-    override suspend fun createNote(noteEntity: NoteEntity) = try {
-        val note = remoteDataSource.createNote(noteEntity)
-        localDataSource.createNote(note)
-        note
-    } catch (_: Exception) {
-        coroutineContext.ensureActive()
-        null
+    override suspend fun getNoteById(noteId: Long) = localDataSource.getNoteById(noteId)
+
+    override suspend fun getNoteByUUID(uuid: String) = localDataSource.getNoteByUUID(uuid)
+
+    override suspend fun createNote(noteEntity: NoteEntity): NoteEntity? {
+        val remoteNote = remoteDataSource.createNote(noteEntity)
+        remoteNote.getOrNull()?.let { note ->
+            val notesToBeSavedInDB = note.toNoteEntity()
+            return if (localDataSource.createNote(notesToBeSavedInDB) != null) {
+                notesToBeSavedInDB
+            } else
+                null
+        }
+        return null
     }
 
     override suspend fun updateNote(
@@ -39,36 +58,43 @@ class NoteMarkRepositoryImpl(
         content: String,
         lastEditedAt: String,
         noteEntity: NoteEntity
-    ) = try {
-        val note = remoteDataSource.updateNote(
+    ): NoteEntity? {
+        val remoteNote = remoteDataSource.updateNote(
             title = title,
             content = content,
             lastEditedAt = lastEditedAt,
             noteEntity = noteEntity
         )
-        localDataSource.updateNote(title, content, lastEditedAt, note)
-        note
-    } catch (_: Exception) {
-        coroutineContext.ensureActive()
-        null
+
+        remoteNote.getOrNull()?.let { note ->
+            val notesToBeSavedInDB = note.toNoteEntity()
+            return if (localDataSource.updateNote(
+                    title = notesToBeSavedInDB.title,
+                    content = notesToBeSavedInDB.content,
+                    lastEditedAt = notesToBeSavedInDB.lastEditedAt,
+                    id = notesToBeSavedInDB.id
+            ) != null) {
+                notesToBeSavedInDB
+            } else
+                null
+        }
+        return null
     }
 
     override suspend fun insertNotes(noteEntities: List<NoteEntity>) = localDataSource.insertNotes(noteEntities)
 
     override suspend fun deleteNote(noteEntity: NoteEntity): Boolean {
-        return try {
-            val status = remoteDataSource.deleteNote(noteEntity)
-            if (status) {
-                return localDataSource.deleteNote(noteEntity)
+        val noteDeletedRemotely = remoteDataSource.deleteNote(noteEntity)
+        if (noteDeletedRemotely.getOrNull() == Unit) {
+            if (localDataSource.deleteNote(noteEntity)) {
+                return true
             } else
                 false
-        } catch (_: Exception) {
-            coroutineContext.ensureActive()
-            false
         }
+        return false
     }
 
-    override suspend fun deleteAllNotes() = try {
+    override suspend fun deleteAllLocalNotes() = try {
         localDataSource.deleteAllNotes()
     } catch (_: Exception) {
         coroutineContext.ensureActive()

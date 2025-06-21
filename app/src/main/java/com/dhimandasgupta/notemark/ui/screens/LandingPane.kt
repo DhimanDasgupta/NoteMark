@@ -106,15 +106,15 @@ private fun LandingPanePortrait(
     navigateToAfterLogin: () -> Unit = {},
     navigateToLogin: () -> Unit = {}
 ) {
-    Column(
+    Box(
         modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.SpaceBetween
+        contentAlignment = Alignment.BottomCenter
     ) {
         Image(
             painter = painterResource(id = R.drawable.bg_phone_portrait),
             contentDescription = null,
             contentScale = ContentScale.FillHeight,
-            modifier = modifier.aspectRatio(0.8f)
+            modifier = modifier.aspectRatio(0.8f).align(Alignment.TopCenter)
         )
 
         ForegroundPane(

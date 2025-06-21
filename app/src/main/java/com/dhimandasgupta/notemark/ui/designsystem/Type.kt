@@ -56,6 +56,12 @@ val Typography: Typography @Composable get() = Typography(
         fontSize = 32.sp,
         lineHeight = 36.sp
     ),
+    titleMedium = TextStyle(
+        fontFamily = SpaceGrotesk,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+        lineHeight = 24.sp
+    ),
     titleSmall = TextStyle(
         fontFamily = SpaceGrotesk,
         fontWeight = FontWeight.Medium,

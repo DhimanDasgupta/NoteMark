@@ -12,14 +12,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.dhimandasgupta.notemark.presenter.AppPresenter
+import com.dhimandasgupta.notemark.presenter.EditNotePresenter
 import com.dhimandasgupta.notemark.presenter.LoginPresenter
+import com.dhimandasgupta.notemark.presenter.NoteListPresenter
 import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
 import com.dhimandasgupta.notemark.statemachine.AppAction
 import com.dhimandasgupta.notemark.statemachine.AppState
 import com.dhimandasgupta.notemark.statemachine.NonLoggedInState
 import com.dhimandasgupta.notemark.ui.screens.LauncherPane
-import com.dhimandasgupta.notemark.ui.screens.LoggedInPane
+import com.dhimandasgupta.notemark.ui.screens.NoteListPane
 import com.dhimandasgupta.notemark.ui.screens.LoginPane
+import com.dhimandasgupta.notemark.ui.screens.NoteEditPane
 import com.dhimandasgupta.notemark.ui.screens.RegistrationPane
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
@@ -69,7 +72,7 @@ private fun NavGraphBuilder.NoteMarkGraph(
                         Toast.makeText(context, "Oops!!! Please login first to get started", Toast.LENGTH_LONG).show()
                         return@LauncherPane
                     }
-                    navController.navigate(NoteMarkDestination.LoggedInDestination) {
+                    navController.navigate(NoteMarkDestination.NoteListPane) {
                         popUpTo(NoteMarkDestination.LauncherDestination) {
                             inclusive = true
                         }
@@ -94,7 +97,7 @@ private fun NavGraphBuilder.NoteMarkGraph(
             LoginPane(
                 windowSizeClass = windowSizeClass,
                 navigateToAfterLogin = {
-                    navController.navigate(NoteMarkDestination.LoggedInDestination) {
+                    navController.navigate(NoteMarkDestination.NoteListPane) {
                         popUpTo(NoteMarkDestination.LoginDestination) {
                             inclusive = true
                         }
@@ -134,19 +137,44 @@ private fun NavGraphBuilder.NoteMarkGraph(
             )
         }
 
-        composable<NoteMarkDestination.LoggedInDestination> {
-            LoggedInPane(
+        composable<NoteMarkDestination.NoteListPane> {
+            val noteListPresenter = koinInject<NoteListPresenter>()
+
+            val noteListUiModel = noteListPresenter.uiModel()
+            val noteListAction = noteListPresenter::processEvent
+
+            NoteListPane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
                 appState = appUiModel,
-                logoutClicked = {
+                noteListUiModel = noteListUiModel,
+                noteListAction = noteListAction,
+                onFabClicked = {
+                    navController.navigate(NoteMarkDestination.NoteEditPane)
+                },
+                onLogoutClicked = {
                     appEvents(AppAction.AppLogout)
                     navController.navigate(NoteMarkDestination.LauncherDestination) {
-                        popUpTo(NoteMarkDestination.LoggedInDestination) {
+                        popUpTo(NoteMarkDestination.NoteListPane) {
                             inclusive = true
                         }
                     }
                 }
+            )
+        }
+
+        composable<NoteMarkDestination.NoteEditPane> {
+            val editNotePresenter = koinInject<EditNotePresenter>()
+
+            val editNoteUiModel = editNotePresenter.uiModel()
+            val editNoteAction = editNotePresenter::processEvent
+
+            NoteEditPane(
+                modifier = Modifier,
+                windowSizeClass = windowSizeClass,
+                editNoteUiModel = editNoteUiModel,
+                editNoteAction = editNoteAction,
+                onCloseClicked = { navController.navigateUp() }
             )
         }
     }
@@ -166,5 +194,8 @@ object NoteMarkDestination {
     data object RegistrationDestination
 
     @Serializable
-    data object LoggedInDestination
+    data object NoteListPane
+
+    @Serializable
+    data object NoteEditPane
 }
