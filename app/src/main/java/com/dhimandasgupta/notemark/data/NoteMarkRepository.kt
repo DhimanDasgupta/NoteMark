@@ -72,7 +72,7 @@ class NoteMarkRepositoryImpl(
                     title = notesToBeSavedInDB.title,
                     content = notesToBeSavedInDB.content,
                     lastEditedAt = notesToBeSavedInDB.lastEditedAt,
-                    id = notesToBeSavedInDB.id
+                    uuid = notesToBeSavedInDB.uuid
             ) != null) {
                 notesToBeSavedInDB
             } else

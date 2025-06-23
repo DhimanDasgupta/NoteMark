@@ -15,7 +15,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 
 @Immutable
 data class NoteListUiModel(
-    val noteEntities: List<NoteEntity>
+    val noteEntities: List<NoteEntity>,
+    val noteClickedUuid: String = "",
+    val noteLongClickedUuid: String = "",
 )
 
 private val defaultNoteListUiModel = NoteListUiModel(noteEntities = emptyList())
@@ -34,7 +36,11 @@ class NoteListPresenter(
             noteListStateMachine.state.collect { noteListState ->
                 noteListUiModel = when (noteListState) {
                     is NoteListState.NoteListStateWithNotes -> {
-                        noteListUiModel.copy(noteEntities = noteListState.notes)
+                        noteListUiModel.copy(
+                            noteEntities = noteListState.notes,
+                            noteClickedUuid = noteListState.clickedNoteUuid,
+                            noteLongClickedUuid = noteListState.longClickedNoteUuid
+                        )
                     }
 
                     else -> noteListUiModel.copy(noteEntities = emptyList())

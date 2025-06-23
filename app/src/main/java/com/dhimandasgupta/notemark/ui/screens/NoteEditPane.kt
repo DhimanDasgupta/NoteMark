@@ -63,6 +63,7 @@ import com.dhimandasgupta.notemark.ui.phonePortrait
 fun NoteEditPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
+    noteId: String = "",
     editNoteUiModel: EditNoteState,
     editNoteAction: (EditNoteAction) -> Unit = {},
     onCloseClicked: () -> Unit = {}
@@ -73,6 +74,12 @@ fun NoteEditPane(
     LaunchedEffect(editNoteUiModel.saved) {
         if (editNoteUiModel.saved == true) {
             onCloseClicked()
+        }
+    }
+
+    LaunchedEffect(key1 = noteId) {
+        if (noteId.isNotEmpty()) {
+            editNoteAction(EditNoteAction.LoadNote(noteId))
         }
     }
 

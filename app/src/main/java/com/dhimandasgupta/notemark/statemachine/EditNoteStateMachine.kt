@@ -18,6 +18,7 @@ data class EditNoteState(
 )
 
 sealed interface EditNoteAction {
+    data class LoadNote(val uuid: String) : EditNoteAction
     data class UpdateNote(val noteEntity: NoteEntity) : EditNoteAction
     data class UpdateTitle(val title: String) : EditNoteAction
     data class UpdateContent(val content: String) : EditNoteAction
@@ -31,6 +32,17 @@ class EditNoteStateMachine(
     init {
         spec {
             inState<EditNoteState> {
+                on<EditNoteAction.LoadNote> { action, state ->
+                    noteMarkRepository.getNoteByUUID(uuid = action.uuid)?.let { noteEntity ->
+                        state.mutate {
+                            copy(
+                                title = noteEntity.title,
+                                content = noteEntity.content,
+                                noteEntity = noteEntity
+                            )
+                        }
+                    } ?: state.noChange()
+                }
                 on<EditNoteAction.UpdateNote> { action, state ->
                     state.mutate { copy(noteEntity = action.noteEntity) }
                 }

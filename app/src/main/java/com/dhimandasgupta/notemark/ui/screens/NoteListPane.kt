@@ -2,6 +2,7 @@ package com.dhimandasgupta.notemark.ui.screens
 
 import LoggedInUser
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.dhimandasgupta.notemark.NoteMarkDestination
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.android.ConnectionState.Available
 import com.dhimandasgupta.notemark.common.convertIsoOffsetToReadableFormat
@@ -50,6 +52,7 @@ import com.dhimandasgupta.notemark.statemachine.AppState
 import com.dhimandasgupta.notemark.statemachine.LoggedInState
 import com.dhimandasgupta.notemark.statemachine.NonLoggedInState
 import com.dhimandasgupta.notemark.statemachine.NoteListAction
+import com.dhimandasgupta.notemark.statemachine.NoteListAction.NoteClicked
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
@@ -78,12 +81,27 @@ fun NoteListPane(
     appState: AppState,
     noteListUiModel: NoteListUiModel,
     noteListAction: (NoteListAction) -> Unit = {},
+    onNoteClicked: (String) -> Unit = {},
     onFabClicked: () -> Unit = {},
     onLogoutClicked: () -> Unit = {},
 ) {
     LaunchedEffect(key1 = appState) {
         if (appState is NonLoggedInState) {
             onLogoutClicked()
+            return@LaunchedEffect
+        }
+    }
+
+    LaunchedEffect(key1 = noteListUiModel.noteClickedUuid) {
+        if (noteListUiModel.noteClickedUuid.isNotEmpty()) {
+            onNoteClicked(noteListUiModel.noteClickedUuid)
+            return@LaunchedEffect
+        }
+    }
+
+    LaunchedEffect(key1 = noteListUiModel.noteLongClickedUuid) {
+        if (noteListUiModel.noteLongClickedUuid.isNotEmpty()) {
+            noteListAction(NoteListAction.NoteLongClickConsumed)
             return@LaunchedEffect
         }
     }
@@ -305,7 +323,8 @@ private fun NoteGrid(
         ) { noteEntity ->
             NoteItem(
                 modifier = Modifier,
-                note = noteEntity
+                note = noteEntity,
+                noteListAction = noteListAction
             )
         }
 
@@ -325,13 +344,18 @@ private fun NoteGrid(
 @Composable
 fun NoteItem(
     modifier: Modifier = Modifier,
-    note: NoteEntity
+    note: NoteEntity,
+    noteListAction: (NoteListAction) -> Unit = {},
 ) {
     Column(
         modifier = modifier
             .clip(shape = shapes.medium)
             .background(color = colorScheme.surfaceContainerLowest)
             .padding(16.dp)
+            .combinedClickable(
+                onClick = { noteListAction(NoteListAction.NoteClicked(note.uuid)) },
+                onLongClick = { noteListAction(NoteListAction.NoteLongClicked(note.uuid)) }
+            )
     ) {
         Text(
             text = convertIsoOffsetToReadableFormat(note.lastEditedAt),
