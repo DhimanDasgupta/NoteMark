@@ -86,7 +86,7 @@ class NoteMarkLocalDataSourceImpl(
     }
 
     override suspend fun deleteNote(noteEntity: NoteEntity) = withContext(Dispatchers.IO) {
-        val result = queries.deleteNoteById(noteEntity.id)
+        val result = queries.deleteNoteByUUID(noteEntity.uuid)
         return@withContext result.value == 1L
     }
 

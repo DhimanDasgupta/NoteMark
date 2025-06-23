@@ -5,7 +5,6 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -22,12 +21,11 @@ import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
 import com.dhimandasgupta.notemark.statemachine.AppAction
 import com.dhimandasgupta.notemark.statemachine.AppState
 import com.dhimandasgupta.notemark.statemachine.NonLoggedInState
-import com.dhimandasgupta.notemark.statemachine.NoteListAction
 import com.dhimandasgupta.notemark.statemachine.NoteListAction.NoteClicked
 import com.dhimandasgupta.notemark.ui.screens.LauncherPane
-import com.dhimandasgupta.notemark.ui.screens.NoteListPane
 import com.dhimandasgupta.notemark.ui.screens.LoginPane
 import com.dhimandasgupta.notemark.ui.screens.NoteEditPane
+import com.dhimandasgupta.notemark.ui.screens.NoteListPane
 import com.dhimandasgupta.notemark.ui.screens.RegistrationPane
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject

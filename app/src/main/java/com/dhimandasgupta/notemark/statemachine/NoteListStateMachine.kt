@@ -23,6 +23,7 @@ sealed interface NoteListAction {
     data class NoteLongClicked(val uuid: String): NoteListAction
     data object NoteClickConsumed: NoteListAction
     data object NoteLongClickConsumed: NoteListAction
+    data class NoteDeleted(val uuid: String): NoteListAction
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -73,6 +74,14 @@ class NoteListStateMachine(
                             longClickedNoteUuid = ""
                         )
                     }
+                }
+                on<NoteListAction.NoteDeleted> { action, state ->
+                    noteMarkRepository.getNoteByUUID(uuid = action.uuid)?.let { noteEntity ->
+                        if  (noteMarkRepository.deleteNote(noteEntity)) {
+                            return@on state.override { state.snapshot.copy(notes = state.snapshot.notes.filter { it.uuid != action.uuid }) }
+                        }
+                    }
+                    state.noChange()
                 }
                 collectWhileInState(noteMarkRepository.getAllNotes()) { notes, state ->
                     if (notes.isNotEmpty()) {

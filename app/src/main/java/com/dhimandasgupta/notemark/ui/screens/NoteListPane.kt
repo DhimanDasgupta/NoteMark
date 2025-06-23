@@ -2,6 +2,7 @@ package com.dhimandasgupta.notemark.ui.screens
 
 import LoggedInUser
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +22,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
@@ -32,7 +35,10 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,7 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.dhimandasgupta.notemark.NoteMarkDestination
+import androidx.compose.ui.window.Dialog
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.android.ConnectionState.Available
 import com.dhimandasgupta.notemark.common.convertIsoOffsetToReadableFormat
@@ -52,7 +58,8 @@ import com.dhimandasgupta.notemark.statemachine.AppState
 import com.dhimandasgupta.notemark.statemachine.LoggedInState
 import com.dhimandasgupta.notemark.statemachine.NonLoggedInState
 import com.dhimandasgupta.notemark.statemachine.NoteListAction
-import com.dhimandasgupta.notemark.statemachine.NoteListAction.NoteClicked
+import com.dhimandasgupta.notemark.statemachine.NoteListAction.NoteDeleted
+import com.dhimandasgupta.notemark.statemachine.NoteListAction.NoteLongClickConsumed
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
@@ -99,17 +106,11 @@ fun NoteListPane(
         }
     }
 
-    LaunchedEffect(key1 = noteListUiModel.noteLongClickedUuid) {
-        if (noteListUiModel.noteLongClickedUuid.isNotEmpty()) {
-            noteListAction(NoteListAction.NoteLongClickConsumed)
-            return@LaunchedEffect
-        }
-    }
-
     Box(
         modifier = modifier
             .background(color = colorResource(R.color.splash_blue_background))
-            .fillMaxSize()
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
         when (appState) {
             is NonLoggedInState -> throw IllegalStateException("This should not happen")
@@ -121,6 +122,25 @@ fun NoteListPane(
                 noteListAction = noteListAction,
                 onFabClicked = onFabClicked,
                 onLogoutClicked = onLogoutClicked
+            )
+        }
+
+        // Dialog check
+        var showDialog by remember { mutableStateOf(false) }
+        LaunchedEffect(key1 = noteListUiModel.noteLongClickedUuid) {
+            if (noteListUiModel.noteLongClickedUuid.isNotEmpty()) {
+                showDialog = true
+            }
+        }
+
+        if (showDialog) {
+            ShowDeleteDialog(
+                noteId = noteListUiModel.noteLongClickedUuid,
+                noteListAction = noteListAction,
+                onDismiss = {
+                    showDialog = false
+                    noteListAction(NoteLongClickConsumed)
+                }
             )
         }
     }
@@ -342,7 +362,7 @@ private fun NoteGrid(
 }
 
 @Composable
-fun NoteItem(
+private fun NoteItem(
     modifier: Modifier = Modifier,
     note: NoteEntity,
     noteListAction: (NoteListAction) -> Unit = {},
@@ -351,11 +371,11 @@ fun NoteItem(
         modifier = modifier
             .clip(shape = shapes.medium)
             .background(color = colorScheme.surfaceContainerLowest)
-            .padding(16.dp)
             .combinedClickable(
                 onClick = { noteListAction(NoteListAction.NoteClicked(note.uuid)) },
                 onLongClick = { noteListAction(NoteListAction.NoteLongClicked(note.uuid)) }
             )
+            .padding(16.dp)
     ) {
         Text(
             text = convertIsoOffsetToReadableFormat(note.lastEditedAt),
@@ -380,6 +400,65 @@ fun NoteItem(
             overflow = TextOverflow.Ellipsis,
             maxLines = Random.nextInt(3, 6)
         )
+    }
+}
+
+@Composable
+fun ShowDeleteDialog(
+    modifier: Modifier = Modifier,
+    noteId: String,
+    onDismiss: () -> Unit = {},
+    noteListAction: (NoteListAction) -> Unit = {}
+) {
+    Dialog(
+        onDismissRequest = { onDismiss() }
+    ) {
+        Column(
+            modifier = modifier
+                .clip(shapes.medium)
+                .wrapContentSize()
+                .background(color = colorScheme.surfaceContainerLowest)
+                .padding(all = 32.dp)
+        ) {
+            Text(
+                text = "Are you sure you want to delete this note?",
+                style = typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Click Discard to delete your note, else click Cancel to keep editing.",
+                style = typography.bodyLarge
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+
+                Text(
+                    text = "Keep Editing",
+                    style = typography.bodyMedium,
+                    color = colorScheme.primary,
+                    modifier = Modifier.clickable { onDismiss() }
+                )
+
+                Spacer(modifier = Modifier.width(32.dp))
+
+                Text(
+                    text = "Discard",
+                    style = typography.bodyMedium,
+                    color = colorScheme.error,
+                    modifier = Modifier.clickable {
+                        noteListAction(NoteDeleted(noteId))
+                        onDismiss()
+                    }
+                )
+            }
+        }
     }
 }
 
@@ -463,6 +542,18 @@ private fun TabletExpandedLandscapePreview() {
             windowSizeClass = extendedTabletLandscape,
             appState = loggedInState,
             noteListUiModel = noteListUiModel
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@PhonePortraitPreview
+@Composable
+private fun DeleteDialogPreview() {
+    NoteMarkTheme {
+        ShowDeleteDialog(
+            modifier = Modifier,
+            noteId = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d"
         )
     }
 }

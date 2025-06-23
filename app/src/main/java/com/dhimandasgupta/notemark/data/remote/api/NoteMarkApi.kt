@@ -233,7 +233,7 @@ class NoteMarkApiImpl(
     override suspend fun deleteNote(noteEntity: NoteEntity): Result<Unit> {
         return try {
             val response = client.delete {
-                url("/api/notes/${noteEntity.id}")
+                url("/api/notes/${noteEntity.uuid}")
                 contentType(ContentType.Application.Json)
             }
 
