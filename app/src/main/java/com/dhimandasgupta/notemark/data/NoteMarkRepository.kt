@@ -2,6 +2,7 @@ package com.dhimandasgupta.notemark.data
 
 import com.dhimandasgupta.notemark.data.local.datasource.NoteMarkLocalDataSource
 import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSource
+import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.database.NoteEntity
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
@@ -9,7 +10,7 @@ import kotlin.coroutines.coroutineContext
 
 interface NoteMarkRepository {
     fun getAllNotes(): Flow<List<NoteEntity>>
-    suspend fun getRemoteNotes(): List<NoteEntity>
+    suspend fun getRemoteNotes(page: Int = -1, size: Int = 20): Result<NoteResponse>
     suspend fun getNoteById(noteId: Long): NoteEntity?
     suspend fun getNoteByUUID(uuid: String): NoteEntity?
     suspend fun createNote(noteEntity: NoteEntity): NoteEntity?
@@ -25,16 +26,16 @@ class NoteMarkRepositoryImpl(
 ) : NoteMarkRepository {
     override fun getAllNotes(): Flow<List<NoteEntity>> = localDataSource.getAllNotes()
 
-    override suspend fun getRemoteNotes(): List<NoteEntity> {
-        val remoteNotes = remoteDataSource.getAllNotes()
-        remoteNotes.getOrNull()?.notes?.let { notes ->
-            val notesToBeSavedInDB = notes.map { note -> note.toNoteEntity() }
+    override suspend fun getRemoteNotes(page: Int, size: Int): Result<NoteResponse> {
+        val remoteNotes = remoteDataSource.getAllNotes(page, size)
+        remoteNotes.getOrNull()?.notes?.let { note ->
+            val notesToBeSavedInDB = note.map { note -> note.toNoteEntity() }
             return if (localDataSource.insertNotes(notesToBeSavedInDB)) {
-                notesToBeSavedInDB
+                remoteNotes
             } else
-                emptyList()
+                Result.failure(Exception("Failed to fetch notes from remote"))
         }
-        return emptyList()
+        return Result.failure(Exception("Failed to fetch notes from remote"))
     }
 
     override suspend fun getNoteById(noteId: Long) = localDataSource.getNoteById(noteId)

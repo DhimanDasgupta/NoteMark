@@ -92,13 +92,6 @@ fun NoteListPane(
     onFabClicked: () -> Unit = {},
     onLogoutClicked: () -> Unit = {},
 ) {
-    LaunchedEffect(key1 = appState) {
-        if (appState is NonLoggedInState) {
-            onLogoutClicked()
-            return@LaunchedEffect
-        }
-    }
-
     LaunchedEffect(key1 = noteListUiModel.noteClickedUuid) {
         if (noteListUiModel.noteClickedUuid.isNotEmpty()) {
             onNoteClicked(noteListUiModel.noteClickedUuid)
@@ -113,7 +106,7 @@ fun NoteListPane(
         contentAlignment = Alignment.Center
     ) {
         when (appState) {
-            is NonLoggedInState -> throw IllegalStateException("This should not happen")
+            is NonLoggedInState -> { onLogoutClicked() }
             is LoggedInState -> NoteListValidPane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,

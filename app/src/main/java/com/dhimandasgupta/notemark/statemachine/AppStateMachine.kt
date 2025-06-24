@@ -58,7 +58,7 @@ class AppStateMachine(
             }
             inState<LoggedInState> {
                 onEnterEffect { state ->
-                    noteMarkRepository.getRemoteNotes()
+                    syncRemoteNotes()
                 }
                 collectWhileInState(applicationContext.observeConnectivityAsFlow()) { connected, state ->
                     state.mutate { state.snapshot.copy(connectionState = connected) }
@@ -81,5 +81,26 @@ class AppStateMachine(
             connectionState = null
         )
     }
+
+    private suspend fun syncRemoteNotes() {
+        var total = 0
+        var numberOfNotesLoaded = 0
+        var pageNumber = 0
+
+        do {
+            noteMarkRepository.getRemoteNotes(pageNumber, PAGE_SIZE).fold(
+                onSuccess = { noteResponse ->
+                    pageNumber++
+                    total = noteResponse.total
+                    numberOfNotesLoaded += noteResponse.notes.size
+                },
+                onFailure = { throwable ->
+                    // Handle error
+                }
+            )
+        } while (numberOfNotesLoaded < total)
+    }
 }
+
+private const val PAGE_SIZE: Int = 10
 

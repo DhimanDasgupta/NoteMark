@@ -43,6 +43,13 @@ class NoteListStateMachine(
             }
 
             inState<NoteListStateWithNotes> {
+                collectWhileInState(noteMarkRepository.getAllNotes()) { notes, state ->
+                    if (notes.isNotEmpty()) {
+                        state.mutate { NoteListStateWithNotes(state.snapshot.notes.sortedByDescending { it.lastEditedAt }) }
+                    } else {
+                        state.override { NoteListStateWithNoNotes }
+                    }
+                }
                 on<NoteListAction.NoteClicked> { action, state ->
                     state.mutate {
                         copy(
@@ -77,21 +84,15 @@ class NoteListStateMachine(
                 }
                 on<NoteListAction.NoteDeleted> { action, state ->
                     noteMarkRepository.getNoteByUUID(uuid = action.uuid)?.let { noteEntity ->
-                        if  (noteMarkRepository.deleteNote(noteEntity)) {
+                        if (noteMarkRepository.deleteNote(noteEntity)) {
                             return@on state.override { state.snapshot.copy(notes = state.snapshot.notes.filter { it.uuid != action.uuid }) }
                         }
                     }
                     state.noChange()
                 }
-                collectWhileInState(noteMarkRepository.getAllNotes()) { notes, state ->
-                    if (notes.isNotEmpty()) {
-                        state.mutate { NoteListStateWithNotes(state.snapshot.notes.sortedByDescending { it.lastEditedAt }) }
-                    } else {
-                        state.override { NoteListStateWithNoNotes } }
-                    }
-                }
             }
         }
+    }
 
     companion object {
         val defaultNoteListState = NoteListStateWithNoNotes

@@ -50,7 +50,7 @@ interface NoteMarkApi {
     suspend fun logout()
 
     /** CRUD purpose methods */
-    suspend fun getNotes(pageNumber: Int = -1, pageSize: Int = 20): Result<NoteResponse>
+    suspend fun getNotes(page: Int = -1, size: Int = 20): Result<NoteResponse>
     suspend fun createNote(noteEntity: NoteEntity): Result<Note>
     suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): Result<Note>
     suspend fun deleteNote(noteEntity: NoteEntity): Result<Unit>
@@ -130,13 +130,13 @@ class NoteMarkApiImpl(
         }
     }
 
-    override suspend fun getNotes(pageNumber: Int, pageSize: Int): Result<NoteResponse> {
+    override suspend fun getNotes(page: Int, size: Int): Result<NoteResponse> {
         return try {
             val response = client.get {
                 url("/api/notes")
                 contentType(ContentType.Application.Json)
-                parameter("pageNumber", pageNumber.toString())
-                parameter("pageSize", pageSize.toString())
+                parameter("page", page)
+                parameter("size", size)
                 header("Authorization", "Bearer ${userManager.getUser().first()?.bearerTokens?.accessToken}")
             }
 

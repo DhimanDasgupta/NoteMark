@@ -6,7 +6,7 @@ import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.database.NoteEntity
 
 interface NoteMarkApiDataSource {
-    suspend fun getAllNotes(): Result<NoteResponse>
+    suspend fun getAllNotes(page: Int = -1, size: Int = 20): Result<NoteResponse>
     suspend fun createNote(noteEntity: NoteEntity): Result<Note>
     suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): Result<Note>
     suspend fun deleteNote(noteEntity: NoteEntity): Result<Unit>
@@ -15,7 +15,7 @@ interface NoteMarkApiDataSource {
 class NoteMarkApiDataSourceImpl(
     private val noteMarkApi: NoteMarkApi
 ) : NoteMarkApiDataSource {
-    override suspend fun getAllNotes() = noteMarkApi.getNotes()
+    override suspend fun getAllNotes(page: Int, size: Int) = noteMarkApi.getNotes(page, size)
 
     override suspend fun createNote(noteEntity: NoteEntity) = noteMarkApi.createNote(noteEntity)
 

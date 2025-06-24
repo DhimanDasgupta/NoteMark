@@ -120,14 +120,14 @@ val appModule = module {
     singleOf(::NoteMarkApiDataSourceImpl) bind NoteMarkApiDataSource::class
     singleOf(::NoteMarkLocalDataSourceImpl) bind NoteMarkLocalDataSource::class
     singleOf(::NoteMarkRepositoryImpl) bind NoteMarkRepository::class
-    single {
+    factory {
         AppStateMachine(
             applicationContext = androidContext(),
             userManager = get(),
             noteMarkRepository = get()
         )
     }
-    singleOf(::AppPresenter)
+    factoryOf(::AppPresenter)
 
     factory { LoginStateMachine(noteMarkApi = get()) }
     factoryOf(::LoginPresenter)
