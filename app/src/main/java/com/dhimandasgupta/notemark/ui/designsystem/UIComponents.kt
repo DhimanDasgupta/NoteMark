@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
@@ -34,6 +35,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -43,10 +45,13 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
@@ -331,6 +336,12 @@ fun NoteMarkFAB(
                 ),
                 shape = shapes.medium
             ),
+        elevation = FloatingActionButtonDefaults.elevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp,
+            hoveredElevation = 0.dp,
+            focusedElevation = 0.dp
+        ),
         contentColor = Color.Transparent,
         containerColor = Color.Transparent
     ) {
@@ -342,4 +353,41 @@ fun NoteMarkFAB(
                 .padding(all = 8.dp)
         )
     }
+}
+
+@Composable
+fun LimitedText(
+    fullText: String,
+    style: TextStyle,
+    color: Color,
+    targetCharCount: Int = 100
+) {
+    var textToDisplay by remember(fullText) { mutableStateOf(fullText) }
+    var textLayoutResultState by remember { mutableStateOf<TextLayoutResult?>(null) }
+
+    Text(
+        text = textToDisplay,
+        style = style,
+        color = color,
+        onTextLayout = { textLayoutResult ->
+            textLayoutResultState = textLayoutResult
+            if (textLayoutResult.layoutInput.text.length > targetCharCount) {
+                if (textLayoutResult.isLineEllipsized(textLayoutResult.lineCount - 1) ||
+                    textLayoutResult.getLineEnd(
+                        textLayoutResult.lineCount - 1,
+                        visibleEnd = true
+                    ) < targetCharCount &&
+                    fullText.length > targetCharCount
+                ) {
+                    if (textToDisplay.length > targetCharCount) { // Ensure we only shorten once
+                        textToDisplay = fullText.substring(0, targetCharCount)
+                    }
+                } else if (fullText.length > targetCharCount && textToDisplay.length > targetCharCount) {
+                    textToDisplay = fullText.substring(0, targetCharCount)
+                }
+            }
+        },
+        maxLines = 5,
+        overflow = TextOverflow.Ellipsis
+    )
 }

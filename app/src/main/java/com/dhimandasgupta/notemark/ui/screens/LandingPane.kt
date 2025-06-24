@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +39,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.statemachine.AppState
+import com.dhimandasgupta.notemark.statemachine.LoggedInState
+import com.dhimandasgupta.notemark.statemachine.NonLoggedInState
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
@@ -61,9 +65,17 @@ import com.dhimandasgupta.notemark.ui.phonePortrait
 fun LauncherPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
+    appState: AppState,
     navigateToAfterLogin: () -> Unit = {},
-    navigateToLogin: () -> Unit = {}
+    navigateToLogin: () -> Unit = {},
+    navigateToList: () -> Unit = {}
 ) {
+    LaunchedEffect(appState) {
+        if (appState is LoggedInState) {
+            navigateToList()
+            return@LaunchedEffect
+        }
+    }
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -317,7 +329,8 @@ private fun PhonePortraitPreview() {
     NoteMarkTheme {
         LauncherPane(
             modifier = Modifier,
-            windowSizeClass = phonePortrait
+            windowSizeClass = phonePortrait,
+            appState = NonLoggedInState(connectionState = null)
         )
     }
 }
@@ -329,7 +342,8 @@ private fun PhoneLandscapePreview() {
     NoteMarkTheme {
         LauncherPane(
             modifier = Modifier,
-            windowSizeClass = phoneLandscape
+            windowSizeClass = phoneLandscape,
+            appState = NonLoggedInState(connectionState = null)
         )
     }
 }
@@ -341,7 +355,8 @@ private fun TabletMediumPortraitPreview() {
     NoteMarkTheme {
         LauncherPane(
             modifier = Modifier,
-            windowSizeClass = mediumTabletPortrait
+            windowSizeClass = mediumTabletPortrait,
+            appState = NonLoggedInState(connectionState = null)
         )
     }
 }
@@ -353,7 +368,8 @@ private fun TabletMediumLandscapePreview() {
     NoteMarkTheme {
         LauncherPane(
             modifier = Modifier,
-            windowSizeClass = mediumTabletLandscape
+            windowSizeClass = mediumTabletLandscape,
+            appState = NonLoggedInState(connectionState = null)
         )
     }
 }
@@ -365,7 +381,8 @@ private fun TabletExpandedPortraitPreview() {
     NoteMarkTheme {
         LauncherPane(
             modifier = Modifier,
-            windowSizeClass = extendedTabletPortrait
+            windowSizeClass = extendedTabletPortrait,
+            appState = NonLoggedInState(connectionState = null)
         )
     }
 }
@@ -377,7 +394,8 @@ private fun TabletExpandedLandscapePreview() {
     NoteMarkTheme {
         LauncherPane(
             modifier = Modifier,
-            windowSizeClass = extendedTabletLandscape
+            windowSizeClass = extendedTabletLandscape,
+            appState = NonLoggedInState(connectionState = null)
         )
     }
 }

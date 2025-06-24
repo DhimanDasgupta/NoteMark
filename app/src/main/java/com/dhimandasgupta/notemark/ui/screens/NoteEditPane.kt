@@ -181,7 +181,7 @@ fun NoteEditBody(
             modifier = Modifier
                 .fillMaxWidth(),
             visualTransformation = VisualTransformation.None,
-            placeholder = { Text(text = "Enter note title", style = typography.titleSmall) },
+            placeholder = { Text(text = "Note title", style = typography.titleLarge) },
             maxLines = 2,
             colors = OutlinedTextFieldDefaults.colors().copy(
                 focusedTextColor = colorScheme.onSurface,
@@ -216,7 +216,7 @@ fun NoteEditBody(
             modifier = Modifier
                 .fillMaxWidth(),
             visualTransformation = VisualTransformation.None,
-            placeholder = { Text(text = "Enter note title", style = typography.bodyLarge) },
+            placeholder = { Text(text = "Tap to enter note content", style = typography.bodyLarge) },
             colors = OutlinedTextFieldDefaults.colors().copy(
                 focusedTextColor = colorScheme.onSurface,
                 unfocusedTextColor = colorScheme.onSurface,
@@ -229,13 +229,7 @@ fun NoteEditBody(
             ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Unspecified,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    focusManager.clearFocus()
-                    keyboardController?.hide()
-                }
+                imeAction = ImeAction.Unspecified
             )
         )
     }

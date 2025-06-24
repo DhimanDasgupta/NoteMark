@@ -44,7 +44,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -68,6 +67,7 @@ import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
+import com.dhimandasgupta.notemark.ui.designsystem.LimitedText
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkFAB
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkToolbarButton
@@ -78,7 +78,6 @@ import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
 import io.ktor.client.plugins.auth.providers.BearerTokens
-import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
@@ -208,6 +207,13 @@ fun NoteListWithNotes(
         }
     }
 
+    val maxLength = remember(layoutType) {
+        when (layoutType) {
+            DeviceLayoutType.TABLET_LAYOUT -> 250
+            else -> 150
+        }
+    }
+
     Column(
         modifier = modifier.fillMaxSize()
     ) {
@@ -233,6 +239,7 @@ fun NoteListWithNotes(
             NoteGrid(
                 modifier = Modifier.fillMaxSize(),
                 columnCount = columnCount,
+                maxLength = maxLength,
                 noteListUiModel = noteListState,
                 noteListAction = noteListAction
             )
@@ -327,6 +334,7 @@ private fun NoNotes(
 private fun NoteGrid(
     modifier: Modifier = Modifier,
     columnCount: Int,
+    maxLength: Int,
     noteListUiModel: NoteListUiModel,
     noteListAction: (NoteListAction) -> Unit = {},
 ) {
@@ -344,6 +352,7 @@ private fun NoteGrid(
             NoteItem(
                 modifier = Modifier,
                 note = noteEntity,
+                maxLength = maxLength,
                 noteListAction = noteListAction
             )
         }
@@ -354,7 +363,7 @@ private fun NoteGrid(
                     .padding(
                         bottom = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
                             .asPaddingValues()
-                            .calculateBottomPadding()
+                            .calculateBottomPadding() + 16.dp
                     )
             )
         }
@@ -365,6 +374,7 @@ private fun NoteGrid(
 private fun NoteItem(
     modifier: Modifier = Modifier,
     note: NoteEntity,
+    maxLength: Int,
     noteListAction: (NoteListAction) -> Unit = {},
 ) {
     Column(
@@ -385,20 +395,20 @@ private fun NoteItem(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = note.title,
+        LimitedText(
+            fullText = note.title,
             style = typography.titleMedium,
-            color = colorScheme.onSurface
+            color = colorScheme.onSurface,
+            targetCharCount = maxLength
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(
-            text = note.content,
+        LimitedText(
+            fullText = note.content,
             style = typography.bodySmall,
             color = colorScheme.onSurfaceVariant,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = Random.nextInt(3, 6)
+            targetCharCount = maxLength
         )
     }
 }

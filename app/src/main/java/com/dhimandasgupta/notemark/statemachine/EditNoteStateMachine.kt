@@ -58,8 +58,8 @@ class EditNoteStateMachine(
                             val inserted = noteMarkRepository.createNote(
                                 NoteEntity(
                                     id = System.currentTimeMillis(),
-                                    title = state.snapshot.title,
-                                    content = state.snapshot.content,
+                                    title = state.snapshot.title.trim(),
+                                    content = state.snapshot.content.trim(),
                                     createdAt = getCurrentIso8601Timestamp(),
                                     lastEditedAt = getCurrentIso8601Timestamp(),
                                     uuid = Uuid.random().toHexDashString()
@@ -71,15 +71,17 @@ class EditNoteStateMachine(
                             }
                         }
                         else -> {
-                            val updatedNote = noteMarkRepository.updateNote(
-                                title = state.snapshot.title,
-                                content = state.snapshot.content,
-                                lastEditedAt = getCurrentIso8601Timestamp(),
-                                noteEntity = state.snapshot.noteEntity!!
-                            )
+                            state.snapshot.noteEntity?.let { noteEntity ->
+                                val updatedNote = noteMarkRepository.updateNote(
+                                    title = state.snapshot.title.trim(),
+                                    content = state.snapshot.content.trim(),
+                                    lastEditedAt = getCurrentIso8601Timestamp(),
+                                    noteEntity = noteEntity
+                                )
 
-                            updatedNote?.let {
-                                return@on state.mutate { copy(saved = true) }
+                                updatedNote?.let {
+                                    return@on state.mutate { copy(saved = true) }
+                                }
                             }
                         }
                     }
