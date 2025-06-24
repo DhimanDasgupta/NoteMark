@@ -119,10 +119,15 @@ fun NoteEditToolbar(
             .background(color = colorScheme.surfaceContainerLowest)
             .fillMaxWidth()
             .padding(
-                end = 16.dp,
+                start = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                    .asPaddingValues()
+                    .calculateLeftPadding(LayoutDirection.Ltr),
                 top = WindowInsets.systemBars.union(WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateTopPadding(),
+                end = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                    .asPaddingValues()
+                    .calculateEndPadding(LayoutDirection.Ltr) + 16.dp
             ),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -155,7 +160,6 @@ fun NoteEditBody(
     onTitleTextChanged: (String) -> Unit = {},
     onBodyTextChanged: (String) -> Unit = {}
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
     LaunchedEffect(Unit) { focusManager.clearFocus() }

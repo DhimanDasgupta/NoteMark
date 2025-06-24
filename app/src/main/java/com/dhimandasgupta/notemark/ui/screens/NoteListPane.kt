@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
@@ -265,9 +266,15 @@ private fun NoteListPaneToolbar(
             .background(color = colorScheme.surfaceContainerLowest)
             .fillMaxWidth()
             .padding(
+                start = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                    .asPaddingValues()
+                    .calculateLeftPadding(LayoutDirection.Ltr),
                 top = WindowInsets.systemBars.union(WindowInsets.displayCutout)
                     .asPaddingValues()
-                    .calculateTopPadding()
+                    .calculateTopPadding(),
+                end = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                    .asPaddingValues()
+                    .calculateEndPadding(LayoutDirection.Ltr)
             )
             .padding(
                 vertical = 4.dp,
@@ -340,8 +347,8 @@ private fun NoteGrid(
 ) {
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(count = columnCount),
-        contentPadding = PaddingValues(16.dp),
-        verticalItemSpacing = 16.dp,
+        contentPadding = PaddingValues(8.dp),
+        verticalItemSpacing = 8.dp,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier.fillMaxSize()
     ) {
@@ -357,13 +364,15 @@ private fun NoteGrid(
             )
         }
 
-        item {
+        item(
+            span = StaggeredGridItemSpan.FullLine,
+        ) {
             Spacer(
                 modifier = Modifier
-                    .padding(
-                        bottom = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                    .height(
+                        height = WindowInsets.navigationBars
                             .asPaddingValues()
-                            .calculateBottomPadding() + 16.dp
+                            .calculateBottomPadding()
                     )
             )
         }
