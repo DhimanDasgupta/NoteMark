@@ -10,15 +10,21 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -73,6 +79,8 @@ fun NoteEditPane(
 
     LaunchedEffect(editNoteUiModel.saved) {
         if (editNoteUiModel.saved == true) {
+            focusManager.clearFocus()
+            keyboardController?.hide()
             onCloseClicked()
         }
     }
@@ -86,10 +94,11 @@ fun NoteEditPane(
     Column(
         modifier = modifier
             .background(color = colorScheme.surfaceContainerLowest)
-            .fillMaxSize()
+            .fillMaxWidth()
+            .wrapContentHeight(align = Alignment.Top)
     ) {
         NoteEditToolbar(
-            modifier = Modifier,
+            modifier = Modifier.wrapContentHeight(align = Alignment.Top),
             onCloseClicked = onCloseClicked,
             onSaveClicked = {
                 focusManager.clearFocus()
@@ -99,7 +108,9 @@ fun NoteEditPane(
         )
 
         NoteEditBody(
-            modifier = Modifier,
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(1f),
             titleText = editNoteUiModel.title,
             bodyText = editNoteUiModel.content,
             onTitleTextChanged =  { editNoteAction(EditNoteAction.UpdateTitle(it)) },
@@ -161,12 +172,14 @@ fun NoteEditBody(
     onBodyTextChanged: (String) -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) { focusManager.clearFocus() }
 
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .verticalScroll(scrollState)
             .padding(
                 start = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
                     .asPaddingValues()
@@ -175,18 +188,19 @@ fun NoteEditBody(
                     .asPaddingValues()
                     .calculateEndPadding(LayoutDirection.Ltr)
             )
+            .windowInsetsPadding(WindowInsets.ime)
             .padding(vertical = 16.dp),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
         TextField(
             value = titleText,
             onValueChange = { onTitleTextChanged(it) },
             textStyle = typography.titleLarge,
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .wrapContentHeight(align = Alignment.Top),
             visualTransformation = VisualTransformation.None,
             placeholder = { Text(text = "Note title", style = typography.titleLarge) },
-            maxLines = 2,
             colors = OutlinedTextFieldDefaults.colors().copy(
                 focusedTextColor = colorScheme.onSurface,
                 unfocusedTextColor = colorScheme.onSurface,
@@ -218,7 +232,8 @@ fun NoteEditBody(
             onValueChange = { onBodyTextChanged(it) },
             textStyle = typography.bodyLarge,
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .wrapContentHeight(align = Alignment.Top),
             visualTransformation = VisualTransformation.None,
             placeholder = { Text(text = "Tap to enter note content", style = typography.bodyLarge) },
             colors = OutlinedTextFieldDefaults.colors().copy(
