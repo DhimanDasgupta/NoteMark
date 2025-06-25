@@ -55,8 +55,6 @@ import com.dhimandasgupta.notemark.common.extensions.formatUserName
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.presenter.NoteListUiModel
 import com.dhimandasgupta.notemark.statemachine.AppState
-import com.dhimandasgupta.notemark.statemachine.LoggedInState
-import com.dhimandasgupta.notemark.statemachine.NonLoggedInState
 import com.dhimandasgupta.notemark.statemachine.NoteListAction
 import com.dhimandasgupta.notemark.statemachine.NoteListAction.NoteDeleted
 import com.dhimandasgupta.notemark.statemachine.NoteListAction.NoteLongClickConsumed
@@ -105,9 +103,9 @@ fun NoteListPane(
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        when (appState) {
-            is NonLoggedInState -> { onLogoutClicked() }
-            is LoggedInState -> NoteListValidPane(
+        when (appState.loggedInUser) {
+            null -> { onLogoutClicked() }
+            else -> NoteListValidPane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
                 userName = appState.loggedInUser.userName.formatUserName(),
@@ -570,7 +568,7 @@ private fun DeleteDialogPreview() {
     }
 }
 
-private val loggedInState = LoggedInState(
+private val loggedInState = AppState(
     loggedInUser = LoggedInUser(
         userName = "Dhiman",
         bearerTokens = BearerTokens("", "")

@@ -39,9 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.statemachine.AppState
-import com.dhimandasgupta.notemark.statemachine.LoggedInState
-import com.dhimandasgupta.notemark.statemachine.NonLoggedInState
+import com.dhimandasgupta.notemark.presenter.LauncherUiModel
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
@@ -65,13 +63,13 @@ import com.dhimandasgupta.notemark.ui.phonePortrait
 fun LauncherPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    appState: AppState,
+    launcherUiModel: LauncherUiModel,
     navigateToAfterLogin: () -> Unit = {},
     navigateToLogin: () -> Unit = {},
     navigateToList: () -> Unit = {}
 ) {
-    LaunchedEffect(appState) {
-        if (appState is LoggedInState) {
+    LaunchedEffect(launcherUiModel) {
+        if (launcherUiModel.loggedInUser != null) {
             navigateToList()
             return@LaunchedEffect
         }
@@ -330,7 +328,7 @@ private fun PhonePortraitPreview() {
         LauncherPane(
             modifier = Modifier,
             windowSizeClass = phonePortrait,
-            appState = NonLoggedInState(connectionState = null)
+            launcherUiModel = LauncherUiModel.Empty
         )
     }
 }
@@ -343,7 +341,7 @@ private fun PhoneLandscapePreview() {
         LauncherPane(
             modifier = Modifier,
             windowSizeClass = phoneLandscape,
-            appState = NonLoggedInState(connectionState = null)
+            launcherUiModel = LauncherUiModel.Empty
         )
     }
 }
@@ -356,7 +354,7 @@ private fun TabletMediumPortraitPreview() {
         LauncherPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletPortrait,
-            appState = NonLoggedInState(connectionState = null)
+            launcherUiModel = LauncherUiModel.Empty
         )
     }
 }
@@ -369,7 +367,7 @@ private fun TabletMediumLandscapePreview() {
         LauncherPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletLandscape,
-            appState = NonLoggedInState(connectionState = null)
+            launcherUiModel = LauncherUiModel.Empty
         )
     }
 }
@@ -382,7 +380,7 @@ private fun TabletExpandedPortraitPreview() {
         LauncherPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletPortrait,
-            appState = NonLoggedInState(connectionState = null)
+            launcherUiModel = LauncherUiModel.Empty
         )
     }
 }
@@ -395,7 +393,7 @@ private fun TabletExpandedLandscapePreview() {
         LauncherPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletLandscape,
-            appState = NonLoggedInState(connectionState = null)
+            launcherUiModel = LauncherUiModel.Empty
         )
     }
 }

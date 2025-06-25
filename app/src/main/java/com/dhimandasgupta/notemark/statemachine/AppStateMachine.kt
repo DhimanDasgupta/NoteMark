@@ -7,24 +7,14 @@ import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
-import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 
 @Immutable
-sealed interface AppState {
-    val connectionState: ConnectionState?
-}
-
-@Immutable
-data class NonLoggedInState(
-    override val connectionState: ConnectionState?
-) : AppState
-
-@Immutable
-data class LoggedInState(
-    val loggedInUser: LoggedInUser,
-    override val connectionState: ConnectionState? = null
-) : AppState
+data class AppState(
+    val connectionState: ConnectionState? = ConnectionState.Unavailable,
+    val loggedInUser: LoggedInUser? = null
+)
 
 sealed interface AppAction {
     object ConnectionStateConsumed: AppAction
@@ -33,36 +23,28 @@ sealed interface AppAction {
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AppStateMachine(
-    val applicationContext: Context,
-    val userManager: UserManager,
-    val noteMarkRepository: NoteMarkRepository
+    private val applicationContext: Context,
+    private val userManager: UserManager,
+    private val noteMarkRepository: NoteMarkRepository
 ) : StateMachine<AppState, AppAction>(defaultAppState) {
 
     init {
         spec {
-            inState<NonLoggedInState> {
+            inState<AppState> {
                 // All Flows while in the app state should be collected here
                 collectWhileInState(userManager.getUser()) { user, state ->
                     user?.let { nonNullUser ->
-                        state.override { LoggedInState(loggedInUser = nonNullUser, connectionState = null) }
+                        state.override { AppState(loggedInUser = nonNullUser, connectionState = ConnectionState.Unavailable) }
                     } ?: state.noChange()
                 }
                 collectWhileInState(applicationContext.observeConnectivityAsFlow()) { connected, state ->
                     state.mutate { state.snapshot.copy(connectionState = connected) }
                 }
 
-                // All the actions valid for app state should be handled here
-                on<AppAction.ConnectionStateConsumed> { _, state ->
-                    state.mutate { state.snapshot.copy(connectionState = null) }
-                }
-            }
-            inState<LoggedInState> {
                 onEnterEffect { state ->
                     syncRemoteNotes()
                 }
-                collectWhileInState(applicationContext.observeConnectivityAsFlow()) { connected, state ->
-                    state.mutate { state.snapshot.copy(connectionState = connected) }
-                }
+
                 // All the actions valid for app state should be handled here
                 on<AppAction.ConnectionStateConsumed> { _, state ->
                     state.mutate { state.snapshot.copy(connectionState = null) }
@@ -70,15 +52,16 @@ class AppStateMachine(
                 on<AppAction.AppLogout> { _, state ->
                     noteMarkRepository.deleteAllLocalNotes()
                     userManager.clearUser()
-                    state.override { NonLoggedInState(connectionState = state.snapshot.connectionState) }
+                    state.override { AppState(loggedInUser = null, connectionState = state.snapshot.connectionState) }
                 }
             }
         }
     }
 
     companion object {
-        val defaultAppState = NonLoggedInState(
-            connectionState = null
+        val defaultAppState = AppState(
+            connectionState = ConnectionState.Unavailable,
+            loggedInUser = null
         )
     }
 

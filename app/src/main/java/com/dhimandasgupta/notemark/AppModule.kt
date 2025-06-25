@@ -9,15 +9,15 @@ import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.NoteMarkRepositoryImpl
 import com.dhimandasgupta.notemark.data.local.datasource.NoteMarkLocalDataSource
 import com.dhimandasgupta.notemark.data.local.datasource.NoteMarkLocalDataSourceImpl
-import com.dhimandasgupta.notemark.database.NoteMarkDatabase
 import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
 import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApiImpl
 import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSource
 import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSourceImpl
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.data.remote.model.RefreshResponse
-import com.dhimandasgupta.notemark.presenter.AppPresenter
+import com.dhimandasgupta.notemark.database.NoteMarkDatabase
 import com.dhimandasgupta.notemark.presenter.EditNotePresenter
+import com.dhimandasgupta.notemark.presenter.LauncherPresenter
 import com.dhimandasgupta.notemark.presenter.LoginPresenter
 import com.dhimandasgupta.notemark.presenter.NoteListPresenter
 import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
@@ -42,7 +42,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
-import io.ktor.http.ContentType.*
+import io.ktor.http.ContentType.Application
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.first
@@ -120,14 +120,14 @@ val appModule = module {
     singleOf(::NoteMarkApiDataSourceImpl) bind NoteMarkApiDataSource::class
     singleOf(::NoteMarkLocalDataSourceImpl) bind NoteMarkLocalDataSource::class
     singleOf(::NoteMarkRepositoryImpl) bind NoteMarkRepository::class
-    factory {
+    single {
         AppStateMachine(
             applicationContext = androidContext(),
             userManager = get(),
             noteMarkRepository = get()
         )
     }
-    factoryOf(::AppPresenter)
+    factoryOf(::LauncherPresenter)
 
     factory { LoginStateMachine(noteMarkApi = get()) }
     factoryOf(::LoginPresenter)

@@ -31,6 +31,10 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.presenter.RegistrationUiModel
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.EmailEntered
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.PasswordEntered
@@ -53,7 +58,6 @@ import com.dhimandasgupta.notemark.statemachine.RegistrationAction.RepeatPasswor
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameEntered
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameFiledInFocus
 import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameFiledLostFocus
-import com.dhimandasgupta.notemark.statemachine.RegistrationState
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
@@ -78,7 +82,7 @@ fun RegistrationPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
     navigateToLogin: () -> Unit = {},
-    registrationState: RegistrationState,
+    registrationUiModel: RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {}
 ) {
     Box(
@@ -129,7 +133,7 @@ fun RegistrationPane(
                             )
                             .verticalScroll(rememberScrollState()),
                         navigateToLogin = navigateToLogin,
-                        registrationState = registrationState,
+                        registrationUiModel = registrationUiModel,
                         registrationAction = registrationAction
                     )
                 }
@@ -162,7 +166,7 @@ fun RegistrationPane(
                     RightPane(
                         modifier = Modifier.fillMaxWidth(),
                         navigateToLogin = navigateToLogin,
-                        registrationState = registrationState,
+                        registrationUiModel = registrationUiModel,
                         registrationAction = registrationAction
                     )
                 }
@@ -193,7 +197,7 @@ fun RegistrationPane(
                     Spacer(modifier = Modifier.height(16.dp))
                     RightPane(
                         navigateToLogin = navigateToLogin,
-                        registrationState = registrationState,
+                        registrationUiModel = registrationUiModel,
                         registrationAction = registrationAction
                     )
                 }
@@ -225,7 +229,7 @@ private fun LeftPane(modifier: Modifier = Modifier) {
 private fun RightPane(
     modifier: Modifier = Modifier,
     navigateToLogin: () -> Unit = {},
-    registrationState: RegistrationState,
+    registrationUiModel: RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -234,10 +238,10 @@ private fun RightPane(
 
     LaunchedEffect(Unit) { focusManager.clearFocus() }
 
-    LaunchedEffect(registrationState.registrationSuccess) {
-        if (registrationState.registrationSuccess == null) return@LaunchedEffect
+    LaunchedEffect(registrationUiModel.registrationSuccess) {
+        if (registrationUiModel.registrationSuccess == null) return@LaunchedEffect
         registrationAction(RegistrationChangeStatusConsumed)
-        Toast.makeText(context, if (registrationState.registrationSuccess == true) "Registration successful" else "Registration failed", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, if (registrationUiModel.registrationSuccess) "Registration successful" else "Registration failed", Toast.LENGTH_SHORT).show()
         navigateToLogin()
     }
 
@@ -245,50 +249,62 @@ private fun RightPane(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        var userName by rememberSaveable { mutableStateOf(registrationUiModel.userName) }
+        LaunchedEffect(userName) { registrationAction(UserNameEntered(userName)) }
+
         NoteMarkTextField(
             modifier = Modifier.fillMaxWidth(),
             label = "Username",
-            enteredText = registrationState.userName,
+            enteredText = userName,
             hintText = "John.doe",
-            onFocusGained = { registrationAction(UserNameFiledInFocus(registrationState.userName)) },
-            onFocusLost = { registrationAction(UserNameFiledLostFocus(registrationState.userName)) },
-            explanationText = registrationState.userNameExplanation ?: "",
-            errorText = registrationState.userNameError ?: "",
-            onTextChanged = { registrationAction(UserNameEntered(it)) },
+            onFocusGained = { registrationAction(UserNameFiledInFocus(registrationUiModel.userName)) },
+            onFocusLost = { registrationAction(UserNameFiledLostFocus(registrationUiModel.userName)) },
+            explanationText = registrationUiModel.userNameExplanation ?: "",
+            errorText = registrationUiModel.userNameError ?: "",
+            onTextChanged = { userName = it },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
+
+        var email by rememberSaveable { mutableStateOf(registrationUiModel.email) }
+        LaunchedEffect(email) { registrationAction(EmailEntered(email)) }
 
         NoteMarkTextField(
             modifier = Modifier.fillMaxWidth(),
             label = "Email",
-            enteredText = registrationState.email,
+            enteredText = email,
             hintText = "john.doe@gmail.com",
-            errorText = registrationState.emailError ?: "",
-            onTextChanged = { registrationAction(EmailEntered(it)) },
+            errorText = registrationUiModel.emailError ?: "",
+            onTextChanged = { email = it },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
+
+        var password by rememberSaveable { mutableStateOf(registrationUiModel.password) }
+        LaunchedEffect(password) { registrationAction(PasswordEntered(password)) }
 
         NoteMarkPasswordTextField(
             modifier = Modifier.fillMaxWidth(),
             label = "Password",
-            enteredText = registrationState.password,
+            enteredText = password,
             hintText = "Password",
-            explanationText = registrationState.passwordExplanation ?: "",
-            errorText = registrationState.passwordError ?: "",
-            onFocusGained = { registrationAction(PasswordFiledInFocus(registrationState.password)) },
-            onTextChanged = { registrationAction(PasswordEntered(it)) },
+            explanationText = registrationUiModel.passwordExplanation ?: "",
+            errorText = registrationUiModel.passwordError ?: "",
+            onFocusGained = { registrationAction(PasswordFiledInFocus(registrationUiModel.password)) },
+            onTextChanged = { password = it },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
+
+        var repeatPassword by rememberSaveable { mutableStateOf(registrationUiModel.repeatPassword) }
+        LaunchedEffect(repeatPassword) { registrationAction(RepeatPasswordEntered(repeatPassword)) }
 
         NoteMarkPasswordTextField(
             modifier = Modifier.fillMaxWidth(),
             label = "Repeat password",
-            enteredText = registrationState.repeatPassword,
+            enteredText = repeatPassword,
             hintText = "Password",
-            errorText = registrationState.repeatPasswordError ?: "",
-            onTextChanged = { registrationAction(RepeatPasswordEntered(it)) },
+            errorText = registrationUiModel.repeatPasswordError ?: "",
+            onTextChanged = { repeatPassword = it },
             onDoneClicked = {
-                if (registrationState.registrationEnabled) {
+                if (registrationUiModel.registrationEnabled) {
                     registrationAction(RegisterClicked)
                 }
                 focusManager.moveFocus(FocusDirection.Exit)
@@ -305,7 +321,7 @@ private fun RightPane(
             },
             modifier = Modifier
                 .fillMaxWidth(),
-            enabled = registrationState.registrationEnabled
+            enabled = registrationUiModel.registrationEnabled
         ) {
             Text(
                 text = "Create account",
@@ -340,7 +356,7 @@ private fun PhonePortraitPreview() {
         RegistrationPane(
             modifier = Modifier,
             windowSizeClass = phonePortrait,
-            registrationState = RegistrationState()
+            registrationUiModel = RegistrationUiModel.Empty
         )
     }
 }
@@ -353,7 +369,7 @@ private fun PhoneLandscapePreview() {
         RegistrationPane(
             modifier = Modifier,
             windowSizeClass = phoneLandscape,
-            registrationState = RegistrationState()
+            registrationUiModel = RegistrationUiModel.Empty
         )
     }
 }
@@ -366,7 +382,7 @@ private fun TabletMediumPortraitPreview() {
         RegistrationPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletPortrait,
-            registrationState = RegistrationState()
+            registrationUiModel = RegistrationUiModel.Empty
         )
     }
 }
@@ -379,7 +395,7 @@ private fun TabletMediumLandscapePreview() {
         RegistrationPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletLandscape,
-            registrationState = RegistrationState()
+            registrationUiModel = RegistrationUiModel.Empty
         )
     }
 }
@@ -392,7 +408,7 @@ private fun TabletExpandedPortraitPreview() {
         RegistrationPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletPortrait,
-            registrationState = RegistrationState()
+            registrationUiModel = RegistrationUiModel.Empty
         )
     }
 }
@@ -405,7 +421,7 @@ private fun TabletExpandedLandscapePreview() {
         RegistrationPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletLandscape,
-            registrationState = RegistrationState()
+            registrationUiModel = RegistrationUiModel.Empty
         )
     }
 }

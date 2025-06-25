@@ -30,6 +30,10 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,12 +46,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.presenter.LoginUiModel
 import com.dhimandasgupta.notemark.statemachine.LoginAction
 import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailEntered
 import com.dhimandasgupta.notemark.statemachine.LoginAction.HideLoginButton
 import com.dhimandasgupta.notemark.statemachine.LoginAction.LoginClicked
 import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordEntered
-import com.dhimandasgupta.notemark.statemachine.LoginState
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
@@ -74,7 +78,7 @@ fun LoginPane(
     windowSizeClass: WindowSizeClass,
     navigateToAfterLogin: () -> Unit = {},
     navigateToRegistration: () -> Unit = {},
-    loginState: LoginState,
+    loginUiModel: LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
 ) {
     Box(
@@ -125,7 +129,7 @@ fun LoginPane(
                             .verticalScroll(rememberScrollState()),
                         navigateToRegistration = navigateToRegistration,
                         navigateToAfterLogin = navigateToAfterLogin,
-                        loginState = loginState,
+                        loginUiModel = loginUiModel,
                         loginAction = loginAction
                     )
                 }
@@ -157,7 +161,7 @@ fun LoginPane(
                     RightPane(
                         navigateToRegistration = navigateToRegistration,
                         navigateToAfterLogin = navigateToAfterLogin,
-                        loginState = loginState,
+                        loginUiModel = loginUiModel,
                         loginAction = loginAction
                     )
                 }
@@ -189,7 +193,7 @@ fun LoginPane(
                     RightPane(
                         navigateToRegistration = navigateToRegistration,
                         navigateToAfterLogin = navigateToAfterLogin,
-                        loginState = loginState,
+                        loginUiModel = loginUiModel,
                         loginAction = loginAction
                     )
                 }
@@ -223,7 +227,7 @@ private fun LeftPane(
 private fun RightPane(
     modifier: Modifier = Modifier,
     navigateToRegistration: () -> Unit = {},
-    loginState: LoginState,
+    loginUiModel: LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
     navigateToAfterLogin: () -> Unit = {},
 ) {
@@ -233,11 +237,11 @@ private fun RightPane(
 
     LaunchedEffect(Unit) { focusManager.clearFocus() }
 
-    LaunchedEffect(loginState.loginSuccess) {
-        if (loginState.loginSuccess == null) return@LaunchedEffect
-        Toast.makeText(context, if (loginState.loginSuccess == true) "Login successful" else "Login failed", Toast.LENGTH_SHORT).show()
+    LaunchedEffect(loginUiModel.loginSuccess) {
+        if (loginUiModel.loginSuccess == null) return@LaunchedEffect
+        Toast.makeText(context, if (loginUiModel.loginSuccess) "Login successful" else "Login failed", Toast.LENGTH_SHORT).show()
         loginAction(LoginAction.LoginChangeConsumed)
-        if (loginState.loginSuccess == true) {
+        if (loginUiModel.loginSuccess) {
             navigateToAfterLogin()
         }
     }
@@ -246,23 +250,29 @@ private fun RightPane(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        var emailText by rememberSaveable { mutableStateOf(loginUiModel.email) }
+        LaunchedEffect(emailText) { loginAction(EmailEntered(emailText)) }
+
         NoteMarkTextField(
             modifier = Modifier.fillMaxWidth(),
             label = "Email",
-            enteredText = loginState.email,
+            enteredText = emailText,
             hintText = "john.doe@gmail.com",
-            onTextChanged = { loginAction(EmailEntered(it)) },
+            onTextChanged = { emailText = it },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
+
+        var passwordText by rememberSaveable { mutableStateOf(loginUiModel.password) }
+        LaunchedEffect(passwordText) { loginAction(PasswordEntered(passwordText)) }
 
         NoteMarkPasswordTextField(
             modifier = Modifier.fillMaxWidth(),
             label = "Password",
-            enteredText = loginState.password,
+            enteredText = passwordText,
             hintText = "Password",
-            onTextChanged = { loginAction(PasswordEntered(it)) },
+            onTextChanged = { passwordText = it },
             onDoneClicked = {
-                if (loginState.loginEnabled) {
+                if (loginUiModel.loginEnabled) {
                     loginAction(HideLoginButton)
                     loginAction(LoginClicked)
                 }
@@ -279,7 +289,7 @@ private fun RightPane(
                 loginAction(LoginClicked)
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = loginState.loginEnabled
+            enabled = loginUiModel.loginEnabled
         ) {
             Text(
                 text = "Log in",
@@ -312,7 +322,7 @@ private fun PhonePortraitPreview() {
         LoginPane(
             modifier = Modifier,
             windowSizeClass = phonePortrait,
-            loginState = LoginState()
+            loginUiModel = LoginUiModel.Empty
         )
     }
 }
@@ -325,7 +335,7 @@ private fun PhoneLandscapePreview() {
         LoginPane(
             modifier = Modifier,
             windowSizeClass = phoneLandscape,
-            loginState = LoginState()
+            loginUiModel = LoginUiModel.Empty
         )
     }
 }
@@ -338,7 +348,7 @@ private fun TabletMediumPortraitPreview() {
         LoginPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletPortrait,
-            loginState = LoginState()
+            loginUiModel = LoginUiModel.Empty
         )
     }
 }
@@ -351,7 +361,7 @@ private fun TabletMediumLandscapePreview() {
         LoginPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletLandscape,
-            loginState = LoginState()
+            loginUiModel = LoginUiModel.Empty
         )
     }
 }
@@ -364,7 +374,7 @@ private fun TabletExpandedPortraitPreview() {
         LoginPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletPortrait,
-            loginState = LoginState()
+            loginUiModel = LoginUiModel.Empty
         )
     }
 }
@@ -377,7 +387,7 @@ private fun TabletExpandedLandscapePreview() {
         LoginPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletLandscape,
-            loginState = LoginState()
+            loginUiModel = LoginUiModel.Empty
         )
     }
 }

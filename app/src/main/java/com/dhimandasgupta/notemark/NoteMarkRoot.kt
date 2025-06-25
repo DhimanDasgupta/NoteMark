@@ -13,14 +13,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.dhimandasgupta.notemark.NoteMarkDestination.NoteEditPane
-import com.dhimandasgupta.notemark.presenter.AppPresenter
 import com.dhimandasgupta.notemark.presenter.EditNotePresenter
+import com.dhimandasgupta.notemark.presenter.LauncherPresenter
 import com.dhimandasgupta.notemark.presenter.LoginPresenter
 import com.dhimandasgupta.notemark.presenter.NoteListPresenter
 import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
-import com.dhimandasgupta.notemark.statemachine.AppAction
-import com.dhimandasgupta.notemark.statemachine.AppState
-import com.dhimandasgupta.notemark.statemachine.NonLoggedInState
+import com.dhimandasgupta.notemark.statemachine.AppStateMachine.Companion.defaultAppState
 import com.dhimandasgupta.notemark.statemachine.NoteListAction.NoteClicked
 import com.dhimandasgupta.notemark.ui.screens.LauncherPane
 import com.dhimandasgupta.notemark.ui.screens.LoginPane
@@ -36,19 +34,12 @@ fun NoteMarkRoot(
     windowSizeClass: WindowSizeClass,
     modifier: Modifier = Modifier
 ) {
-    val appPresenter = koinInject<AppPresenter>()
-
-    val  appUiModel = appPresenter.uiModel()
-    val  appEvents = appPresenter::processEvent
-
     NavHost(
         navController = navController,
         startDestination = NoteMarkDestination.RootPane,
         modifier = modifier
     ) {
         noteMarkGraph(
-            appUiModel = appUiModel,
-            appEvents = appEvents,
             navController = navController,
             windowSizeClass = windowSizeClass
         )
@@ -57,8 +48,6 @@ fun NoteMarkRoot(
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 private fun NavGraphBuilder.noteMarkGraph(
-    appUiModel: AppState,
-    appEvents: (AppAction) -> Unit = {},
     navController: NavHostController,
     windowSizeClass: WindowSizeClass
 ) {
@@ -66,13 +55,15 @@ private fun NavGraphBuilder.noteMarkGraph(
         startDestination = NoteMarkDestination.LauncherPane
     ) {
         composable<NoteMarkDestination.LauncherPane> {
-            val context  = LocalActivity.current
+            val context = LocalActivity.current
+            val launcherPresenter = koinInject<LauncherPresenter>()
+            val launcherUiModel = launcherPresenter.uiModel()
 
             LauncherPane(
                 windowSizeClass = windowSizeClass,
-                appState = appUiModel,
+                launcherUiModel = launcherUiModel,
                 navigateToAfterLogin = {
-                    if (appUiModel is NonLoggedInState) {
+                    if (launcherUiModel.loggedInUser == null) {
                         Toast.makeText(context, "Oops!!! Please login first to get started", Toast.LENGTH_LONG).show()
                         return@LauncherPane
                     }
@@ -121,7 +112,7 @@ private fun NavGraphBuilder.noteMarkGraph(
                         }
                     }
                 },
-                loginState = loginUiModel,
+                loginUiModel = loginUiModel,
                 loginAction = loginEvents,
                 modifier = Modifier
             )
@@ -143,14 +134,13 @@ private fun NavGraphBuilder.noteMarkGraph(
                         }
                     }
                 },
-                registrationState = registrationUiModel,
+                registrationUiModel = registrationUiModel,
                 registrationAction = registrationAction,
             )
         }
 
         composable<NoteMarkDestination.NoteListPane> {
             val noteListPresenter = koinInject<NoteListPresenter>()
-
             val noteListUiModel = noteListPresenter.uiModel()
             val noteListAction = noteListPresenter::processEvent
 
@@ -158,7 +148,7 @@ private fun NavGraphBuilder.noteMarkGraph(
             NoteListPane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
-                appState = appUiModel,
+                appState = defaultAppState,
                 noteListUiModel = noteListUiModel,
                 noteListAction = noteListAction,
                 onNoteClicked = { uuid ->
@@ -169,7 +159,7 @@ private fun NavGraphBuilder.noteMarkGraph(
                     navController.navigate(NoteEditPane(""))
                 },
                 onLogoutClicked = {
-                    appEvents(AppAction.AppLogout)
+                    // scope.launch { appStateMachine.dispatch(AppAction.AppLogout) }
                     navController.navigate(NoteMarkDestination.LauncherPane) {
                         popUpTo(NoteMarkDestination.NoteListPane) {
                             inclusive = true
