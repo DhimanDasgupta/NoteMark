@@ -1,20 +1,28 @@
 package com.dhimandasgupta.notemark.statemachine
 
+import UserManager
 import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
+import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.statemachine.NoteListState.NoteListStateWithNoNotes
 import com.dhimandasgupta.notemark.statemachine.NoteListState.NoteListStateWithNotes
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.distinctUntilChanged
 import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 
 @Immutable
 sealed interface NoteListState {
-    object NoteListStateWithNoNotes : NoteListState
+    val userName: String?
+    data class NoteListStateWithNoNotes(
+        override val userName: String? = null
+    ) : NoteListState
+
     data class NoteListStateWithNotes(
+        override val userName: String?,
         val notes: List<NoteEntity>,
-        val clickedNoteUuid: String = "",
-        val longClickedNoteUuid: String = ""
+        val longClickedNoteUuid: String = "",
+        val clickedNoteUuid: String = ""
     ): NoteListState
 }
 
@@ -28,7 +36,8 @@ sealed interface NoteListAction {
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NoteListStateMachine(
-    val noteMarkRepository: NoteMarkRepository
+    private val userManager: UserManager,
+    private val noteMarkRepository: NoteMarkRepository
 ) : StateMachine<NoteListState, NoteListAction>(defaultNoteListState) {
     init {
         spec {
@@ -37,7 +46,19 @@ class NoteListStateMachine(
                     if (notes.isEmpty()) {
                         state.noChange()
                     } else {
-                        state.override { NoteListStateWithNotes(notes.sortedByDescending { it.lastEditedAt }) }
+                        state.override {
+                            NoteListStateWithNotes(
+                                userName = state.snapshot.userName,
+                                notes = notes.sortedByDescending { it.lastEditedAt }
+                            )
+                        }
+                    }
+                }
+                collectWhileInState(userManager.getUser()) { user, state ->
+                    state.mutate {
+                        copy(
+                            userName = user?.userName ?: ""
+                        )
                     }
                 }
             }
@@ -45,9 +66,25 @@ class NoteListStateMachine(
             inState<NoteListStateWithNotes> {
                 collectWhileInState(noteMarkRepository.getAllNotes()) { notes, state ->
                     if (notes.isNotEmpty()) {
-                        state.mutate { NoteListStateWithNotes(state.snapshot.notes.sortedByDescending { it.lastEditedAt }) }
+                        state.mutate {
+                            NoteListStateWithNotes(
+                                userName = state.snapshot.userName,
+                                notes = notes.sortedByDescending { it.lastEditedAt }
+                            )
+                        }
                     } else {
-                        state.override { NoteListStateWithNoNotes }
+                        state.override {
+                            NoteListStateWithNoNotes(
+                                userName = state.snapshot.userName
+                            )
+                        }
+                    }
+                }
+                collectWhileInState(userManager.getUser()) { user, state ->
+                    state.mutate {
+                        copy(
+                            userName = user?.userName ?: ""
+                        )
                     }
                 }
                 on<NoteListAction.NoteClicked> { action, state ->
@@ -95,6 +132,8 @@ class NoteListStateMachine(
     }
 
     companion object {
-        val defaultNoteListState = NoteListStateWithNoNotes
+        val defaultNoteListState = NoteListStateWithNoNotes(
+            userName = null
+        )
     }
 }

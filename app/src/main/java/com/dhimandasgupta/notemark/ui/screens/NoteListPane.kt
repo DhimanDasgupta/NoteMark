@@ -1,6 +1,5 @@
 package com.dhimandasgupta.notemark.ui.screens
 
-import LoggedInUser
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -49,12 +48,10 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.common.android.ConnectionState.Available
 import com.dhimandasgupta.notemark.common.convertIsoOffsetToReadableFormat
 import com.dhimandasgupta.notemark.common.extensions.formatUserName
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.presenter.NoteListUiModel
-import com.dhimandasgupta.notemark.statemachine.AppState
 import com.dhimandasgupta.notemark.statemachine.NoteListAction
 import com.dhimandasgupta.notemark.statemachine.NoteListAction.NoteDeleted
 import com.dhimandasgupta.notemark.statemachine.NoteListAction.NoteLongClickConsumed
@@ -76,14 +73,13 @@ import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
 import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
-import io.ktor.client.plugins.auth.providers.BearerTokens
+import kotlinx.collections.immutable.toPersistentList
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun NoteListPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    appState: AppState,
     noteListUiModel: NoteListUiModel,
     noteListAction: (NoteListAction) -> Unit = {},
     onNoteClicked: (String) -> Unit = {},
@@ -97,24 +93,28 @@ fun NoteListPane(
         }
     }
 
+    LaunchedEffect(noteListUiModel.userName) {
+        if (noteListUiModel.userName?.isEmpty() == true) {
+            onLogoutClicked()
+            return@LaunchedEffect
+        }
+    }
+
     Box(
         modifier = modifier
             .background(color = colorResource(R.color.splash_blue_background))
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        when (appState.loggedInUser) {
-            null -> { onLogoutClicked() }
-            else -> NoteListValidPane(
-                modifier = Modifier,
-                windowSizeClass = windowSizeClass,
-                userName = appState.loggedInUser.userName.formatUserName(),
-                noteListUiModel = noteListUiModel,
-                noteListAction = noteListAction,
-                onFabClicked = onFabClicked,
-                onLogoutClicked = onLogoutClicked
-            )
-        }
+        NoteListValidPane(
+            modifier = Modifier,
+            windowSizeClass = windowSizeClass,
+            userName = noteListUiModel.userName?.formatUserName() ?: "",
+            noteListUiModel = noteListUiModel,
+            noteListAction = noteListAction,
+            onFabClicked = onFabClicked,
+            onLogoutClicked = onLogoutClicked
+        )
 
         // Dialog check
         var showDialog by remember { mutableStateOf(false) }
@@ -480,7 +480,6 @@ private fun PhonePortraitPreview() {
         NoteListPane(
             modifier = Modifier,
             windowSizeClass = phonePortrait,
-            appState = loggedInState,
             noteListUiModel = noteListUiModel
         )
     }
@@ -494,7 +493,6 @@ private fun PhoneLandscapePreview() {
         NoteListPane(
             modifier = Modifier,
             windowSizeClass = phoneLandscape,
-            appState = loggedInState,
             noteListUiModel = noteListUiModel
         )
     }
@@ -508,7 +506,6 @@ private fun TabletMediumPortraitPreview() {
         NoteListPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletPortrait,
-            appState = loggedInState,
             noteListUiModel = noteListUiModel
         )
     }
@@ -522,7 +519,6 @@ private fun TabletMediumLandscapePreview() {
         NoteListPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletLandscape,
-            appState = loggedInState,
             noteListUiModel = noteListUiModel
         )
     }
@@ -536,7 +532,6 @@ private fun TabletExpandedPortraitPreview() {
         NoteListPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletPortrait,
-            appState = loggedInState,
             noteListUiModel = noteListUiModel
         )
     }
@@ -550,7 +545,6 @@ private fun TabletExpandedLandscapePreview() {
         NoteListPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletLandscape,
-            appState = loggedInState,
             noteListUiModel = noteListUiModel
         )
     }
@@ -568,15 +562,8 @@ private fun DeleteDialogPreview() {
     }
 }
 
-private val loggedInState = AppState(
-    loggedInUser = LoggedInUser(
-        userName = "Dhiman",
-        bearerTokens = BearerTokens("", "")
-    ),
-    connectionState = Available
-)
-
 private val noteListUiModel = NoteListUiModel(
+    userName = "Dhiman",
     noteEntities = listOf(
         NoteEntity(
             id = 0,
@@ -586,5 +573,5 @@ private val noteListUiModel = NoteListUiModel(
             lastEditedAt = "20th Apr",
             uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d"
         )
-    )
+    ).toPersistentList()
 )

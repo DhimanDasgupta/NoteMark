@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.statemachine.AppAction
 import com.dhimandasgupta.notemark.statemachine.AppStateMachine
@@ -34,33 +34,33 @@ class LauncherPresenter(
     @Composable
     fun uiModel(): LauncherUiModel {
         val scope = rememberCoroutineScope()
-        var launcherUiModel by remember { mutableStateOf(LauncherUiModel.Empty) }
+        var launcherUiModel by remember(
+            key1 = appStateMachine.state
+        ) { mutableStateOf(LauncherUiModel.Empty) }
 
         // Receives the State from the StateMachine
-        LifecycleStartEffect(Unit) {
+        LifecycleResumeEffect(
+            key1 = appStateMachine.state
+        ) {
             scope.launch {
                 appStateMachine.state.collect { appState ->
-                    launcherUiModel = LauncherUiModel(
+                    launcherUiModel = launcherUiModel.copy(
                         connectionState = appState.connectionState,
                         loggedInUser = appState.loggedInUser
                     )
                 }
             }
-            onStopOrDispose {
-                scope.cancel()
-            }
+            onPauseOrDispose { scope.cancel() }
         }
 
         // Send the Events to the State Machine through Actions
-        LifecycleStartEffect(key1 = Unit) {
+        LifecycleResumeEffect(key1 = Unit) {
             scope.launch {
                 events.collect { event ->
                     appStateMachine.dispatch(event)
                 }
             }
-            onStopOrDispose {
-                scope.cancel()
-            }
+            onPauseOrDispose { scope.cancel() }
         }
 
         return launcherUiModel

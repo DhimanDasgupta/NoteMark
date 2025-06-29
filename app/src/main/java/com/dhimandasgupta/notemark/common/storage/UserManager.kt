@@ -2,11 +2,11 @@ import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
 @Immutable
@@ -18,6 +18,7 @@ data class LoggedInUser(
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth_tokens")
 
 interface UserManager {
+    suspend fun saveToken(bearerTokens: BearerTokens)
     suspend fun saveUser(loggerInUser: LoggedInUser)
     fun getUser(): Flow<LoggedInUser?>
     suspend fun clearUser()
@@ -33,6 +34,8 @@ interface UserManager {
 class UserManagerImpl(
     private val context: Context
 ) : UserManager {
+    private val dataStore: DataStore<Preferences> = context.dataStore
+
     /**
      * Companion object holding the keys used for storing user preferences in DataStore.
      */
@@ -48,16 +51,37 @@ class UserManagerImpl(
     }
 
     /**
+     * Saves the provided [BearerTokens]'s details to DataStore.
+     * Stores the access token, refresh token (if available).
+     *
+     * @param bearerTokens The token to save.
+     */
+    override suspend fun saveToken(bearerTokens: BearerTokens) {
+        dataStore.updateData { preferences ->
+            preferences.toMutablePreferences().apply {
+                set(ACCESS_TOKEN_KEY, bearerTokens.accessToken)
+                bearerTokens.refreshToken?.let { refreshToken ->
+                    set(REFRESH_TOKEN_KEY, refreshToken)
+                }
+            }
+        }
+    }
+
+    /**
      * Saves the provided [LoggedInUser]'s details to DataStore.
      * Stores the access token, refresh token (if available), and username.
      *
      * @param loggerInUser The user data to save.
      */
     override suspend fun saveUser(loggerInUser: LoggedInUser) {
-        context.dataStore.edit { preferences ->
-            preferences[ACCESS_TOKEN_KEY] = loggerInUser.bearerTokens.accessToken
-            loggerInUser.bearerTokens.refreshToken?.let { preferences[REFRESH_TOKEN_KEY] = it }
-            preferences[USER_NAME] = loggerInUser.userName
+        dataStore.updateData { preferences ->
+            preferences.toMutablePreferences().apply {
+                set(USER_NAME, loggerInUser.userName)
+                set(ACCESS_TOKEN_KEY, loggerInUser.bearerTokens.accessToken)
+                loggerInUser.bearerTokens.refreshToken?.let { refreshToken ->
+                    set(REFRESH_TOKEN_KEY, refreshToken)
+                }
+            }
         }
     }
 
@@ -68,23 +92,23 @@ class UserManagerImpl(
      *
      * @return A [Flow] emitting the [LoggedInUser] or `null` if no user data is found or is incomplete.
      */
-    override fun getUser(): Flow<LoggedInUser?> {
-        return context.dataStore.data.map { preferences ->
-            val userName = preferences[USER_NAME]
-            val accessToken = preferences[ACCESS_TOKEN_KEY]
-            val refreshToken = preferences[REFRESH_TOKEN_KEY]
+    override fun getUser(): Flow<LoggedInUser?> = dataStore.data.catch { exception ->
+        null
+    }.map {
+        val userName = it[USER_NAME]
+        val accessToken = it[ACCESS_TOKEN_KEY]
+        val refreshToken = it[REFRESH_TOKEN_KEY]
 
-            if (userName != null && accessToken != null && refreshToken != null) {
-                LoggedInUser(
-                    userName = userName,
-                    bearerTokens = BearerTokens(
-                        accessToken = accessToken,
-                        refreshToken = refreshToken
-                    )
+        if (userName != null) {
+            LoggedInUser(
+                userName = userName,
+                bearerTokens = BearerTokens(
+                    accessToken = accessToken ?: "",
+                    refreshToken = refreshToken
                 )
-            } else {
-                null
-            }
+            )
+        } else {
+            null
         }
     }
 
@@ -93,8 +117,10 @@ class UserManagerImpl(
      * Effectively removes all user authentication data.
      */
     override suspend fun clearUser() {
-        context.dataStore.edit { preferences ->
-            preferences.clear()
+        dataStore.updateData { preferences ->
+            preferences.toMutablePreferences().also {
+                it.clear()
+            }
         }
     }
 }

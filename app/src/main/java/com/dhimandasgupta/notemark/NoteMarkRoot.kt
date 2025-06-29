@@ -18,7 +18,7 @@ import com.dhimandasgupta.notemark.presenter.LauncherPresenter
 import com.dhimandasgupta.notemark.presenter.LoginPresenter
 import com.dhimandasgupta.notemark.presenter.NoteListPresenter
 import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
-import com.dhimandasgupta.notemark.statemachine.AppStateMachine.Companion.defaultAppState
+import com.dhimandasgupta.notemark.statemachine.AppAction
 import com.dhimandasgupta.notemark.statemachine.NoteListAction.NoteClicked
 import com.dhimandasgupta.notemark.ui.screens.LauncherPane
 import com.dhimandasgupta.notemark.ui.screens.LoginPane
@@ -120,7 +120,6 @@ private fun NavGraphBuilder.noteMarkGraph(
 
         composable<NoteMarkDestination.RegistrationPane> {
             val registrationPresenter = koinInject<RegistrationPresenter>()
-
             val registrationUiModel = registrationPresenter.uiModel()
             val registrationAction = registrationPresenter::processEvent
 
@@ -143,12 +142,12 @@ private fun NavGraphBuilder.noteMarkGraph(
             val noteListPresenter = koinInject<NoteListPresenter>()
             val noteListUiModel = noteListPresenter.uiModel()
             val noteListAction = noteListPresenter::processEvent
+            val appAction = noteListPresenter::processAppActionEvent
 
 
             NoteListPane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
-                appState = defaultAppState,
                 noteListUiModel = noteListUiModel,
                 noteListAction = noteListAction,
                 onNoteClicked = { uuid ->
@@ -159,7 +158,7 @@ private fun NavGraphBuilder.noteMarkGraph(
                     navController.navigate(NoteEditPane(""))
                 },
                 onLogoutClicked = {
-                    // scope.launch { appStateMachine.dispatch(AppAction.AppLogout) }
+                    appAction(AppAction.AppLogout)
                     navController.navigate(NoteMarkDestination.LauncherPane) {
                         popUpTo(NoteMarkDestination.NoteListPane) {
                             inclusive = true
@@ -171,9 +170,7 @@ private fun NavGraphBuilder.noteMarkGraph(
 
         composable<NoteEditPane> { backStackEntry ->
             val arguments: NoteEditPane = backStackEntry.toRoute()
-
             val editNotePresenter = koinInject<EditNotePresenter>()
-
             val editNoteUiModel = editNotePresenter.uiModel()
             val editNoteAction = editNotePresenter::processEvent
 

@@ -1,6 +1,5 @@
 package com.dhimandasgupta.notemark
 
-import LoggedInUser
 import UserManager
 import UserManagerImpl
 import app.cash.sqldelight.db.SqlDriver
@@ -90,15 +89,7 @@ val appModule = module {
                             }.body<RefreshResponse>()
 
                             val newTokens = BearerTokens(response.accessToken, response.refreshToken)
-                            val userManager = get<UserManager>()
-                            userManager.getUser().first()?.userName?.let { userName ->
-                                userManager.saveUser(
-                                    loggerInUser = LoggedInUser(
-                                        userName = userName,
-                                        bearerTokens = newTokens
-                                    )
-                                )
-                            }
+                            get<UserManager>().saveToken(newTokens)
                             newTokens
                         } catch (_: Exception) {
                             get<UserManager>().clearUser()
@@ -135,7 +126,7 @@ val appModule = module {
     factory { RegistrationStateMachine(noteMarkApi = get()) }
     factoryOf(::RegistrationPresenter)
 
-    factory { NoteListStateMachine(noteMarkRepository = get()) }
+    factory { NoteListStateMachine(userManager = get(), noteMarkRepository = get()) }
     factoryOf(::NoteListPresenter)
 
     factory { EditNoteStateMachine(noteMarkRepository = get()) }

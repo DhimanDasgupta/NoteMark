@@ -27,15 +27,19 @@ class AppStateMachine(
     private val userManager: UserManager,
     private val noteMarkRepository: NoteMarkRepository
 ) : StateMachine<AppState, AppAction>(defaultAppState) {
+    private var cachedUser: LoggedInUser? = null
 
     init {
         spec {
             inState<AppState> {
                 // All Flows while in the app state should be collected here
                 collectWhileInState(userManager.getUser()) { user, state ->
-                    user?.let { nonNullUser ->
-                        state.override { AppState(loggedInUser = nonNullUser, connectionState = ConnectionState.Unavailable) }
-                    } ?: state.noChange()
+                    user?.let { cachedUser = it }
+                    if (cachedUser != null) {
+                        state.override { state.snapshot.copy(loggedInUser = cachedUser) }
+                    } else {
+                        state.noChange()
+                    }
                 }
                 collectWhileInState(applicationContext.observeConnectivityAsFlow()) { connected, state ->
                     state.mutate { state.snapshot.copy(connectionState = connected) }
@@ -50,6 +54,7 @@ class AppStateMachine(
                     state.mutate { state.snapshot.copy(connectionState = null) }
                 }
                 on<AppAction.AppLogout> { _, state ->
+                    cachedUser = null
                     noteMarkRepository.deleteAllLocalNotes()
                     userManager.clearUser()
                     state.override { AppState(loggedInUser = null, connectionState = state.snapshot.connectionState) }
