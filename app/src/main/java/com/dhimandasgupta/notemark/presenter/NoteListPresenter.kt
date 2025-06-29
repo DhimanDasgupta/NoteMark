@@ -19,6 +19,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 @Immutable
@@ -48,10 +49,10 @@ class NoteListPresenter(
 
         // Receives the State from the StateMachine
         LifecycleStartEffect(
-            key1 = appStateMachine.state
+            key1 = Unit
         ) {
             scope.launch {
-                appStateMachine.state.collect { appState ->
+                appStateMachine.state.onStart { AppStateMachine.defaultAppState }.collect { appState ->
                     appState.loggedInUser?.userName?.let {
                         noteListUiModel = noteListUiModel.copy(userName = it)
                     }
@@ -61,14 +62,13 @@ class NoteListPresenter(
         }
 
         LifecycleStartEffect(
-            key1 = noteListStateMachine.state
+            key1 = Unit
         ) {
             scope.launch {
-                noteListStateMachine.state.collect { noteListState ->
+                noteListStateMachine.state.onStart { NoteListStateMachine.defaultNoteListState }.collect { noteListState ->
                     noteListUiModel = when (noteListState) {
                         is NoteListState.NoteListStateWithNotes -> {
                             noteListUiModel.copy(
-                                userName = noteListState.userName,
                                 noteEntities = noteListState.notes.toPersistentList(),
                                 noteClickedUuid = noteListState.clickedNoteUuid,
                                 noteLongClickedUuid = noteListState.longClickedNoteUuid
@@ -76,7 +76,6 @@ class NoteListPresenter(
                         }
 
                         else -> noteListUiModel.copy(
-                            userName = noteListState.userName,
                             noteEntities = persistentListOf()
                         )
                     }

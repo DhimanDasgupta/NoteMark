@@ -35,11 +35,7 @@ class AppStateMachine(
                 // All Flows while in the app state should be collected here
                 collectWhileInState(userManager.getUser()) { user, state ->
                     user?.let { cachedUser = it }
-                    if (cachedUser != null) {
-                        state.override { state.snapshot.copy(loggedInUser = cachedUser) }
-                    } else {
-                        state.noChange()
-                    }
+                    state.mutate { state.snapshot.copy(loggedInUser = cachedUser) }
                 }
                 collectWhileInState(applicationContext.observeConnectivityAsFlow()) { connected, state ->
                     state.mutate { state.snapshot.copy(connectionState = connected) }
@@ -57,7 +53,7 @@ class AppStateMachine(
                     cachedUser = null
                     noteMarkRepository.deleteAllLocalNotes()
                     userManager.clearUser()
-                    state.override { AppState(loggedInUser = null, connectionState = state.snapshot.connectionState) }
+                    state.override { state.snapshot.copy(loggedInUser = null) }
                 }
             }
         }

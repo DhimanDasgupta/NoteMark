@@ -9,11 +9,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.LifecycleStartEffect
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.statemachine.AppAction
 import com.dhimandasgupta.notemark.statemachine.AppStateMachine
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 @Immutable
@@ -39,18 +41,20 @@ class LauncherPresenter(
         ) { mutableStateOf(LauncherUiModel.Empty) }
 
         // Receives the State from the StateMachine
-        LifecycleResumeEffect(
-            key1 = appStateMachine.state
+        LifecycleStartEffect(
+            key1 = Unit
         ) {
             scope.launch {
-                appStateMachine.state.collect { appState ->
-                    launcherUiModel = launcherUiModel.copy(
-                        connectionState = appState.connectionState,
-                        loggedInUser = appState.loggedInUser
-                    )
+                appStateMachine.state.onStart { emit(AppStateMachine.defaultAppState) }.collect { appState ->
+                    appState.loggedInUser?.let {
+                        launcherUiModel = launcherUiModel.copy(
+                            connectionState = appState.connectionState,
+                            loggedInUser = appState.loggedInUser
+                        )
+                    }
                 }
             }
-            onPauseOrDispose { scope.cancel() }
+            onStopOrDispose { scope.cancel() }
         }
 
         // Send the Events to the State Machine through Actions
