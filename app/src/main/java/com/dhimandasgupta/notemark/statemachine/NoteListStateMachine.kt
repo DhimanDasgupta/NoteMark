@@ -3,12 +3,10 @@ package com.dhimandasgupta.notemark.statemachine
 import UserManager
 import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
-import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.statemachine.NoteListState.NoteListStateWithNoNotes
 import com.dhimandasgupta.notemark.statemachine.NoteListState.NoteListStateWithNotes
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.distinctUntilChanged
 import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 
 @Immutable
