@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
@@ -49,8 +48,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.presenter.EditNoteUiModel
 import com.dhimandasgupta.notemark.statemachine.EditNoteAction
-import com.dhimandasgupta.notemark.statemachine.EditNoteState
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
@@ -70,7 +69,7 @@ fun NoteEditPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
     noteId: String = "",
-    editNoteUiModel: EditNoteState,
+    editNoteUiModel: EditNoteUiModel,
     editNoteAction: (EditNoteAction) -> Unit = {},
     onCloseClicked: () -> Unit = {}
 ) {
@@ -262,7 +261,7 @@ private fun PhonePortraitPreview() {
         NoteEditPane(
             modifier = Modifier,
             windowSizeClass = phonePortrait,
-            editNoteUiModel = defaultEditNoteState
+            editNoteUiModel = defaultEditNoteUiModel
         )
     }
 }
@@ -275,7 +274,7 @@ private fun PhoneLandscapePreview() {
         NoteEditPane(
             modifier = Modifier,
             windowSizeClass = phoneLandscape,
-            editNoteUiModel = defaultEditNoteState
+            editNoteUiModel = defaultEditNoteUiModel
         )
     }
 }
@@ -288,7 +287,7 @@ private fun TabletMediumPortraitPreview() {
         NoteEditPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletPortrait,
-            editNoteUiModel = defaultEditNoteState
+            editNoteUiModel = defaultEditNoteUiModel
         )
     }
 }
@@ -301,7 +300,7 @@ private fun TabletMediumLandscapePreview() {
         NoteEditPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletLandscape,
-            editNoteUiModel = defaultEditNoteState
+            editNoteUiModel = defaultEditNoteUiModel
         )
     }
 }
@@ -314,7 +313,7 @@ private fun TabletExpandedPortraitPreview() {
         NoteEditPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletPortrait,
-            editNoteUiModel = defaultEditNoteState
+            editNoteUiModel = defaultEditNoteUiModel
         )
     }
 }
@@ -327,12 +326,12 @@ private fun TabletExpandedLandscapePreview() {
         NoteEditPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletLandscape,
-            editNoteUiModel = defaultEditNoteState
+            editNoteUiModel = defaultEditNoteUiModel
         )
     }
 }
 
-private val defaultEditNoteState = EditNoteState(
+private val defaultEditNoteUiModel = EditNoteUiModel(
     title = "Hello there, this is a the title of the Note",
     content = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
     noteEntity = null

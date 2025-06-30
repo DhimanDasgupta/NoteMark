@@ -76,6 +76,7 @@ class UserManagerImpl(
     override suspend fun saveUser(loggerInUser: LoggedInUser) {
         dataStore.updateData { preferences ->
             preferences.toMutablePreferences().apply {
+                clear()
                 set(USER_NAME, loggerInUser.userName)
                 set(ACCESS_TOKEN_KEY, loggerInUser.bearerTokens.accessToken)
                 loggerInUser.bearerTokens.refreshToken?.let { refreshToken ->

@@ -20,6 +20,7 @@ import com.dhimandasgupta.notemark.presenter.LauncherPresenter
 import com.dhimandasgupta.notemark.presenter.LoginPresenter
 import com.dhimandasgupta.notemark.presenter.NoteListPresenter
 import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
+import com.dhimandasgupta.notemark.presenter.SettingsPresenter
 import com.dhimandasgupta.notemark.statemachine.AppStateMachine
 import com.dhimandasgupta.notemark.statemachine.EditNoteStateMachine
 import com.dhimandasgupta.notemark.statemachine.LoginStateMachine
@@ -131,4 +132,6 @@ val appModule = module {
 
     factory { EditNoteStateMachine(noteMarkRepository = get()) }
     factoryOf(::EditNotePresenter)
+
+    factoryOf(::SettingsPresenter)
 }

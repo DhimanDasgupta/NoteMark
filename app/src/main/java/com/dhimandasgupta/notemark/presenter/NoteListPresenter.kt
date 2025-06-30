@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.statemachine.AppAction
+import com.dhimandasgupta.notemark.statemachine.AppState
 import com.dhimandasgupta.notemark.statemachine.AppStateMachine
 import com.dhimandasgupta.notemark.statemachine.NoteListAction
 import com.dhimandasgupta.notemark.statemachine.NoteListState
@@ -53,9 +54,12 @@ class NoteListPresenter(
         ) {
             scope.launch {
                 appStateMachine.state.onStart { AppStateMachine.defaultAppState }.collect { appState ->
-                    appState.loggedInUser?.userName?.let {
-                        noteListUiModel = noteListUiModel.copy(userName = it)
-                    }
+                    noteListUiModel = noteListUiModel.copy(
+                        userName = when (appState) {
+                            is AppState.LoggedIn -> appState.loggedInUser.userName
+                            else -> ""
+                        }
+                    )
                 }
             }
             onStopOrDispose { scope.cancel() }

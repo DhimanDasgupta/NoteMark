@@ -3,9 +3,12 @@ package com.dhimandasgupta.notemark.data
 import com.dhimandasgupta.notemark.data.local.datasource.NoteMarkLocalDataSource
 import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSource
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
+import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.database.NoteEntity
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
 
 interface NoteMarkRepository {
@@ -18,6 +21,7 @@ interface NoteMarkRepository {
     suspend fun insertNotes(noteEntities: List<NoteEntity>): Boolean
     suspend fun deleteNote(noteEntity: NoteEntity): Boolean
     suspend fun deleteAllLocalNotes(): Boolean
+    suspend fun logout(request: RefreshRequest): Result<Unit>
 }
 
 class NoteMarkRepositoryImpl(
@@ -100,5 +104,15 @@ class NoteMarkRepositoryImpl(
     } catch (_: Exception) {
         coroutineContext.ensureActive()
         false
+    }
+
+    override suspend fun logout(request: RefreshRequest): Result<Unit> {
+        val result = remoteDataSource.logout(request)
+        result.onSuccess {
+            withContext(NonCancellable) {
+                localDataSource.deleteAllNotes()
+            }
+        }
+        return result
     }
 }

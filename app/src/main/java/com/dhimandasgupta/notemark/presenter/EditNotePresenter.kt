@@ -1,16 +1,37 @@
 package com.dhimandasgupta.notemark.presenter
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.LifecycleStartEffect
+import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.statemachine.EditNoteAction
-import com.dhimandasgupta.notemark.statemachine.EditNoteState
 import com.dhimandasgupta.notemark.statemachine.EditNoteStateMachine
-import com.dhimandasgupta.notemark.statemachine.EditNoteStateMachine.Companion.defaultEditNoteState
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
+
+@Immutable
+data class EditNoteUiModel(
+    val title: String,
+    val content: String,
+    val noteEntity: NoteEntity? = null,
+    val saved: Boolean? = null
+) {
+    companion object {
+        val Empty = EditNoteUiModel(
+            title = "",
+            content = "",
+            noteEntity = null
+        )
+    }
+}
 
 class EditNotePresenter(
     private val editNoteStateMachine: EditNoteStateMachine
@@ -18,21 +39,37 @@ class EditNotePresenter(
     private val events = MutableSharedFlow<EditNoteAction>(extraBufferCapacity = 10)
 
     @Composable
-    fun uiModel(): EditNoteState {
-        var editNoteUiModel by remember { mutableStateOf(defaultEditNoteState) }
+    fun uiModel(): EditNoteUiModel {
+        val scope = rememberCoroutineScope()
+        var editNoteUiModel by remember(
+            key1 = editNoteStateMachine.state
+        ) { mutableStateOf(EditNoteUiModel.Empty) }
 
         // Receives the State from the StateMachine
-        LaunchedEffect(key1 = Unit) {
-            editNoteStateMachine.state.collect { editNoteState ->
-                editNoteUiModel = editNoteState
+        LifecycleStartEffect(
+            key1 = Unit
+        ) {
+            scope.launch {
+                editNoteStateMachine.state.onStart { EditNoteStateMachine.defaultEditNoteState }.collect { editNoteState ->
+                    editNoteUiModel = editNoteUiModel.copy(
+                        title = editNoteState.title,
+                        content = editNoteState.content,
+                        noteEntity = editNoteState.noteEntity,
+                        saved = editNoteState.saved
+                    )
+                }
             }
+            onStopOrDispose { scope.cancel() }
         }
 
         // Send the Events to the State Machine through Actions
-        LaunchedEffect(key1 = Unit) {
-            events.collect { editNoteAction ->
-                editNoteStateMachine.dispatch(editNoteAction)
+        LifecycleStartEffect(key1 = Unit) {
+            scope.launch {
+                events.collect { editNoteAction ->
+                    editNoteStateMachine.dispatch(editNoteAction)
+                }
             }
+            onStopOrDispose { scope.cancel() }
         }
 
         return editNoteUiModel

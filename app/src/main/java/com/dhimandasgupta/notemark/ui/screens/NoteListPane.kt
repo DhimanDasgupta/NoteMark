@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
@@ -27,6 +28,8 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
@@ -43,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -84,7 +88,8 @@ fun NoteListPane(
     noteListAction: (NoteListAction) -> Unit = {},
     onNoteClicked: (String) -> Unit = {},
     onFabClicked: () -> Unit = {},
-    onLogoutClicked: () -> Unit = {},
+    onSettingsClicked: () -> Unit = {},
+    onProfileClicked: () -> Unit = {},
 ) {
     LaunchedEffect(key1 = noteListUiModel.noteClickedUuid) {
         if (noteListUiModel.noteClickedUuid.isNotEmpty()) {
@@ -95,7 +100,7 @@ fun NoteListPane(
 
     LaunchedEffect(noteListUiModel.userName) {
         if (noteListUiModel.userName?.isEmpty() == true) {
-            onLogoutClicked()
+            onProfileClicked()
             return@LaunchedEffect
         }
     }
@@ -113,7 +118,8 @@ fun NoteListPane(
             noteListUiModel = noteListUiModel,
             noteListAction = noteListAction,
             onFabClicked = onFabClicked,
-            onLogoutClicked = onLogoutClicked
+            onSettingsClicked = onSettingsClicked,
+            onProfileClicked = onProfileClicked
         )
 
         // Dialog check
@@ -145,14 +151,16 @@ private fun NoteListValidPane(
     noteListUiModel: NoteListUiModel,
     noteListAction: (NoteListAction) -> Unit = {},
     onFabClicked: () -> Unit = {},
-    onLogoutClicked: () -> Unit = {},
+    onSettingsClicked: () -> Unit = {},
+    onProfileClicked: () -> Unit = {},
 ) {
     when (noteListUiModel.noteEntities.isEmpty()) {
         true -> NoteListWithEmptyNotes(
             modifier = modifier,
             userName = userName,
             onFabClicked = onFabClicked,
-            onLogoutClicked = onLogoutClicked
+            onSettingsClicked = onSettingsClicked,
+            onProfileClicked = onProfileClicked
         )
         else -> NoteListWithNotes(
             modifier = Modifier,
@@ -161,7 +169,8 @@ private fun NoteListValidPane(
             noteListState = noteListUiModel,
             noteListAction = noteListAction,
             onFabClicked = onFabClicked,
-            onLogoutClicked = onLogoutClicked
+            onSettingsClicked = onSettingsClicked,
+            onProfileClicked = onProfileClicked
         )
     }
 }
@@ -171,13 +180,15 @@ private fun NoteListWithEmptyNotes(
     modifier: Modifier = Modifier,
     userName: String,
     onFabClicked: () -> Unit,
-    onLogoutClicked: () -> Unit
+    onSettingsClicked: () -> Unit,
+    onProfileClicked: () -> Unit
 ) {
     NoNotes(
         modifier = modifier,
         userName = userName,
         onFabClicked = onFabClicked,
-        onLogoutClicked = onLogoutClicked
+        onSettingsClicked = onSettingsClicked,
+        onProfileClicked = onProfileClicked
     )
 }
 
@@ -189,7 +200,8 @@ fun NoteListWithNotes(
     noteListState: NoteListUiModel,
     noteListAction: (NoteListAction) -> Unit = {},
     onFabClicked: () -> Unit = {},
-    onLogoutClicked: () -> Unit = {},
+    onSettingsClicked: () -> Unit = {},
+    onProfileClicked: () -> Unit = {},
 ) {
     val layoutType = getDeviceLayoutType(windowSizeClass)
     val columnCount = remember(layoutType) {
@@ -213,7 +225,8 @@ fun NoteListWithNotes(
             modifier = Modifier,
             toolbarTitle = "NoteMark",
             userName = userName,
-            onLogoutClicked = onLogoutClicked
+            onSettingsClicked = onSettingsClicked,
+            onProfileClicked = onProfileClicked
         )
 
         Box(
@@ -250,7 +263,8 @@ private fun NoteListPaneToolbar(
     modifier: Modifier = Modifier,
     toolbarTitle: String,
     userName: String,
-    onLogoutClicked: () -> Unit,
+    onSettingsClicked: () -> Unit,
+    onProfileClicked: () -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -276,12 +290,25 @@ private fun NoteListPaneToolbar(
     ) {
         Text(
             text = toolbarTitle,
-            style = typography.titleMedium
+            style = typography.titleMedium,
+            modifier = Modifier.weight(1f)
         )
+
+        IconButton(
+            onClick = onSettingsClicked
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_settings),
+                contentDescription = "Settings",
+                modifier = Modifier.requiredSize(size = 48.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
 
         NoteMarkToolbarButton(
             title = userName,
-            onClick = onLogoutClicked
+            onClick = onProfileClicked
         )
     }
 }
@@ -291,7 +318,8 @@ private fun NoNotes(
     modifier: Modifier = Modifier,
     toolbarTitle: String = "NoteMark",
     userName: String = "DD",
-    onLogoutClicked: () -> Unit,
+    onSettingsClicked: () -> Unit,
+    onProfileClicked: () -> Unit,
     onFabClicked: () -> Unit = {},
 ) {
     Box(
@@ -301,7 +329,8 @@ private fun NoNotes(
             modifier = Modifier,
             toolbarTitle = toolbarTitle,
             userName = userName,
-            onLogoutClicked = onLogoutClicked
+            onSettingsClicked = onSettingsClicked,
+            onProfileClicked = onProfileClicked
         )
 
         Text(

@@ -14,3 +14,5 @@ val OnSurfaceVariant = Color(0xFF535364)
 val OnSurfaceVariantDark = Color(0xFFEFEFF2)
 val SurfaceLowest = Color(0xFFFFFFFF)
 val SurfaceLowestDark = Color(0x00000000)
+
+val Error = Color(0xFFB3261E)

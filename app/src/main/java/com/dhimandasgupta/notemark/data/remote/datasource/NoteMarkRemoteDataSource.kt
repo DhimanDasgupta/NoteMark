@@ -3,6 +3,7 @@ package com.dhimandasgupta.notemark.data.remote.datasource
 import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
 import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
+import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.database.NoteEntity
 
 interface NoteMarkApiDataSource {
@@ -10,6 +11,7 @@ interface NoteMarkApiDataSource {
     suspend fun createNote(noteEntity: NoteEntity): Result<Note>
     suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): Result<Note>
     suspend fun deleteNote(noteEntity: NoteEntity): Result<Unit>
+    suspend fun logout(request: RefreshRequest): Result<Unit>
 }
 
 class NoteMarkApiDataSourceImpl(
@@ -27,4 +29,6 @@ class NoteMarkApiDataSourceImpl(
     )
 
     override suspend fun deleteNote(noteEntity: NoteEntity) = noteMarkApi.deleteNote(noteEntity)
+
+    override suspend fun logout(request: RefreshRequest): Result<Unit>  = noteMarkApi.logout(request)
 }

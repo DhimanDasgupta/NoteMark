@@ -12,12 +12,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import com.dhimandasgupta.notemark.NoteMarkDestination.NoteEditPane
 import com.dhimandasgupta.notemark.presenter.EditNotePresenter
 import com.dhimandasgupta.notemark.presenter.LauncherPresenter
 import com.dhimandasgupta.notemark.presenter.LoginPresenter
 import com.dhimandasgupta.notemark.presenter.NoteListPresenter
 import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
+import com.dhimandasgupta.notemark.presenter.SettingsPresenter
 import com.dhimandasgupta.notemark.statemachine.AppAction
 import com.dhimandasgupta.notemark.statemachine.NoteListAction.NoteClicked
 import com.dhimandasgupta.notemark.ui.screens.LauncherPane
@@ -25,6 +25,7 @@ import com.dhimandasgupta.notemark.ui.screens.LoginPane
 import com.dhimandasgupta.notemark.ui.screens.NoteEditPane
 import com.dhimandasgupta.notemark.ui.screens.NoteListPane
 import com.dhimandasgupta.notemark.ui.screens.RegistrationPane
+import com.dhimandasgupta.notemark.ui.screens.SettingsPane
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 
@@ -142,7 +143,6 @@ private fun NavGraphBuilder.noteMarkGraph(
             val noteListPresenter = koinInject<NoteListPresenter>()
             val noteListUiModel = noteListPresenter.uiModel()
             val noteListAction = noteListPresenter::processEvent
-            val appAction = noteListPresenter::processAppActionEvent
 
 
             NoteListPane(
@@ -151,25 +151,21 @@ private fun NavGraphBuilder.noteMarkGraph(
                 noteListUiModel = noteListUiModel,
                 noteListAction = noteListAction,
                 onNoteClicked = { uuid ->
-                    navController.navigate(route = NoteEditPane(uuid))
+                    navController.navigate(route = NoteMarkDestination.NoteEditPane(uuid))
                     noteListAction(NoteClicked(noteListUiModel.noteClickedUuid))
                 },
                 onFabClicked = {
-                    navController.navigate(NoteEditPane(""))
+                    navController.navigate(NoteMarkDestination.NoteEditPane(""))
                 },
-                onLogoutClicked = {
-                    appAction(AppAction.AppLogout)
-                    navController.navigate(NoteMarkDestination.LauncherPane) {
-                        popUpTo(NoteMarkDestination.NoteListPane) {
-                            inclusive = true
-                        }
-                    }
-                }
+                onSettingsClicked = {
+                    navController.navigate(NoteMarkDestination.SettingsPane)
+                },
+                onProfileClicked = {}
             )
         }
 
-        composable<NoteEditPane> { backStackEntry ->
-            val arguments: NoteEditPane = backStackEntry.toRoute()
+        composable<NoteMarkDestination.NoteEditPane> { backStackEntry ->
+            val arguments: NoteMarkDestination.NoteEditPane = backStackEntry.toRoute()
             val editNotePresenter = koinInject<EditNotePresenter>()
             val editNoteUiModel = editNotePresenter.uiModel()
             val editNoteAction = editNotePresenter::processEvent
@@ -181,6 +177,26 @@ private fun NavGraphBuilder.noteMarkGraph(
                 editNoteUiModel = editNoteUiModel,
                 editNoteAction = editNoteAction,
                 onCloseClicked = { navController.navigateUp() }
+            )
+        }
+
+        composable<NoteMarkDestination.SettingsPane> {
+            val settingsPresenter = koinInject<SettingsPresenter>()
+            val settingsUiModel = settingsPresenter.uiModel()
+            val settingsAction = settingsPresenter::processEvent
+
+            SettingsPane(
+                modifier = Modifier,
+                settingsUiModel = settingsUiModel,
+                onBackClicked = { navController.navigateUp() },
+                onLogoutSuccessful = {
+                    navController.navigate(NoteMarkDestination.LauncherPane) {
+                        launchSingleTop = true
+                    }
+                },
+                onLogoutClicked = {
+                    settingsAction(AppAction.AppLogout)
+                }
             )
         }
     }
@@ -206,4 +222,7 @@ object NoteMarkDestination {
     data class NoteEditPane(
         val noteId: String = ""
     )
+
+    @Serializable
+    data object SettingsPane
 }

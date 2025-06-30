@@ -1,6 +1,5 @@
 package com.dhimandasgupta.notemark.presenter
 
-import LoggedInUser
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
@@ -8,9 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LifecycleStartEffect
-import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.statemachine.AppAction
 import com.dhimandasgupta.notemark.statemachine.AppState
 import com.dhimandasgupta.notemark.statemachine.AppStateMachine
@@ -20,38 +17,32 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 @Immutable
-data class LauncherUiModel(
-    val connectionState: ConnectionState? = ConnectionState.Unavailable,
-    val loggedInUser: LoggedInUser? = null
+data class SettingsUiModel(
+    val logoutStatus: Boolean? = null
 ) {
     companion object {
-        val Empty = LauncherUiModel()
+        val Empty = SettingsUiModel()
     }
 }
 
-class LauncherPresenter(
+class SettingsPresenter(
     private val appStateMachine: AppStateMachine
 ) {
     private val events = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
 
     @Composable
-    fun uiModel(): LauncherUiModel {
+    fun uiModel(): SettingsUiModel {
         val scope = rememberCoroutineScope()
-        var launcherUiModel by remember(
-            key1 = appStateMachine.state
-        ) { mutableStateOf(LauncherUiModel.Empty) }
+        var logoutUiModel by remember { mutableStateOf(SettingsUiModel.Empty) }
 
         // Receives the State from the StateMachine
-        LifecycleStartEffect(
-            key1 = Unit
-        ) {
+        LifecycleStartEffect(key1 = Unit) {
             scope.launch {
-                appStateMachine.state.onStart { emit(AppStateMachine.defaultAppState) }.collect { appState ->
-                    launcherUiModel = launcherUiModel.copy(
-                        connectionState = appState.connectionState,
-                        loggedInUser = when (appState) {
-                            is AppState.NotLoggedIn -> null
-                            is AppState.LoggedIn -> appState.loggedInUser
+                appStateMachine.state.onStart { AppStateMachine.defaultAppState }.collect { appState ->
+                    logoutUiModel = logoutUiModel.copy(
+                        logoutStatus = when (appState) {
+                            is AppState.NotLoggedIn -> true
+                            else -> null
                         }
                     )
                 }
@@ -60,19 +51,20 @@ class LauncherPresenter(
         }
 
         // Send the Events to the State Machine through Actions
-        LifecycleResumeEffect(key1 = Unit) {
+        LifecycleStartEffect(key1 = Unit) {
             scope.launch {
-                events.collect { event ->
-                    appStateMachine.dispatch(event)
+                events.collect { loginAction ->
+                    appStateMachine.dispatch(loginAction)
                 }
             }
-            onPauseOrDispose { scope.cancel() }
+            onStopOrDispose { scope.cancel() }
         }
 
-        return launcherUiModel
+        return logoutUiModel
     }
 
     fun processEvent(event: AppAction) {
         events.tryEmit(event)
     }
 }
+

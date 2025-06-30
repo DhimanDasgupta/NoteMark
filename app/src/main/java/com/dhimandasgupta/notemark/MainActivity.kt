@@ -6,8 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
@@ -29,11 +29,12 @@ class MainActivity : ComponentActivity() {
             val windowSizeClass = calculateWindowSizeClass(actualActivity as Activity)
 
             NoteMarkTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NoteMarkRoot(
                         navController = navController,
                         windowSizeClass = windowSizeClass,
-                        modifier = Modifier.padding()
+                        modifier = Modifier
+                            .consumeWindowInsets(paddingValues = innerPadding)
                     )
                 }
             }

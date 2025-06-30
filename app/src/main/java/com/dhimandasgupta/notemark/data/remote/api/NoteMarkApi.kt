@@ -6,6 +6,7 @@ import com.dhimandasgupta.notemark.data.remote.model.AuthResponse
 import com.dhimandasgupta.notemark.data.remote.model.LoginRequest
 import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
+import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.data.remote.model.RegisterRequest
 import com.dhimandasgupta.notemark.data.toNote
 import com.dhimandasgupta.notemark.database.NoteEntity
@@ -26,6 +27,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlin.coroutines.coroutineContext
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -47,7 +49,7 @@ interface NoteMarkApi {
     /** Auth Purpose methods */
     suspend fun register(request: RegisterRequest): Result<Unit>
     suspend fun login(request: LoginRequest): Result<Unit>
-    suspend fun logout()
+    suspend fun logout(request: RefreshRequest): Result<Unit>
 
     /** CRUD purpose methods */
     suspend fun getNotes(page: Int = -1, size: Int = 20): Result<NoteResponse>
@@ -161,8 +163,36 @@ class NoteMarkApiImpl(
         }
     }
 
-    override suspend fun logout() {
-        userManager.clearUser()
+    override suspend fun logout(request: RefreshRequest): Result<Unit> {
+        return try {
+            val response = client.post {
+                url("/api/auth/logout")
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+
+            // HttpResponseValidator should ideally handle non-2xx responses by throwing.
+            // If it doesn't, or you want more specific handling here:
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    userManager.clearUser()
+                    Result.success(Unit)
+                }
+                // Consider handling other specific statuses like BadRequest, Unauthorized, etc.
+                else -> Result.failure(ApiGenericException("Logout failed with status: ${response.status.value}"))
+            }
+        } catch (e: AuthenticationException) {
+            Result.failure(AuthenticationException("Authentication failed: ${e.message}", e))
+        } catch (e: ClientRequestException) { // Ktor exception for 4xx/5xx
+            coroutineContext.ensureActive()
+            when (e.response.status) {
+                HttpStatusCode.Unauthorized -> Result.failure(AuthenticationException("Authentication failed: ${e.message}", e))
+                else -> Result.failure(ApiGenericException("Logout failed: ${e.message}", e))
+            }
+        } catch (e: Exception) { // Catch other potential exceptions (network, serialization)
+            coroutineContext.ensureActive()
+            Result.failure(ApiGenericException("An unexpected error occurred during registration", e))
+        }
     }
 
     @OptIn(ExperimentalUuidApi::class)
