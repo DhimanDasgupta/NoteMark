@@ -15,6 +15,7 @@ import com.dhimandasgupta.notemark.statemachine.AppStateMachine
 import com.dhimandasgupta.notemark.statemachine.NoteListAction
 import com.dhimandasgupta.notemark.statemachine.NoteListState
 import com.dhimandasgupta.notemark.statemachine.NoteListStateMachine
+import com.dhimandasgupta.notemark.statemachine.SyncState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -29,6 +30,7 @@ data class NoteListUiModel(
     val noteEntities: ImmutableList<NoteEntity>,
     val noteClickedUuid: String = "",
     val noteLongClickedUuid: String = "",
+    val showSyncProgress: Boolean = false
 )
 
 private val defaultNoteListUiModel = NoteListUiModel(noteEntities = persistentListOf())
@@ -58,6 +60,10 @@ class NoteListPresenter(
                         userName = when (appState) {
                             is AppState.LoggedIn -> appState.loggedInUser.userName
                             else -> ""
+                        },
+                        showSyncProgress = when (appState) {
+                            is AppState.LoggedIn -> appState.syncState != SyncState.SyncFinished
+                            else -> true
                         }
                     )
                 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -27,6 +29,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -37,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
@@ -48,6 +52,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.common.convertNoteTimestampToReadableFormat
+import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.presenter.EditNoteUiModel
 import com.dhimandasgupta.notemark.statemachine.EditNoteAction
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
@@ -56,6 +62,8 @@ import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedPortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
+import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
+import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
 import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
@@ -90,11 +98,14 @@ fun NoteEditPane(
         }
     }
 
+    val layoutType = getDeviceLayoutType(windowSizeClass)
+
     Column(
         modifier = modifier
             .background(color = colorScheme.surfaceContainerLowest)
             .fillMaxWidth()
-            .wrapContentHeight(align = Alignment.Top)
+            .wrapContentHeight(align = Alignment.Top),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         NoteEditToolbar(
             modifier = Modifier.wrapContentHeight(align = Alignment.Top),
@@ -108,12 +119,20 @@ fun NoteEditPane(
 
         NoteEditBody(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(
+                    fraction = when (layoutType) {
+                        DeviceLayoutType.PHONE_PORTRAIT -> 1f
+                        DeviceLayoutType.PHONE_LANDSCAPE -> 0.9f
+                        else -> 0.75f
+                    }
+                )
                 .fillMaxHeight(1f),
             titleText = editNoteUiModel.title,
             bodyText = editNoteUiModel.content,
-            onTitleTextChanged =  { editNoteAction(EditNoteAction.UpdateTitle(it)) },
-            onBodyTextChanged = { editNoteAction(EditNoteAction.UpdateContent(it)) }
+            dateCreated = convertNoteTimestampToReadableFormat(editNoteUiModel.noteEntity?.createdAt ?: ""),
+            lastEdited = convertNoteTimestampToReadableFormat(editNoteUiModel.noteEntity?.lastEditedAt ?: ""),
+            onTitleTextChanged =  { value -> editNoteAction(EditNoteAction.UpdateTitle(title = value)) },
+            onBodyTextChanged = { value -> editNoteAction(EditNoteAction.UpdateContent(content = value)) }
         )
     }
 }
@@ -167,6 +186,8 @@ fun NoteEditBody(
     modifier: Modifier = Modifier,
     titleText: String = "",
     bodyText: String = "",
+    dateCreated: String = "",
+    lastEdited: String = "",
     onTitleTextChanged: (String) -> Unit = {},
     onBodyTextChanged: (String) -> Unit = {}
 ) {
@@ -175,81 +196,200 @@ fun NoteEditBody(
 
     LaunchedEffect(Unit) { focusManager.clearFocus() }
 
-    Column(
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(
+                bottom = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                    .asPaddingValues()
+                    .calculateBottomPadding() + 16.dp
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .verticalScroll(scrollState)
+                .padding(
+                    start = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                        .asPaddingValues()
+                        .calculateLeftPadding(LayoutDirection.Ltr),
+                    end = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                        .asPaddingValues()
+                        .calculateEndPadding(LayoutDirection.Ltr)
+                )
+                .windowInsetsPadding(WindowInsets.ime)
+                .padding(vertical = 16.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            TextField(
+                value = titleText,
+                onValueChange = { value -> onTitleTextChanged(value) },
+                textStyle = typography.titleLarge,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(align = Alignment.Top),
+                visualTransformation = VisualTransformation.None,
+                placeholder = { Text(text = "Note title", style = typography.titleLarge) },
+                colors = OutlinedTextFieldDefaults.colors().copy(
+                    focusedTextColor = colorScheme.onSurface,
+                    unfocusedTextColor = colorScheme.onSurface,
+                    focusedContainerColor = colorScheme.surfaceContainerLowest,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    errorIndicatorColor = Color.Transparent,
+                ),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Unspecified,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Next) }
+                )
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
+            )
+
+            NoteDateTime(
+                modifier = Modifier,
+                dateCreated = dateCreated,
+                lastEdited = lastEdited
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
+            )
+
+            TextField(
+                value = bodyText,
+                onValueChange = { value -> onBodyTextChanged(value) },
+                textStyle = typography.bodyLarge,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(align = Alignment.Top),
+                visualTransformation = VisualTransformation.None,
+                placeholder = { Text(text = "Tap to enter note content", style = typography.bodyLarge) },
+                colors = OutlinedTextFieldDefaults.colors().copy(
+                    focusedTextColor = colorScheme.onSurface,
+                    unfocusedTextColor = colorScheme.onSurface,
+                    focusedContainerColor = colorScheme.surfaceContainerLowest,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    errorIndicatorColor = Color.Transparent,
+                ),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Unspecified,
+                    imeAction = ImeAction.Unspecified
+                )
+            )
+        }
+
+        EditAndViewMode(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            onEditClicked = {},
+            onViewClicked = {}
+        )
+    }
+}
+
+@Composable
+private fun NoteDateTime(
+    modifier: Modifier = Modifier,
+    dateCreated: String,
+    lastEdited: String
+) {
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .verticalScroll(scrollState)
-            .padding(
-                start = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateLeftPadding(LayoutDirection.Ltr),
-                end = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateEndPadding(LayoutDirection.Ltr)
-            )
-            .windowInsetsPadding(WindowInsets.ime)
-            .padding(vertical = 16.dp),
-        verticalArrangement = Arrangement.Top
+            .padding(vertical = 8.dp, horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        TextField(
-            value = titleText,
-            onValueChange = { onTitleTextChanged(it) },
-            textStyle = typography.titleLarge,
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(align = Alignment.Top),
-            visualTransformation = VisualTransformation.None,
-            placeholder = { Text(text = "Note title", style = typography.titleLarge) },
-            colors = OutlinedTextFieldDefaults.colors().copy(
-                focusedTextColor = colorScheme.onSurface,
-                unfocusedTextColor = colorScheme.onSurface,
-                focusedContainerColor = colorScheme.surfaceContainerLowest,
-                unfocusedContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                errorIndicatorColor = Color.Transparent,
-            ),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Unspecified,
-                imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { focusManager.moveFocus(FocusDirection.Next) }
+                .weight(1f)
+        ) {
+            Text(
+                text = "Date Created",
+                color = colorScheme.onSurfaceVariant,
+                style = typography.bodyMedium
             )
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
-        )
-
-        TextField(
-            value = bodyText,
-            onValueChange = { onBodyTextChanged(it) },
-            textStyle = typography.bodyLarge,
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(align = Alignment.Top),
-            visualTransformation = VisualTransformation.None,
-            placeholder = { Text(text = "Tap to enter note content", style = typography.bodyLarge) },
-            colors = OutlinedTextFieldDefaults.colors().copy(
-                focusedTextColor = colorScheme.onSurface,
-                unfocusedTextColor = colorScheme.onSurface,
-                focusedContainerColor = colorScheme.surfaceContainerLowest,
-                unfocusedContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                errorIndicatorColor = Color.Transparent,
-            ),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Unspecified,
-                imeAction = ImeAction.Unspecified
+            Text(
+                text = dateCreated,
+                style = typography.titleSmall
             )
-        )
+        }
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+        ) {
+            Text(
+                text = "Last Edited",
+                color = colorScheme.onSurfaceVariant,
+                style = typography.bodyMedium
+            )
+            Text(
+                text = lastEdited,
+                style = typography.titleSmall
+            )
+        }
+    }
+}
+
+@Composable
+private fun EditAndViewMode(
+    modifier: Modifier = Modifier,
+    onEditClicked: () -> Unit,
+    onViewClicked: () -> Unit
+) {
+    Row(
+        modifier = modifier
+            .clip(shape = shapes.medium)
+            .background(color = colorScheme.surfaceVariant),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(
+            onClick = onEditClicked,
+            modifier = Modifier
+                .clip(shape = shapes.medium)
+                .width(56.dp)
+                .height(56.dp)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_edit),
+                contentDescription = "Edit",
+                tint = colorScheme.onSurfaceVariant,
+            )
+        }
+
+        IconButton(
+            onClick = onViewClicked,
+            modifier = Modifier
+                .clip(shape = shapes.medium)
+                .width(56.dp)
+                .height(56.dp)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_view),
+                contentDescription = "Edit",
+                tint = colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -334,5 +474,12 @@ private fun TabletExpandedLandscapePreview() {
 private val defaultEditNoteUiModel = EditNoteUiModel(
     title = "Hello there, this is a the title of the Note",
     content = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-    noteEntity = null
+    noteEntity = NoteEntity(
+        id = 1,
+        title = "Hello there, this is a the title of the Note",
+        content = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+        createdAt = "2025-06-29T19:18:24.369Z",
+        lastEditedAt = "2025-06-30T21:58:37.634Z",
+        uuid = "123e4567-e89b-12d3-a456-426614174000"
+    )
 )

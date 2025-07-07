@@ -1,6 +1,7 @@
 package com.dhimandasgupta.notemark
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -59,6 +60,12 @@ private fun NavGraphBuilder.noteMarkGraph(
             val context = LocalActivity.current
             val launcherPresenter = koinInject<LauncherPresenter>()
             val launcherUiModel = launcherPresenter.uiModel()
+
+            BackHandler(
+                enabled = launcherUiModel.loggedInUser == null
+            ) {
+                context?.finish()
+            }
 
             LauncherPane(
                 windowSizeClass = windowSizeClass,

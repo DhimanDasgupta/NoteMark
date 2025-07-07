@@ -29,3 +29,17 @@ fun convertIsoOffsetToReadableFormat(isoOffsetDateTimeString: String): String {
         ""
     }
 }
+
+@OptIn(ExperimentalTime::class)
+fun convertNoteTimestampToReadableFormat(isoOffsetDateTimeString: String): String {
+    return try {
+        val offsetDateTime = OffsetDateTime.parse(isoOffsetDateTimeString, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        val targetFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.getDefault())
+
+        offsetDateTime.format(targetFormatter)
+    } catch (e: DateTimeParseException) {
+        ""
+    } catch (e: Exception) {
+        ""
+    }
+}

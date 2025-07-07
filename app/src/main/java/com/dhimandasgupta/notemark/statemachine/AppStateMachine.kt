@@ -9,6 +9,7 @@ import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 
@@ -22,8 +23,15 @@ sealed interface AppState {
 
     data class LoggedIn(
         override val connectionState: ConnectionState? = ConnectionState.Unavailable,
-        val loggedInUser: LoggedInUser
+        val loggedInUser: LoggedInUser,
+        val syncState: SyncState = SyncState.SyncNotStarted
     ) : AppState
+}
+
+sealed interface SyncState {
+    data object SyncNotStarted : SyncState
+    data object SyncStarted : SyncState
+    data object SyncFinished : SyncState
 }
 
 sealed interface AppAction {
@@ -60,8 +68,10 @@ class AppStateMachine(
             }
 
             inState<AppState.LoggedIn> {
-                onEnterEffect { state ->
+                onEnter { state ->
+                    state.mutate { state.snapshot.copy(syncState = SyncState.SyncStarted) }
                     syncRemoteNotes()
+                    state.mutate { state.snapshot.copy(syncState = SyncState.SyncFinished) }
                 }
 
                 // All the actions valid for app state should be handled here
@@ -96,6 +106,7 @@ class AppStateMachine(
         var pageNumber = 0
 
         do {
+            delay(1000) // Intentionally adding delay.
             noteMarkRepository.getRemoteNotes(pageNumber, PAGE_SIZE).fold(
                 onSuccess = { noteResponse ->
                     pageNumber++
@@ -110,5 +121,5 @@ class AppStateMachine(
     }
 }
 
-private const val PAGE_SIZE: Int = 10
+private const val PAGE_SIZE: Int = 1
 

@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -159,6 +160,7 @@ private fun NoteListValidPane(
             modifier = modifier,
             userName = userName,
             onFabClicked = onFabClicked,
+            showSyncProgress = noteListUiModel.showSyncProgress,
             onSettingsClicked = onSettingsClicked,
             onProfileClicked = onProfileClicked
         )
@@ -179,6 +181,7 @@ private fun NoteListValidPane(
 private fun NoteListWithEmptyNotes(
     modifier: Modifier = Modifier,
     userName: String,
+    showSyncProgress: Boolean,
     onFabClicked: () -> Unit,
     onSettingsClicked: () -> Unit,
     onProfileClicked: () -> Unit
@@ -186,6 +189,7 @@ private fun NoteListWithEmptyNotes(
     NoNotes(
         modifier = modifier,
         userName = userName,
+        showSyncProgress = showSyncProgress,
         onFabClicked = onFabClicked,
         onSettingsClicked = onSettingsClicked,
         onProfileClicked = onProfileClicked
@@ -317,7 +321,8 @@ private fun NoteListPaneToolbar(
 private fun NoNotes(
     modifier: Modifier = Modifier,
     toolbarTitle: String = "NoteMark",
-    userName: String = "DD",
+    userName: String = "",
+    showSyncProgress: Boolean,
     onSettingsClicked: () -> Unit,
     onProfileClicked: () -> Unit,
     onFabClicked: () -> Unit = {},
@@ -333,20 +338,34 @@ private fun NoNotes(
             onProfileClicked = onProfileClicked
         )
 
-        Text(
-            text = "You’ve got an empty board, \n let’s place your first note on it!",
-            style = typography.titleSmall,
-            color = colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(
-                    WindowInsets.displayCutout.union(WindowInsets.statusBars).union(
-                        WindowInsets.navigationBars
-                    ).asPaddingValues()
+        when (showSyncProgress) {
+            true -> Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .wrapContentSize()
+                    .padding(16.dp)
+            ) {
+                CircularProgressIndicator(
+                    modifier = modifier
+                        .wrapContentSize(align = Alignment.Center)
+                        .padding(all = 16.dp)
                 )
-                .padding(vertical = 96.dp, horizontal = 32.dp)
-        )
+            }
+            else -> Text(
+                text = "You’ve got an empty board, \n let’s place your first note on it!",
+                style = typography.titleSmall,
+                color = colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(
+                        WindowInsets.displayCutout.union(WindowInsets.statusBars).union(
+                            WindowInsets.navigationBars
+                        ).asPaddingValues()
+                    )
+                    .padding(vertical = 96.dp, horizontal = 32.dp)
+            )
+        }
 
         NoteMarkFAB(
             modifier = Modifier
@@ -375,6 +394,7 @@ private fun NoteGrid(
         items(
             items = noteListUiModel.noteEntities,
             key = { note -> note.id },
+            contentType = { "notes" }
         ) { noteEntity ->
             NoteItem(
                 modifier = Modifier,
@@ -384,8 +404,24 @@ private fun NoteGrid(
             )
         }
 
+        if (noteListUiModel.showSyncProgress) {
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+                key = "sync_progress",
+                contentType = "sync_progress"
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .wrapContentSize(Alignment.Center)
+                        .padding(all = 16.dp)
+                )
+            }
+        }
+
         item(
             span = StaggeredGridItemSpan.FullLine,
+            key = "spacer",
+            contentType = "spacer"
         ) {
             Spacer(
                 modifier = Modifier
@@ -602,5 +638,8 @@ private val noteListUiModel = NoteListUiModel(
             lastEditedAt = "20th Apr",
             uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d"
         )
-    ).toPersistentList()
+    ).toPersistentList(),
+    noteClickedUuid = "",
+    noteLongClickedUuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+    showSyncProgress = true
 )
