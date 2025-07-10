@@ -15,12 +15,14 @@ import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSourceI
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.data.remote.model.RefreshResponse
 import com.dhimandasgupta.notemark.database.NoteMarkDatabase
+import com.dhimandasgupta.notemark.presenter.AddNotePresenter
 import com.dhimandasgupta.notemark.presenter.EditNotePresenter
 import com.dhimandasgupta.notemark.presenter.LauncherPresenter
 import com.dhimandasgupta.notemark.presenter.LoginPresenter
 import com.dhimandasgupta.notemark.presenter.NoteListPresenter
 import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
 import com.dhimandasgupta.notemark.presenter.SettingsPresenter
+import com.dhimandasgupta.notemark.statemachine.AddNoteStateMachine
 import com.dhimandasgupta.notemark.statemachine.AppStateMachine
 import com.dhimandasgupta.notemark.statemachine.EditNoteStateMachine
 import com.dhimandasgupta.notemark.statemachine.LoginStateMachine
@@ -129,6 +131,9 @@ val appModule = module {
 
     factory { NoteListStateMachine(userManager = get(), noteMarkRepository = get()) }
     factoryOf(::NoteListPresenter)
+
+    factory { AddNoteStateMachine(noteMarkRepository = get()) }
+    factoryOf(::AddNotePresenter)
 
     factory { EditNoteStateMachine(noteMarkRepository = get()) }
     factoryOf(::EditNotePresenter)

@@ -1,18 +1,21 @@
 package com.dhimandasgupta.notemark.common
 
+import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
 import java.util.Locale
-import kotlin.time.ExperimentalTime
+
+
+// Constants for time thresholds
+private const val FIVE_MINUTES_IN_SECONDS = 5 * 60L
+private const val SIXTY_MINUTES_IN_SECONDS = 60 * 60L
 
 fun getCurrentIso8601Timestamp(): String {
     val currentDateTime = OffsetDateTime.now()
     return currentDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 }
 
-@OptIn(ExperimentalTime::class)
-fun convertIsoOffsetToReadableFormat(isoOffsetDateTimeString: String): String {
+fun convertIsoToRelativeYearFormat(isoOffsetDateTimeString: String): String {
     return try {
         val offsetDateTime = OffsetDateTime.parse(isoOffsetDateTimeString, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
         val targetFormatterCurrentYear = DateTimeFormatter.ofPattern("dd MMM", Locale.getDefault())
@@ -23,23 +26,43 @@ fun convertIsoOffsetToReadableFormat(isoOffsetDateTimeString: String): String {
         } else {
             offsetDateTime.format(targetFormatterPreviousYear)
         }
-    } catch (e: DateTimeParseException) {
-        ""
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         ""
     }
 }
 
-@OptIn(ExperimentalTime::class)
+fun convertIsoToRelativeTimeFormat(isoOffsetDateTimeString: String): String {
+    return try {
+        val parsedDateTime = OffsetDateTime.parse(isoOffsetDateTimeString, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        val currentDateTime = OffsetDateTime.now(parsedDateTime.offset) // Use the same offset for accurate comparison
+
+        val durationBetween = Duration.between(parsedDateTime, currentDateTime)
+        val differenceInSeconds = durationBetween.seconds
+
+        when {
+            differenceInSeconds < 0 -> {
+                // Time is in the future, handle as an edge case or error,
+                // or show the date if that's preferred.
+                // For now, let's fall back to showing the date as if it were in the past.
+                // Or, you could return "In the future" or ""
+                convertNoteTimestampToReadableFormat(isoOffsetDateTimeString)
+            }
+            differenceInSeconds < FIVE_MINUTES_IN_SECONDS -> "Just now"
+            differenceInSeconds <= SIXTY_MINUTES_IN_SECONDS -> "Last hour"
+            else -> convertNoteTimestampToReadableFormat(isoOffsetDateTimeString)
+        }
+    } catch (_: Exception) {
+        ""
+    }
+}
+
 fun convertNoteTimestampToReadableFormat(isoOffsetDateTimeString: String): String {
     return try {
         val offsetDateTime = OffsetDateTime.parse(isoOffsetDateTimeString, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
         val targetFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.getDefault())
 
         offsetDateTime.format(targetFormatter)
-    } catch (e: DateTimeParseException) {
-        ""
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         ""
     }
 }

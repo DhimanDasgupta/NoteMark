@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import com.dhimandasgupta.notemark.presenter.AddNotePresenter
 import com.dhimandasgupta.notemark.presenter.EditNotePresenter
 import com.dhimandasgupta.notemark.presenter.LauncherPresenter
 import com.dhimandasgupta.notemark.presenter.LoginPresenter
@@ -21,9 +22,10 @@ import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
 import com.dhimandasgupta.notemark.presenter.SettingsPresenter
 import com.dhimandasgupta.notemark.statemachine.AppAction
 import com.dhimandasgupta.notemark.statemachine.NoteListAction.NoteClicked
+import com.dhimandasgupta.notemark.ui.screens.AddNotePane
 import com.dhimandasgupta.notemark.ui.screens.LauncherPane
 import com.dhimandasgupta.notemark.ui.screens.LoginPane
-import com.dhimandasgupta.notemark.ui.screens.NoteEditPane
+import com.dhimandasgupta.notemark.ui.screens.EditNotePane
 import com.dhimandasgupta.notemark.ui.screens.NoteListPane
 import com.dhimandasgupta.notemark.ui.screens.RegistrationPane
 import com.dhimandasgupta.notemark.ui.screens.SettingsPane
@@ -162,12 +164,26 @@ private fun NavGraphBuilder.noteMarkGraph(
                     noteListAction(NoteClicked(noteListUiModel.noteClickedUuid))
                 },
                 onFabClicked = {
-                    navController.navigate(NoteMarkDestination.NoteEditPane(""))
+                    navController.navigate(NoteMarkDestination.NoteCreatePane)
                 },
                 onSettingsClicked = {
                     navController.navigate(NoteMarkDestination.SettingsPane)
                 },
                 onProfileClicked = {}
+            )
+        }
+
+        composable<NoteMarkDestination.NoteCreatePane> {
+            val addNotePresenter = koinInject<AddNotePresenter>()
+            val addNoteUiModel = addNotePresenter.uiModel()
+            val addNoteAction = addNotePresenter::processEvent
+
+            AddNotePane(
+                modifier = Modifier,
+                windowSizeClass = windowSizeClass,
+                addNoteUiModel = addNoteUiModel,
+                addNoteAction = addNoteAction,
+                onBackClicked = { navController.navigateUp() }
             )
         }
 
@@ -177,7 +193,7 @@ private fun NavGraphBuilder.noteMarkGraph(
             val editNoteUiModel = editNotePresenter.uiModel()
             val editNoteAction = editNotePresenter::processEvent
 
-            NoteEditPane(
+            EditNotePane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
                 noteId = arguments.noteId,
@@ -224,6 +240,9 @@ object NoteMarkDestination {
 
     @Serializable
     data object NoteListPane
+
+    @Serializable
+    data object NoteCreatePane
 
     @Serializable
     data class NoteEditPane(

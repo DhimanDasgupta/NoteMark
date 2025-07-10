@@ -28,7 +28,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -53,7 +52,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.common.convertIsoOffsetToReadableFormat
+import com.dhimandasgupta.notemark.common.convertIsoToRelativeYearFormat
 import com.dhimandasgupta.notemark.common.extensions.formatUserName
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.presenter.NoteListUiModel
@@ -72,6 +71,7 @@ import com.dhimandasgupta.notemark.ui.designsystem.LimitedText
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkFAB
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkToolbarButton
+import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
 import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
 import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
 import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
@@ -345,10 +345,13 @@ private fun NoNotes(
                     .wrapContentSize()
                     .padding(16.dp)
             ) {
-                CircularProgressIndicator(
-                    modifier = modifier
-                        .wrapContentSize(align = Alignment.Center)
+                ThreeBouncingDots(
+                    modifier = Modifier
                         .padding(all = 16.dp)
+                        .wrapContentSize(),
+                    dotColor1 = colorResource(R.color.splash_blue),
+                    dotColor2 = colorResource(R.color.splash_blue),
+                    dotColor3 = colorResource(R.color.splash_blue)
                 )
             }
             else -> Text(
@@ -410,10 +413,13 @@ private fun NoteGrid(
                 key = "sync_progress",
                 contentType = "sync_progress"
             ) {
-                CircularProgressIndicator(
+                ThreeBouncingDots(
                     modifier = Modifier
-                        .wrapContentSize(Alignment.Center)
                         .padding(all = 16.dp)
+                        .wrapContentSize(),
+                    dotColor1 = colorResource(R.color.splash_blue),
+                    dotColor2 = colorResource(R.color.splash_blue),
+                    dotColor3 = colorResource(R.color.splash_blue)
                 )
             }
         }
@@ -453,7 +459,7 @@ private fun NoteItem(
             .padding(16.dp)
     ) {
         Text(
-            text = convertIsoOffsetToReadableFormat(note.lastEditedAt),
+            text = convertIsoToRelativeYearFormat(note.lastEditedAt),
             style = typography.bodyMedium,
             color = colorScheme.primary
         )
@@ -464,7 +470,7 @@ private fun NoteItem(
             fullText = note.title,
             style = typography.titleMedium,
             color = colorScheme.onSurface,
-            targetCharCount = maxLength
+            targetCharacterCount = maxLength
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -473,7 +479,7 @@ private fun NoteItem(
             fullText = note.content,
             style = typography.bodySmall,
             color = colorScheme.onSurfaceVariant,
-            targetCharCount = maxLength
+            targetCharacterCount = maxLength
         )
     }
 }

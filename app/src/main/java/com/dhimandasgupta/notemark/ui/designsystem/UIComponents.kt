@@ -1,5 +1,9 @@
 package com.dhimandasgupta.notemark.ui.designsystem
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -14,9 +19,11 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -33,6 +40,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,16 +53,18 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
+import kotlinx.coroutines.delay
 
 @Composable
 fun NoteMarkButton(
@@ -323,7 +333,7 @@ fun NoteMarkFAB(
         shape = shapes.medium,
         modifier = modifier
             .padding(
-                end =  WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                end = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateEndPadding(LayoutDirection.Ltr),
                 bottom = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
@@ -360,34 +370,109 @@ fun LimitedText(
     fullText: String,
     style: TextStyle,
     color: Color,
-    targetCharCount: Int = 100
+    targetCharacterCount: Int = 100
 ) {
     var textToDisplay by remember(fullText) { mutableStateOf(fullText) }
-    var textLayoutResultState by remember { mutableStateOf<TextLayoutResult?>(null) }
 
     Text(
         text = textToDisplay,
         style = style,
         color = color,
         onTextLayout = { textLayoutResult ->
-            textLayoutResultState = textLayoutResult
-            if (textLayoutResult.layoutInput.text.length > targetCharCount) {
+            if (textLayoutResult.layoutInput.text.length > targetCharacterCount) {
                 if (textLayoutResult.isLineEllipsized(textLayoutResult.lineCount - 1) ||
                     textLayoutResult.getLineEnd(
                         textLayoutResult.lineCount - 1,
                         visibleEnd = true
-                    ) < targetCharCount &&
-                    fullText.length > targetCharCount
+                    ) < targetCharacterCount &&
+                    fullText.length > targetCharacterCount
                 ) {
-                    if (textToDisplay.length > targetCharCount) { // Ensure we only shorten once
-                        textToDisplay = fullText.substring(0, targetCharCount)
+                    if (textToDisplay.length > targetCharacterCount) { // Ensure we only shorten once
+                        textToDisplay = fullText.substring(0, targetCharacterCount)
                     }
-                } else if (fullText.length > targetCharCount && textToDisplay.length > targetCharCount) {
-                    textToDisplay = fullText.substring(0, targetCharCount)
+                } else if (fullText.length > targetCharacterCount && textToDisplay.length > targetCharacterCount) {
+                    textToDisplay = fullText.substring(0, targetCharacterCount)
                 }
             }
         },
         maxLines = 5,
         overflow = TextOverflow.Ellipsis
     )
+}
+
+@Composable
+private fun BouncingDot(
+    modifier: Modifier = Modifier,
+    color: Color = Color.Blue,
+    size: Dp = 10.dp,
+    bounceHeight: Dp = 30.dp,
+    animationDurationMillis: Int = 500,
+    delayMillis: Int = 0 // Delay before this specific dot starts its animation
+) {
+    val offsetY = remember { Animatable(0f) }
+
+    LaunchedEffect(key1 = Unit) {
+        delay(delayMillis.toLong()) // Apply initial delay
+        offsetY.animateTo(
+            targetValue = -bounceHeight.value, // Move up
+            animationSpec = infiniteRepeatable(
+                animation = keyframes {
+                    durationMillis = animationDurationMillis
+                    0f at 0 // Start at original position
+                    -bounceHeight.value at animationDurationMillis / 2 // Peak
+                    0f at animationDurationMillis // Return to original position
+                },
+                repeatMode = RepeatMode.Restart // Could also be Reverse for a different effect
+            )
+        )
+    }
+
+    Box(
+        modifier = modifier
+            .offset { IntOffset(x = 0, y = offsetY.value.toInt()) }
+            .size(size)
+            .clip(CircleShape)
+            .background(color)
+    )
+}
+
+@Composable
+fun ThreeBouncingDots(
+    modifier: Modifier = Modifier,
+    dotColor1: Color = Color.Red,
+    dotColor2: Color = Color.Green,
+    dotColor3: Color = Color.Blue,
+    dotSize: Dp = 12.dp,
+    bounceHeight: Dp = 40.dp,
+    animationDurationMillis: Int = 600,
+    spaceBetweenDots: Dp = 8.dp,
+    dotStartDelayMillis: Int = 150 // Staggered delay for each dot
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.Bottom, // Align to bottom so they bounce from the same baseline
+        horizontalArrangement = Arrangement.spacedBy(spaceBetweenDots)
+    ) {
+        BouncingDot(
+            color = dotColor1,
+            size = dotSize,
+            bounceHeight = bounceHeight,
+            animationDurationMillis = animationDurationMillis,
+            delayMillis = 0 // First dot starts immediately
+        )
+        BouncingDot(
+            color = dotColor2,
+            size = dotSize,
+            bounceHeight = bounceHeight,
+            animationDurationMillis = animationDurationMillis,
+            delayMillis = dotStartDelayMillis // Second dot is delayed
+        )
+        BouncingDot(
+            color = dotColor3,
+            size = dotSize,
+            bounceHeight = bounceHeight,
+            animationDurationMillis = animationDurationMillis,
+            delayMillis = dotStartDelayMillis * 2 // Third dot is further delayed
+        )
+    }
 }

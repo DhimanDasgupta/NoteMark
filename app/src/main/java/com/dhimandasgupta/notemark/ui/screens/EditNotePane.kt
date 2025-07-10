@@ -52,7 +52,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.common.convertNoteTimestampToReadableFormat
+import com.dhimandasgupta.notemark.common.convertIsoToRelativeTimeFormat
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.presenter.EditNoteUiModel
 import com.dhimandasgupta.notemark.statemachine.EditNoteAction
@@ -73,7 +73,7 @@ import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
 
 @Composable
-fun NoteEditPane(
+fun EditNotePane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
     noteId: String = "",
@@ -107,7 +107,7 @@ fun NoteEditPane(
             .wrapContentHeight(align = Alignment.Top),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        NoteEditToolbar(
+        EditNoteToolbar(
             modifier = Modifier.wrapContentHeight(align = Alignment.Top),
             onCloseClicked = onCloseClicked,
             onSaveClicked = {
@@ -117,20 +117,20 @@ fun NoteEditPane(
             }
         )
 
-        NoteEditBody(
+        EditNoteBody(
             modifier = Modifier
                 .fillMaxWidth(
                     fraction = when (layoutType) {
                         DeviceLayoutType.PHONE_PORTRAIT -> 1f
                         DeviceLayoutType.PHONE_LANDSCAPE -> 0.9f
-                        else -> 0.75f
+                        else -> 0.85f
                     }
                 )
                 .fillMaxHeight(1f),
             titleText = editNoteUiModel.title,
             bodyText = editNoteUiModel.content,
-            dateCreated = convertNoteTimestampToReadableFormat(editNoteUiModel.noteEntity?.createdAt ?: ""),
-            lastEdited = convertNoteTimestampToReadableFormat(editNoteUiModel.noteEntity?.lastEditedAt ?: ""),
+            dateCreated = convertIsoToRelativeTimeFormat(editNoteUiModel.noteEntity?.createdAt ?: ""),
+            lastEdited = convertIsoToRelativeTimeFormat(editNoteUiModel.noteEntity?.lastEditedAt ?: ""),
             onTitleTextChanged =  { value -> editNoteAction(EditNoteAction.UpdateTitle(title = value)) },
             onBodyTextChanged = { value -> editNoteAction(EditNoteAction.UpdateContent(content = value)) }
         )
@@ -138,7 +138,7 @@ fun NoteEditPane(
 }
 
 @Composable
-fun NoteEditToolbar(
+fun EditNoteToolbar(
     modifier: Modifier = Modifier,
     onCloseClicked: () -> Unit = {},
     onSaveClicked: () -> Unit = {}
@@ -182,7 +182,7 @@ fun NoteEditToolbar(
 }
 
 @Composable
-fun NoteEditBody(
+fun EditNoteBody(
     modifier: Modifier = Modifier,
     titleText: String = "",
     bodyText: String = "",
@@ -398,7 +398,7 @@ private fun EditAndViewMode(
 @Composable
 private fun PhonePortraitPreview() {
     NoteMarkTheme {
-        NoteEditPane(
+        EditNotePane(
             modifier = Modifier,
             windowSizeClass = phonePortrait,
             editNoteUiModel = defaultEditNoteUiModel
@@ -411,7 +411,7 @@ private fun PhonePortraitPreview() {
 @Composable
 private fun PhoneLandscapePreview() {
     NoteMarkTheme {
-        NoteEditPane(
+        EditNotePane(
             modifier = Modifier,
             windowSizeClass = phoneLandscape,
             editNoteUiModel = defaultEditNoteUiModel
@@ -424,7 +424,7 @@ private fun PhoneLandscapePreview() {
 @Composable
 private fun TabletMediumPortraitPreview() {
     NoteMarkTheme {
-        NoteEditPane(
+        EditNotePane(
             modifier = Modifier,
             windowSizeClass = mediumTabletPortrait,
             editNoteUiModel = defaultEditNoteUiModel
@@ -437,7 +437,7 @@ private fun TabletMediumPortraitPreview() {
 @Composable
 private fun TabletMediumLandscapePreview() {
     NoteMarkTheme {
-        NoteEditPane(
+        EditNotePane(
             modifier = Modifier,
             windowSizeClass = mediumTabletLandscape,
             editNoteUiModel = defaultEditNoteUiModel
@@ -450,7 +450,7 @@ private fun TabletMediumLandscapePreview() {
 @Composable
 private fun TabletExpandedPortraitPreview() {
     NoteMarkTheme {
-        NoteEditPane(
+        EditNotePane(
             modifier = Modifier,
             windowSizeClass = extendedTabletPortrait,
             editNoteUiModel = defaultEditNoteUiModel
@@ -463,7 +463,7 @@ private fun TabletExpandedPortraitPreview() {
 @Composable
 private fun TabletExpandedLandscapePreview() {
     NoteMarkTheme {
-        NoteEditPane(
+        EditNotePane(
             modifier = Modifier,
             windowSizeClass = extendedTabletLandscape,
             editNoteUiModel = defaultEditNoteUiModel
