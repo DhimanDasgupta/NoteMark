@@ -6,6 +6,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -13,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import com.dhimandasgupta.notemark.common.extensions.setDarkStatusBarIcons
 import com.dhimandasgupta.notemark.presenter.AddNotePresenter
 import com.dhimandasgupta.notemark.presenter.EditNotePresenter
 import com.dhimandasgupta.notemark.presenter.LauncherPresenter
@@ -60,6 +62,8 @@ private fun NavGraphBuilder.noteMarkGraph(
     ) {
         composable<NoteMarkDestination.LauncherPane> {
             val context = LocalActivity.current
+            SideEffect { context?.setDarkStatusBarIcons(true) }
+
             val launcherPresenter = koinInject<LauncherPresenter>()
             val launcherUiModel = launcherPresenter.uiModel()
 
@@ -101,6 +105,9 @@ private fun NavGraphBuilder.noteMarkGraph(
         }
 
         composable<NoteMarkDestination.LoginPane> {
+            val context = LocalActivity.current
+            SideEffect { context?.setDarkStatusBarIcons(false) }
+
             val loginPresenter = koinInject<LoginPresenter>()
 
             val loginUiModel = loginPresenter.uiModel()
@@ -129,6 +136,9 @@ private fun NavGraphBuilder.noteMarkGraph(
         }
 
         composable<NoteMarkDestination.RegistrationPane> {
+            val context = LocalActivity.current
+            SideEffect { context?.setDarkStatusBarIcons(false) }
+
             val registrationPresenter = koinInject<RegistrationPresenter>()
             val registrationUiModel = registrationPresenter.uiModel()
             val registrationAction = registrationPresenter::processEvent
@@ -149,10 +159,12 @@ private fun NavGraphBuilder.noteMarkGraph(
         }
 
         composable<NoteMarkDestination.NoteListPane> {
+            val context = LocalActivity.current
+            SideEffect { context?.setDarkStatusBarIcons(true) }
+
             val noteListPresenter = koinInject<NoteListPresenter>()
             val noteListUiModel = noteListPresenter.uiModel()
             val noteListAction = noteListPresenter::processEvent
-
 
             NoteListPane(
                 modifier = Modifier,
@@ -174,6 +186,9 @@ private fun NavGraphBuilder.noteMarkGraph(
         }
 
         composable<NoteMarkDestination.NoteCreatePane> {
+            val context = LocalActivity.current
+            SideEffect { context?.setDarkStatusBarIcons(true) }
+
             val addNotePresenter = koinInject<AddNotePresenter>()
             val addNoteUiModel = addNotePresenter.uiModel()
             val addNoteAction = addNotePresenter::processEvent
@@ -188,6 +203,9 @@ private fun NavGraphBuilder.noteMarkGraph(
         }
 
         composable<NoteMarkDestination.NoteEditPane> { backStackEntry ->
+            val context = LocalActivity.current
+            SideEffect { context?.setDarkStatusBarIcons(true) }
+
             val arguments: NoteMarkDestination.NoteEditPane = backStackEntry.toRoute()
             val editNotePresenter = koinInject<EditNotePresenter>()
             val editNoteUiModel = editNotePresenter.uiModel()
@@ -204,6 +222,9 @@ private fun NavGraphBuilder.noteMarkGraph(
         }
 
         composable<NoteMarkDestination.SettingsPane> {
+            val context = LocalActivity.current
+            SideEffect { context?.setDarkStatusBarIcons(true) }
+
             val settingsPresenter = koinInject<SettingsPresenter>()
             val settingsUiModel = settingsPresenter.uiModel()
             val settingsAction = settingsPresenter::processEvent
