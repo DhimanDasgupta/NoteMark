@@ -1,7 +1,10 @@
 package com.dhimandasgupta.notemark.ui.screens
 
+import androidx.activity.compose.LocalActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
@@ -27,7 +31,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
@@ -38,6 +41,8 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,9 +58,14 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.convertIsoToRelativeTimeFormat
+import com.dhimandasgupta.notemark.common.extensions.lockToLandscape
+import com.dhimandasgupta.notemark.common.extensions.turnOffImmersiveMode
+import com.dhimandasgupta.notemark.common.extensions.turnOnImmersiveMode
+import com.dhimandasgupta.notemark.common.extensions.unlockOrientation
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.presenter.EditNoteUiModel
 import com.dhimandasgupta.notemark.statemachine.EditNoteAction
+import com.dhimandasgupta.notemark.statemachine.Mode
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
@@ -64,7 +74,9 @@ import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
+import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
+import com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton
 import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
 import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
 import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
@@ -76,16 +88,18 @@ import com.dhimandasgupta.notemark.ui.phonePortrait
 fun EditNotePane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    noteId: String = "",
+    noteId: String,
     editNoteUiModel: EditNoteUiModel,
     editNoteAction: (EditNoteAction) -> Unit = {},
     onCloseClicked: () -> Unit = {}
 ) {
+    val updatedEditNoteUiModel by rememberUpdatedState(editNoteUiModel)
+
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(editNoteUiModel.saved) {
-        if (editNoteUiModel.saved == true) {
+    LaunchedEffect(updatedEditNoteUiModel.saved) {
+        if (updatedEditNoteUiModel.saved == true) {
             focusManager.clearFocus()
             keyboardController?.hide()
             onCloseClicked()
@@ -95,6 +109,21 @@ fun EditNotePane(
     LaunchedEffect(key1 = noteId) {
         if (noteId.isNotEmpty()) {
             editNoteAction(EditNoteAction.LoadNote(noteId))
+        }
+    }
+
+    val context = LocalActivity.current
+
+    LaunchedEffect(key1 = updatedEditNoteUiModel.isReaderMode) {
+        when (updatedEditNoteUiModel.isReaderMode) {
+            true -> {
+                context?.turnOnImmersiveMode()
+                context?.lockToLandscape()
+            }
+            false -> {
+                context?.turnOffImmersiveMode()
+                context?.unlockOrientation()
+            }
         }
     }
 
@@ -109,6 +138,7 @@ fun EditNotePane(
     ) {
         EditNoteToolbar(
             modifier = Modifier.wrapContentHeight(align = Alignment.Top),
+            editEnabled = updatedEditNoteUiModel.editEnable,
             onCloseClicked = onCloseClicked,
             onSaveClicked = {
                 focusManager.clearFocus()
@@ -126,13 +156,24 @@ fun EditNotePane(
                         else -> 0.85f
                     }
                 )
-                .fillMaxHeight(1f),
-            titleText = editNoteUiModel.title,
-            bodyText = editNoteUiModel.content,
-            dateCreated = convertIsoToRelativeTimeFormat(editNoteUiModel.noteEntity?.createdAt ?: ""),
-            lastEdited = convertIsoToRelativeTimeFormat(editNoteUiModel.noteEntity?.lastEditedAt ?: ""),
+                .fillMaxHeight(1f)
+                .lifecycleAwareDebouncedClickable(
+                    onClick = {
+                        if (updatedEditNoteUiModel.isReaderMode) {
+                            editNoteAction(EditNoteAction.ModeChange(Mode.ViewMode))
+                        }
+                    }
+                ),
+            isReaderModeOn = updatedEditNoteUiModel.isReaderMode,
+            editEnabled = updatedEditNoteUiModel.editEnable,
+            titleText = updatedEditNoteUiModel.title,
+            bodyText = updatedEditNoteUiModel.content,
+            dateCreated = convertIsoToRelativeTimeFormat(updatedEditNoteUiModel.noteEntity?.createdAt ?: ""),
+            lastEdited = convertIsoToRelativeTimeFormat(updatedEditNoteUiModel.noteEntity?.lastEditedAt ?: ""),
             onTitleTextChanged =  { value -> editNoteAction(EditNoteAction.UpdateTitle(title = value)) },
-            onBodyTextChanged = { value -> editNoteAction(EditNoteAction.UpdateContent(content = value)) }
+            onBodyTextChanged = { value -> editNoteAction(EditNoteAction.UpdateContent(content = value)) },
+            onEditClicked = { editNoteAction(EditNoteAction.ModeChange(Mode.EditMode)) },
+            onViewClicked = { editNoteAction(EditNoteAction.ModeChange(Mode.ReaderMode)) }
         )
     }
 }
@@ -140,56 +181,110 @@ fun EditNotePane(
 @Composable
 fun EditNoteToolbar(
     modifier: Modifier = Modifier,
+    editEnabled: Boolean = false,
     onCloseClicked: () -> Unit = {},
     onSaveClicked: () -> Unit = {}
 ) {
-    Row(
-        modifier = modifier
-            .background(color = colorScheme.surfaceContainerLowest)
-            .fillMaxWidth()
-            .padding(
-                start = WindowInsets.systemBars.union(WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateLeftPadding(LayoutDirection.Ltr),
-                top = WindowInsets.systemBars.union(WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateTopPadding(),
-                end = WindowInsets.systemBars.union(WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateEndPadding(LayoutDirection.Ltr) + 16.dp
-            ),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    AnimatedVisibility(
+        visible = editEnabled,
+        enter = expandVertically(),
+        exit = shrinkVertically(),
     ) {
-        IconButton(
-            onClick = onCloseClicked
+        Row(
+            modifier = modifier
+                .background(color = colorScheme.surfaceContainerLowest)
+                .fillMaxWidth()
+                .padding(
+                    start = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                        .asPaddingValues()
+                        .calculateLeftPadding(LayoutDirection.Ltr) + 16.dp,
+                    top = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                        .asPaddingValues()
+                        .calculateTopPadding() + 16.dp,
+                    end = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                        .asPaddingValues()
+                        .calculateEndPadding(LayoutDirection.Ltr) + 16.dp
+                ),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_x),
-                contentDescription = "Close Note",
-                tint = colorScheme.onSurfaceVariant,
-                modifier = Modifier
+            SafeIconButton(
+                onClick = onCloseClicked
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_x),
+                    contentDescription = "Close Note",
+                    tint = colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                )
+            }
+
+            Text(
+                text = "Save Note".uppercase(),
+                style = typography.titleSmall,
+                color = colorScheme.primary,
+                modifier = Modifier.lifecycleAwareDebouncedClickable { onSaveClicked() }
             )
         }
+    }
 
-        Text(
-            text = "Save Note".uppercase(),
-            style = typography.titleSmall,
-            color = colorScheme.primary,
-            modifier = Modifier.clickable { onSaveClicked() }
-        )
+    AnimatedVisibility(
+        visible = !editEnabled,
+        enter = expandVertically(),
+        exit = shrinkVertically(),
+    ) {
+        Row(
+            modifier = modifier
+                .background(color = colorScheme.surfaceContainerLowest)
+                .fillMaxWidth()
+                .padding(
+                    start = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                        .asPaddingValues()
+                        .calculateLeftPadding(LayoutDirection.Ltr) + 16.dp,
+                    top = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                        .asPaddingValues()
+                        .calculateTopPadding() + 16.dp,
+                    end = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                        .asPaddingValues()
+                        .calculateEndPadding(LayoutDirection.Ltr) + 16.dp
+                ),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                modifier = Modifier.lifecycleAwareDebouncedClickable { onCloseClicked() },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_back_arrow),
+                    contentDescription = "Settings",
+                    tint = colorScheme.primary,
+                    modifier = Modifier.requiredSize(size = 32.dp)
+                )
+
+                Text(
+                    text = "All Notes".uppercase(),
+                    style = typography.titleSmall,
+                    color = colorScheme.primary
+                )
+            }
+        }
     }
 }
 
 @Composable
 fun EditNoteBody(
     modifier: Modifier = Modifier,
+    isReaderModeOn: Boolean = false,
+    editEnabled: Boolean = false,
     titleText: String = "",
     bodyText: String = "",
     dateCreated: String = "",
     lastEdited: String = "",
     onTitleTextChanged: (String) -> Unit = {},
-    onBodyTextChanged: (String) -> Unit = {}
+    onBodyTextChanged: (String) -> Unit = {},
+    onEditClicked: () -> Unit = {},
+    onViewClicked: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
@@ -224,6 +319,7 @@ fun EditNoteBody(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextField(
+                enabled = editEnabled,
                 value = titleText,
                 onValueChange = { value -> onTitleTextChanged(value) },
                 textStyle = typography.titleLarge,
@@ -236,11 +332,12 @@ fun EditNoteBody(
                     focusedTextColor = colorScheme.onSurface,
                     unfocusedTextColor = colorScheme.onSurface,
                     focusedContainerColor = colorScheme.surfaceContainerLowest,
-                    unfocusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = colorScheme.surfaceContainerLowest,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     disabledIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent,
+                    disabledTextColor = colorScheme.onSurface,
+                    errorIndicatorColor = Color.Transparent
                 ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Unspecified,
@@ -258,11 +355,15 @@ fun EditNoteBody(
                     .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
             )
 
-            NoteDateTime(
-                modifier = Modifier,
-                dateCreated = dateCreated,
-                lastEdited = lastEdited
-            )
+            AnimatedVisibility(
+                visible = !editEnabled,
+            ) {
+                NoteDateTime(
+                    modifier = Modifier,
+                    dateCreated = dateCreated,
+                    lastEdited = lastEdited
+                )
+            }
 
             Box(
                 modifier = Modifier
@@ -272,6 +373,7 @@ fun EditNoteBody(
             )
 
             TextField(
+                enabled = editEnabled,
                 value = bodyText,
                 onValueChange = { value -> onBodyTextChanged(value) },
                 textStyle = typography.bodyLarge,
@@ -284,11 +386,12 @@ fun EditNoteBody(
                     focusedTextColor = colorScheme.onSurface,
                     unfocusedTextColor = colorScheme.onSurface,
                     focusedContainerColor = colorScheme.surfaceContainerLowest,
-                    unfocusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = colorScheme.surfaceContainerLowest,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     disabledIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent,
+                    disabledTextColor = colorScheme.onSurface,
+                    errorIndicatorColor = Color.Transparent
                 ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Unspecified,
@@ -297,11 +400,22 @@ fun EditNoteBody(
             )
         }
 
-        EditAndViewMode(
-            modifier = Modifier.align(Alignment.BottomCenter),
-            onEditClicked = {},
-            onViewClicked = {}
-        )
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            AnimatedVisibility(
+                visible = !isReaderModeOn,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                EditAndViewMode(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    onEditClicked = onEditClicked,
+                    onViewClicked = onViewClicked
+                )
+            }
+        }
     }
 }
 
@@ -363,7 +477,7 @@ private fun EditAndViewMode(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(
+        SafeIconButton(
             onClick = onEditClicked,
             modifier = Modifier
                 .clip(shape = shapes.medium)
@@ -377,7 +491,7 @@ private fun EditAndViewMode(
             )
         }
 
-        IconButton(
+        SafeIconButton(
             onClick = onViewClicked,
             modifier = Modifier
                 .clip(shape = shapes.medium)
@@ -401,7 +515,8 @@ private fun PhonePortraitPreview() {
         EditNotePane(
             modifier = Modifier,
             windowSizeClass = phonePortrait,
-            editNoteUiModel = defaultEditNoteUiModel
+            editNoteUiModel = defaultEditNoteUiModel,
+            noteId = "1",
         )
     }
 }
@@ -414,7 +529,8 @@ private fun PhoneLandscapePreview() {
         EditNotePane(
             modifier = Modifier,
             windowSizeClass = phoneLandscape,
-            editNoteUiModel = defaultEditNoteUiModel
+            editNoteUiModel = defaultEditNoteUiModel,
+            noteId = "1",
         )
     }
 }
@@ -427,7 +543,8 @@ private fun TabletMediumPortraitPreview() {
         EditNotePane(
             modifier = Modifier,
             windowSizeClass = mediumTabletPortrait,
-            editNoteUiModel = defaultEditNoteUiModel
+            editNoteUiModel = defaultEditNoteUiModel,
+            noteId = "1",
         )
     }
 }
@@ -440,7 +557,8 @@ private fun TabletMediumLandscapePreview() {
         EditNotePane(
             modifier = Modifier,
             windowSizeClass = mediumTabletLandscape,
-            editNoteUiModel = defaultEditNoteUiModel
+            editNoteUiModel = defaultEditNoteUiModel,
+            noteId = "1",
         )
     }
 }
@@ -453,7 +571,8 @@ private fun TabletExpandedPortraitPreview() {
         EditNotePane(
             modifier = Modifier,
             windowSizeClass = extendedTabletPortrait,
-            editNoteUiModel = defaultEditNoteUiModel
+            editNoteUiModel = defaultEditNoteUiModel,
+            noteId = "1",
         )
     }
 }
@@ -466,7 +585,8 @@ private fun TabletExpandedLandscapePreview() {
         EditNotePane(
             modifier = Modifier,
             windowSizeClass = extendedTabletLandscape,
-            editNoteUiModel = defaultEditNoteUiModel
+            editNoteUiModel = defaultEditNoteUiModel,
+            noteId = "1",
         )
     }
 }

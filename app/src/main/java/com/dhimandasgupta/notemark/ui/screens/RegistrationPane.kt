@@ -3,7 +3,6 @@ package com.dhimandasgupta.notemark.ui.screens
 import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -66,6 +66,7 @@ import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
+import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkPasswordTextField
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTextField
@@ -85,6 +86,8 @@ fun RegistrationPane(
     registrationUiModel: RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {}
 ) {
+    val updatedRegistrationUiModel by rememberUpdatedState(newValue = registrationUiModel)
+
     Box(
         modifier = modifier
             .background(color = colorResource(R.color.splash_blue))
@@ -133,7 +136,7 @@ fun RegistrationPane(
                             )
                             .verticalScroll(rememberScrollState()),
                         navigateToLogin = navigateToLogin,
-                        registrationUiModel = registrationUiModel,
+                        registrationUiModel = updatedRegistrationUiModel,
                         registrationAction = registrationAction
                     )
                 }
@@ -166,7 +169,7 @@ fun RegistrationPane(
                     RightPane(
                         modifier = Modifier.fillMaxWidth(),
                         navigateToLogin = navigateToLogin,
-                        registrationUiModel = registrationUiModel,
+                        registrationUiModel = updatedRegistrationUiModel,
                         registrationAction = registrationAction
                     )
                 }
@@ -197,7 +200,7 @@ fun RegistrationPane(
                     Spacer(modifier = Modifier.height(16.dp))
                     RightPane(
                         navigateToLogin = navigateToLogin,
-                        registrationUiModel = registrationUiModel,
+                        registrationUiModel = updatedRegistrationUiModel,
                         registrationAction = registrationAction
                     )
                 }
@@ -333,7 +336,7 @@ private fun RightPane(
             text = "Already have and account?",
             style = typography.titleSmall,
             fontWeight = FontWeight.Normal,
-            modifier = Modifier.fillMaxSize().clickable {
+            modifier = Modifier.fillMaxSize().lifecycleAwareDebouncedClickable {
                 navigateToLogin()
             },
             textAlign = TextAlign.Center,

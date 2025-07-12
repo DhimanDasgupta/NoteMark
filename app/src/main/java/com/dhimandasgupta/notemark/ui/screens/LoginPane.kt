@@ -3,7 +3,6 @@ package com.dhimandasgupta.notemark.ui.screens
 import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -60,6 +60,7 @@ import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
+import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkPasswordTextField
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTextField
@@ -81,6 +82,8 @@ fun LoginPane(
     loginUiModel: LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
 ) {
+    val updatedLoginUiModel by rememberUpdatedState(loginUiModel)
+
     Box(
         modifier = modifier
             .background(color = colorResource(R.color.splash_blue))
@@ -129,7 +132,7 @@ fun LoginPane(
                             .verticalScroll(rememberScrollState()),
                         navigateToRegistration = navigateToRegistration,
                         navigateToAfterLogin = navigateToAfterLogin,
-                        loginUiModel = loginUiModel,
+                        loginUiModel = updatedLoginUiModel,
                         loginAction = loginAction
                     )
                 }
@@ -156,7 +159,11 @@ fun LoginPane(
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    LeftPane()
+                    LeftPane(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
                     RightPane(
                         navigateToRegistration = navigateToRegistration,
@@ -193,7 +200,7 @@ fun LoginPane(
                     RightPane(
                         navigateToRegistration = navigateToRegistration,
                         navigateToAfterLogin = navigateToAfterLogin,
-                        loginUiModel = loginUiModel,
+                        loginUiModel = updatedLoginUiModel,
                         loginAction = loginAction
                     )
                 }
@@ -204,11 +211,13 @@ fun LoginPane(
 
 @Composable
 private fun LeftPane(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = horizontalAlignment
     ) {
         Text(
             text = "Log In",
@@ -303,7 +312,7 @@ private fun RightPane(
             fontWeight = FontWeight.Normal,
             modifier = Modifier
                 .fillMaxSize()
-                .clickable {
+                .lifecycleAwareDebouncedClickable {
                     navigateToRegistration()
                 },
             textAlign = TextAlign.Center,

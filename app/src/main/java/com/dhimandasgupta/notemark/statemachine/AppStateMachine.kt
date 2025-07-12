@@ -28,6 +28,7 @@ sealed interface AppState {
     ) : AppState
 }
 
+@Immutable
 sealed interface SyncState {
     data object SyncNotStarted : SyncState
     data object SyncStarted : SyncState
@@ -50,6 +51,11 @@ class AppStateMachine(
     init {
         spec {
             inState<AppState.NotLoggedIn> {
+                condition({ cachedUser != null }) {
+                    onEnter { state ->
+                        state.override { AppState.LoggedIn(loggedInUser = cachedUser!!) }
+                    }
+                }
                 // All Flows while in the app state should be collected here
                 collectWhileInState(userManager.getUser()) { user, state ->
                     user?.let { cachedUser = it }
@@ -98,9 +104,16 @@ class AppStateMachine(
 
     companion object {
         val defaultAppState = AppState.NotLoggedIn()
+
     }
 
     private suspend fun syncRemoteNotes() {
+        // Don't Sync if the last sync was less than a minute ago
+        if (
+            (System.currentTimeMillis() - userManager.getSyncTime()
+                .first()) < DURATION_BETWEEN_SUCCESSFUL_SYNC
+        ) return
+
         var total = 0
         var numberOfNotesLoaded = 0
         var pageNumber = 0
@@ -112,6 +125,9 @@ class AppStateMachine(
                     pageNumber++
                     total = noteResponse.total
                     numberOfNotesLoaded += noteResponse.notes.size
+
+                    // Saving the last successful sync time.
+                    userManager.saveSyncTime(System.currentTimeMillis())
                 },
                 onFailure = { throwable ->
                     // Handle error
@@ -122,4 +138,5 @@ class AppStateMachine(
 }
 
 private const val PAGE_SIZE: Int = 1
+const val DURATION_BETWEEN_SUCCESSFUL_SYNC = 5 * 60 * 1000
 

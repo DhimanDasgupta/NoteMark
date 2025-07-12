@@ -2,6 +2,7 @@ import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import io.ktor.client.plugins.auth.providers.BearerTokens
@@ -20,7 +21,9 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 interface UserManager {
     suspend fun saveToken(bearerTokens: BearerTokens)
     suspend fun saveUser(loggerInUser: LoggedInUser)
+    suspend fun saveSyncTime(syncTime: Long)
     fun getUser(): Flow<LoggedInUser?>
+    fun getSyncTime(): Flow<Long>
     suspend fun clearUser()
 }
 
@@ -48,6 +51,9 @@ class UserManagerImpl(
 
         /** [Preferences.Key] for storing the refresh token. */
         private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
+
+        /** [Preferences.Key] for storing the last sync time. */
+        private val LAST_SYNC_TIME = longPreferencesKey(name = "last_sync_time")
     }
 
     /**
@@ -87,6 +93,20 @@ class UserManagerImpl(
     }
 
     /**
+     * Saves the provided sync time to DataStore.
+     * Stores the last sync time as a Long value.
+     *
+     * @param syncTime The last sync time to save.
+     */
+    override suspend fun saveSyncTime(syncTime: Long) {
+        dataStore.updateData { preferences ->
+            preferences.toMutablePreferences().apply {
+                set(LAST_SYNC_TIME, syncTime)
+            }
+        }
+    }
+
+    /**
      * Retrieves the [LoggedInUser] from DataStore by observing its [Flow] of [Preferences].
      * Maps the stored preferences into a [LoggedInUser] object if all necessary
      * data (username, access token, refresh token) is present.
@@ -111,6 +131,20 @@ class UserManagerImpl(
         } else {
             null
         }
+    }
+
+    /**
+     * Retrieves the last synchronization time from DataStore.
+     * Observes the [Flow] of [Preferences] and extracts the timestamp stored
+     * under the `LAST_SYNC_TIME` key. If the key is not found or an error occurs
+     * during data retrieval, it defaults to `0L`.
+     *
+     * @return A [Flow] emitting the last synchronization time as a [Long] value.
+     */
+    override fun getSyncTime(): Flow<Long> = dataStore.data.catch { exception ->
+        0L
+    }.map {
+        it[LAST_SYNC_TIME] ?: 0L
     }
 
     /**

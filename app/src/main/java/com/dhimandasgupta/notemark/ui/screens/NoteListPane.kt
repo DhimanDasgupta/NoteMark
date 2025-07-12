@@ -1,7 +1,6 @@
 package com.dhimandasgupta.notemark.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +28,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
@@ -41,6 +39,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,10 +66,12 @@ import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
+import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.LimitedText
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkFAB
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkToolbarButton
+import com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton
 import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
 import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
 import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
@@ -92,14 +93,16 @@ fun NoteListPane(
     onSettingsClicked: () -> Unit = {},
     onProfileClicked: () -> Unit = {},
 ) {
-    LaunchedEffect(key1 = noteListUiModel.noteClickedUuid) {
-        if (noteListUiModel.noteClickedUuid.isNotEmpty()) {
+    val updateNoteListUiModel by rememberUpdatedState(newValue = noteListUiModel)
+
+    LaunchedEffect(key1 = updateNoteListUiModel.noteClickedUuid) {
+        if (updateNoteListUiModel.noteClickedUuid.isNotEmpty()) {
             onNoteClicked(noteListUiModel.noteClickedUuid)
             return@LaunchedEffect
         }
     }
 
-    LaunchedEffect(noteListUiModel.userName) {
+    LaunchedEffect(updateNoteListUiModel.userName) {
         if (noteListUiModel.userName?.isEmpty() == true) {
             onProfileClicked()
             return@LaunchedEffect
@@ -116,7 +119,7 @@ fun NoteListPane(
             modifier = Modifier,
             windowSizeClass = windowSizeClass,
             userName = noteListUiModel.userName?.formatUserName() ?: "",
-            noteListUiModel = noteListUiModel,
+            noteListUiModel = updateNoteListUiModel,
             noteListAction = noteListAction,
             onFabClicked = onFabClicked,
             onSettingsClicked = onSettingsClicked,
@@ -125,7 +128,7 @@ fun NoteListPane(
 
         // Dialog check
         var showDialog by remember { mutableStateOf(false) }
-        LaunchedEffect(key1 = noteListUiModel.noteLongClickedUuid) {
+        LaunchedEffect(key1 = updateNoteListUiModel.noteLongClickedUuid) {
             if (noteListUiModel.noteLongClickedUuid.isNotEmpty()) {
                 showDialog = true
             }
@@ -133,7 +136,7 @@ fun NoteListPane(
 
         if (showDialog) {
             ShowDeleteDialog(
-                noteId = noteListUiModel.noteLongClickedUuid,
+                noteId = updateNoteListUiModel.noteLongClickedUuid,
                 noteListAction = noteListAction,
                 onDismiss = {
                     showDialog = false
@@ -298,7 +301,7 @@ private fun NoteListPaneToolbar(
             modifier = Modifier.weight(1f)
         )
 
-        IconButton(
+        SafeIconButton(
             onClick = onSettingsClicked
         ) {
             Icon(
@@ -524,7 +527,7 @@ fun ShowDeleteDialog(
                     text = "Keep Editing",
                     style = typography.bodyMedium,
                     color = colorScheme.primary,
-                    modifier = Modifier.clickable { onDismiss() }
+                    modifier = Modifier.lifecycleAwareDebouncedClickable { onDismiss() }
                 )
 
                 Spacer(modifier = Modifier.width(32.dp))
@@ -533,7 +536,7 @@ fun ShowDeleteDialog(
                     text = "Discard",
                     style = typography.bodyMedium,
                     color = colorScheme.error,
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.lifecycleAwareDebouncedClickable {
                         noteListAction(NoteDeleted(noteId))
                         onDismiss()
                     }

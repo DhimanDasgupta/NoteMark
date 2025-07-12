@@ -14,14 +14,23 @@ data class EditNoteState(
     val title: String,
     val content: String,
     val noteEntity: NoteEntity? = null,
-    val saved: Boolean? = null
+    val saved: Boolean? = null,
+    val mode: Mode = Mode.ViewMode
 )
+
+@Immutable
+sealed interface Mode {
+    data object ViewMode : Mode
+    data object EditMode : Mode
+    data object ReaderMode : Mode
+}
 
 sealed interface EditNoteAction {
     data class LoadNote(val uuid: String) : EditNoteAction
     data class UpdateNote(val noteEntity: NoteEntity) : EditNoteAction
     data class UpdateTitle(val title: String) : EditNoteAction
     data class UpdateContent(val content: String) : EditNoteAction
+    data class ModeChange(val mode: Mode) : EditNoteAction
     data object Save : EditNoteAction
 }
 
@@ -88,6 +97,9 @@ class EditNoteStateMachine(
 
                     state.noChange()
                 }
+                on<EditNoteAction.ModeChange> { action, state ->
+                    state.mutate { copy(mode = action.mode) }
+                }
             }
         }
     }
@@ -96,7 +108,9 @@ class EditNoteStateMachine(
         val defaultEditNoteState = EditNoteState(
             title = "",
             content = "",
-            noteEntity = null
+            noteEntity = null,
+            saved = null,
+            mode = Mode.ViewMode
         )
     }
 }

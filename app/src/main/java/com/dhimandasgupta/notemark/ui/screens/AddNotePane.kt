@@ -1,7 +1,6 @@
 package com.dhimandasgupta.notemark.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -25,6 +25,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -34,17 +35,21 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.presenter.AddNoteUiModel
 import com.dhimandasgupta.notemark.statemachine.AddNoteAction
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
@@ -55,6 +60,7 @@ import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
+import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
 import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
@@ -73,9 +79,11 @@ fun AddNotePane(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+    
+    val updatedAddNoteUiModel by rememberUpdatedState(addNoteUiModel)
 
-    LaunchedEffect(addNoteUiModel.saved) {
-        if (addNoteUiModel.saved == true) {
+    LaunchedEffect(updatedAddNoteUiModel.saved) {
+        if (updatedAddNoteUiModel.saved == true) {
             focusManager.clearFocus()
             keyboardController?.hide()
             onBackClicked()
@@ -111,8 +119,8 @@ fun AddNotePane(
                     }
                 )
                 .fillMaxHeight(1f),
-            titleText = addNoteUiModel.title,
-            bodyText = addNoteUiModel.content,
+            titleText = updatedAddNoteUiModel.title,
+            bodyText = updatedAddNoteUiModel.content,
             onTitleTextChanged =  { value -> addNoteAction(AddNoteAction.UpdateTitle(title = value)) },
             onBodyTextChanged = { value -> addNoteAction(AddNoteAction.UpdateContent(content = value)) }
         )
@@ -143,18 +151,29 @@ private fun AddNoteToolbar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "< All Notes".uppercase(),
-            style = typography.titleSmall,
-            color = colorScheme.primary,
-            modifier = Modifier.clickable { onBackClicked() }
-        )
+        Row(
+            modifier = Modifier.lifecycleAwareDebouncedClickable { onBackClicked() },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_back_arrow),
+                contentDescription = "Settings",
+                tint = colorScheme.primary,
+                modifier = Modifier.requiredSize(size = 32.dp)
+            )
+
+            Text(
+                text = "All Notes".uppercase(),
+                style = typography.titleSmall,
+                color = colorScheme.primary
+            )
+        }
 
         Text(
             text = "Save Note".uppercase(),
             style = typography.titleSmall,
             color = colorScheme.primary,
-            modifier = Modifier.clickable { onSaveClicked() }
+            modifier = Modifier.lifecycleAwareDebouncedClickable { onSaveClicked() }
         )
     }
 }

@@ -29,6 +29,8 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,8 +70,10 @@ fun LauncherPane(
     navigateToLogin: () -> Unit = {},
     navigateToList: () -> Unit = {}
 ) {
-    LaunchedEffect(launcherUiModel) {
-        if (launcherUiModel.loggedInUser != null) {
+    val updatedLauncherUiModel by rememberUpdatedState(launcherUiModel)
+
+    LaunchedEffect(updatedLauncherUiModel) {
+        if (updatedLauncherUiModel.loggedInUser != null) {
             navigateToList()
             return@LaunchedEffect
         }

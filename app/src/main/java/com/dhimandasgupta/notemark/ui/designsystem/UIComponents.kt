@@ -7,7 +7,6 @@ import androidx.compose.animation.core.keyframes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +31,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
@@ -40,10 +42,13 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -63,7 +68,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import kotlinx.coroutines.delay
 
 @Composable
@@ -105,6 +115,7 @@ fun NoteMarkOutlinedButton(
 @Composable
 fun NoteMarkTextField(
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     label: String? = "",
     enteredText: String = "",
     hintText: String = "",
@@ -131,6 +142,7 @@ fun NoteMarkTextField(
         var hasFocus by rememberSaveable { mutableStateOf(false) }
 
         TextField(
+            enabled = enabled,
             value = enteredText,
             onValueChange = onTextChanged,
             modifier = Modifier
@@ -188,6 +200,7 @@ fun NoteMarkTextField(
 @Composable
 fun NoteMarkPasswordTextField(
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     label: String? = "",
     enteredText: String = "",
     hintText: String = "",
@@ -215,6 +228,7 @@ fun NoteMarkPasswordTextField(
         }
 
         TextField(
+            enabled = enabled,
             value = enteredText,
             onValueChange = onTextChanged,
             trailingIcon = {
@@ -224,7 +238,7 @@ fun NoteMarkPasswordTextField(
                         modifier = Modifier
                             .size(32.dp)
                             .padding(4.dp)
-                            .clickable {
+                            .lifecycleAwareDebouncedClickable {
                                 showPassword = !showPassword
                             }
                         ,
@@ -237,7 +251,7 @@ fun NoteMarkPasswordTextField(
                         modifier = Modifier
                             .size(32.dp)
                             .padding(4.dp)
-                            .clickable {
+                            .lifecycleAwareDebouncedClickable {
                                 showPassword = !showPassword
                             }
                         ,
@@ -310,7 +324,7 @@ fun NoteMarkToolbarButton(
         modifier = modifier
             .clip(shape = shapes.extraSmall)
             .background(color = colorScheme.primary)
-            .clickable {
+            .lifecycleAwareDebouncedClickable {
                 onClick()
             }
     ) {
@@ -474,5 +488,53 @@ fun ThreeBouncingDots(
             animationDurationMillis = animationDurationMillis,
             delayMillis = dotStartDelayMillis * 2 // Third dot is further delayed
         )
+    }
+}
+
+@Composable
+fun SafeIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
+    owner: LifecycleOwner = LocalLifecycleOwner.current,
+    activeState: Lifecycle.State = Lifecycle.State.RESUMED,
+    debounceIntervalMs: Long = 700L,
+    content: @Composable () -> Unit
+) {
+    val currentOnClick by rememberUpdatedState(onClick)
+    var lastClickTime by remember { mutableLongStateOf(0L) }
+    var lifecycleAllowsClick by remember {
+        mutableStateOf(owner.lifecycle.currentState.isAtLeast(activeState))
+    }
+
+    DisposableEffect(owner, activeState) {
+        val observer = LifecycleEventObserver { _, _ ->
+            lifecycleAllowsClick = owner.lifecycle.currentState.isAtLeast(activeState)
+        }
+        owner.lifecycle.addObserver(observer)
+        onDispose {
+            owner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    val isButtonEnabled = enabled && lifecycleAllowsClick
+
+    IconButton(
+        onClick = {
+            // Check enabled state again here, though IconButton's internal state should also prevent it
+            if (isButtonEnabled) {
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - lastClickTime >= debounceIntervalMs) {
+                    lastClickTime = currentTime
+                    currentOnClick()
+                }
+            }
+        },
+        modifier = modifier,
+        enabled = isButtonEnabled, // Pass the combined enabled state to the actual IconButton
+        colors = colors
+    ) {
+        content()
     }
 }

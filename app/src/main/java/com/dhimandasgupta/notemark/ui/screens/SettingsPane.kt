@@ -16,13 +16,14 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -36,6 +37,7 @@ import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedPortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
+import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 
 @Composable
@@ -46,8 +48,10 @@ fun SettingsPane(
     onBackClicked: () -> Unit = {},
     onLogoutClicked: () -> Unit = {}
 ) {
-    LaunchedEffect(key1 = settingsUiModel.logoutStatus) {
-        if (settingsUiModel.logoutStatus == true) {
+    val updatedSettingsUiModel by rememberUpdatedState(settingsUiModel)
+
+    LaunchedEffect(key1 = updatedSettingsUiModel.logoutStatus) {
+        if (updatedSettingsUiModel.logoutStatus == true) {
             onLogoutSuccessful()
             return@LaunchedEffect
         }
@@ -92,20 +96,17 @@ private fun SettingsToolbar(
             .padding(
                 vertical = 4.dp,
                 horizontal = 8.dp
-            ),
+            )
+            .lifecycleAwareDebouncedClickable(onClick = onBackClicked),
         horizontalArrangement = Arrangement.spacedBy(0.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(
-            onClick = onBackClicked
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_back_arrow),
-                contentDescription = "Settings",
-                tint = colorScheme.onSurface,
-                modifier = Modifier.requiredSize(size = 32.dp)
-            )
-        }
+        Icon(
+            painter = painterResource(R.drawable.ic_back_arrow),
+            contentDescription = "Settings",
+            tint = colorScheme.onSurface,
+            modifier = Modifier.requiredSize(size = 32.dp)
+        )
 
         Text(
             text = "Settings",

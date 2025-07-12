@@ -7,11 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.statemachine.EditNoteAction
 import com.dhimandasgupta.notemark.statemachine.EditNoteStateMachine
+import com.dhimandasgupta.notemark.statemachine.Mode
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.onStart
@@ -22,13 +22,17 @@ data class EditNoteUiModel(
     val title: String,
     val content: String,
     val noteEntity: NoteEntity? = null,
-    val saved: Boolean? = null
+    val saved: Boolean? = null,
+    val editEnable: Boolean = false,
+    val isReaderMode: Boolean = false
 ) {
     companion object {
         val Empty = EditNoteUiModel(
             title = "",
             content = "",
-            noteEntity = null
+            noteEntity = null,
+            editEnable = false,
+            isReaderMode = false
         )
     }
 }
@@ -55,7 +59,9 @@ class EditNotePresenter(
                         title = editNoteState.title,
                         content = editNoteState.content,
                         noteEntity = editNoteState.noteEntity,
-                        saved = editNoteState.saved
+                        saved = editNoteState.saved,
+                        editEnable = editNoteState.mode == Mode.EditMode,
+                        isReaderMode = editNoteState.mode == Mode.ReaderMode
                     )
                 }
             }
