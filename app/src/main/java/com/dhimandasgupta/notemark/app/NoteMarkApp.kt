@@ -1,7 +1,8 @@
-package com.dhimandasgupta.notemark
+package com.dhimandasgupta.notemark.app
 
 import android.app.Application
 import android.os.StrictMode
+import com.dhimandasgupta.notemark.BuildConfig
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin

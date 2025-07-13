@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark
+package com.dhimandasgupta.notemark.app
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -15,22 +15,21 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.dhimandasgupta.notemark.common.extensions.setDarkStatusBarIcons
-import com.dhimandasgupta.notemark.presenter.AddNotePresenter
-import com.dhimandasgupta.notemark.presenter.EditNotePresenter
-import com.dhimandasgupta.notemark.presenter.LauncherPresenter
-import com.dhimandasgupta.notemark.presenter.LoginPresenter
-import com.dhimandasgupta.notemark.presenter.NoteListPresenter
-import com.dhimandasgupta.notemark.presenter.RegistrationPresenter
-import com.dhimandasgupta.notemark.presenter.SettingsPresenter
-import com.dhimandasgupta.notemark.statemachine.AppAction
-import com.dhimandasgupta.notemark.statemachine.NoteListAction.NoteClicked
-import com.dhimandasgupta.notemark.ui.screens.AddNotePane
-import com.dhimandasgupta.notemark.ui.screens.LauncherPane
-import com.dhimandasgupta.notemark.ui.screens.LoginPane
-import com.dhimandasgupta.notemark.ui.screens.EditNotePane
-import com.dhimandasgupta.notemark.ui.screens.NoteListPane
-import com.dhimandasgupta.notemark.ui.screens.RegistrationPane
-import com.dhimandasgupta.notemark.ui.screens.SettingsPane
+import com.dhimandasgupta.notemark.features.addnote.AddNotePresenter
+import com.dhimandasgupta.notemark.features.editnote.EditNotePresenter
+import com.dhimandasgupta.notemark.features.launcher.AppAction
+import com.dhimandasgupta.notemark.features.launcher.LauncherPresenter
+import com.dhimandasgupta.notemark.features.login.LoginPresenter
+import com.dhimandasgupta.notemark.features.notelist.NoteListPresenter
+import com.dhimandasgupta.notemark.features.registration.RegistrationPresenter
+import com.dhimandasgupta.notemark.features.settings.SettingsPresenter
+import com.dhimandasgupta.notemark.features.addnote.AddNotePane
+import com.dhimandasgupta.notemark.features.launcher.LauncherPane
+import com.dhimandasgupta.notemark.features.login.LoginPane
+import com.dhimandasgupta.notemark.features.editnote.EditNotePane
+import com.dhimandasgupta.notemark.features.notelist.NoteListPane
+import com.dhimandasgupta.notemark.features.registration.RegistrationPane
+import com.dhimandasgupta.notemark.features.settings.SettingsPane
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 
@@ -173,7 +172,6 @@ private fun NavGraphBuilder.noteMarkGraph(
                 noteListAction = noteListAction,
                 onNoteClicked = { uuid ->
                     navController.navigate(route = NoteMarkDestination.NoteEditPane(uuid))
-                    noteListAction(NoteClicked(noteListUiModel.noteClickedUuid))
                 },
                 onFabClicked = {
                     navController.navigate(NoteMarkDestination.NoteCreatePane)

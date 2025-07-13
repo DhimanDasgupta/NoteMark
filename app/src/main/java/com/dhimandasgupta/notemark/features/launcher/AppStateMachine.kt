@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.statemachine
+package com.dhimandasgupta.notemark.features.launcher
 
 import LoggedInUser
 import UserManager

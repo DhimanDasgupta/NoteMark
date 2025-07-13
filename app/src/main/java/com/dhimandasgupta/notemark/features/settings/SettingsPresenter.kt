@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.presenter
+package com.dhimandasgupta.notemark.features.settings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -8,9 +8,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleStartEffect
-import com.dhimandasgupta.notemark.statemachine.AppAction
-import com.dhimandasgupta.notemark.statemachine.AppState
-import com.dhimandasgupta.notemark.statemachine.AppStateMachine
+import com.dhimandasgupta.notemark.features.launcher.AppAction
+import com.dhimandasgupta.notemark.features.launcher.AppState
+import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.onStart

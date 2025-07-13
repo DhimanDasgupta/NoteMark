@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.presenter
+package com.dhimandasgupta.notemark.features.editnote
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -9,9 +9,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.dhimandasgupta.notemark.database.NoteEntity
-import com.dhimandasgupta.notemark.statemachine.EditNoteAction
-import com.dhimandasgupta.notemark.statemachine.EditNoteStateMachine
-import com.dhimandasgupta.notemark.statemachine.Mode
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.onStart

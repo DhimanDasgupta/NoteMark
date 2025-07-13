@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.ui.screens
+package com.dhimandasgupta.notemark.features.registration
 
 import android.widget.Toast
 import androidx.activity.compose.LocalActivity
@@ -47,17 +47,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.presenter.RegistrationUiModel
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.EmailEntered
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.PasswordEntered
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.PasswordFiledInFocus
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.RegisterClicked
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.RegistrationChangeStatusConsumed
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.RepeatPasswordEntered
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameEntered
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameFiledInFocus
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameFiledLostFocus
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.EmailEntered
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.PasswordEntered
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.PasswordFiledInFocus
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.RegisterClicked
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.RegistrationChangeStatusConsumed
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.RepeatPasswordEntered
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameEntered
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledInFocus
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledLostFocus
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview

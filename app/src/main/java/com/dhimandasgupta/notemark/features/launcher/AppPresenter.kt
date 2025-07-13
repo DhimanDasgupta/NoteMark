@@ -1,15 +1,11 @@
-package com.dhimandasgupta.notemark.presenter
+package com.dhimandasgupta.notemark.features.launcher
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-import com.dhimandasgupta.notemark.statemachine.AppAction
-import com.dhimandasgupta.notemark.statemachine.AppState
-import com.dhimandasgupta.notemark.statemachine.AppStateMachine
-import com.dhimandasgupta.notemark.statemachine.AppStateMachine.Companion.defaultAppState
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 class AppPresenter(
@@ -19,7 +15,7 @@ class AppPresenter(
 
     @Composable
     fun uiModel(): AppState {
-        var applicationState: AppState by remember { mutableStateOf(defaultAppState) }
+        var applicationState: AppState by remember { mutableStateOf(AppStateMachine.Companion.defaultAppState) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {

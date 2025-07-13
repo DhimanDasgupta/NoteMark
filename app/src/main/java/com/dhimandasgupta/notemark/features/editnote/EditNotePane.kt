@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.ui.screens
+package com.dhimandasgupta.notemark.features.editnote
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -63,9 +63,6 @@ import com.dhimandasgupta.notemark.common.extensions.turnOffImmersiveMode
 import com.dhimandasgupta.notemark.common.extensions.turnOnImmersiveMode
 import com.dhimandasgupta.notemark.common.extensions.unlockOrientation
 import com.dhimandasgupta.notemark.database.NoteEntity
-import com.dhimandasgupta.notemark.presenter.EditNoteUiModel
-import com.dhimandasgupta.notemark.statemachine.EditNoteAction
-import com.dhimandasgupta.notemark.statemachine.Mode
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview

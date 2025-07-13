@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.presenter
+package com.dhimandasgupta.notemark.features.notelist
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -9,13 +9,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.dhimandasgupta.notemark.database.NoteEntity
-import com.dhimandasgupta.notemark.statemachine.AppAction
-import com.dhimandasgupta.notemark.statemachine.AppState
-import com.dhimandasgupta.notemark.statemachine.AppStateMachine
-import com.dhimandasgupta.notemark.statemachine.NoteListAction
-import com.dhimandasgupta.notemark.statemachine.NoteListState
-import com.dhimandasgupta.notemark.statemachine.NoteListStateMachine
-import com.dhimandasgupta.notemark.statemachine.SyncState
+import com.dhimandasgupta.notemark.features.launcher.AppAction
+import com.dhimandasgupta.notemark.features.launcher.AppState
+import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
+import com.dhimandasgupta.notemark.features.launcher.SyncState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -28,7 +25,6 @@ import kotlinx.coroutines.launch
 data class NoteListUiModel(
     val userName: String? = null,
     val noteEntities: ImmutableList<NoteEntity>,
-    val noteClickedUuid: String = "",
     val noteLongClickedUuid: String = "",
     val showSyncProgress: Boolean = false
 )
@@ -80,7 +76,6 @@ class NoteListPresenter(
                         is NoteListState.NoteListStateWithNotes -> {
                             noteListUiModel.copy(
                                 noteEntities = noteListState.notes.toPersistentList(),
-                                noteClickedUuid = noteListState.clickedNoteUuid,
                                 noteLongClickedUuid = noteListState.longClickedNoteUuid
                             )
                         }

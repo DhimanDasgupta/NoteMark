@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.ui.screens
+package com.dhimandasgupta.notemark.features.addnote
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -50,8 +50,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.presenter.AddNoteUiModel
-import com.dhimandasgupta.notemark.statemachine.AddNoteAction
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview

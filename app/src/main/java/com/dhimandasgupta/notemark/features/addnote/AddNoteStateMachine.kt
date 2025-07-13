@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.statemachine
+package com.dhimandasgupta.notemark.features.addnote
 
 import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.getCurrentIso8601Timestamp

@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.ui.screens
+package com.dhimandasgupta.notemark.features.login
 
 import android.widget.Toast
 import androidx.activity.compose.LocalActivity
@@ -46,12 +46,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.presenter.LoginUiModel
-import com.dhimandasgupta.notemark.statemachine.LoginAction
-import com.dhimandasgupta.notemark.statemachine.LoginAction.EmailEntered
-import com.dhimandasgupta.notemark.statemachine.LoginAction.HideLoginButton
-import com.dhimandasgupta.notemark.statemachine.LoginAction.LoginClicked
-import com.dhimandasgupta.notemark.statemachine.LoginAction.PasswordEntered
+import com.dhimandasgupta.notemark.features.login.LoginAction.EmailEntered
+import com.dhimandasgupta.notemark.features.login.LoginAction.HideLoginButton
+import com.dhimandasgupta.notemark.features.login.LoginAction.LoginClicked
+import com.dhimandasgupta.notemark.features.login.LoginAction.PasswordEntered
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
@@ -281,13 +279,15 @@ private fun RightPane(
             hintText = "Password",
             onTextChanged = { passwordText = it },
             onDoneClicked = {
+                focusManager.moveFocus(FocusDirection.Enter)
+                keyboardController?.hide()
+                focusManager.clearFocus(true)
+
                 if (loginUiModel.loginEnabled) {
                     loginAction(HideLoginButton)
                     loginAction(LoginClicked)
                 }
-                focusManager.moveFocus(FocusDirection.Enter)
-                keyboardController?.hide()
-                focusManager.clearFocus(true) }
+            }
         )
 
         NoteMarkButton(

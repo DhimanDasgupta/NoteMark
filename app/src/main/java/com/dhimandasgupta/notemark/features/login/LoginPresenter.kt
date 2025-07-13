@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.presenter
+package com.dhimandasgupta.notemark.features.login
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -8,8 +8,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleStartEffect
-import com.dhimandasgupta.notemark.statemachine.LoginAction
-import com.dhimandasgupta.notemark.statemachine.LoginStateMachine
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch

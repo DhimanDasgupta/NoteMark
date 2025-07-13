@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.statemachine
+package com.dhimandasgupta.notemark.features.registration
 
 import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.extensions.isUsernameValid
@@ -6,14 +6,14 @@ import com.dhimandasgupta.notemark.common.extensions.isValidEmail
 import com.dhimandasgupta.notemark.common.extensions.isValidPassword
 import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
 import com.dhimandasgupta.notemark.data.remote.model.RegisterRequest
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.EmailEntered
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.PasswordEntered
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.PasswordFiledInFocus
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.RegisterClicked
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.RepeatPasswordEntered
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameEntered
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameFiledInFocus
-import com.dhimandasgupta.notemark.statemachine.RegistrationAction.UserNameFiledLostFocus
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.EmailEntered
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.PasswordEntered
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.PasswordFiledInFocus
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.RegisterClicked
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.RepeatPasswordEntered
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameEntered
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledInFocus
+import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledLostFocus
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 

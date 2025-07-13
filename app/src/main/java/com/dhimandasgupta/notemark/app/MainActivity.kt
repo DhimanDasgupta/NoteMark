@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark
+package com.dhimandasgupta.notemark.app
 
 import android.app.Activity
 import android.os.Bundle
@@ -29,11 +29,11 @@ class MainActivity : ComponentActivity() {
             val windowSizeClass = calculateWindowSizeClass(actualActivity as Activity)
 
             NoteMarkTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(modifier = Modifier.Companion.fillMaxSize()) { innerPadding ->
                     NoteMarkRoot(
                         navController = navController,
                         windowSizeClass = windowSizeClass,
-                        modifier = Modifier
+                        modifier = Modifier.Companion
                             .consumeWindowInsets(paddingValues = innerPadding)
                     )
                 }
