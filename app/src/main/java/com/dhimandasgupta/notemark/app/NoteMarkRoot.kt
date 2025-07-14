@@ -3,11 +3,14 @@ package com.dhimandasgupta.notemark.app
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
+import androidx.compose.animation.slideIn
+import androidx.compose.animation.slideOut
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -40,9 +43,13 @@ fun NoteMarkRoot(
     modifier: Modifier = Modifier
 ) {
     NavHost(
+        modifier = modifier,
         navController = navController,
         startDestination = NoteMarkDestination.RootPane,
-        modifier = modifier
+        enterTransition = { slideIn { IntOffset(x = it.width, y = 0) } },
+        exitTransition = { slideOut { IntOffset(x = -it.width / 3, y = 0) } },
+        popEnterTransition = { slideIn { IntOffset(x = -it.width, y = 0) } },
+        popExitTransition = { slideOut { IntOffset(x = it.width, y = 0) } }
     ) {
         noteMarkGraph(
             navController = navController,
