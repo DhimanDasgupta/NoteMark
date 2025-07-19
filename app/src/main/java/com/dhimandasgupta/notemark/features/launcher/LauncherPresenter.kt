@@ -1,6 +1,5 @@
 package com.dhimandasgupta.notemark.features.launcher
 
-import LoggedInUser
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
@@ -11,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.dhimandasgupta.notemark.common.android.ConnectionState
+import com.dhimandasgupta.notemark.common.storage.LoggedInUser
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.onStart

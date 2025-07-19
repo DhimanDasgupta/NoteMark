@@ -1,11 +1,11 @@
 package com.dhimandasgupta.notemark.features.launcher
 
-import LoggedInUser
-import UserManager
 import android.content.Context
 import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
+import com.dhimandasgupta.notemark.common.storage.LoggedInUser
+import com.dhimandasgupta.notemark.common.storage.UserManager
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import kotlinx.coroutines.ExperimentalCoroutinesApi

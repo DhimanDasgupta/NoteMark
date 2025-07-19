@@ -1,7 +1,7 @@
 package com.dhimandasgupta.notemark.data.remote.api
 
-import LoggedInUser
-import UserManager
+import com.dhimandasgupta.notemark.common.storage.LoggedInUser
+import com.dhimandasgupta.notemark.common.storage.UserManager
 import com.dhimandasgupta.notemark.data.remote.model.AuthResponse
 import com.dhimandasgupta.notemark.data.remote.model.LoginRequest
 import com.dhimandasgupta.notemark.data.remote.model.Note
@@ -16,7 +16,6 @@ import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
@@ -26,7 +25,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.first
 import kotlin.coroutines.coroutineContext
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -138,7 +136,7 @@ class NoteMarkApiImpl(
                 contentType(ContentType.Application.Json)
                 parameter("page", page)
                 parameter("size", size)
-                header("Authorization", "Bearer ${userManager.getUser().first()?.bearerTokens?.accessToken}")
+                // header("Authorization", "Bearer ${userManager.getUser().first()?.bearerTokens?.accessToken}")
             }
 
             when (response.status) {
@@ -201,7 +199,7 @@ class NoteMarkApiImpl(
                 url("/api/notes")
                 contentType(ContentType.Application.Json)
                 setBody(noteEntity.toNote().copy(uuid = Uuid.random().toHexDashString()))
-                header("Authorization", "Bearer ${userManager.getUser().first()?.bearerTokens?.accessToken}")
+                // header("Authorization", "Bearer ${userManager.getUser().first()?.bearerTokens?.accessToken}")
             }
 
             when (response.status) {

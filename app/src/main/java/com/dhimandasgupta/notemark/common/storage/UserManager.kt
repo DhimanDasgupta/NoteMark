@@ -1,3 +1,5 @@
+package com.dhimandasgupta.notemark.common.storage
+
 import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.datastore.core.DataStore

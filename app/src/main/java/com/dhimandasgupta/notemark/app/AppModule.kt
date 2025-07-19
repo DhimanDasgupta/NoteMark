@@ -1,10 +1,10 @@
 package com.dhimandasgupta.notemark.app
 
-import UserManager
-import UserManagerImpl
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.dhimandasgupta.notemark.BuildConfig
+import com.dhimandasgupta.notemark.common.storage.UserManager
+import com.dhimandasgupta.notemark.common.storage.UserManagerImpl
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.NoteMarkRepositoryImpl
 import com.dhimandasgupta.notemark.data.local.datasource.NoteMarkLocalDataSource

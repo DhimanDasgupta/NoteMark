@@ -1,7 +1,7 @@
 package com.dhimandasgupta.notemark.features.notelist
 
-import UserManager
 import androidx.compose.runtime.Immutable
+import com.dhimandasgupta.notemark.common.storage.UserManager
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.features.notelist.NoteListState.NoteListStateWithNoNotes
