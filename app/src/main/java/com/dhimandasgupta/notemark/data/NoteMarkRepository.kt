@@ -13,13 +13,18 @@ import kotlin.coroutines.coroutineContext
 
 interface NoteMarkRepository {
     fun getAllNotes(): Flow<List<NoteEntity>>
-    suspend fun getRemoteNotes(page: Int = -1, size: Int = 20): Result<NoteResponse>
+    suspend fun getRemoteNotesAndSaveInDB(page: Int = -1, size: Int = 20): Result<NoteResponse>
+    suspend fun getAllNonSyncedNotes(): List<NoteEntity>
+    suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity>
     suspend fun getNoteById(noteId: Long): NoteEntity?
     suspend fun getNoteByUUID(uuid: String): NoteEntity?
     suspend fun createNote(noteEntity: NoteEntity): NoteEntity?
     suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): NoteEntity?
+    suspend fun uploadNote(noteEntities: NoteEntity): Boolean
     suspend fun insertNotes(noteEntities: List<NoteEntity>): Boolean
-    suspend fun deleteNote(noteEntity: NoteEntity): Boolean
+    suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean
+    suspend fun deleteRemoteNote(noteEntity: NoteEntity): Boolean
+    suspend fun deleteLocalNote(noteEntity: NoteEntity): Boolean
     suspend fun deleteAllLocalNotes(): Boolean
     suspend fun logout(request: RefreshRequest): Result<Unit>
 }
@@ -30,10 +35,14 @@ class NoteMarkRepositoryImpl(
 ) : NoteMarkRepository {
     override fun getAllNotes(): Flow<List<NoteEntity>> = localDataSource.getAllNotes()
 
-    override suspend fun getRemoteNotes(page: Int, size: Int): Result<NoteResponse> {
+    override suspend fun getAllNonSyncedNotes(): List<NoteEntity> = localDataSource.getAllNonSyncedNotes()
+
+    override suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity> = localDataSource.getAllMarkedAsDeletedNotes()
+
+    override suspend fun getRemoteNotesAndSaveInDB(page: Int, size: Int): Result<NoteResponse> {
         val remoteNotes = remoteDataSource.getAllNotes(page, size)
         remoteNotes.getOrNull()?.notes?.let { note ->
-            val notesToBeSavedInDB = note.map { note -> note.toNoteEntity() }
+            val notesToBeSavedInDB = note.map { note -> note.toNoteEntity(synced = true) }
             return if (localDataSource.insertNotes(notesToBeSavedInDB)) {
                 remoteNotes
             } else
@@ -46,58 +55,38 @@ class NoteMarkRepositoryImpl(
 
     override suspend fun getNoteByUUID(uuid: String) = localDataSource.getNoteByUUID(uuid)
 
-    override suspend fun createNote(noteEntity: NoteEntity): NoteEntity? {
-        val remoteNote = remoteDataSource.createNote(noteEntity)
-        remoteNote.getOrNull()?.let { note ->
-            val notesToBeSavedInDB = note.toNoteEntity()
-            return if (localDataSource.createNote(notesToBeSavedInDB) != null) {
-                notesToBeSavedInDB
-            } else
-                null
-        }
-        return null
-    }
+    override suspend fun createNote(noteEntity: NoteEntity): NoteEntity? = localDataSource.createNote(noteEntity.copy(synced = false))
 
     override suspend fun updateNote(
         title: String,
         content: String,
         lastEditedAt: String,
         noteEntity: NoteEntity
-    ): NoteEntity? {
-        val remoteNote = remoteDataSource.updateNote(
-            title = title,
-            content = content,
-            lastEditedAt = lastEditedAt,
-            noteEntity = noteEntity
-        )
-
-        remoteNote.getOrNull()?.let { note ->
-            val notesToBeSavedInDB = note.toNoteEntity()
-            return if (localDataSource.updateNote(
-                    title = notesToBeSavedInDB.title,
-                    content = notesToBeSavedInDB.content,
-                    lastEditedAt = notesToBeSavedInDB.lastEditedAt,
-                    uuid = notesToBeSavedInDB.uuid
-            ) != null) {
-                notesToBeSavedInDB
-            } else
-                null
-        }
-        return null
-    }
+    ): NoteEntity? = localDataSource.updateNote(
+        title = title,
+        content = content,
+        lastEditedAt = lastEditedAt,
+        uuid = noteEntity.uuid
+    )
 
     override suspend fun insertNotes(noteEntities: List<NoteEntity>) = localDataSource.insertNotes(noteEntities)
 
-    override suspend fun deleteNote(noteEntity: NoteEntity): Boolean {
-        val noteDeletedRemotely = remoteDataSource.deleteNote(noteEntity)
-        if (noteDeletedRemotely.getOrNull() == Unit) {
-            if (localDataSource.deleteNote(noteEntity)) {
-                return true
-            } else
-                false
-        }
-        return false
+    override suspend fun uploadNote(noteEntities: NoteEntity): Boolean {
+        val noteCreatedRemotely = remoteDataSource.createNote(noteEntities)
+        return noteCreatedRemotely.getOrNull() != null
     }
+
+    override suspend fun deleteRemoteNote(noteEntity: NoteEntity): Boolean {
+        val noteDeletedRemotely = remoteDataSource.deleteNote(noteEntity)
+        return noteDeletedRemotely.getOrNull() == Unit
+    }
+
+    override suspend fun deleteLocalNote(noteEntity: NoteEntity): Boolean {
+        val noteDeletedLocally = localDataSource.deleteNote(noteEntity)
+        return noteDeletedLocally
+    }
+
+    override suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean  = localDataSource.markAsDeleted(noteEntity)
 
     override suspend fun deleteAllLocalNotes() = try {
         localDataSource.deleteAllNotes()

@@ -19,3 +19,7 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keepclassmembers class com.dhimandasgupta.notemark.app.NoteSyncWorker {
+    public <init>(android.content.Context, androidx.work.WorkerParameters);
+}

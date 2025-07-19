@@ -562,7 +562,9 @@ private val noteListUiModel = NoteListUiModel(
             content = "This is content For the Note",
             createdAt = "19th Apr",
             lastEditedAt = "20th Apr",
-            uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d"
+            uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+            synced = true,
+            markAsDeleted = false
         )
     ).toPersistentList(),
     noteLongClickedUuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",

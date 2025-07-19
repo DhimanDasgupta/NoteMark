@@ -11,6 +11,8 @@ import androidx.lifecycle.compose.LifecycleStartEffect
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppState
 import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.onStart
@@ -18,6 +20,9 @@ import kotlinx.coroutines.launch
 
 @Immutable
 data class SettingsUiModel(
+    val syncIntervals: ImmutableList<String> = persistentListOf("Manual", "15 Minutes", "30 Minutes", "1 Hour"),
+    val selectedSyncInterval: String = "Manual",
+    val lastSynced: String = "Never",
     val logoutStatus: Boolean? = null
 ) {
     companion object {
@@ -43,6 +48,10 @@ class SettingsPresenter(
                         logoutStatus = when (appState) {
                             is AppState.NotLoggedIn -> true
                             else -> null
+                        },
+                        lastSynced = when (appState) {
+                            is AppState.LoggedIn -> "Just Now"
+                            else -> "Never"
                         }
                     )
                 }

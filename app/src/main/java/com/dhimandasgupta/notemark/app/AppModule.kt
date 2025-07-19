@@ -172,7 +172,7 @@ val appModule = module {
     singleOf(::NoteMarkApiImpl) bind NoteMarkApi::class
     singleOf(::NoteMarkApiDataSourceImpl) bind NoteMarkApiDataSource::class
     singleOf(::NoteMarkLocalDataSourceImpl) bind NoteMarkLocalDataSource::class
-    singleOf(::NoteMarkRepositoryImpl) bind NoteMarkRepository::class
+    single { NoteMarkRepositoryImpl(get(), get())} bind NoteMarkRepository::class
     single {
         AppStateMachine(
             applicationContext = androidContext(),
@@ -200,5 +200,5 @@ val appModule = module {
 
     factoryOf(::SettingsPresenter)
 
-    worker { NoteSyncWorker(androidContext(), get(), get(), get(), get()) }
+    worker { NoteSyncWorker(androidContext(), get()) }
 }

@@ -2,19 +2,30 @@ package com.dhimandasgupta.notemark.features.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
@@ -23,13 +34,21 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.app.NoteSyncWorker
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
@@ -49,6 +68,8 @@ fun SettingsPane(
 ) {
     val updatedSettingsUiModel by rememberUpdatedState(settingsUiModel)
 
+    var showSyncInterval by remember { mutableStateOf(false) }
+
     LaunchedEffect(key1 = updatedSettingsUiModel.logoutStatus) {
         if (updatedSettingsUiModel.logoutStatus == true) {
             onLogoutSuccessful()
@@ -67,6 +88,9 @@ fun SettingsPane(
             onBackClicked = onBackClicked
         )
         SettingsBody(
+            settingsUiModel = settingsUiModel,
+            showSyncInterval = showSyncInterval,
+            onSyncIntervalClicked = { showSyncInterval = !showSyncInterval },
             onLogoutClicked = onLogoutClicked
         )
     }
@@ -119,45 +143,207 @@ private fun SettingsToolbar(
 @Composable
 private fun SettingsBody(
     modifier: Modifier = Modifier,
+    settingsUiModel: SettingsUiModel,
+    showSyncInterval: Boolean = false,
+    onSyncIntervalClicked: () -> Unit = {},
     onLogoutClicked: () -> Unit = {}
 ) {
-    Row(
+    Box(
         modifier = modifier
-            .background(color = colorScheme.surfaceContainerLowest)
-            .fillMaxWidth()
-            .padding(
-                start = WindowInsets.systemBars.union(WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateLeftPadding(LayoutDirection.Ltr),
-                end = WindowInsets.systemBars.union(WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateEndPadding(LayoutDirection.Ltr)
-            )
-            .padding(
-                vertical = 4.dp,
-                horizontal = 16.dp
-            )
-            .combinedClickable(
-                onClick = onLogoutClicked
-            ),
-        horizontalArrangement = Arrangement.spacedBy(0.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .fillMaxSize()
     ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_log_out),
-            contentDescription = "Settings",
-            tint = colorScheme.error,
+        Column(
             modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .requiredSize(size = 32.dp)
-        )
+                .background(color = colorScheme.surfaceContainerLowest)
+                .fillMaxWidth()
+                .padding(
+                    start = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                        .asPaddingValues()
+                        .calculateLeftPadding(LayoutDirection.Ltr),
+                    end = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                        .asPaddingValues()
+                        .calculateEndPadding(LayoutDirection.Ltr)
+                )
+                .scrollable(
+                    state = rememberScrollState(),
+                    orientation = Orientation.Vertical
+                )
+                .padding(horizontal = 16.dp)
+        ) {
+            // Sync Interval
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .combinedClickable(
+                        onClick = onSyncIntervalClicked
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_clock),
+                    contentDescription = "Sync Interval",
+                    tint = colorScheme.onSurface,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .requiredSize(size = 24.dp)
+                )
 
-        Text(
-            text = "Log out",
-            style = typography.titleMedium,
-            color = colorScheme.error,
-            modifier = Modifier.weight(1f)
-        )
+                Text(
+                    text = "Sync Interval",
+                    style = typography.titleSmall,
+                    color = colorScheme.onSurface,
+                    modifier = Modifier.wrapContentSize()
+                )
+
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                )
+
+                Text(
+                    text = settingsUiModel.selectedSyncInterval,
+                    style = typography.bodyLarge,
+                    color = colorScheme.onSurfaceVariant,
+                    modifier = Modifier.wrapContentSize()
+                )
+
+                Icon(
+                    painter = painterResource(R.drawable.ic_right),
+                    contentDescription = "Sync Interval",
+                    tint = colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .requiredSize(size = 32.dp)
+                )
+            }
+
+            Spacer(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
+                    .padding(bottom = 8.dp)
+            )
+
+            // Sync Data
+            Row(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .combinedClickable(
+                        onClick = {}
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_sync),
+                    contentDescription = "Settings",
+                    tint = colorScheme.onSurface,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .requiredSize(size = 24.dp)
+                )
+
+                Column {
+                    Text(
+                        text = "Sync Data",
+                        style = typography.titleSmall,
+                        color = colorScheme.onSurface,
+                        modifier = Modifier.wrapContentSize()
+                    )
+
+                    Text(
+                        text = "Last synced: ${settingsUiModel.lastSynced}",
+                        style = typography.bodySmall,
+                        color = colorScheme.onSurfaceVariant,
+                        modifier = Modifier.wrapContentSize()
+                    )
+                }
+            }
+
+            Spacer(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
+                    .padding(bottom = 8.dp)
+            )
+
+            // Logout
+            Row(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .combinedClickable(
+                        onClick = onLogoutClicked
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_log_out),
+                    contentDescription = "Settings",
+                    tint = colorScheme.error,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .requiredSize(size = 32.dp)
+                )
+
+                Text(
+                    text = "Log out",
+                    style = typography.titleMedium,
+                    color = colorScheme.error,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        if (showSyncInterval) {
+            val context = LocalContext.current
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentSize(Alignment.TopEnd) // Aligns the IconButton and thus the menu
+                    .padding(16.dp)
+            ) {
+                DropdownMenu(
+                    modifier = Modifier.background(color = colorScheme.surfaceContainerLowest),
+                    expanded = true,
+                    offset = DpOffset(x = 0.dp, y = 0.dp),
+                    onDismissRequest = onSyncIntervalClicked,
+                ) {
+                    settingsUiModel.syncIntervals.forEach { label ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = label,
+                                    style = typography.bodyLarge
+                                )
+                            },
+                            onClick = {
+                                val workManager = WorkManager.getInstance(context.applicationContext)
+                                workManager.enqueue(OneTimeWorkRequestBuilder<NoteSyncWorker>().build())
+                                onSyncIntervalClicked()
+                            },
+                            trailingIcon = {
+                                if (label == settingsUiModel.selectedSyncInterval) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = colorScheme.primary
+                                    )
+                                } else null
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

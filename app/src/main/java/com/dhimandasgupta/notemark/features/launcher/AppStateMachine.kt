@@ -25,15 +25,8 @@ sealed interface AppState {
     data class LoggedIn(
         override val connectionState: ConnectionState? = ConnectionState.Unavailable,
         val user: User,
-        val syncState: SyncState = SyncState.SyncNotStarted
+        val isSyncing: Boolean = false
     ) : AppState
-}
-
-@Immutable
-sealed interface SyncState {
-    data object SyncNotStarted : SyncState
-    data object SyncStarted : SyncState
-    data object SyncFinished : SyncState
 }
 
 sealed interface AppAction {
@@ -76,10 +69,13 @@ class AppStateMachine(
             }
 
             inState<AppState.LoggedIn> {
-                onEnter { state ->
-                    state.mutate { state.snapshot.copy(syncState = SyncState.SyncStarted) }
-                    syncRemoteNotes()
-                    state.mutate { state.snapshot.copy(syncState = SyncState.SyncFinished) }
+                onEnterEffect { state ->
+                    syncRepository.saveSyncing(true)
+                    downloadAndSaveNotes()
+                    syncRepository.saveSyncing(false)
+                }
+                collectWhileInState(syncRepository.getSync()) { sync, state ->
+                    state.mutate { state.snapshot.copy(isSyncing = sync.syncing) }
                 }
 
                 // All the actions valid for app state should be handled here
@@ -109,7 +105,7 @@ class AppStateMachine(
 
     }
 
-    private suspend fun syncRemoteNotes() {
+    private suspend fun downloadAndSaveNotes() {
         // Don't Sync if the last sync was less than a minute ago
         if (
             (System.currentTimeMillis() - syncRepository.getSync().first().lastDownloadedTime) < DURATION_BETWEEN_SUCCESSFUL_SYNC
@@ -121,7 +117,7 @@ class AppStateMachine(
 
         do {
             delay(1000) // Intentionally adding delay.
-            noteMarkRepository.getRemoteNotes(pageNumber, PAGE_SIZE).fold(
+            noteMarkRepository.getRemoteNotesAndSaveInDB(pageNumber, PAGE_SIZE).fold(
                 onSuccess = { noteResponse ->
                     pageNumber++
                     total = noteResponse.total

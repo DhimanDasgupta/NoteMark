@@ -43,7 +43,9 @@ class AddNoteStateMachine(
                             content = state.snapshot.content.trim(),
                             createdAt = getCurrentIso8601Timestamp(),
                             lastEditedAt = getCurrentIso8601Timestamp(),
-                            uuid = Uuid.random().toHexDashString()
+                            uuid = Uuid.random().toHexDashString(),
+                            synced = false,
+                            markAsDeleted = false
                         )
                     )
 

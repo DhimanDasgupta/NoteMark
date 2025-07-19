@@ -82,7 +82,7 @@ class NoteListStateMachine(
                 }
                 on<NoteListAction.NoteDelete> { action, state ->
                     noteMarkRepository.getNoteByUUID(uuid = action.uuid)?.let { noteEntity ->
-                        if (noteMarkRepository.deleteNote(noteEntity)) {
+                        if (noteMarkRepository.markAsDeleted(noteEntity)) {
                             return@on state.override { state.snapshot.copy(notes = state.snapshot.notes.filter { it.uuid != action.uuid }) }
                         }
                     }

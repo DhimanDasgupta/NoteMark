@@ -10,11 +10,15 @@ import kotlinx.coroutines.withContext
 
 interface NoteMarkLocalDataSource {
     fun getAllNotes(): Flow<List<NoteEntity>>
+    suspend fun getAllNonSyncedNotes(): List<NoteEntity>
+    suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity>
     suspend fun getNoteById(noteId: Long): NoteEntity?
     suspend fun getNoteByUUID(uuid: String): NoteEntity?
     suspend fun createNote(noteEntity: NoteEntity): NoteEntity?
     suspend fun updateNote(title: String, content: String, lastEditedAt: String, uuid: String): NoteEntity?
+    suspend fun insertNote(noteEntities: NoteEntity): Boolean
     suspend fun insertNotes(noteEntities: List<NoteEntity>): Boolean
+    suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean
     suspend fun deleteNote(noteEntity: NoteEntity): Boolean
     suspend fun deleteAllNotes(): Boolean
 }
@@ -28,6 +32,14 @@ class NoteMarkLocalDataSourceImpl(
         return queries.getAllNotes()
             .asFlow()
             .mapToList(Dispatchers.IO)
+    }
+
+    override suspend fun getAllNonSyncedNotes(): List<NoteEntity> = withContext(Dispatchers.IO) {
+        return@withContext queries.getAllNonSyncedNotes().executeAsList()
+    }
+
+    override suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity> = withContext(Dispatchers.IO) {
+        return@withContext queries.getAllDeletedNotes().executeAsList()
     }
 
     override suspend fun getNoteById(noteId: Long): NoteEntity? = withContext(Dispatchers.IO) {
@@ -59,7 +71,8 @@ class NoteMarkLocalDataSourceImpl(
             noteEntity.content,
             noteEntity.createdAt,
             noteEntity.lastEditedAt,
-            noteEntity.uuid
+            noteEntity.uuid,
+            synced = false
         )
 
         return@withContext (if (result.value == 1L) {
@@ -67,6 +80,21 @@ class NoteMarkLocalDataSourceImpl(
         } else {
             null
         }) as NoteEntity
+    }
+
+    override suspend fun insertNote(noteEntities: NoteEntity): Boolean = withContext(Dispatchers.IO) {
+        val result = queries.transactionWithResult {
+            queries.insertNote(
+                noteEntities.title,
+                noteEntities.content,
+                noteEntities.createdAt,
+                noteEntities.lastEditedAt,
+                noteEntities.uuid,
+                synced = false
+            )
+            return@transactionWithResult true
+        }
+        return@withContext result
     }
 
     override suspend fun insertNotes(noteEntities: List<NoteEntity>) = withContext(Dispatchers.IO) {
@@ -77,12 +105,18 @@ class NoteMarkLocalDataSourceImpl(
                     noteEntity.content,
                     noteEntity.createdAt,
                     noteEntity.lastEditedAt,
-                    noteEntity.uuid
+                    noteEntity.uuid,
+                    synced = false
                 )
             }
             return@transactionWithResult true
         }
         return@withContext result
+    }
+
+    override suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean = withContext(Dispatchers.IO) {
+        val result = queries.markNoteAsDeletedByUUID(noteEntity.uuid)
+        return@withContext result.value == 1L
     }
 
     override suspend fun deleteNote(noteEntity: NoteEntity) = withContext(Dispatchers.IO) {

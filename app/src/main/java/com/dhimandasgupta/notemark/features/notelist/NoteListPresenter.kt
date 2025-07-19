@@ -12,7 +12,6 @@ import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppState
 import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
-import com.dhimandasgupta.notemark.features.launcher.SyncState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -58,7 +57,7 @@ class NoteListPresenter(
                             else -> ""
                         },
                         showSyncProgress = when (appState) {
-                            is AppState.LoggedIn -> appState.syncState != SyncState.SyncFinished
+                            is AppState.LoggedIn -> appState.isSyncing
                             else -> true
                         }
                     )

@@ -2,6 +2,8 @@ package com.dhimandasgupta.notemark.app
 
 import android.app.Application
 import android.os.StrictMode
+import androidx.work.Configuration
+import androidx.work.WorkManager
 import com.dhimandasgupta.notemark.BuildConfig
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -13,6 +15,12 @@ class NoteMarkApp : Application() {
         if (BuildConfig.DEBUG) {
             // enableStrictMode()
         }
+
+        val config = Configuration.Builder()
+            .setMinimumLoggingLevel(android.util.Log.DEBUG)
+            .build()
+
+        WorkManager.initialize(this, config)
 
         startKoin {
             androidLogger()
