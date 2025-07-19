@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option java_package = "com.dhimandasgupta.notemark.proto";
+option java_multiple_files = true;
+
+message Sync {
+  bool syncing = 1;
+  enum SyncDuration {
+    SYNC_DURATION_UNSPECIFIED = 0;
+    SYNC_DURATION_NONE = 1;
+    SYNC_DURATION_MANUAL = 2;
+    SYNC_DURATION_FIFTEEN_MINUTES = 3;
+    SYNC_DURATION_THIRTY_MINUTES = 4;
+    SYNC_DURATION_ONE_HOUR = 5;
+  }
+  SyncDuration sync_duration = 2;
+  int64 last_downloaded_time = 3;
+  int64 last_uploaded_time = 4;
+}

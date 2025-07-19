@@ -10,7 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.dhimandasgupta.notemark.common.android.ConnectionState
-import com.dhimandasgupta.notemark.common.storage.LoggedInUser
+import com.dhimandasgupta.notemark.proto.User
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.onStart
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 @Immutable
 data class LauncherUiModel(
     val connectionState: ConnectionState? = ConnectionState.Unavailable,
-    val loggedInUser: LoggedInUser? = null
+    val loggedInUser: User? = null
 ) {
     companion object {
         val Empty = LauncherUiModel()
@@ -48,7 +48,7 @@ class LauncherPresenter(
                         connectionState = appState.connectionState,
                         loggedInUser = when (appState) {
                             is AppState.NotLoggedIn -> null
-                            is AppState.LoggedIn -> appState.loggedInUser
+                            is AppState.LoggedIn -> appState.user
                         }
                     )
                 }

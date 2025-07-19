@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.sqlDelight)
+    alias(libs.plugins.google.protobuf)
 }
 
 // Create a Properties object to hold our values
@@ -81,6 +82,24 @@ sqldelight {
     }
 }
 
+protobuf {
+    protoc {
+        artifact = libs.protobuf.protoc.get().toString()
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                register("kotlin") {
+                    option("lite")
+                }
+                register("java") {
+                    option("lite")
+                }
+            }
+        }
+    }
+}
+
 dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.material3.window.size.android)
@@ -134,6 +153,9 @@ dependencies {
 
     // Kotlinx collections
     implementation(libs.kotlinx.collections.immutable)
+
+    // Protobuf
+    implementation(libs.kotlin.protobuf)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

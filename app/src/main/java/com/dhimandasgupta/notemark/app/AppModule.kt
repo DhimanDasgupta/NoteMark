@@ -1,14 +1,29 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package com.dhimandasgupta.notemark.app
 
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.core.DataStoreFactory
+import androidx.datastore.dataStore
+import androidx.datastore.dataStoreFile
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.dhimandasgupta.notemark.BuildConfig
-import com.dhimandasgupta.notemark.common.storage.UserManager
-import com.dhimandasgupta.notemark.common.storage.UserManagerImpl
+import com.dhimandasgupta.notemark.common.storage.SyncSerializer
+import com.dhimandasgupta.notemark.common.storage.UserSerializer
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.NoteMarkRepositoryImpl
+import com.dhimandasgupta.notemark.data.SyncRepository
+import com.dhimandasgupta.notemark.data.SyncRepositoryImpl
+import com.dhimandasgupta.notemark.data.UserRepository
+import com.dhimandasgupta.notemark.data.UserRepositoryImpl
 import com.dhimandasgupta.notemark.data.local.datasource.NoteMarkLocalDataSource
 import com.dhimandasgupta.notemark.data.local.datasource.NoteMarkLocalDataSourceImpl
+import com.dhimandasgupta.notemark.data.local.datasource.NoteSyncDataSource
+import com.dhimandasgupta.notemark.data.local.datasource.NoteSyncDataSourceImpl
+import com.dhimandasgupta.notemark.data.local.datasource.UserDataSource
+import com.dhimandasgupta.notemark.data.local.datasource.UserDataSourceImpl
 import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
 import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApiImpl
 import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSource
@@ -17,18 +32,20 @@ import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.data.remote.model.RefreshResponse
 import com.dhimandasgupta.notemark.database.NoteMarkDatabase
 import com.dhimandasgupta.notemark.features.addnote.AddNotePresenter
-import com.dhimandasgupta.notemark.features.editnote.EditNotePresenter
-import com.dhimandasgupta.notemark.features.launcher.LauncherPresenter
-import com.dhimandasgupta.notemark.features.login.LoginPresenter
-import com.dhimandasgupta.notemark.features.notelist.NoteListPresenter
-import com.dhimandasgupta.notemark.features.registration.RegistrationPresenter
-import com.dhimandasgupta.notemark.features.settings.SettingsPresenter
 import com.dhimandasgupta.notemark.features.addnote.AddNoteStateMachine
+import com.dhimandasgupta.notemark.features.editnote.EditNotePresenter
 import com.dhimandasgupta.notemark.features.editnote.EditNoteStateMachine
 import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
+import com.dhimandasgupta.notemark.features.launcher.LauncherPresenter
+import com.dhimandasgupta.notemark.features.login.LoginPresenter
 import com.dhimandasgupta.notemark.features.login.LoginStateMachine
+import com.dhimandasgupta.notemark.features.notelist.NoteListPresenter
 import com.dhimandasgupta.notemark.features.notelist.NoteListStateMachine
+import com.dhimandasgupta.notemark.features.registration.RegistrationPresenter
 import com.dhimandasgupta.notemark.features.registration.RegistrationStateMachine
+import com.dhimandasgupta.notemark.features.settings.SettingsPresenter
+import com.dhimandasgupta.notemark.proto.Sync
+import com.dhimandasgupta.notemark.proto.User
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
@@ -48,17 +65,51 @@ import io.ktor.client.request.url
 import io.ktor.http.ContentType.Application
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
+// Define unique names for your DataStores
+private enum class DataStoreType {
+    USER_PREFERENCES,
+    SYNC_PREFERENCES
+}
+
+private const val APP_BACKGROUND_SCOPE = "app_background_scope"
+
 val appModule = module {
-    singleOf(::UserManagerImpl) bind UserManager::class
+    single<CoroutineScope>(named(APP_BACKGROUND_SCOPE)) { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
+    single<DataStore<User>>(named(DataStoreType.USER_PREFERENCES)) {
+        DataStoreFactory.create(
+            serializer = UserSerializer(),
+            produceFile = { androidApplication().dataStoreFile("user_store.pb") },
+            corruptionHandler = null,
+            migrations = listOf(),
+            scope = get(named(APP_BACKGROUND_SCOPE))
+        )
+    }
+    single { UserDataSourceImpl(get(named(DataStoreType.USER_PREFERENCES))) } bind UserDataSource::class
+    single { UserRepositoryImpl(get()) } bind UserRepository::class
+    single<DataStore<Sync>>(named(DataStoreType.SYNC_PREFERENCES)) {
+        DataStoreFactory.create(
+            serializer = SyncSerializer(),
+            produceFile = { androidApplication().dataStoreFile("sync_store.pb") },
+            corruptionHandler = null,
+            migrations = listOf(),
+            scope = get(named(APP_BACKGROUND_SCOPE))
+        )
+    }
+    single { NoteSyncDataSourceImpl(get(named(DataStoreType.SYNC_PREFERENCES))) } bind NoteSyncDataSource::class
+    single { SyncRepositoryImpl(get()) } bind SyncRepository::class
     single {
         HttpClient(Android) {
             install(ContentNegotiation) {
@@ -78,11 +129,19 @@ val appModule = module {
             install(Auth) {
                 bearer {
                     loadTokens {
-                        get<UserManager>().getUser().first()?.bearerTokens
+                        val user = get<UserRepository>().getUser().first()
+                        if (user?.accessToken != null && user.refreshToken != null) {
+                            BearerTokens(user.accessToken, user.refreshToken)
+                        }
+                        null
                     }
                     refreshTokens {
-                        val currentTokens = get<UserManager>().getUser().firstOrNull()?.bearerTokens
-                            ?: return@refreshTokens null
+                        val user = get<UserRepository>().getUser().first()
+                        val currentTokens = if (user?.accessToken != null && user.refreshToken != null) {
+                            BearerTokens(user.accessToken, user.refreshToken)
+                        } else {
+                            return@refreshTokens null
+                        }
 
                         try {
                             val response = client.post {
@@ -93,10 +152,10 @@ val appModule = module {
                             }.body<RefreshResponse>()
 
                             val newTokens = BearerTokens(response.accessToken, response.refreshToken)
-                            get<UserManager>().saveToken(newTokens)
+                            get<UserRepository>().saveBearToken(newTokens)
                             newTokens
                         } catch (_: Exception) {
-                            get<UserManager>().clearUser()
+                            get<UserRepository>().deleteUser()
                             null
                         }
                     }
@@ -118,7 +177,8 @@ val appModule = module {
     single {
         AppStateMachine(
             applicationContext = androidContext(),
-            userManager = get(),
+            userRepository = get(),
+            syncRepository = get(),
             noteMarkRepository = get()
         )
     }
@@ -130,7 +190,7 @@ val appModule = module {
     factory { RegistrationStateMachine(noteMarkApi = get()) }
     factoryOf(::RegistrationPresenter)
 
-    factory { NoteListStateMachine(userManager = get(), noteMarkRepository = get()) }
+    factory { NoteListStateMachine(userRepository = get(), noteMarkRepository = get()) }
     factoryOf(::NoteListPresenter)
 
     factory { AddNoteStateMachine(noteMarkRepository = get()) }
@@ -141,3 +201,9 @@ val appModule = module {
 
     factoryOf(::SettingsPresenter)
 }
+
+private val Context.userDataStore: DataStore<User>
+    get() = dataStore(fileName = "user_store.pb", serializer = UserSerializer()) as DataStore<User>
+
+private val Context.syncDataStore: DataStore<Sync>
+    get() = dataStore(fileName = "sync_store.pb", serializer = SyncSerializer()) as DataStore<Sync>

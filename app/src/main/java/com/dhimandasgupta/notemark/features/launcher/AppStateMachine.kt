@@ -4,10 +4,11 @@ import android.content.Context
 import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
-import com.dhimandasgupta.notemark.common.storage.LoggedInUser
-import com.dhimandasgupta.notemark.common.storage.UserManager
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
+import com.dhimandasgupta.notemark.data.SyncRepository
+import com.dhimandasgupta.notemark.data.UserRepository
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
+import com.dhimandasgupta.notemark.proto.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -23,7 +24,7 @@ sealed interface AppState {
 
     data class LoggedIn(
         override val connectionState: ConnectionState? = ConnectionState.Unavailable,
-        val loggedInUser: LoggedInUser,
+        val user: User,
         val syncState: SyncState = SyncState.SyncNotStarted
     ) : AppState
 }
@@ -43,27 +44,28 @@ sealed interface AppAction {
 @OptIn(ExperimentalCoroutinesApi::class)
 class AppStateMachine(
     private val applicationContext: Context,
-    private val userManager: UserManager,
+    private val userRepository: UserRepository,
+    private val syncRepository: SyncRepository,
     private val noteMarkRepository: NoteMarkRepository
 ) : StateMachine<AppState, AppAction>(defaultAppState) {
-    private var cachedUser: LoggedInUser? = null
+    private var cachedUser: User? = null
 
     init {
         spec {
             inState<AppState.NotLoggedIn> {
                 condition({ cachedUser != null }) {
                     onEnter { state ->
-                        state.override { AppState.LoggedIn(loggedInUser = cachedUser!!) }
+                        state.override { AppState.LoggedIn(user = cachedUser!!) }
                     }
                 }
                 // All Flows while in the app state should be collected here
-                collectWhileInState(userManager.getUser()) { user, state ->
+                collectWhileInState(userRepository.getUser()) { user, state ->
                     user?.let { cachedUser = it }
                     cachedUser?.let { user ->
                         state.override {
                             AppState.LoggedIn(
                                 connectionState = state.snapshot.connectionState,
-                                loggedInUser = user
+                                user = user
                             )
                         }
                     } ?: state.noChange()
@@ -87,7 +89,7 @@ class AppStateMachine(
                 on<AppAction.AppLogout> { _, state ->
                     noteMarkRepository.logout(
                         request = RefreshRequest(
-                            refreshToken = userManager.getUser().first()?.bearerTokens?.refreshToken ?: ""
+                            refreshToken = userRepository.getUser().first()?.refreshToken ?: ""
                         )
                     ).getOrNull()?.let {
                         cachedUser = null
@@ -110,8 +112,7 @@ class AppStateMachine(
     private suspend fun syncRemoteNotes() {
         // Don't Sync if the last sync was less than a minute ago
         if (
-            (System.currentTimeMillis() - userManager.getSyncTime()
-                .first()) < DURATION_BETWEEN_SUCCESSFUL_SYNC
+            (System.currentTimeMillis() - syncRepository.getSync().first().lastDownloadedTime) < DURATION_BETWEEN_SUCCESSFUL_SYNC
         ) return
 
         var total = 0
@@ -127,7 +128,7 @@ class AppStateMachine(
                     numberOfNotesLoaded += noteResponse.notes.size
 
                     // Saving the last successful sync time.
-                    userManager.saveSyncTime(System.currentTimeMillis())
+                    syncRepository.saveLastDownloadedTime(System.currentTimeMillis())
                 },
                 onFailure = { throwable ->
                     // Handle error

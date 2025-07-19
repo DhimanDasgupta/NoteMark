@@ -1,7 +1,6 @@
 package com.dhimandasgupta.notemark.data.remote.api
 
-import com.dhimandasgupta.notemark.common.storage.LoggedInUser
-import com.dhimandasgupta.notemark.common.storage.UserManager
+import com.dhimandasgupta.notemark.data.local.datasource.UserDataSource
 import com.dhimandasgupta.notemark.data.remote.model.AuthResponse
 import com.dhimandasgupta.notemark.data.remote.model.LoginRequest
 import com.dhimandasgupta.notemark.data.remote.model.Note
@@ -10,10 +9,10 @@ import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.data.remote.model.RegisterRequest
 import com.dhimandasgupta.notemark.data.toNote
 import com.dhimandasgupta.notemark.database.NoteEntity
+import com.dhimandasgupta.notemark.proto.User
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
-import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
@@ -57,7 +56,7 @@ interface NoteMarkApi {
 
 class NoteMarkApiImpl(
     val client: HttpClient,
-    private val userManager: UserManager
+    private val userDataSource: UserDataSource
 ) : NoteMarkApi {
     override suspend fun register(request: RegisterRequest): Result<Unit> {
         return try {
@@ -104,12 +103,12 @@ class NoteMarkApiImpl(
                 HttpStatusCode.OK -> {
                     val authResponse = response.body<AuthResponse>()
                     // Save user only after successful response parsing
-                    val tokens = BearerTokens(authResponse.accessToken, authResponse.refreshToken)
-                    userManager.saveUser(
-                        loggerInUser = LoggedInUser(
-                            userName = authResponse.username,
-                            bearerTokens = tokens
-                        )
+                    userDataSource.saveUser(
+                        user = User.newBuilder().apply {
+                            userName = authResponse.username
+                            accessToken = authResponse.accessToken
+                            refreshToken = authResponse.refreshToken
+                        }.build()
                     )
                     Result.success(Unit)
                 }
@@ -172,7 +171,7 @@ class NoteMarkApiImpl(
             // If it doesn't, or you want more specific handling here:
             when (response.status) {
                 HttpStatusCode.OK -> {
-                    userManager.clearUser()
+                    userDataSource.deleteUser()
                     Result.success(Unit)
                 }
                 // Consider handling other specific statuses like BadRequest, Unauthorized, etc.

@@ -1,8 +1,8 @@
 package com.dhimandasgupta.notemark.features.notelist
 
 import androidx.compose.runtime.Immutable
-import com.dhimandasgupta.notemark.common.storage.UserManager
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
+import com.dhimandasgupta.notemark.data.UserRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.features.notelist.NoteListState.NoteListStateWithNoNotes
 import com.dhimandasgupta.notemark.features.notelist.NoteListState.NoteListStateWithNotes
@@ -29,7 +29,7 @@ sealed interface NoteListAction {
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NoteListStateMachine(
-    private val userManager: UserManager,
+    private val userRepository: UserRepository,
     private val noteMarkRepository: NoteMarkRepository
 ) : StateMachine<NoteListState, NoteListAction>(defaultNoteListState) {
     init {
@@ -47,7 +47,7 @@ class NoteListStateMachine(
                         }
                     }
                 }
-                collectWhileInState(userManager.getUser()) { user, state ->
+                collectWhileInState(userRepository.getUser()) { user, state ->
                     state.mutate {
                         copy(
                             userName = user?.userName ?: ""
@@ -73,7 +73,7 @@ class NoteListStateMachine(
                         }
                     }
                 }
-                collectWhileInState(userManager.getUser()) { user, state ->
+                collectWhileInState(userRepository.getUser()) { user, state ->
                     state.mutate {
                         copy(
                             userName = user?.userName ?: ""

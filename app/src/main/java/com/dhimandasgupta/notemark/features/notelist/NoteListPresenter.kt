@@ -54,7 +54,7 @@ class NoteListPresenter(
                 appStateMachine.state.onStart { AppStateMachine.defaultAppState }.collect { appState ->
                     noteListUiModel = noteListUiModel.copy(
                         userName = when (appState) {
-                            is AppState.LoggedIn -> appState.loggedInUser.userName
+                            is AppState.LoggedIn -> appState.user.userName
                             else -> ""
                         },
                         showSyncProgress = when (appState) {
