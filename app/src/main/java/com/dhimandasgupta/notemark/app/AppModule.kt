@@ -2,10 +2,8 @@
 
 package com.dhimandasgupta.notemark.app
 
-import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
-import androidx.datastore.dataStore
 import androidx.datastore.dataStoreFile
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
@@ -201,9 +199,3 @@ val appModule = module {
 
     factoryOf(::SettingsPresenter)
 }
-
-private val Context.userDataStore: DataStore<User>
-    get() = dataStore(fileName = "user_store.pb", serializer = UserSerializer()) as DataStore<User>
-
-private val Context.syncDataStore: DataStore<Sync>
-    get() = dataStore(fileName = "sync_store.pb", serializer = SyncSerializer()) as DataStore<Sync>
