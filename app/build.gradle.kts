@@ -103,6 +103,7 @@ protobuf {
 dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.material3.window.size.android)
+    implementation(libs.androidx.work.runtime.ktx)
     coreLibraryDesugaring(libs.desugar.jdk)
 
     implementation(libs.androidx.core.ktx)
@@ -122,6 +123,7 @@ dependencies {
     implementation(project.dependencies.platform(libs.koin.bom))
     implementation(libs.koin.core)
     implementation(libs.koin.android)
+    implementation(libs.koin.work.manager)
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.compose.navigation)
 

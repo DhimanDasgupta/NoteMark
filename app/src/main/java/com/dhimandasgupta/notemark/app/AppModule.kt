@@ -70,6 +70,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.workmanager.dsl.worker
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
@@ -198,4 +199,6 @@ val appModule = module {
     factoryOf(::EditNotePresenter)
 
     factoryOf(::SettingsPresenter)
+
+    worker { NoteSyncWorker(androidContext(), get(), get(), get(), get()) }
 }
