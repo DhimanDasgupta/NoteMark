@@ -26,11 +26,14 @@ class NoteSyncWorker(
         try {
             syncRepository.saveSyncing(true)
 
+            // Fetch all Remote notes.
             val allRemoteNotes = noteMarkRepository.getRemoteNotesAndSaveInDB().getOrElse { NoteResponse(notes = emptyList(), total = 0) }
 
+            // Delete all Remote notes waiting to be deleted.
             val toBeDeletedNotes = noteMarkRepository.getAllMarkedAsDeletedNotes()
             deleteNotes(toBeDeletedNotes)
 
+            // Update or Upload all Local notes.
             val toBeSyncedNotes = noteMarkRepository.getAllNonSyncedNotes()
             updateOrUploadNotes(
                 remoteNotes = allRemoteNotes.notes,
