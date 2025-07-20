@@ -8,8 +8,8 @@ interface NoteSyncDataSource {
     fun getSync(): Flow<Sync>
     suspend fun saveSyncing(isSyncing: Boolean)
     suspend fun saveSyncDuration(syncDuration: Sync.SyncDuration)
-    suspend fun saveLastDownloadedTime(downLoadedTime: Long)
-    suspend fun saveLastUploadedTime(uploadedTime: Long)
+    suspend fun saveLastDownloadedTime(downLoadedTime: String)
+    suspend fun saveLastUploadedTime(uploadedTime: String)
 }
 
 class NoteSyncDataSourceImpl(
@@ -34,7 +34,7 @@ class NoteSyncDataSourceImpl(
         }
     }
 
-    override suspend fun saveLastDownloadedTime(downLoadedTime: Long) {
+    override suspend fun saveLastDownloadedTime(downLoadedTime: String) {
         syncDataStore.updateData { transform ->
             transform.toBuilder()
                 .setLastDownloadedTime(downLoadedTime)
@@ -42,7 +42,7 @@ class NoteSyncDataSourceImpl(
         }
     }
 
-    override suspend fun saveLastUploadedTime(uploadedTime: Long) {
+    override suspend fun saveLastUploadedTime(uploadedTime: String) {
         syncDataStore.updateData { transform ->
             transform.toBuilder()
                 .setLastUploadedTime(uploadedTime)

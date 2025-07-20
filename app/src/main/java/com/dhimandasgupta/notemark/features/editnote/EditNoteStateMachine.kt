@@ -83,7 +83,7 @@ class EditNoteStateMachine(
                         }
                         else -> {
                             state.snapshot.noteEntity?.let { noteEntity ->
-                                val updatedNote = noteMarkRepository.updateNote(
+                                val updatedNote = noteMarkRepository.updateLocalNote(
                                     title = state.snapshot.title.trim(),
                                     content = state.snapshot.content.trim(),
                                     lastEditedAt = getCurrentIso8601Timestamp(),

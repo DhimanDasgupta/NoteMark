@@ -19,8 +19,9 @@ interface NoteMarkRepository {
     suspend fun getNoteById(noteId: Long): NoteEntity?
     suspend fun getNoteByUUID(uuid: String): NoteEntity?
     suspend fun createNote(noteEntity: NoteEntity): NoteEntity?
-    suspend fun updateNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): NoteEntity?
-    suspend fun uploadNote(noteEntities: NoteEntity): Boolean
+    suspend fun updateLocalNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): NoteEntity?
+    suspend fun createNewRemoteNote(noteEntities: NoteEntity): Boolean
+    suspend fun updateRemoteNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): Boolean
     suspend fun insertNotes(noteEntities: List<NoteEntity>): Boolean
     suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean
     suspend fun deleteRemoteNote(noteEntity: NoteEntity): Boolean
@@ -57,7 +58,7 @@ class NoteMarkRepositoryImpl(
 
     override suspend fun createNote(noteEntity: NoteEntity): NoteEntity? = localDataSource.createNote(noteEntity.copy(synced = false))
 
-    override suspend fun updateNote(
+    override suspend fun updateLocalNote(
         title: String,
         content: String,
         lastEditedAt: String,
@@ -71,9 +72,19 @@ class NoteMarkRepositoryImpl(
 
     override suspend fun insertNotes(noteEntities: List<NoteEntity>) = localDataSource.insertNotes(noteEntities)
 
-    override suspend fun uploadNote(noteEntities: NoteEntity): Boolean {
+    override suspend fun createNewRemoteNote(noteEntities: NoteEntity): Boolean {
         val noteCreatedRemotely = remoteDataSource.createNote(noteEntities)
         return noteCreatedRemotely.getOrNull() != null
+    }
+
+    override suspend fun updateRemoteNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): Boolean {
+        val noteUpdatedRemotely = remoteDataSource.updateNote(
+            title = title,
+            content = content,
+            lastEditedAt = lastEditedAt,
+            noteEntity = noteEntity
+        )
+        return noteUpdatedRemotely.getOrNull() != null
     }
 
     override suspend fun deleteRemoteNote(noteEntity: NoteEntity): Boolean {

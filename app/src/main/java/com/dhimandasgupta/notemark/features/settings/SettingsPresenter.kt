@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleStartEffect
+import com.dhimandasgupta.notemark.common.convertNoteTimestampToReadableFormat
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppState
 import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
@@ -22,7 +23,7 @@ import kotlinx.coroutines.launch
 data class SettingsUiModel(
     val syncIntervals: ImmutableList<String> = persistentListOf("Manual", "15 Minutes", "30 Minutes", "1 Hour"),
     val selectedSyncInterval: String = "Manual",
-    val lastSynced: String = "Never",
+    val lastSynced: String = "--",
     val logoutStatus: Boolean? = null
 ) {
     companion object {
@@ -50,8 +51,21 @@ class SettingsPresenter(
                             else -> null
                         },
                         lastSynced = when (appState) {
-                            is AppState.LoggedIn -> "Just Now"
-                            else -> "Never"
+                            is AppState.LoggedIn -> appState.sync?.lastUploadedTime?.let { time ->
+                                convertNoteTimestampToReadableFormat(time)
+                            } ?: "--"
+                            else -> "--"
+                        },
+                        selectedSyncInterval = when (appState) {
+                            is AppState.LoggedIn -> appState.sync?.syncDuration?.let {
+                                when (it.ordinal) {
+                                    3 -> "15 Minutes"
+                                    4 -> "30 Minutes"
+                                    5 -> "1 Hour"
+                                    else -> "Manual"
+                                }
+                            } ?: "Manual"
+                            else -> "Manual"
                         }
                     )
                 }

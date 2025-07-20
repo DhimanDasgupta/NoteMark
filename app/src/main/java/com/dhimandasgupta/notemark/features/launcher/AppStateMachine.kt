@@ -2,16 +2,23 @@ package com.dhimandasgupta.notemark.features.launcher
 
 import android.content.Context
 import androidx.compose.runtime.Immutable
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.dhimandasgupta.notemark.app.NoteSyncWorker
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.SyncRepository
 import com.dhimandasgupta.notemark.data.UserRepository
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
+import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.proto.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import java.time.Duration
 import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 
 @Immutable
@@ -25,12 +32,13 @@ sealed interface AppState {
     data class LoggedIn(
         override val connectionState: ConnectionState? = ConnectionState.Unavailable,
         val user: User,
-        val isSyncing: Boolean = false
+        val sync: Sync? = null,
     ) : AppState
 }
 
 sealed interface AppAction {
     object ConnectionStateConsumed: AppAction
+    data class UpdateSync(val syncDuration: Sync.SyncDuration) : AppAction
     object AppLogout : AppAction
 }
 
@@ -70,17 +78,32 @@ class AppStateMachine(
 
             inState<AppState.LoggedIn> {
                 onEnterEffect { state ->
-                    syncRepository.saveSyncing(true)
-                    downloadAndSaveNotes()
-                    syncRepository.saveSyncing(false)
+                    // TODO: Just trigger the one time sync.
+                    // applicationContext.cancelPreviousAndTriggerNewWork()
                 }
                 collectWhileInState(syncRepository.getSync()) { sync, state ->
-                    state.mutate { state.snapshot.copy(isSyncing = sync.syncing) }
+                    state.mutate { state.snapshot.copy(sync = sync) }
                 }
 
                 // All the actions valid for app state should be handled here
                 on<AppAction.ConnectionStateConsumed> { _, state ->
                     state.mutate { state.snapshot.copy(connectionState = null) }
+                }
+                on<AppAction.UpdateSync> { action, state ->
+                    val duration = when (action.syncDuration) {
+                        Sync.SyncDuration.SYNC_DURATION_FIFTEEN_MINUTES -> Duration.ofMinutes(15)
+                        Sync.SyncDuration.SYNC_DURATION_THIRTY_MINUTES -> Duration.ofMinutes(30)
+                        Sync.SyncDuration.SYNC_DURATION_ONE_HOUR -> Duration.ofHours(1)
+                        else -> Duration.ZERO
+                    }
+
+                    /*applicationContext.cancelPreviousAndTriggerNewWork(
+                        duration = duration
+                    )*/
+
+                    val updatedSync = state.snapshot.sync?.toBuilder()?.setSyncDuration(action.syncDuration)?.build()
+                    syncRepository.saveSyncDuration(action.syncDuration)
+                    state.mutate { state.snapshot.copy(sync = updatedSync) }
                 }
                 on<AppAction.AppLogout> { _, state ->
                     noteMarkRepository.logout(
@@ -102,38 +125,36 @@ class AppStateMachine(
 
     companion object {
         val defaultAppState = AppState.NotLoggedIn()
-
-    }
-
-    private suspend fun downloadAndSaveNotes() {
-        // Don't Sync if the last sync was less than a minute ago
-        if (
-            (System.currentTimeMillis() - syncRepository.getSync().first().lastDownloadedTime) < DURATION_BETWEEN_SUCCESSFUL_SYNC
-        ) return
-
-        var total = 0
-        var numberOfNotesLoaded = 0
-        var pageNumber = 0
-
-        do {
-            delay(1000) // Intentionally adding delay.
-            noteMarkRepository.getRemoteNotesAndSaveInDB(pageNumber, PAGE_SIZE).fold(
-                onSuccess = { noteResponse ->
-                    pageNumber++
-                    total = noteResponse.total
-                    numberOfNotesLoaded += noteResponse.notes.size
-
-                    // Saving the last successful sync time.
-                    syncRepository.saveLastDownloadedTime(System.currentTimeMillis())
-                },
-                onFailure = { throwable ->
-                    // Handle error
-                }
-            )
-        } while (numberOfNotesLoaded < total)
     }
 }
 
-private const val PAGE_SIZE: Int = 1
-const val DURATION_BETWEEN_SUCCESSFUL_SYNC = 5 * 60 * 1000
+private fun Context.cancelPreviousAndTriggerNewWork(duration: Duration = Duration.ZERO) {
+    val workManager = WorkManager.getInstance(this)
+    workManager.cancelAllWork()
+
+    val constraints = Constraints.Builder()
+        .setRequiredNetworkType(NetworkType.CONNECTED)
+        .setRequiresBatteryNotLow(true)
+        .setRequiresStorageNotLow(true)
+        .build()
+
+    when (duration) {
+        Duration.ZERO -> {
+            workManager.enqueue(
+                request = OneTimeWorkRequestBuilder<NoteSyncWorker>()
+                    .setConstraints(constraints)
+                    .build()
+            )
+        }
+        else -> {
+            workManager.enqueue(
+                request = PeriodicWorkRequestBuilder<NoteSyncWorker>(
+                    repeatInterval = duration
+                ).
+                setConstraints(constraints).
+                build()
+            )
+        }
+    }
+}
 

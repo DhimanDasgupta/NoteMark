@@ -25,7 +25,7 @@ class SyncSerializer(
 
 private val defaultSyncValue = Sync.newBuilder().apply {
     syncing = false
-    lastUploadedTime = 0L
-    lastDownloadedTime = 0L
+    lastUploadedTime = "0"
+    lastDownloadedTime = "0"
     syncDuration = Sync.SyncDuration.SYNC_DURATION_NONE
 }.build()

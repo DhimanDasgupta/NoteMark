@@ -57,7 +57,7 @@ class NoteListPresenter(
                             else -> ""
                         },
                         showSyncProgress = when (appState) {
-                            is AppState.LoggedIn -> appState.isSyncing
+                            is AppState.LoggedIn -> appState.sync?.syncing ?: false
                             else -> true
                         }
                     )

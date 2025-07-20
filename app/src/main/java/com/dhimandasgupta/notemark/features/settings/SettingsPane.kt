@@ -40,15 +40,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.app.NoteSyncWorker
+import com.dhimandasgupta.notemark.features.launcher.AppAction
+import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
 import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
@@ -62,6 +60,7 @@ import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 fun SettingsPane(
     modifier: Modifier = Modifier,
     settingsUiModel: SettingsUiModel,
+    settingsAction: (AppAction) -> Unit = {},
     onLogoutSuccessful: () -> Unit = {},
     onBackClicked: () -> Unit = {},
     onLogoutClicked: () -> Unit = {}
@@ -90,7 +89,19 @@ fun SettingsPane(
         SettingsBody(
             settingsUiModel = settingsUiModel,
             showSyncInterval = showSyncInterval,
-            onSyncIntervalClicked = { showSyncInterval = !showSyncInterval },
+            toggleSyncIntervalVisibility = { showSyncInterval = !showSyncInterval },
+            onSyncIntervalSelected = { label ->
+                settingsAction(
+                    AppAction.UpdateSync(
+                        syncDuration = when (label) {
+                            "15 Minutes" -> Sync.SyncDuration.SYNC_DURATION_FIFTEEN_MINUTES
+                            "30 Minutes" -> Sync.SyncDuration.SYNC_DURATION_THIRTY_MINUTES
+                            "1 Hour" -> Sync.SyncDuration.SYNC_DURATION_ONE_HOUR
+                            else -> Sync.SyncDuration.SYNC_DURATION_MANUAL
+                        }
+                    )
+                )
+            },
             onLogoutClicked = onLogoutClicked
         )
     }
@@ -145,7 +156,8 @@ private fun SettingsBody(
     modifier: Modifier = Modifier,
     settingsUiModel: SettingsUiModel,
     showSyncInterval: Boolean = false,
-    onSyncIntervalClicked: () -> Unit = {},
+    toggleSyncIntervalVisibility: () -> Unit = {},
+    onSyncIntervalSelected: (String) -> Unit = {},
     onLogoutClicked: () -> Unit = {}
 ) {
     Box(
@@ -176,7 +188,7 @@ private fun SettingsBody(
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
                     .combinedClickable(
-                        onClick = onSyncIntervalClicked
+                        onClick = toggleSyncIntervalVisibility
                     ),
                 horizontalArrangement = Arrangement.spacedBy(0.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -303,8 +315,6 @@ private fun SettingsBody(
         }
 
         if (showSyncInterval) {
-            val context = LocalContext.current
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -315,7 +325,7 @@ private fun SettingsBody(
                     modifier = Modifier.background(color = colorScheme.surfaceContainerLowest),
                     expanded = true,
                     offset = DpOffset(x = 0.dp, y = 0.dp),
-                    onDismissRequest = onSyncIntervalClicked,
+                    onDismissRequest = toggleSyncIntervalVisibility,
                 ) {
                     settingsUiModel.syncIntervals.forEach { label ->
                         DropdownMenuItem(
@@ -325,11 +335,7 @@ private fun SettingsBody(
                                     style = typography.bodyLarge
                                 )
                             },
-                            onClick = {
-                                val workManager = WorkManager.getInstance(context.applicationContext)
-                                workManager.enqueue(OneTimeWorkRequestBuilder<NoteSyncWorker>().build())
-                                onSyncIntervalClicked()
-                            },
+                            onClick = { onSyncIntervalSelected(label) },
                             trailingIcon = {
                                 if (label == settingsUiModel.selectedSyncInterval) {
                                     Icon(

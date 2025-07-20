@@ -14,6 +14,6 @@ message Sync {
     SYNC_DURATION_ONE_HOUR = 5;
   }
   SyncDuration sync_duration = 2;
-  int64 last_downloaded_time = 3;
-  int64 last_uploaded_time = 4;
+  string last_downloaded_time = 3;
+  string last_uploaded_time = 4;
 }

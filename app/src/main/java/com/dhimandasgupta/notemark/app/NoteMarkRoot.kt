@@ -237,6 +237,7 @@ private fun NavGraphBuilder.noteMarkGraph(
             SettingsPane(
                 modifier = Modifier,
                 settingsUiModel = settingsUiModel,
+                settingsAction = settingsAction,
                 onBackClicked = { navController.navigateUp() },
                 onLogoutSuccessful = {
                     navController.navigate(NoteMarkDestination.LauncherPane) {

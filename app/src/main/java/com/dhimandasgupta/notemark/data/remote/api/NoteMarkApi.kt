@@ -198,7 +198,6 @@ class NoteMarkApiImpl(
                 url("/api/notes")
                 contentType(ContentType.Application.Json)
                 setBody(noteEntity.toNote().copy(uuid = Uuid.random().toHexDashString()))
-                // header("Authorization", "Bearer ${userManager.getUser().first()?.bearerTokens?.accessToken}")
             }
 
             when (response.status) {
