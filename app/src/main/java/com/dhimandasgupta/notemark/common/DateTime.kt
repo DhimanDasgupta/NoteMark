@@ -27,7 +27,7 @@ fun convertIsoToRelativeYearFormat(isoOffsetDateTimeString: String): String {
             offsetDateTime.format(targetFormatterPreviousYear)
         }
     } catch (_: Exception) {
-        ""
+        "Unknown"
     }
 }
 
@@ -52,7 +52,7 @@ fun convertIsoToRelativeTimeFormat(isoOffsetDateTimeString: String): String {
             else -> convertNoteTimestampToReadableFormat(isoOffsetDateTimeString)
         }
     } catch (_: Exception) {
-        ""
+        "Unknown"
     }
 }
 
@@ -63,6 +63,6 @@ fun convertNoteTimestampToReadableFormat(isoOffsetDateTimeString: String): Strin
 
         offsetDateTime.format(targetFormatter)
     } catch (_: Exception) {
-        ""
+        "Unknown"
     }
 }

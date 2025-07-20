@@ -315,40 +315,13 @@ private fun SettingsBody(
         }
 
         if (showSyncInterval) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentSize(Alignment.TopEnd) // Aligns the IconButton and thus the menu
-                    .padding(16.dp)
-            ) {
-                DropdownMenu(
-                    modifier = Modifier.background(color = colorScheme.surfaceContainerLowest),
-                    expanded = true,
-                    offset = DpOffset(x = 0.dp, y = 0.dp),
-                    onDismissRequest = toggleSyncIntervalVisibility,
-                ) {
-                    settingsUiModel.syncIntervals.forEach { label ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = label,
-                                    style = typography.bodyLarge
-                                )
-                            },
-                            onClick = { onSyncIntervalSelected(label) },
-                            trailingIcon = {
-                                if (label == settingsUiModel.selectedSyncInterval) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = null,
-                                        tint = colorScheme.primary
-                                    )
-                                } else null
-                            }
-                        )
-                    }
-                }
-            }
+            SyncDropDown(
+                modifier = Modifier,
+                selectedSyncInterval = settingsUiModel.selectedSyncInterval,
+                syncIntervals = settingsUiModel.syncIntervals,
+                toggleDropDownVisibility = toggleSyncIntervalVisibility,
+                onDropDownItemSelected = onSyncIntervalSelected
+            )
         }
     }
 }

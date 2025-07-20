@@ -78,8 +78,7 @@ class AppStateMachine(
 
             inState<AppState.LoggedIn> {
                 onEnterEffect { state ->
-                    // TODO: Just trigger the one time sync.
-                    // applicationContext.cancelPreviousAndTriggerNewWork()
+                    applicationContext.cancelPreviousAndTriggerNewWork()
                 }
                 collectWhileInState(syncRepository.getSync()) { sync, state ->
                     state.mutate { state.snapshot.copy(sync = sync) }
@@ -97,9 +96,7 @@ class AppStateMachine(
                         else -> Duration.ZERO
                     }
 
-                    /*applicationContext.cancelPreviousAndTriggerNewWork(
-                        duration = duration
-                    )*/
+                    applicationContext.cancelPreviousAndTriggerNewWork(duration = duration)
 
                     val updatedSync = state.snapshot.sync?.toBuilder()?.setSyncDuration(action.syncDuration)?.build()
                     syncRepository.saveSyncDuration(action.syncDuration)
