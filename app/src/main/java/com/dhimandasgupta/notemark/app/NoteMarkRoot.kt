@@ -198,6 +198,12 @@ private fun NavGraphBuilder.noteMarkGraph(
             val addNoteUiModel = addNotePresenter.uiModel()
             val addNoteAction = addNotePresenter::processEvent
 
+            BackHandler(
+                enabled = true,
+            ) {
+                navController.navigateUp()
+            }
+
             AddNotePane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
@@ -216,6 +222,12 @@ private fun NavGraphBuilder.noteMarkGraph(
             val editNoteUiModel = editNotePresenter.uiModel()
             val editNoteAction = editNotePresenter::processEvent
 
+            BackHandler(
+                enabled = true,
+            ) {
+                navController.navigateUp()
+            }
+
             EditNotePane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
@@ -233,6 +245,12 @@ private fun NavGraphBuilder.noteMarkGraph(
             val settingsPresenter = koinInject<SettingsPresenter>()
             val settingsUiModel = settingsPresenter.uiModel()
             val settingsAction = settingsPresenter::processEvent
+
+            BackHandler(
+                enabled = true,
+            ) {
+                navController.navigateUp()
+            }
 
             SettingsPane(
                 modifier = Modifier,

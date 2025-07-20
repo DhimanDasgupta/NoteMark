@@ -63,6 +63,7 @@ import io.ktor.client.request.url
 import io.ktor.http.ContentType.Application
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -83,10 +84,17 @@ private enum class DataStoreType {
     SYNC_PREFERENCES
 }
 
-private const val APP_BACKGROUND_SCOPE = "app_background_scope"
+const val APP_BACKGROUND_SCOPE = "app_background_scope"
 
 val appModule = module {
-    single<CoroutineScope>(named(APP_BACKGROUND_SCOPE)) { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
+    single<CoroutineScope>(
+        named(APP_BACKGROUND_SCOPE)) {
+        CoroutineScope(
+            Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { context, throwable ->
+                println(throwable.message ?: "CoroutineExceptionHandler got $throwable")
+            }
+        )
+    }
     single<DataStore<User>>(named(DataStoreType.USER_PREFERENCES)) {
         DataStoreFactory.create(
             serializer = UserSerializer(),

@@ -9,20 +9,25 @@ import com.dhimandasgupta.notemark.data.SyncRepository
 import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.database.NoteEntity
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.qualifier.named
 import org.koin.java.KoinJavaComponent.inject
 
 class NoteSyncWorker(
     context: Context,
     workerParameters: WorkerParameters
 ) : CoroutineWorker(context, workerParameters), KoinComponent {
+    private val applicationScope: CoroutineScope by inject(named(APP_BACKGROUND_SCOPE))
     private val syncRepository: SyncRepository by inject(SyncRepository::class.java)
     private val noteMarkRepository: NoteMarkRepository by inject(NoteMarkRepository::class.java)
 
-    override suspend fun doWork(): Result {
+    override suspend fun doWork(): Result = withContext(applicationScope.coroutineContext) {
         try {
             syncRepository.saveSyncing(true)
 
@@ -41,12 +46,14 @@ class NoteSyncWorker(
             )
 
             syncRepository.saveLastUploadedTime(getCurrentIso8601Timestamp())
-            syncRepository.saveSyncing(false)
+            syncRepository.saveLastDownloadedTime(getCurrentIso8601Timestamp())
 
-            return Result.success()
+            Result.success()
         } catch (_: Exception) {
             coroutineContext.ensureActive()
-            return Result.failure()
+            Result.failure()
+        } finally {
+            syncRepository.saveSyncing(false)
         }
     }
 

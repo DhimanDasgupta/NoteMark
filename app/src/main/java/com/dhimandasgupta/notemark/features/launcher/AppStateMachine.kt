@@ -10,6 +10,7 @@ import androidx.work.WorkManager
 import com.dhimandasgupta.notemark.app.NoteSyncWorker
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
+import com.dhimandasgupta.notemark.common.getDifferenceFromTimestampInMinutes
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.SyncRepository
 import com.dhimandasgupta.notemark.data.UserRepository
@@ -50,13 +51,14 @@ class AppStateMachine(
     private val noteMarkRepository: NoteMarkRepository
 ) : StateMachine<AppState, AppAction>(defaultAppState) {
     private var cachedUser: User? = null
+    private var cachedSync: Sync? = null
 
     init {
         spec {
             inState<AppState.NotLoggedIn> {
                 condition({ cachedUser != null }) {
                     onEnter { state ->
-                        state.override { AppState.LoggedIn(user = cachedUser!!) }
+                        state.override { AppState.LoggedIn(user = cachedUser!!, sync = cachedSync) }
                     }
                 }
                 // All Flows while in the app state should be collected here
@@ -78,9 +80,13 @@ class AppStateMachine(
 
             inState<AppState.LoggedIn> {
                 onEnterEffect { state ->
-                    applicationContext.cancelPreviousAndTriggerNewWork()
+                    val sync = cachedSync ?: syncRepository.getSync().first()
+                    if (getDifferenceFromTimestampInMinutes(sync.lastUploadedTime) > 5L && !sync.syncing) {
+                        applicationContext.cancelPreviousAndTriggerNewWork()
+                    }
                 }
                 collectWhileInState(syncRepository.getSync()) { sync, state ->
+                    cachedSync = sync
                     state.mutate { state.snapshot.copy(sync = sync) }
                 }
 

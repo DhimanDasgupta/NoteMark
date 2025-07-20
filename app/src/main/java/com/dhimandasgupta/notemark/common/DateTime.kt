@@ -15,6 +15,20 @@ fun getCurrentIso8601Timestamp(): String {
     return currentDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 }
 
+fun getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString: String): Long {
+    return try {
+        val parsedDateTime =
+            OffsetDateTime.parse(isoOffsetDateTimeString, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        val currentDateTime =
+            OffsetDateTime.now(parsedDateTime.offset)
+
+        val durationBetween = Duration.between(parsedDateTime, currentDateTime)
+        durationBetween.toMinutes()
+    } catch (_: Exception) {
+        0L
+    }
+}
+
 fun convertIsoToRelativeYearFormat(isoOffsetDateTimeString: String): String {
     return try {
         val offsetDateTime = OffsetDateTime.parse(isoOffsetDateTimeString, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
