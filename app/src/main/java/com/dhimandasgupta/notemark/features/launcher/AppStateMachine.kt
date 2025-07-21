@@ -79,10 +79,12 @@ class AppStateMachine(
             }
 
             inState<AppState.LoggedIn> {
-                onEnterEffect { state ->
-                    val sync = cachedSync ?: syncRepository.getSync().first()
-                    if (getDifferenceFromTimestampInMinutes(sync.lastUploadedTime) > 5L && !sync.syncing) {
-                        applicationContext.cancelPreviousAndTriggerNewWork()
+                condition( { cachedSync != null } ) {
+                    onEnterEffect { state ->
+                        val sync = cachedSync ?: syncRepository.getSync().first()
+                        if (getDifferenceFromTimestampInMinutes(sync.lastUploadedTime) > 5L && !sync.syncing) {
+                            applicationContext.cancelPreviousAndTriggerNewWork()
+                        }
                     }
                 }
                 collectWhileInState(syncRepository.getSync()) { sync, state ->
@@ -115,6 +117,8 @@ class AppStateMachine(
                         )
                     ).getOrNull()?.let {
                         cachedUser = null
+                        cachedSync = null
+                        noteMarkRepository.deleteAllLocalNotes()
                         state.override {
                             AppState.NotLoggedIn(
                                 connectionState = state.snapshot.connectionState

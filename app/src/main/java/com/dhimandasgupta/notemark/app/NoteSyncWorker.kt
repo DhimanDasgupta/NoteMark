@@ -62,11 +62,11 @@ class NoteSyncWorker(
         notes: List<NoteEntity>
     ) {
         notes.forEach { note ->
-            when (remoteNotes.find { it.uuid == note.uuid }) {
+            when (remoteNotes.find { remoteNote -> remoteNote.uuid == note.uuid }) {
                 null -> uploadNote(note)
                 else -> updateNote(note)
             }
-            delay(1000L)
+            delay(1000L) // Just some delay for testing
         }
     }
 
@@ -102,7 +102,7 @@ class NoteSyncWorker(
     private suspend fun deleteNotes(notes: List<NoteEntity>) {
         notes.forEach { note ->
             deleteNote(note)
-            delay(1000L)
+            delay(1000L) // Just some delay for testing
         }
     }
 

@@ -197,7 +197,7 @@ class NoteMarkApiImpl(
             val response = client.post {
                 url("/api/notes")
                 contentType(ContentType.Application.Json)
-                setBody(noteEntity.toNote().copy(uuid = Uuid.random().toHexDashString()))
+                setBody(noteEntity.toNote())
             }
 
             when (response.status) {

@@ -74,7 +74,8 @@ UPDATE NoteEntity
 SET
     title = :title,
     content = :content,
-    lastEditedAt = :lastEditedAt
+    lastEditedAt = :lastEditedAt,
+    synced = 0
 WHERE uuid = :uuid;
 
 -- Permanently delete a note (use with caution)

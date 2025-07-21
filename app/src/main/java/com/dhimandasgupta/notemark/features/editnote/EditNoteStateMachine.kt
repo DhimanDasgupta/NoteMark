@@ -62,38 +62,16 @@ class EditNoteStateMachine(
                     state.mutate { copy(content = action.content) }
                 }
                 on<EditNoteAction.Save> { _, state ->
-                    when (state.snapshot.noteEntity) {
-                        null -> {
-                            val inserted = noteMarkRepository.createNote(
-                                NoteEntity(
-                                    id = System.currentTimeMillis(),
-                                    title = state.snapshot.title.trim(),
-                                    content = state.snapshot.content.trim(),
-                                    createdAt = getCurrentIso8601Timestamp(),
-                                    lastEditedAt = getCurrentIso8601Timestamp(),
-                                    uuid = Uuid.random().toHexDashString(),
-                                    synced = false,
-                                    markAsDeleted = false
-                                )
-                            )
+                    state.snapshot.noteEntity?.let { noteEntity ->
+                        val updatedNote = noteMarkRepository.updateLocalNote(
+                            title = state.snapshot.title.trim(),
+                            content = state.snapshot.content.trim(),
+                            lastEditedAt = getCurrentIso8601Timestamp(),
+                            noteEntity = noteEntity
+                        )
 
-                            inserted?.let {
-                                return@on state.mutate { copy(saved = true) }
-                            }
-                        }
-                        else -> {
-                            state.snapshot.noteEntity?.let { noteEntity ->
-                                val updatedNote = noteMarkRepository.updateLocalNote(
-                                    title = state.snapshot.title.trim(),
-                                    content = state.snapshot.content.trim(),
-                                    lastEditedAt = getCurrentIso8601Timestamp(),
-                                    noteEntity = noteEntity
-                                )
-
-                                updatedNote?.let {
-                                    return@on state.mutate { copy(saved = true) }
-                                }
-                            }
+                        updatedNote?.let {
+                            return@on state.mutate { copy(saved = true) }
                         }
                     }
 

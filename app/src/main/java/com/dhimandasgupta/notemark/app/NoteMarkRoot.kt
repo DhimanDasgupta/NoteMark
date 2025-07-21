@@ -198,6 +198,10 @@ private fun NavGraphBuilder.noteMarkGraph(
             val addNoteUiModel = addNotePresenter.uiModel()
             val addNoteAction = addNotePresenter::processEvent
 
+            /**
+             * To make sure the collection from AppState machine is canceled
+             * Otherwise FlowRedux will throw an exception
+             * */
             BackHandler(
                 enabled = true,
             ) {
@@ -222,6 +226,10 @@ private fun NavGraphBuilder.noteMarkGraph(
             val editNoteUiModel = editNotePresenter.uiModel()
             val editNoteAction = editNotePresenter::processEvent
 
+            /**
+             * To make sure the collection from AppState machine is canceled
+             * Otherwise FlowRedux will throw an exception
+             * */
             BackHandler(
                 enabled = true,
             ) {
@@ -246,6 +254,10 @@ private fun NavGraphBuilder.noteMarkGraph(
             val settingsUiModel = settingsPresenter.uiModel()
             val settingsAction = settingsPresenter::processEvent
 
+            /**
+             * To make sure the collection from AppState machine is canceled
+             * Otherwise FlowRedux will throw an exception
+             * */
             BackHandler(
                 enabled = true,
             ) {
