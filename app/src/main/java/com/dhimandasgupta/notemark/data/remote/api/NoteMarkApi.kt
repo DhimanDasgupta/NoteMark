@@ -26,7 +26,6 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.ensureActive
 import kotlin.coroutines.coroutineContext
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 class UserAlreadyExistsException(
     message: String = "User already exists"

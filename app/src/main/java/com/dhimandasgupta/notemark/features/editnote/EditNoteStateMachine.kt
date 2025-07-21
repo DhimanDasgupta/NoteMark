@@ -7,7 +7,6 @@ import com.dhimandasgupta.notemark.database.NoteEntity
 import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 @Immutable
 data class EditNoteState(
