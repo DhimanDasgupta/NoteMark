@@ -22,6 +22,10 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
@@ -36,6 +40,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -56,6 +61,7 @@ fun SettingsPane(
     modifier: Modifier = Modifier,
     settingsUiModel: SettingsUiModel,
     settingsAction: (AppAction) -> Unit = {},
+    onDeleteNoteCheckChanged: () -> Unit = {},
     onLogoutSuccessful: () -> Unit = {},
     onBackClicked: () -> Unit = {},
     onLogoutClicked: () -> Unit = {}
@@ -97,6 +103,7 @@ fun SettingsPane(
                     )
                 )
             },
+            onDeleteNoteCheckChanged = onDeleteNoteCheckChanged,
             onLogoutClicked = onLogoutClicked
         )
     }
@@ -153,6 +160,7 @@ private fun SettingsBody(
     showSyncInterval: Boolean = false,
     toggleSyncIntervalVisibility: () -> Unit = {},
     onSyncIntervalSelected: (String) -> Unit = {},
+    onDeleteNoteCheckChanged: () -> Unit = {},
     onLogoutClicked: () -> Unit = {}
 ) {
     Box(
@@ -178,135 +186,51 @@ private fun SettingsBody(
                 .padding(horizontal = 16.dp)
         ) {
             // Sync Interval
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .combinedClickable(
-                        onClick = toggleSyncIntervalVisibility
-                    ),
-                horizontalArrangement = Arrangement.spacedBy(0.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_clock),
-                    contentDescription = "Sync Interval",
-                    tint = colorScheme.onSurface,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .requiredSize(size = 24.dp)
-                )
-
-                Text(
-                    text = "Sync Interval",
-                    style = typography.titleSmall,
-                    color = colorScheme.onSurface,
-                    modifier = Modifier.wrapContentSize()
-                )
-
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                )
-
-                Text(
-                    text = settingsUiModel.selectedSyncInterval,
-                    style = typography.bodyLarge,
-                    color = colorScheme.onSurfaceVariant,
-                    modifier = Modifier.wrapContentSize()
-                )
-
-                Icon(
-                    painter = painterResource(R.drawable.ic_right),
-                    contentDescription = "Sync Interval",
-                    tint = colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .requiredSize(size = 32.dp)
-                )
-            }
+            SyncIntervalRow(
+                modifier = Modifier,
+                settingsUiModel = settingsUiModel,
+                toggleSyncIntervalVisibility = toggleSyncIntervalVisibility
+            )
 
             Spacer(
                 modifier = Modifier
-                    .padding(top = 8.dp)
                     .fillMaxWidth()
                     .height(1.dp)
                     .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
-                    .padding(bottom = 8.dp)
             )
 
             // Sync Data
-            Row(
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .combinedClickable(
-                        onClick = {}
-                    ),
-                horizontalArrangement = Arrangement.spacedBy(0.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_sync),
-                    contentDescription = "Settings",
-                    tint = colorScheme.onSurface,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .requiredSize(size = 24.dp)
-                )
-
-                Column {
-                    Text(
-                        text = "Sync Data",
-                        style = typography.titleSmall,
-                        color = colorScheme.onSurface,
-                        modifier = Modifier.wrapContentSize()
-                    )
-
-                    Text(
-                        text = "Last synced: ${settingsUiModel.lastSynced}",
-                        style = typography.bodySmall,
-                        color = colorScheme.onSurfaceVariant,
-                        modifier = Modifier.wrapContentSize()
-                    )
-                }
-            }
+            SyncDataRow(
+                modifier = Modifier,
+                settingsUiModel = settingsUiModel
+            )
 
             Spacer(
                 modifier = Modifier
-                    .padding(top = 8.dp)
                     .fillMaxWidth()
                     .height(1.dp)
                     .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
-                    .padding(bottom = 8.dp)
+            )
+
+            // Delete Local Data
+            DeleteLocalDataRow(
+                modifier = Modifier,
+                settingsUiModel = settingsUiModel,
+                onCheckChange = onDeleteNoteCheckChanged
+            )
+
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
             )
 
             // Logout
-            Row(
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .combinedClickable(
-                        onClick = onLogoutClicked
-                    ),
-                horizontalArrangement = Arrangement.spacedBy(0.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_log_out),
-                    contentDescription = "Settings",
-                    tint = colorScheme.error,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .requiredSize(size = 32.dp)
-                )
-
-                Text(
-                    text = "Log out",
-                    style = typography.titleMedium,
-                    color = colorScheme.error,
-                    modifier = Modifier.weight(1f)
-                )
-            }
+            LogoutRow(
+                modifier = Modifier,
+                onLogoutClicked = onLogoutClicked
+            )
         }
 
         if (showSyncInterval) {
@@ -318,6 +242,175 @@ private fun SettingsBody(
                 onDropDownItemSelected = onSyncIntervalSelected
             )
         }
+    }
+}
+
+@Composable
+private fun SyncIntervalRow(
+    modifier: Modifier = Modifier,
+    settingsUiModel: SettingsUiModel,
+    toggleSyncIntervalVisibility: () -> Unit
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .combinedClickable(
+                onClick = toggleSyncIntervalVisibility
+            )
+            .padding(vertical = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(0.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_clock),
+            contentDescription = "Sync Interval",
+            tint = colorScheme.onSurface,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .requiredSize(size = 24.dp)
+        )
+
+        Text(
+            text = "Sync Interval",
+            style = typography.titleSmall,
+            color = colorScheme.onSurface,
+            modifier = Modifier.wrapContentSize()
+        )
+
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        )
+
+        Text(
+            text = settingsUiModel.selectedSyncInterval,
+            style = typography.bodyLarge,
+            color = colorScheme.onSurfaceVariant,
+            modifier = Modifier.wrapContentSize()
+        )
+
+        Icon(
+            painter = painterResource(R.drawable.ic_right),
+            contentDescription = "Sync Interval",
+            tint = colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .requiredSize(size = 32.dp)
+        )
+    }
+}
+
+@Composable
+private fun SyncDataRow(
+    modifier: Modifier = Modifier,
+    settingsUiModel: SettingsUiModel,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .combinedClickable(
+                onClick = {}
+            )
+            .padding(vertical = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(0.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_sync),
+            contentDescription = "Settings",
+            tint = colorScheme.onSurface,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .requiredSize(size = 24.dp)
+        )
+
+        Column {
+            Text(
+                text = "Sync Data",
+                style = typography.titleSmall,
+                color = colorScheme.onSurface,
+                modifier = Modifier.wrapContentSize()
+            )
+
+            Text(
+                text = "Last synced: ${settingsUiModel.lastSynced}",
+                style = typography.bodySmall,
+                color = colorScheme.onSurfaceVariant,
+                modifier = Modifier.wrapContentSize()
+            )
+        }
+    }
+}
+
+@Composable
+private fun DeleteLocalDataRow(
+    modifier: Modifier = Modifier,
+    settingsUiModel: SettingsUiModel,
+    onCheckChange: () -> Unit
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .combinedClickable(
+                onClick = onCheckChange
+            )
+            .padding(vertical = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(0.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Delete local notes when logging out?",
+            style = typography.titleSmall,
+            color = colorScheme.error,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .weight(1f)
+        )
+
+        Icon(
+            imageVector = if (settingsUiModel.deleteLocalNotesOnLogout) Icons.Default.Check else Icons.Filled.Close,
+            contentDescription = if (settingsUiModel.deleteLocalNotesOnLogout) "Checked" else "Unchecked",
+            tint = colorScheme.primary,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+    }
+}
+
+@Composable
+private fun LogoutRow(
+    modifier: Modifier = Modifier,
+    onLogoutClicked: () -> Unit
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .combinedClickable(
+                onClick = onLogoutClicked
+            )
+            .padding(vertical = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(0.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_log_out),
+            contentDescription = "Settings",
+            tint = colorScheme.error,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .requiredSize(size = 32.dp)
+        )
+
+        Text(
+            text = "Log out",
+            style = typography.titleMedium,
+            color = colorScheme.error,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 

@@ -274,6 +274,9 @@ private fun NavGraphBuilder.noteMarkGraph(
                         launchSingleTop = true
                     }
                 },
+                onDeleteNoteCheckChanged = {
+                    settingsAction(AppAction.DeleteLocalNotesOnLogout(!settingsUiModel.deleteLocalNotesOnLogout))
+                },
                 onLogoutClicked = {
                     settingsAction(AppAction.AppLogout)
                 }

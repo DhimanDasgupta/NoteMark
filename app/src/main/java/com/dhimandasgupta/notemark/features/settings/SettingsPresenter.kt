@@ -24,6 +24,7 @@ data class SettingsUiModel(
     val syncIntervals: ImmutableList<String> = persistentListOf("Manual", "15 Minutes", "30 Minutes", "1 Hour"),
     val selectedSyncInterval: String = "Manual",
     val lastSynced: String = "--",
+    val deleteLocalNotesOnLogout: Boolean = false,
     val logoutStatus: Boolean? = null
 ) {
     companion object {
@@ -66,7 +67,11 @@ class SettingsPresenter(
                                 }
                             } ?: "Manual"
                             else -> "Manual"
-                        }
+                        },
+                        deleteLocalNotesOnLogout = when (appState) {
+                            is AppState.LoggedIn -> appState.sync?.deleteLocalNotesOnLogout ?: false
+                            else -> false
+                        },
                     )
                 }
             }

@@ -16,4 +16,5 @@ message Sync {
   SyncDuration sync_duration = 2;
   string last_downloaded_time = 3;
   string last_uploaded_time = 4;
+  bool delete_local_notes_on_logout = 5;
 }

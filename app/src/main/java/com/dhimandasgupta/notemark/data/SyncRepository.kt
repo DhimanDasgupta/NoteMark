@@ -10,6 +10,7 @@ interface SyncRepository {
     suspend fun saveSyncDuration(syncDuration: Sync.SyncDuration)
     suspend fun saveLastDownloadedTime(downLoadedTime: String)
     suspend fun saveLastUploadedTime(uploadedTime: String)
+    suspend fun saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout: Boolean)
 }
 
 class SyncRepositoryImpl(
@@ -22,7 +23,12 @@ class SyncRepositoryImpl(
     override suspend fun saveSyncDuration(syncDuration: Sync.SyncDuration) =
         noteSyncDataSource.saveSyncDuration(syncDuration)
 
-    override suspend fun saveLastDownloadedTime(downLoadedTime: String) = noteSyncDataSource.saveLastDownloadedTime(downLoadedTime)
+    override suspend fun saveLastDownloadedTime(downLoadedTime: String) =
+        noteSyncDataSource.saveLastDownloadedTime(downLoadedTime)
 
-    override suspend fun saveLastUploadedTime(uploadedTime: String) = noteSyncDataSource.saveLastUploadedTime(uploadedTime)
+    override suspend fun saveLastUploadedTime(uploadedTime: String) =
+        noteSyncDataSource.saveLastUploadedTime(uploadedTime)
+
+    override suspend fun saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout: Boolean) =
+        noteSyncDataSource.saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout)
 }

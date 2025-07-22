@@ -28,4 +28,5 @@ private val defaultSyncValue = Sync.newBuilder().apply {
     lastUploadedTime = "0"
     lastDownloadedTime = "0"
     syncDuration = Sync.SyncDuration.SYNC_DURATION_NONE
+    deleteLocalNotesOnLogout = false
 }.build()

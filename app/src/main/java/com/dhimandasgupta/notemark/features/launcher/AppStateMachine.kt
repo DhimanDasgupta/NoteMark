@@ -41,6 +41,7 @@ sealed interface AppAction {
     object ConnectionStateConsumed: AppAction
     data class UpdateSync(val syncDuration: Sync.SyncDuration) : AppAction
     object AppLogout : AppAction
+    data class DeleteLocalNotesOnLogout(val deleteOnLogout: Boolean) : AppAction
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -110,15 +111,20 @@ class AppStateMachine(
                     syncRepository.saveSyncDuration(action.syncDuration)
                     state.mutate { state.snapshot.copy(sync = updatedSync) }
                 }
+                onActionEffect<AppAction.DeleteLocalNotesOnLogout> { action, state ->
+                    syncRepository.saveDeleteLocalNotesOnLogout(action.deleteOnLogout)
+                }
                 on<AppAction.AppLogout> { _, state ->
                     noteMarkRepository.logout(
                         request = RefreshRequest(
                             refreshToken = userRepository.getUser().first()?.refreshToken ?: ""
                         )
                     ).getOrNull()?.let {
+                        if (cachedSync?.deleteLocalNotesOnLogout == true) {
+                            noteMarkRepository.deleteAllLocalNotes()
+                        }
                         cachedUser = null
                         cachedSync = null
-                        noteMarkRepository.deleteAllLocalNotes()
                         state.override {
                             AppState.NotLoggedIn(
                                 connectionState = state.snapshot.connectionState
