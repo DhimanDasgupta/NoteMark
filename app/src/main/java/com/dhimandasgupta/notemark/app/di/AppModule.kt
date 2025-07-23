@@ -1,6 +1,6 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package com.dhimandasgupta.notemark.app
+package com.dhimandasgupta.notemark.app.di
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
@@ -8,6 +8,7 @@ import androidx.datastore.dataStoreFile
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.dhimandasgupta.notemark.BuildConfig
+import com.dhimandasgupta.notemark.app.work.NoteSyncWorker
 import com.dhimandasgupta.notemark.common.storage.SyncSerializer
 import com.dhimandasgupta.notemark.common.storage.UserSerializer
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
@@ -88,38 +89,47 @@ const val APP_BACKGROUND_SCOPE = "app_background_scope"
 
 val appModule = module {
     single<CoroutineScope>(
-        named(APP_BACKGROUND_SCOPE)) {
+        qualifier = named(APP_BACKGROUND_SCOPE)
+    ) {
         CoroutineScope(
-            Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { context, throwable ->
+            context = Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { context, throwable ->
                 println(throwable.message ?: "CoroutineExceptionHandler got $throwable")
             }
         )
     }
-    single<DataStore<User>>(named(DataStoreType.USER_PREFERENCES)) {
+    single<DataStore<User>>(qualifier = named(DataStoreType.USER_PREFERENCES)) {
         DataStoreFactory.create(
             serializer = UserSerializer(),
             produceFile = { androidApplication().dataStoreFile("user_store.pb") },
             corruptionHandler = null,
             migrations = listOf(),
-            scope = get(named(APP_BACKGROUND_SCOPE))
+            scope = get(qualifier = named(APP_BACKGROUND_SCOPE))
         )
     }
-    single { UserDataSourceImpl(get(named(DataStoreType.USER_PREFERENCES))) } bind UserDataSource::class
-    single { UserRepositoryImpl(get()) } bind UserRepository::class
-    single<DataStore<Sync>>(named(DataStoreType.SYNC_PREFERENCES)) {
+    single {
+        UserDataSourceImpl(
+            userDataStore = get(qualifier = named(enum = DataStoreType.USER_PREFERENCES))
+        )
+    } bind UserDataSource::class
+    single { UserRepositoryImpl(userDataSource = get()) } bind UserRepository::class
+    single<DataStore<Sync>>(qualifier = named(DataStoreType.SYNC_PREFERENCES)) {
         DataStoreFactory.create(
             serializer = SyncSerializer(),
-            produceFile = { androidApplication().dataStoreFile("sync_store.pb") },
+            produceFile = { androidApplication().dataStoreFile(fileName = "sync_store.pb") },
             corruptionHandler = null,
             migrations = listOf(),
-            scope = get(named(APP_BACKGROUND_SCOPE))
+            scope = get(qualifier = named(APP_BACKGROUND_SCOPE))
         )
     }
-    single { NoteSyncDataSourceImpl(get(named(DataStoreType.SYNC_PREFERENCES))) } bind NoteSyncDataSource::class
-    single { SyncRepositoryImpl(get()) } bind SyncRepository::class
     single {
-        HttpClient(Android) {
-            install(ContentNegotiation) {
+        NoteSyncDataSourceImpl(
+            syncDataStore = get(qualifier = named(enum = DataStoreType.SYNC_PREFERENCES))
+        )
+    } bind NoteSyncDataSource::class
+    single { SyncRepositoryImpl(noteSyncDataSource = get()) } bind SyncRepository::class
+    single {
+        HttpClient(engineFactory = Android) {
+            install(plugin = ContentNegotiation) {
                 json(
                     Json {
                         prettyPrint = true
@@ -128,38 +138,52 @@ val appModule = module {
                     }
                 )
             }
-            install(Logging) {
+            install(plugin = Logging) {
                 logger = Logger.ANDROID
-                level = LogLevel.ALL
+                level = if (BuildConfig.DEBUG) LogLevel.ALL else LogLevel.NONE
             }
 
-            install(Auth) {
+            install(plugin = Auth) {
                 bearer {
                     loadTokens {
                         val user = get<UserRepository>().getUser().first()
                         if (user?.accessToken != null && user.refreshToken != null) {
-                            BearerTokens(user.accessToken, user.refreshToken)
+                            BearerTokens(
+                                accessToken = user.accessToken,
+                                refreshToken = user.refreshToken
+                            )
                         }
                         null
                     }
                     refreshTokens {
                         val user = get<UserRepository>().getUser().first()
-                        val currentTokens = if (user?.accessToken != null && user.refreshToken != null) {
-                            BearerTokens(user.accessToken, user.refreshToken)
-                        } else {
-                            return@refreshTokens null
-                        }
+                        val currentTokens =
+                            if (user?.accessToken != null && user.refreshToken != null) {
+                                BearerTokens(
+                                    accessToken = user.accessToken,
+                                    refreshToken = user.refreshToken
+                                )
+                            } else {
+                                return@refreshTokens null
+                            }
 
                         try {
                             val response = client.post {
-                                url("/api/auth/refresh")
+                                url(urlString = "/api/auth/refresh")
                                 markAsRefreshTokenRequest()
-                                contentType(Application.Json)
-                                setBody(RefreshRequest(refreshToken = currentTokens.refreshToken ?: ""))
+                                contentType(type = Application.Json)
+                                setBody(
+                                    RefreshRequest(
+                                        refreshToken = currentTokens.refreshToken ?: ""
+                                    )
+                                )
                             }.body<RefreshResponse>()
 
-                            val newTokens = BearerTokens(response.accessToken, response.refreshToken)
-                            get<UserRepository>().saveBearToken(newTokens)
+                            val newTokens = BearerTokens(
+                                accessToken = response.accessToken,
+                                refreshToken = response.refreshToken
+                            )
+                            get<UserRepository>().saveBearToken(token = newTokens)
                             newTokens
                         } catch (_: Exception) {
                             get<UserRepository>().deleteUser()
@@ -169,18 +193,29 @@ val appModule = module {
                 }
             }
             defaultRequest {
-                url("https://notemark.pl-coding.com")
+                url(urlString = "https://notemark.pl-coding.com")
                 header("X-User-Email", BuildConfig.HEADER_VALUE_FOR_NOTE_MARK_API)
-                header("Debug", "true") // Only here
+                header("Debug", if (BuildConfig.DEBUG) "true" else "false") // Only here
             }
         }
     }
-    single { AndroidSqliteDriver(NoteMarkDatabase.Schema, androidContext(), "app.db") } bind SqlDriver::class
-    single { NoteMarkDatabase(get()) }
-    singleOf(::NoteMarkApiImpl) bind NoteMarkApi::class
-    singleOf(::NoteMarkApiDataSourceImpl) bind NoteMarkApiDataSource::class
-    singleOf(::NoteMarkLocalDataSourceImpl) bind NoteMarkLocalDataSource::class
-    single { NoteMarkRepositoryImpl(get(), get())} bind NoteMarkRepository::class
+    single {
+        AndroidSqliteDriver(
+            NoteMarkDatabase.Schema,
+            context = androidContext(),
+            name = "app.db"
+        )
+    } bind SqlDriver::class
+    single { NoteMarkDatabase(driver = get()) }
+    singleOf(constructor = ::NoteMarkApiImpl) bind NoteMarkApi::class
+    singleOf(constructor = ::NoteMarkApiDataSourceImpl) bind NoteMarkApiDataSource::class
+    singleOf(constructor = ::NoteMarkLocalDataSourceImpl) bind NoteMarkLocalDataSource::class
+    single {
+        NoteMarkRepositoryImpl(
+            localDataSource = get(),
+            remoteDataSource = get()
+        )
+    } bind NoteMarkRepository::class
     single {
         AppStateMachine(
             applicationContext = androidContext(),
@@ -189,24 +224,24 @@ val appModule = module {
             noteMarkRepository = get()
         )
     }
-    factoryOf(::LauncherPresenter)
+    factoryOf(constructor = ::LauncherPresenter)
 
     factory { LoginStateMachine(noteMarkApi = get()) }
-    factoryOf(::LoginPresenter)
+    factoryOf(constructor = ::LoginPresenter)
 
     factory { RegistrationStateMachine(noteMarkApi = get()) }
-    factoryOf(::RegistrationPresenter)
+    factoryOf(constructor = ::RegistrationPresenter)
 
     factory { NoteListStateMachine(userRepository = get(), noteMarkRepository = get()) }
-    factoryOf(::NoteListPresenter)
+    factoryOf(constructor = ::NoteListPresenter)
 
     factory { AddNoteStateMachine(noteMarkRepository = get()) }
-    factoryOf(::AddNotePresenter)
+    factoryOf(constructor = ::AddNotePresenter)
 
     factory { EditNoteStateMachine(noteMarkRepository = get()) }
-    factoryOf(::EditNotePresenter)
+    factoryOf(constructor = ::EditNotePresenter)
 
-    factoryOf(::SettingsPresenter)
+    factoryOf(constructor = ::SettingsPresenter)
 
-    worker { NoteSyncWorker(androidContext(), get()) }
+    worker { NoteSyncWorker(context = androidContext(), workerParameters = get()) }
 }

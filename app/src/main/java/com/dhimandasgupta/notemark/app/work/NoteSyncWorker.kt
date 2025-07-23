@@ -1,8 +1,9 @@
-package com.dhimandasgupta.notemark.app
+package com.dhimandasgupta.notemark.app.work
 
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.dhimandasgupta.notemark.app.di.APP_BACKGROUND_SCOPE
 import com.dhimandasgupta.notemark.common.getCurrentIso8601Timestamp
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.SyncRepository
@@ -17,22 +18,25 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
-import org.koin.java.KoinJavaComponent.inject
+import org.koin.java.KoinJavaComponent
 
 class NoteSyncWorker(
     context: Context,
     workerParameters: WorkerParameters
-) : CoroutineWorker(context, workerParameters), KoinComponent {
-    private val applicationScope: CoroutineScope by inject(named(APP_BACKGROUND_SCOPE))
-    private val syncRepository: SyncRepository by inject(SyncRepository::class.java)
-    private val noteMarkRepository: NoteMarkRepository by inject(NoteMarkRepository::class.java)
+) : CoroutineWorker(appContext = context, params = workerParameters), KoinComponent {
+    private val applicationScope: CoroutineScope by inject(qualifier = named(APP_BACKGROUND_SCOPE))
+    private val syncRepository: SyncRepository by KoinJavaComponent.inject(clazz = SyncRepository::class.java)
+    private val noteMarkRepository: NoteMarkRepository by KoinJavaComponent.inject(
+        clazz = NoteMarkRepository::class.java
+    )
 
     override suspend fun doWork(): Result = withContext(applicationScope.coroutineContext) {
         try {
             syncRepository.saveSyncing(true)
 
             // Fetch all Remote notes.
-            val allRemoteNotes = noteMarkRepository.getRemoteNotesAndSaveInDB().getOrElse { NoteResponse(notes = emptyList(), total = 0) }
+            val allRemoteNotes = noteMarkRepository.getRemoteNotesAndSaveInDB()
+                .getOrElse { NoteResponse(notes = emptyList(), total = 0) }
 
             // Delete all Remote notes waiting to be deleted.
             val toBeDeletedNotes = noteMarkRepository.getAllMarkedAsDeletedNotes()

@@ -5,6 +5,8 @@ import android.os.StrictMode
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.dhimandasgupta.notemark.BuildConfig
+import com.dhimandasgupta.notemark.app.di.appModule
+import io.ktor.client.plugins.logging.LogLevel
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -17,7 +19,7 @@ class NoteMarkApp : Application() {
         }
 
         val config = Configuration.Builder()
-            .setMinimumLoggingLevel(android.util.Log.DEBUG)
+            .setMinimumLoggingLevel(if (BuildConfig.DEBUG) android.util.Log.DEBUG else android.util.Log.ERROR)
             .build()
 
         WorkManager.initialize(this, config)

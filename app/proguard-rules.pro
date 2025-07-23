@@ -20,6 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keepclassmembers class com.dhimandasgupta.notemark.app.NoteSyncWorker {
+-keepclassmembers class com.dhimandasgupta.notemark.app.work.NoteSyncWorker {
     public <init>(android.content.Context, androidx.work.WorkerParameters);
 }

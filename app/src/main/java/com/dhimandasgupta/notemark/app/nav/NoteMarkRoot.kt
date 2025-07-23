@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.app
+package com.dhimandasgupta.notemark.app.nav
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
