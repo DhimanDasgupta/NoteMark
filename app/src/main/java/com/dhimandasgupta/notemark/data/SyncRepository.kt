@@ -11,6 +11,7 @@ interface SyncRepository {
     suspend fun saveLastDownloadedTime(downLoadedTime: String)
     suspend fun saveLastUploadedTime(uploadedTime: String)
     suspend fun saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout: Boolean)
+    suspend fun reset()
 }
 
 class SyncRepositoryImpl(
@@ -32,4 +33,6 @@ class SyncRepositoryImpl(
 
     override suspend fun saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout: Boolean) =
         noteSyncDataSource.saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout = deleteLocalNotesOnLogout)
+
+    override suspend fun reset() = noteSyncDataSource.reset()
 }

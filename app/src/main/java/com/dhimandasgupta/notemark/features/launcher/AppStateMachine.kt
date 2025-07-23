@@ -86,7 +86,10 @@ class AppStateMachine(
                 condition(condition = { cachedSync != null } ) {
                     onEnterEffect { state ->
                         val sync = cachedSync ?: syncRepository.getSync().first()
-                        if (getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString = sync.lastUploadedTime) > 5L && !sync.syncing) {
+                        val neverSynced = sync.lastUploadedTime == ""
+                        val lastSyncTimeIsMoreThan5Minutes = getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString = sync.lastUploadedTime) > 5L
+                        // Start sync if never synced or last sync time is more than 5 mins and not syncing.
+                        if (neverSynced || (lastSyncTimeIsMoreThan5Minutes && !sync.syncing)) {
                             applicationContext.cancelPreviousAndTriggerNewWork()
                         }
                     }
@@ -128,6 +131,8 @@ class AppStateMachine(
                         }
                         cachedUser = null
                         cachedSync = null
+                        userRepository.reset()
+                        syncRepository.reset()
                         state.override {
                             AppState.NotLoggedIn(
                                 connectionState = state.snapshot.connectionState

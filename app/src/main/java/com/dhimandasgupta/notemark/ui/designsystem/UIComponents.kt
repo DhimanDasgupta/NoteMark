@@ -503,16 +503,16 @@ fun SafeIconButton(
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     owner: LifecycleOwner = LocalLifecycleOwner.current,
     activeState: Lifecycle.State = Lifecycle.State.RESUMED,
-    debounceIntervalMs: Long = 700L,
+    debounceIntervalMs: Long = 1000L,
     content: @Composable () -> Unit
 ) {
     val currentOnClick by rememberUpdatedState(newValue = onClick)
     var lastClickTime by remember { mutableLongStateOf(value = 0L) }
     var lifecycleAllowsClick by remember {
-        mutableStateOf(owner.lifecycle.currentState.isAtLeast(activeState))
+        mutableStateOf(value = owner.lifecycle.currentState.isAtLeast(activeState))
     }
 
-    DisposableEffect(owner, activeState) {
+    DisposableEffect(key1 = owner, key2 = activeState) {
         val observer = LifecycleEventObserver { _, _ ->
             lifecycleAllowsClick = owner.lifecycle.currentState.isAtLeast(activeState)
         }

@@ -11,6 +11,7 @@ interface NoteSyncDataSource {
     suspend fun saveLastDownloadedTime(downLoadedTime: String)
     suspend fun saveLastUploadedTime(uploadedTime: String)
     suspend fun saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout: Boolean)
+    suspend fun reset()
 }
 
 class NoteSyncDataSourceImpl(
@@ -58,5 +59,11 @@ class NoteSyncDataSourceImpl(
                 .build()
         }
 
+    }
+
+    override suspend fun reset() {
+        syncDataStore.updateData { transform ->
+            transform.toBuilder().clear().build()
+        }
     }
 }

@@ -11,6 +11,7 @@ interface UserDataSource {
     suspend fun saveUser(user: User)
     suspend fun saveBearToken(token: BearerTokens)
     suspend fun deleteUser()
+    suspend fun reset()
 }
 
 class UserDataSourceImpl(
@@ -45,6 +46,12 @@ class UserDataSourceImpl(
     }
 
     override suspend fun deleteUser() {
+        userDataStore.updateData { transform ->
+            transform.toBuilder().clear().build()
+        }
+    }
+
+    override suspend fun reset() {
         userDataStore.updateData { transform ->
             transform.toBuilder().clear().build()
         }

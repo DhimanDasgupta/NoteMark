@@ -55,6 +55,7 @@ import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
+import kotlinx.coroutines.delay
 
 @Composable
 fun SettingsPane(
@@ -71,6 +72,8 @@ fun SettingsPane(
     var showSyncInterval by remember { mutableStateOf(value = false) }
 
     LaunchedEffect(key1 = updatedSettingsUiModel.logoutStatus) {
+        if (updatedSettingsUiModel.logoutStatus == null) return@LaunchedEffect
+        delay(100)
         if (updatedSettingsUiModel.logoutStatus == true) {
             onLogoutSuccessful()
             return@LaunchedEffect

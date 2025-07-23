@@ -10,6 +10,7 @@ interface UserRepository {
     suspend fun saveUser(user: User)
     suspend fun saveBearToken(token: BearerTokens)
     suspend fun deleteUser()
+    suspend fun reset()
 }
 
 class UserRepositoryImpl(
@@ -19,11 +20,10 @@ class UserRepositoryImpl(
 
     override suspend fun saveUser(user: User) = userDataSource.saveUser(user = user)
 
-    override suspend fun saveBearToken(token: BearerTokens) {
+    override suspend fun saveBearToken(token: BearerTokens) =
         userDataSource.saveBearToken(token = token)
-    }
 
-    override suspend fun deleteUser() {
-        userDataSource.deleteUser()
-    }
+    override suspend fun deleteUser() = userDataSource.deleteUser()
+
+    override suspend fun reset() = userDataSource.reset()
 }
