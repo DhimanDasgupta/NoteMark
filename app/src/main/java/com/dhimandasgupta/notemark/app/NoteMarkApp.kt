@@ -6,7 +6,6 @@ import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.dhimandasgupta.notemark.BuildConfig
 import com.dhimandasgupta.notemark.app.di.appModule
-import io.ktor.client.plugins.logging.LogLevel
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -15,19 +14,19 @@ class NoteMarkApp : Application() {
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG) {
-            // enableStrictMode()
+            enableStrictMode()
         }
 
         val config = Configuration.Builder()
             .setMinimumLoggingLevel(if (BuildConfig.DEBUG) android.util.Log.DEBUG else android.util.Log.ERROR)
             .build()
 
-        WorkManager.initialize(this, config)
+        WorkManager.initialize(context = this, configuration = config)
 
         startKoin {
             androidLogger()
-            androidContext(this@NoteMarkApp)
-            modules(appModule)
+            androidContext(androidContext = this@NoteMarkApp)
+            modules(modules = appModule)
         }
     }
 
@@ -36,7 +35,7 @@ class NoteMarkApp : Application() {
             StrictMode.VmPolicy.Builder()
                 .detectAll()
                 .penaltyLog()
-                .penaltyDeath()
+                //.penaltyDeath() // Koin causes crash on this
                 .build()
         )
 
@@ -44,7 +43,7 @@ class NoteMarkApp : Application() {
             StrictMode.ThreadPolicy.Builder()
                 .detectAll()
                 .penaltyLog()
-                .penaltyDeath()
+                //.penaltyDeath()  // Koin causes crash on this
                 .build()
         )
     }
