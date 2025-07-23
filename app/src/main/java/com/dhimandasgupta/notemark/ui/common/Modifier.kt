@@ -44,11 +44,11 @@ fun Modifier.lifecycleAwareDebouncedClickable(
     debounceIntervalMs: Long = 700L, // Default debounce interval
     onClick: () -> Unit
 ): Modifier = composed {
-    val currentOnClick by rememberUpdatedState(onClick)
-    var lastClickTime by remember { mutableLongStateOf(0L) }
-    var lifecycleAllowsClick by remember { mutableStateOf(owner.lifecycle.currentState.isAtLeast(activeState)) }
+    val currentOnClick by rememberUpdatedState(newValue = onClick)
+    var lastClickTime by remember { mutableLongStateOf(value = 0L) }
+    var lifecycleAllowsClick by remember { mutableStateOf(value = owner.lifecycle.currentState.isAtLeast(activeState)) }
 
-    DisposableEffect(owner, activeState) {
+    DisposableEffect(key1 = owner, key2 = activeState) {
         val observer = LifecycleEventObserver { _, event ->
             lifecycleAllowsClick = owner.lifecycle.currentState.isAtLeast(activeState)
         }

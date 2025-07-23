@@ -12,6 +12,7 @@ import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 @Immutable
 sealed interface NoteListState {
     val userName: String?
+
     data class NoteListStateWithNoNotes(
         override val userName: String? = null
     ) : NoteListState
@@ -20,22 +21,22 @@ sealed interface NoteListState {
         override val userName: String?,
         val notes: List<NoteEntity>,
         val longClickedNoteUuid: String = ""
-    ): NoteListState
+    ) : NoteListState
 }
 
 sealed interface NoteListAction {
-    data class NoteDelete(val uuid: String): NoteListAction
+    data class NoteDelete(val uuid: String) : NoteListAction
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NoteListStateMachine(
     private val userRepository: UserRepository,
     private val noteMarkRepository: NoteMarkRepository
-) : StateMachine<NoteListState, NoteListAction>(defaultNoteListState) {
+) : StateMachine<NoteListState, NoteListAction>(initialState = defaultNoteListState) {
     init {
         spec {
             inState<NoteListStateWithNoNotes> {
-                collectWhileInState(noteMarkRepository.getAllNotes()) { notes, state ->
+                collectWhileInState(flow = noteMarkRepository.getAllNotes()) { notes, state ->
                     if (notes.isEmpty()) {
                         state.noChange()
                     } else {
@@ -47,7 +48,7 @@ class NoteListStateMachine(
                         }
                     }
                 }
-                collectWhileInState(userRepository.getUser()) { user, state ->
+                collectWhileInState(flow = userRepository.getUser()) { user, state ->
                     state.mutate {
                         copy(
                             userName = user?.userName ?: ""
@@ -57,7 +58,7 @@ class NoteListStateMachine(
             }
 
             inState<NoteListStateWithNotes> {
-                collectWhileInState(noteMarkRepository.getAllNotes()) { notes, state ->
+                collectWhileInState(flow = noteMarkRepository.getAllNotes()) { notes, state ->
                     if (notes.isNotEmpty()) {
                         state.mutate {
                             NoteListStateWithNotes(
@@ -73,7 +74,7 @@ class NoteListStateMachine(
                         }
                     }
                 }
-                collectWhileInState(userRepository.getUser()) { user, state ->
+                collectWhileInState(flow = userRepository.getUser()) { user, state ->
                     state.mutate {
                         copy(
                             userName = user?.userName ?: ""

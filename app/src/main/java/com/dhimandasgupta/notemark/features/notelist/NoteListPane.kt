@@ -49,7 +49,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.common.convertIsoToRelativeYearFormat
 import com.dhimandasgupta.notemark.common.extensions.formatUserName
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
@@ -87,11 +86,11 @@ fun NoteListPane(
     onProfileClicked: () -> Unit = {},
 ) {
     val updateNoteListUiModel by rememberUpdatedState(newValue = noteListUiModel)
-    var noteDeleteId by remember { mutableStateOf<String?>(null) }
+    var noteDeleteId by remember { mutableStateOf<String?>(value = null) }
 
     Box(
         modifier = modifier
-            .background(color = colorResource(R.color.splash_blue_background))
+            .background(color = colorResource(id = R.color.splash_blue_background))
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
@@ -115,7 +114,7 @@ fun NoteListPane(
                 noteId = updateNoteListUiModel.noteLongClickedUuid,
                 onDelete = { _ ->
                     noteDeleteId?.let { id ->
-                        noteListAction(NoteListAction.NoteDelete(id))
+                        noteListAction(NoteListAction.NoteDelete(uuid = id))
                     }
                     noteDeleteId = null
                 },
@@ -149,6 +148,7 @@ private fun NoteListValidPane(
             onSettingsClicked = onSettingsClicked,
             onProfileClicked = onProfileClicked
         )
+
         else -> NoteListWithNotes(
             modifier = Modifier,
             windowSizeClass = windowSizeClass,
@@ -195,14 +195,14 @@ fun NoteListWithNotes(
     onProfileClicked: () -> Unit = {},
 ) {
     val layoutType = getDeviceLayoutType(windowSizeClass)
-    val columnCount = remember(layoutType) {
+    val columnCount = remember(key1 = layoutType) {
         when (layoutType) {
             DeviceLayoutType.PHONE_PORTRAIT -> 2
             else -> 3
         }
     }
 
-    val maxLength = remember(layoutType) {
+    val maxLength = remember(key1 = layoutType) {
         when (layoutType) {
             DeviceLayoutType.TABLET_LAYOUT -> 250
             else -> 150
@@ -224,10 +224,10 @@ fun NoteListWithNotes(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    start = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                    start = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateLeftPadding(LayoutDirection.Ltr),
-                    end = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                    end = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateEndPadding(LayoutDirection.Ltr)
                 )
@@ -242,7 +242,7 @@ fun NoteListWithNotes(
             )
             NoteMarkFAB(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(all = 16.dp)
                     .align(Alignment.BottomEnd),
                 onClick = onFabClicked,
             )
@@ -263,13 +263,13 @@ private fun NoteListPaneToolbar(
             .background(color = colorScheme.surfaceContainerLowest)
             .fillMaxWidth()
             .padding(
-                start = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                start = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateLeftPadding(LayoutDirection.Ltr),
-                top = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                top = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateTopPadding(),
-                end = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                end = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateEndPadding(LayoutDirection.Ltr)
             )
@@ -283,20 +283,20 @@ private fun NoteListPaneToolbar(
         Text(
             text = toolbarTitle,
             style = typography.titleMedium,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(weight = 1f)
         )
 
         SafeIconButton(
             onClick = onSettingsClicked
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_settings),
+                painter = painterResource(id = R.drawable.ic_settings),
                 contentDescription = "Settings",
                 modifier = Modifier.requiredSize(size = 48.dp)
             )
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(width = 16.dp))
 
         NoteMarkToolbarButton(
             title = userName,
@@ -331,17 +331,18 @@ private fun NoNotes(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .wrapContentSize()
-                    .padding(16.dp)
+                    .padding(all = 16.dp)
             ) {
                 ThreeBouncingDots(
                     modifier = Modifier
                         .padding(all = 16.dp)
                         .wrapContentSize(),
-                    dotColor1 = colorResource(R.color.splash_blue).copy(alpha = 0.5f),
-                    dotColor2 = colorResource(R.color.splash_blue).copy(alpha = 0.75f),
-                    dotColor3 = colorResource(R.color.splash_blue).copy(alpha = 1.0f)
+                    dotColor1 = colorResource(id = R.color.splash_blue).copy(alpha = 0.5f),
+                    dotColor2 = colorResource(id = R.color.splash_blue).copy(alpha = 0.75f),
+                    dotColor3 = colorResource(id = R.color.splash_blue).copy(alpha = 1.0f)
                 )
             }
+
             else -> Text(
                 text = "You’ve got an empty board, \n let’s place your first note on it!",
                 style = typography.titleSmall,
@@ -350,9 +351,10 @@ private fun NoNotes(
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(
-                        WindowInsets.displayCutout.union(WindowInsets.statusBars).union(
-                            WindowInsets.navigationBars
-                        ).asPaddingValues()
+                        paddingValues = WindowInsets.displayCutout.union(insets = WindowInsets.statusBars)
+                            .union(
+                                insets = WindowInsets.navigationBars
+                            ).asPaddingValues()
                     )
                     .padding(vertical = 96.dp, horizontal = 32.dp)
             )
@@ -360,7 +362,7 @@ private fun NoNotes(
 
         NoteMarkFAB(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(all = 16.dp)
                 .align(Alignment.BottomEnd),
             onClick = onFabClicked,
         )
@@ -378,9 +380,9 @@ private fun NoteGrid(
 ) {
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(count = columnCount),
-        contentPadding = PaddingValues(8.dp),
+        contentPadding = PaddingValues(all = 8.dp),
         verticalItemSpacing = 8.dp,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
         modifier = modifier.fillMaxSize()
     ) {
         if (noteListUiModel.showSyncProgress) {
@@ -393,9 +395,9 @@ private fun NoteGrid(
                     modifier = Modifier
                         .padding(all = 16.dp)
                         .wrapContentSize(),
-                    dotColor1 = colorResource(R.color.splash_blue).copy(alpha = 0.5f),
-                    dotColor2 = colorResource(R.color.splash_blue).copy(alpha = 0.75f),
-                    dotColor3 = colorResource(R.color.splash_blue).copy(alpha = 1.0f)
+                    dotColor1 = colorResource(id = R.color.splash_blue).copy(alpha = 0.5f),
+                    dotColor2 = colorResource(id = R.color.splash_blue).copy(alpha = 0.75f),
+                    dotColor3 = colorResource(id = R.color.splash_blue).copy(alpha = 1.0f)
                 )
             }
         }
@@ -447,15 +449,15 @@ private fun NoteItem(
                 onClick = { onNoteClicked(note.uuid) },
                 onLongClick = { onNoteLongClicked(note.uuid) }
             )
-            .padding(16.dp)
+            .padding(all = 16.dp)
     ) {
         Text(
-            text = convertIsoToRelativeYearFormat(note.lastEditedAt),
+            text = note.lastEditedAt,
             style = typography.bodyMedium,
             color = colorScheme.primary
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(height = 8.dp))
 
         LimitedText(
             fullText = note.title,
@@ -464,7 +466,7 @@ private fun NoteItem(
             targetCharacterCount = maxLength
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(height = 4.dp))
 
         LimitedText(
             fullText = note.content,

@@ -1,5 +1,6 @@
 package com.dhimandasgupta.notemark.features.launcher
 
+import android.app.Activity
 import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.work.Constraints
@@ -50,20 +51,22 @@ class AppStateMachine(
     private val userRepository: UserRepository,
     private val syncRepository: SyncRepository,
     private val noteMarkRepository: NoteMarkRepository
-) : StateMachine<AppState, AppAction>(defaultAppState) {
+) : StateMachine<AppState, AppAction>(initialState = defaultAppState) {
     private var cachedUser: User? = null
     private var cachedSync: Sync? = null
 
     init {
+        if (applicationContext is Activity) throw IllegalStateException("Context cannot be an Activity")
+
         spec {
             inState<AppState.NotLoggedIn> {
-                condition({ cachedUser != null }) {
+                condition(condition = { cachedUser != null }) {
                     onEnter { state ->
                         state.override { AppState.LoggedIn(user = cachedUser!!, sync = cachedSync) }
                     }
                 }
                 // All Flows while in the app state should be collected here
-                collectWhileInState(userRepository.getUser()) { user, state ->
+                collectWhileInState(flow = userRepository.getUser()) { user, state ->
                     user?.let { cachedUser = it }
                     cachedUser?.let { user ->
                         state.override {
@@ -74,21 +77,21 @@ class AppStateMachine(
                         }
                     } ?: state.noChange()
                 }
-                collectWhileInState(applicationContext.observeConnectivityAsFlow()) { connected, state ->
+                collectWhileInState(flow = applicationContext.observeConnectivityAsFlow()) { connected, state ->
                     state.mutate { state.snapshot.copy(connectionState = connected) }
                 }
             }
 
             inState<AppState.LoggedIn> {
-                condition( { cachedSync != null } ) {
+                condition(condition = { cachedSync != null } ) {
                     onEnterEffect { state ->
                         val sync = cachedSync ?: syncRepository.getSync().first()
-                        if (getDifferenceFromTimestampInMinutes(sync.lastUploadedTime) > 5L && !sync.syncing) {
+                        if (getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString = sync.lastUploadedTime) > 5L && !sync.syncing) {
                             applicationContext.cancelPreviousAndTriggerNewWork()
                         }
                     }
                 }
-                collectWhileInState(syncRepository.getSync()) { sync, state ->
+                collectWhileInState(flow = syncRepository.getSync()) { sync, state ->
                     cachedSync = sync
                     state.mutate { state.snapshot.copy(sync = sync) }
                 }
@@ -108,11 +111,11 @@ class AppStateMachine(
                     applicationContext.cancelPreviousAndTriggerNewWork(duration = duration)
 
                     val updatedSync = state.snapshot.sync?.toBuilder()?.setSyncDuration(action.syncDuration)?.build()
-                    syncRepository.saveSyncDuration(action.syncDuration)
+                    syncRepository.saveSyncDuration(syncDuration = action.syncDuration)
                     state.mutate { state.snapshot.copy(sync = updatedSync) }
                 }
                 onActionEffect<AppAction.DeleteLocalNotesOnLogout> { action, state ->
-                    syncRepository.saveDeleteLocalNotesOnLogout(action.deleteOnLogout)
+                    syncRepository.saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout = action.deleteOnLogout)
                 }
                 on<AppAction.AppLogout> { _, state ->
                     noteMarkRepository.logout(
@@ -142,7 +145,7 @@ class AppStateMachine(
 }
 
 private fun Context.cancelPreviousAndTriggerNewWork(duration: Duration = Duration.ZERO) {
-    val workManager = WorkManager.getInstance(this)
+    val workManager = WorkManager.getInstance(context = this)
     workManager.cancelAllWork()
 
     val constraints = Constraints.Builder()

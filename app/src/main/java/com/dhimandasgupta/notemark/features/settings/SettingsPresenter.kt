@@ -14,14 +14,22 @@ import com.dhimandasgupta.notemark.features.launcher.AppState
 import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 @Immutable
 data class SettingsUiModel(
-    val syncIntervals: ImmutableList<String> = persistentListOf("Manual", "15 Minutes", "30 Minutes", "1 Hour"),
+    val syncIntervals: ImmutableList<String> = persistentListOf(
+        "Manual",
+        "15 Minutes",
+        "30 Minutes",
+        "1 Hour"
+    ),
     val selectedSyncInterval: String = "Manual",
     val lastSynced: String = "--",
     val deleteLocalNotesOnLogout: Boolean = false,
@@ -40,40 +48,48 @@ class SettingsPresenter(
     @Composable
     fun uiModel(): SettingsUiModel {
         val scope = rememberCoroutineScope()
-        var logoutUiModel by remember { mutableStateOf(SettingsUiModel.Empty) }
+        var logoutUiModel by remember { mutableStateOf(value = SettingsUiModel.Empty) }
 
         // Receives the State from the StateMachine
         LifecycleStartEffect(key1 = Unit) {
             scope.launch {
-                appStateMachine.state.onStart { AppStateMachine.defaultAppState }.collect { appState ->
-                    logoutUiModel = logoutUiModel.copy(
-                        logoutStatus = when (appState) {
-                            is AppState.NotLoggedIn -> true
-                            else -> null
-                        },
-                        lastSynced = when (appState) {
-                            is AppState.LoggedIn -> appState.sync?.lastUploadedTime?.let { time ->
-                                convertNoteTimestampToReadableFormat(time)
-                            } ?: "--"
-                            else -> "--"
-                        },
-                        selectedSyncInterval = when (appState) {
-                            is AppState.LoggedIn -> appState.sync?.syncDuration?.let {
-                                when (it.ordinal) {
-                                    3 -> "15 Minutes"
-                                    4 -> "30 Minutes"
-                                    5 -> "1 Hour"
-                                    else -> "Manual"
-                                }
-                            } ?: "Manual"
-                            else -> "Manual"
-                        },
-                        deleteLocalNotesOnLogout = when (appState) {
-                            is AppState.LoggedIn -> appState.sync?.deleteLocalNotesOnLogout ?: false
-                            else -> false
-                        },
-                    )
-                }
+                appStateMachine.state
+                    .flowOn(Dispatchers.Default)
+                    .catch { /* TODO if needed */ }
+                    .onStart { AppStateMachine.defaultAppState }
+                    .collect { appState ->
+                        logoutUiModel = logoutUiModel.copy(
+                            logoutStatus = when (appState) {
+                                is AppState.NotLoggedIn -> true
+                                else -> null
+                            },
+                            lastSynced = when (appState) {
+                                is AppState.LoggedIn -> appState.sync?.lastUploadedTime?.let { time ->
+                                    convertNoteTimestampToReadableFormat(isoOffsetDateTimeString = time)
+                                } ?: "--"
+
+                                else -> "--"
+                            },
+                            selectedSyncInterval = when (appState) {
+                                is AppState.LoggedIn -> appState.sync?.syncDuration?.let {
+                                    when (it.ordinal) {
+                                        3 -> "15 Minutes"
+                                        4 -> "30 Minutes"
+                                        5 -> "1 Hour"
+                                        else -> "Manual"
+                                    }
+                                } ?: "Manual"
+
+                                else -> "Manual"
+                            },
+                            deleteLocalNotesOnLogout = when (appState) {
+                                is AppState.LoggedIn -> appState.sync?.deleteLocalNotesOnLogout
+                                    ?: false
+
+                                else -> false
+                            },
+                        )
+                    }
             }
             onStopOrDispose { scope.cancel() }
         }
@@ -92,7 +108,7 @@ class SettingsPresenter(
     }
 
     fun processEvent(event: AppAction) {
-        events.tryEmit(event)
+        events.tryEmit(value = event)
     }
 }
 

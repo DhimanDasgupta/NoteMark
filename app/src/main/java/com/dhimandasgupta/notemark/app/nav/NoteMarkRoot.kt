@@ -87,22 +87,22 @@ private fun NavGraphBuilder.noteMarkGraph(
                         Toast.makeText(context, "Oops!!! Please login first to get started", Toast.LENGTH_LONG).show()
                         return@LauncherPane
                     }
-                    navController.navigate(NoteMarkDestination.NoteListPane) {
-                        popUpTo(NoteMarkDestination.LauncherPane) {
+                    navController.navigate(route = NoteMarkDestination.NoteListPane) {
+                        popUpTo(route = NoteMarkDestination.LauncherPane) {
                             inclusive = true
                         }
                     }
                 },
                 navigateToLogin = {
-                    navController.navigate(NoteMarkDestination.LoginPane) {
-                        popUpTo(NoteMarkDestination.LauncherPane) {
+                    navController.navigate(route = NoteMarkDestination.LoginPane) {
+                        popUpTo(route = NoteMarkDestination.LauncherPane) {
                             inclusive = true
                         }
                     }
                 },
                 navigateToList = {
-                    navController.navigate(NoteMarkDestination.NoteListPane) {
-                        popUpTo(NoteMarkDestination.LauncherPane) {
+                    navController.navigate(route = NoteMarkDestination.NoteListPane) {
+                        popUpTo(route = NoteMarkDestination.LauncherPane) {
                             inclusive = true
                         }
                     }
@@ -122,15 +122,15 @@ private fun NavGraphBuilder.noteMarkGraph(
             LoginPane(
                 windowSizeClass = windowSizeClass,
                 navigateToAfterLogin = {
-                    navController.navigate(NoteMarkDestination.NoteListPane) {
-                        popUpTo(NoteMarkDestination.LoginPane) {
+                    navController.navigate(route = NoteMarkDestination.NoteListPane) {
+                        popUpTo(route = NoteMarkDestination.LoginPane) {
                             inclusive = true
                         }
                     }
                 },
                 navigateToRegistration = {
-                    navController.navigate(NoteMarkDestination.RegistrationPane) {
-                        popUpTo(NoteMarkDestination.LoginPane) {
+                    navController.navigate(route = NoteMarkDestination.RegistrationPane) {
+                        popUpTo(route = NoteMarkDestination.LoginPane) {
                             inclusive = true
                         }
                     }
@@ -153,8 +153,8 @@ private fun NavGraphBuilder.noteMarkGraph(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
                 navigateToLogin = {
-                    navController.navigate(NoteMarkDestination.LoginPane) {
-                        popUpTo(NoteMarkDestination.RegistrationPane) {
+                    navController.navigate(route = NoteMarkDestination.LoginPane) {
+                        popUpTo(route = NoteMarkDestination.RegistrationPane) {
                             inclusive = true
                         }
                     }
@@ -178,13 +178,13 @@ private fun NavGraphBuilder.noteMarkGraph(
                 noteListUiModel = noteListUiModel,
                 noteListAction = noteListAction,
                 onNoteClicked = { uuid ->
-                    navController.navigate(route = NoteMarkDestination.NoteEditPane(uuid))
+                    navController.navigate(route = NoteMarkDestination.NoteEditPane(noteId = uuid))
                 },
                 onFabClicked = {
-                    navController.navigate(NoteMarkDestination.NoteCreatePane)
+                    navController.navigate(route = NoteMarkDestination.NoteCreatePane)
                 },
                 onSettingsClicked = {
-                    navController.navigate(NoteMarkDestination.SettingsPane)
+                    navController.navigate(route = NoteMarkDestination.SettingsPane)
                 },
                 onProfileClicked = {}
             )
@@ -270,12 +270,12 @@ private fun NavGraphBuilder.noteMarkGraph(
                 settingsAction = settingsAction,
                 onBackClicked = { navController.navigateUp() },
                 onLogoutSuccessful = {
-                    navController.navigate(NoteMarkDestination.LauncherPane) {
+                    navController.navigate(route = NoteMarkDestination.LauncherPane) {
                         launchSingleTop = true
                     }
                 },
                 onDeleteNoteCheckChanged = {
-                    settingsAction(AppAction.DeleteLocalNotesOnLogout(!settingsUiModel.deleteLocalNotesOnLogout))
+                    settingsAction(AppAction.DeleteLocalNotesOnLogout(deleteOnLogout = !settingsUiModel.deleteLocalNotesOnLogout))
                 },
                 onLogoutClicked = {
                     settingsAction(AppAction.AppLogout)
@@ -306,7 +306,7 @@ object NoteMarkDestination {
 
     @Serializable
     data class NoteEditPane(
-        val noteId: String = ""
+        val noteId: String
     )
 
     @Serializable

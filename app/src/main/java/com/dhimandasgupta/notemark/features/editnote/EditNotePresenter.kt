@@ -8,9 +8,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleStartEffect
+import com.dhimandasgupta.notemark.common.convertIsoToRelativeTimeFormat
 import com.dhimandasgupta.notemark.database.NoteEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -44,23 +48,32 @@ class EditNotePresenter(
         val scope = rememberCoroutineScope()
         var editNoteUiModel by remember(
             key1 = editNoteStateMachine.state
-        ) { mutableStateOf(EditNoteUiModel.Empty) }
+        ) { mutableStateOf(value = EditNoteUiModel.Empty) }
 
         // Receives the State from the StateMachine
         LifecycleStartEffect(
             key1 = Unit
         ) {
             scope.launch {
-                editNoteStateMachine.state.onStart { EditNoteStateMachine.defaultEditNoteState }.collect { editNoteState ->
-                    editNoteUiModel = editNoteUiModel.copy(
-                        title = editNoteState.title,
-                        content = editNoteState.content,
-                        noteEntity = editNoteState.noteEntity,
-                        saved = editNoteState.saved,
-                        editEnable = editNoteState.mode == Mode.EditMode,
-                        isReaderMode = editNoteState.mode == Mode.ReaderMode
-                    )
-                }
+                editNoteStateMachine.state
+                    .flowOn(Dispatchers.Default)
+                    .catch { /* TODO if needed */  }
+                    .onStart { EditNoteStateMachine.defaultEditNoteState }
+                    .collect { editNoteState ->
+                        editNoteUiModel = editNoteUiModel.copy(
+                            title = editNoteState.title,
+                            content = editNoteState.content,
+                            noteEntity = editNoteState.noteEntity?.copy(
+                                createdAt = convertIsoToRelativeTimeFormat(isoOffsetDateTimeString = editNoteState.noteEntity.createdAt),
+                                lastEditedAt = convertIsoToRelativeTimeFormat(
+                                    isoOffsetDateTimeString = editNoteState.noteEntity.lastEditedAt
+                                )
+                            ),
+                            saved = editNoteState.saved,
+                            editEnable = editNoteState.mode == Mode.EditMode,
+                            isReaderMode = editNoteState.mode == Mode.ReaderMode
+                        )
+                    }
             }
             onStopOrDispose { scope.cancel() }
         }
@@ -79,6 +92,6 @@ class EditNotePresenter(
     }
 
     fun processEvent(event: EditNoteAction) {
-        events.tryEmit(event)
+        events.tryEmit(value = event)
     }
 }

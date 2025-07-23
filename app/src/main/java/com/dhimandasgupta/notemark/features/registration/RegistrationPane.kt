@@ -88,12 +88,12 @@ fun RegistrationPane(
 
     Box(
         modifier = modifier
-            .background(color = colorResource(R.color.splash_blue))
+            .background(color = colorResource(id = R.color.splash_blue))
             .fillMaxSize()
     ) {
         val layoutType = getDeviceLayoutType(windowSizeClass)
 
-        when(layoutType) {
+        when (layoutType) {
             DeviceLayoutType.PHONE_LANDSCAPE -> {
                 Row(
                     modifier = Modifier
@@ -101,21 +101,21 @@ fun RegistrationPane(
                             top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
                         )
                         .clip(
-                            RoundedCornerShape(
+                            shape = RoundedCornerShape(
                                 topStart = 16.dp,
                                 topEnd = 16.dp
                             )
                         )
-                        .background(colorScheme.surfaceContainerLowest)
+                        .background(color = colorScheme.surfaceContainerLowest)
                         .fillMaxSize()
                         .padding(all = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
                     verticalAlignment = Alignment.Top
                 ) {
                     LeftPane(
                         modifier = Modifier
                             .safeContentPadding()
-                            .fillMaxWidth(0.4f)
+                            .fillMaxWidth(fraction = 0.4f)
                             .wrapContentHeight(align = Alignment.Top)
                     )
                     RightPane(
@@ -124,21 +124,22 @@ fun RegistrationPane(
                                 top = WindowInsets.systemBars.asPaddingValues()
                                     .calculateTopPadding(),
                                 start = WindowInsets
-                                    .systemBars.union(WindowInsets.displayCutout)
+                                    .systemBars.union(insets = WindowInsets.displayCutout)
                                     .asPaddingValues()
                                     .calculateLeftPadding(LayoutDirection.Ltr),
                                 end = WindowInsets
-                                    .systemBars.union(WindowInsets.displayCutout)
+                                    .systemBars.union(insets = WindowInsets.displayCutout)
                                     .asPaddingValues()
                                     .calculateRightPadding(LayoutDirection.Ltr)
                             )
-                            .verticalScroll(rememberScrollState()),
+                            .verticalScroll(state = rememberScrollState()),
                         navigateToLogin = navigateToLogin,
                         registrationUiModel = updatedRegistrationUiModel,
                         registrationAction = registrationAction
                     )
                 }
             }
+
             DeviceLayoutType.TABLET_LAYOUT -> {
                 Column(
                     modifier = Modifier
@@ -150,20 +151,20 @@ fun RegistrationPane(
                                 .calculateRightPadding(LayoutDirection.Ltr)
                         )
                         .clip(
-                            RoundedCornerShape(
+                            shape = RoundedCornerShape(
                                 topStart = 16.dp,
                                 topEnd = 16.dp
                             )
                         )
-                        .background(colorScheme.surfaceContainerLowest)
+                        .background(color = colorScheme.surfaceContainerLowest)
                         .fillMaxSize()
                         .padding(start = 128.dp, end = 128.dp, top = 128.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                        .verticalScroll(state = rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(space = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     LeftPane()
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(height = 16.dp))
                     RightPane(
                         modifier = Modifier.fillMaxWidth(),
                         navigateToLogin = navigateToLogin,
@@ -172,6 +173,7 @@ fun RegistrationPane(
                     )
                 }
             }
+
             else -> {
                 Column(
                     modifier = Modifier
@@ -183,19 +185,19 @@ fun RegistrationPane(
                                 .calculateRightPadding(LayoutDirection.Ltr)
                         )
                         .clip(
-                            RoundedCornerShape(
+                            shape = RoundedCornerShape(
                                 topStart = 16.dp,
                                 topEnd = 16.dp
                             )
                         )
-                        .background(colorScheme.surfaceContainerLowest)
+                        .background(color = colorScheme.surfaceContainerLowest)
                         .fillMaxSize()
                         .padding(all = 16.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .verticalScroll(state = rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(space = 8.dp)
                 ) {
                     LeftPane()
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(height = 16.dp))
                     RightPane(
                         navigateToLogin = navigateToLogin,
                         registrationUiModel = updatedRegistrationUiModel,
@@ -211,7 +213,7 @@ fun RegistrationPane(
 private fun LeftPane(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(space = 8.dp)
     ) {
         Text(
             text = "Create account",
@@ -237,37 +239,41 @@ private fun RightPane(
     val focusManager = LocalFocusManager.current
     val context = LocalActivity.current
 
-    LaunchedEffect(Unit) { focusManager.clearFocus() }
+    LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
-    LaunchedEffect(registrationUiModel.registrationSuccess) {
+    LaunchedEffect(key1 = registrationUiModel.registrationSuccess) {
         if (registrationUiModel.registrationSuccess == null) return@LaunchedEffect
         registrationAction(RegistrationChangeStatusConsumed)
-        Toast.makeText(context, if (registrationUiModel.registrationSuccess) "Registration successful" else "Registration failed", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            context,
+            if (registrationUiModel.registrationSuccess) "Registration successful" else "Registration failed",
+            Toast.LENGTH_SHORT
+        ).show()
         navigateToLogin()
     }
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(space = 16.dp)
     ) {
-        var userName by rememberSaveable { mutableStateOf(registrationUiModel.userName) }
-        LaunchedEffect(userName) { registrationAction(UserNameEntered(userName)) }
+        var userName by rememberSaveable { mutableStateOf(value = registrationUiModel.userName) }
+        LaunchedEffect(key1 = userName) { registrationAction(UserNameEntered(userName)) }
 
         NoteMarkTextField(
             modifier = Modifier.fillMaxWidth(),
             label = "Username",
             enteredText = userName,
             hintText = "John.doe",
-            onFocusGained = { registrationAction(UserNameFiledInFocus(registrationUiModel.userName)) },
-            onFocusLost = { registrationAction(UserNameFiledLostFocus(registrationUiModel.userName)) },
+            onFocusGained = { registrationAction(UserNameFiledInFocus(userName = registrationUiModel.userName)) },
+            onFocusLost = { registrationAction(UserNameFiledLostFocus(userName = registrationUiModel.userName)) },
             explanationText = registrationUiModel.userNameExplanation ?: "",
             errorText = registrationUiModel.userNameError ?: "",
             onTextChanged = { userName = it },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
 
-        var email by rememberSaveable { mutableStateOf(registrationUiModel.email) }
-        LaunchedEffect(email) { registrationAction(EmailEntered(email)) }
+        var email by rememberSaveable { mutableStateOf(value = registrationUiModel.email) }
+        LaunchedEffect(key1 = email) { registrationAction(EmailEntered(email)) }
 
         NoteMarkTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -280,7 +286,7 @@ private fun RightPane(
         )
 
         var password by rememberSaveable { mutableStateOf(registrationUiModel.password) }
-        LaunchedEffect(password) { registrationAction(PasswordEntered(password)) }
+        LaunchedEffect(key1 = password) { registrationAction(PasswordEntered(password)) }
 
         NoteMarkPasswordTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -289,13 +295,19 @@ private fun RightPane(
             hintText = "Password",
             explanationText = registrationUiModel.passwordExplanation ?: "",
             errorText = registrationUiModel.passwordError ?: "",
-            onFocusGained = { registrationAction(PasswordFiledInFocus(registrationUiModel.password)) },
+            onFocusGained = { registrationAction(PasswordFiledInFocus(password = registrationUiModel.password)) },
             onTextChanged = { password = it },
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
 
-        var repeatPassword by rememberSaveable { mutableStateOf(registrationUiModel.repeatPassword) }
-        LaunchedEffect(repeatPassword) { registrationAction(RepeatPasswordEntered(repeatPassword)) }
+        var repeatPassword by rememberSaveable { mutableStateOf(value = registrationUiModel.repeatPassword) }
+        LaunchedEffect(key1 = repeatPassword) {
+            registrationAction(
+                RepeatPasswordEntered(
+                    repeatPassword
+                )
+            )
+        }
 
         NoteMarkPasswordTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -310,14 +322,14 @@ private fun RightPane(
                 }
                 focusManager.moveFocus(FocusDirection.Exit)
                 keyboardController?.hide()
-                focusManager.clearFocus(true)
+                focusManager.clearFocus(force = true)
             }
         )
 
         NoteMarkButton(
             onClick = {
                 keyboardController?.hide()
-                focusManager.clearFocus(true)
+                focusManager.clearFocus(force = true)
                 registrationAction(RegisterClicked)
             },
             modifier = Modifier
@@ -334,16 +346,18 @@ private fun RightPane(
             text = "Already have and account?",
             style = typography.titleSmall,
             fontWeight = FontWeight.Normal,
-            modifier = Modifier.fillMaxSize().lifecycleAwareDebouncedClickable {
-                navigateToLogin()
-            },
+            modifier = Modifier
+                .fillMaxSize()
+                .lifecycleAwareDebouncedClickable {
+                    navigateToLogin()
+                },
             textAlign = TextAlign.Center,
             color = colorScheme.primary
         )
 
         Spacer(
             modifier = Modifier
-                .height(32.dp)
+                .height(height = 32.dp)
                 .imePadding()
         )
     }

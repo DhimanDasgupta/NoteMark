@@ -43,13 +43,13 @@ sealed interface RegistrationAction {
     data class PasswordFiledInFocus(val password: String) : RegistrationAction
     data class RepeatPasswordEntered(val repeatPassword: String) : RegistrationAction
     data object RegisterClicked : RegistrationAction
-    data object RegistrationChangeStatusConsumed: RegistrationAction
+    data object RegistrationChangeStatusConsumed : RegistrationAction
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RegistrationStateMachine(
     val noteMarkApi: NoteMarkApi
-) : StateMachine<RegistrationState, RegistrationAction>(defaultRegistrationState) {
+) : StateMachine<RegistrationState, RegistrationAction>(initialState = defaultRegistrationState) {
     init {
         spec {
             inState<RegistrationState> {
@@ -138,12 +138,13 @@ class RegistrationStateMachine(
 
                     if (modifiedState.emailError?.isNotEmpty() == true
                         && modifiedState.passwordError?.isNotEmpty() == true
-                        && modifiedState.repeatPasswordError?.isNotEmpty() == true) {
+                        && modifiedState.repeatPasswordError?.isNotEmpty() == true
+                    ) {
                         return@on state.mutate { modifiedState }
                     }
 
                     noteMarkApi.register(
-                        RegisterRequest(
+                        request = RegisterRequest(
                             username = state.snapshot.userName,
                             email = state.snapshot.email,
                             password = state.snapshot.password

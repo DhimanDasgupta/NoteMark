@@ -25,7 +25,7 @@ sealed interface AddNoteAction {
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
 class AddNoteStateMachine(
     val noteMarkRepository: NoteMarkRepository
-) : StateMachine<AddNoteState, AddNoteAction>(defaultAddNoteState) {
+) : StateMachine<AddNoteState, AddNoteAction>(initialState = defaultAddNoteState) {
     init {
         spec {
             inState<AddNoteState> {

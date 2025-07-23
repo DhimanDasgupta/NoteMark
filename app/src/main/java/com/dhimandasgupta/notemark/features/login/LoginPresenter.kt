@@ -8,8 +8,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleStartEffect
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 @Immutable
@@ -34,21 +37,24 @@ class LoginPresenter(
     @Composable
     fun uiModel(): LoginUiModel {
         val scope = rememberCoroutineScope()
-        var loginUiModel by remember { mutableStateOf(LoginUiModel.Empty) }
+        var loginUiModel by remember { mutableStateOf(value = LoginUiModel.Empty) }
 
         // Receives the State from the StateMachine
         LifecycleStartEffect(key1 = Unit) {
             scope.launch {
-                loginStateMachine.state.collect { loginState ->
-                    loginUiModel = LoginUiModel(
-                        email = loginState.email,
-                        password = loginState.password,
-                        emailError = loginState.emailError,
-                        passwordError = loginState.passwordError,
-                        loginEnabled = loginState.loginEnabled,
-                        loginSuccess = loginState.loginSuccess
-                    )
-                }
+                loginStateMachine.state
+                    .flowOn(Dispatchers.Default)
+                    .catch { /* TODO if needed */  }
+                    .collect { loginState ->
+                        loginUiModel = LoginUiModel(
+                            email = loginState.email,
+                            password = loginState.password,
+                            emailError = loginState.emailError,
+                            passwordError = loginState.passwordError,
+                            loginEnabled = loginState.loginEnabled,
+                            loginSuccess = loginState.loginSuccess
+                        )
+                    }
             }
             onStopOrDispose { scope.cancel() }
         }
@@ -67,6 +73,6 @@ class LoginPresenter(
     }
 
     fun processEvent(event: LoginAction) {
-        events.tryEmit(event)
+        events.tryEmit(value = event)
     }
 }

@@ -69,9 +69,9 @@ fun LauncherPane(
     navigateToLogin: () -> Unit = {},
     navigateToList: () -> Unit = {}
 ) {
-    val updatedLauncherUiModel by rememberUpdatedState(launcherUiModel)
+    val updatedLauncherUiModel by rememberUpdatedState(newValue = launcherUiModel)
 
-    LaunchedEffect(updatedLauncherUiModel) {
+    LaunchedEffect(key1 = updatedLauncherUiModel) {
         if (updatedLauncherUiModel.loggedInUser != null) {
             navigateToList()
             return@LaunchedEffect
@@ -80,11 +80,11 @@ fun LauncherPane(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(colorResource(R.color.splash_blue_background))
+            .background(color = colorResource(id = R.color.splash_blue_background))
     ) {
         val layoutType = getDeviceLayoutType(windowSizeClass)
 
-        when(layoutType) {
+        when (layoutType) {
             DeviceLayoutType.PHONE_PORTRAIT -> {
                 LandingPanePortrait(
                     navigateToLogin = navigateToLogin,
@@ -127,24 +127,26 @@ private fun LandingPanePortrait(
             painter = painterResource(id = R.drawable.bg_phone_portrait),
             contentDescription = null,
             contentScale = ContentScale.FillHeight,
-            modifier = modifier.aspectRatio(0.8f).align(Alignment.TopCenter)
+            modifier = modifier
+                .aspectRatio(ratio = 0.8f)
+                .align(Alignment.TopCenter)
         )
 
         ForegroundPane(
             modifier = modifier
                 .clip(
-                    RoundedCornerShape(
+                    shape = RoundedCornerShape(
                         topStart = 16.dp,
                         topEnd = 16.dp
                     )
                 )
-                .background(colorScheme.surface)
+                .background(color = colorScheme.surface)
                 .padding(
                     start = 16.dp,
                     top = 16.dp,
                     end = 16.dp,
                     bottom = WindowInsets
-                        .displayCutout.union(WindowInsets.navigationBars)
+                        .displayCutout.union(insets = WindowInsets.navigationBars)
                         .asPaddingValues()
                         .calculateBottomPadding()
                 ),
@@ -180,22 +182,22 @@ private fun LandingPaneLandscape(
                     align = Alignment.Center
                 )
                 .clip(
-                    RoundedCornerShape(
+                    shape = RoundedCornerShape(
                         topStart = 16.dp,
                         bottomStart = 16.dp
                     )
                 )
-                .background(colorScheme.surface)
+                .background(color = colorScheme.surface)
                 .padding(
                     start = 32.dp,
                     top = 32.dp,
                     end = WindowInsets
-                        .displayCutout.union(WindowInsets.navigationBars)
+                        .displayCutout.union(insets = WindowInsets.navigationBars)
                         .asPaddingValues()
                         .calculateRightPadding(LayoutDirection.Ltr),
                     bottom = 32.dp,
                 )
-                .fillMaxHeight(0.85f),
+                .fillMaxHeight(fraction = 0.85f),
             navigateToLogin = navigateToLogin,
             deviceLayoutType = deviceLayoutType,
             navigateToAfterLogin = navigateToAfterLogin
@@ -220,26 +222,26 @@ private fun LandingPaneTablet(
             contentDescription = null,
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .weight(1f)
-                .aspectRatio(0.5f)
+                .weight(weight = 1f)
+                .aspectRatio(ratio = 0.5f)
         )
 
         ForegroundPane(
             modifier = modifier
-                .fillMaxWidth(0.85f)
+                .fillMaxWidth(fraction = 0.85f)
                 .clip(
-                    RoundedCornerShape(
+                    shape = RoundedCornerShape(
                         topStart = 16.dp,
                         topEnd = 16.dp
                     )
                 )
-                .background(colorScheme.surface)
+                .background(color = colorScheme.surface)
                 .padding(
                     start = 16.dp,
                     top = 16.dp,
                     end = 16.dp,
                     bottom = WindowInsets
-                        .navigationBars.union(WindowInsets.displayCutout)
+                        .navigationBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateBottomPadding()
                 ),
@@ -261,7 +263,7 @@ fun ForegroundPane(
         modifier = modifier
             .padding(top = 8.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = when(deviceLayoutType) {
+        horizontalAlignment = when (deviceLayoutType) {
             DeviceLayoutType.TABLET_LAYOUT -> Alignment.CenterHorizontally
             else -> Alignment.Start
         }
@@ -275,7 +277,7 @@ fun ForegroundPane(
                 .wrapContentSize(Alignment.Center)
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(height = 8.dp))
 
         Text(
             text = stringResource(R.string.landing_info_two),
@@ -287,7 +289,7 @@ fun ForegroundPane(
                 .wrapContentSize(Alignment.Center)
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(height = 24.dp))
 
         NoteMarkButton(
             onClick = navigateToAfterLogin,
@@ -304,7 +306,7 @@ fun ForegroundPane(
             )
         }
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(height = 8.dp))
 
         NoteMarkOutlinedButton(
             onClick = { navigateToLogin() },

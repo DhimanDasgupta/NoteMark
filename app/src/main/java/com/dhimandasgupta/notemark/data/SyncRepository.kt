@@ -18,17 +18,18 @@ class SyncRepositoryImpl(
 ) : SyncRepository {
     override fun getSync(): Flow<Sync> = noteSyncDataSource.getSync()
 
-    override suspend fun saveSyncing(isSyncing: Boolean) = noteSyncDataSource.saveSyncing(isSyncing)
+    override suspend fun saveSyncing(isSyncing: Boolean) =
+        noteSyncDataSource.saveSyncing(isSyncing = isSyncing)
 
     override suspend fun saveSyncDuration(syncDuration: Sync.SyncDuration) =
-        noteSyncDataSource.saveSyncDuration(syncDuration)
+        noteSyncDataSource.saveSyncDuration(syncDuration = syncDuration)
 
     override suspend fun saveLastDownloadedTime(downLoadedTime: String) =
-        noteSyncDataSource.saveLastDownloadedTime(downLoadedTime)
+        noteSyncDataSource.saveLastDownloadedTime(downLoadedTime = downLoadedTime)
 
     override suspend fun saveLastUploadedTime(uploadedTime: String) =
-        noteSyncDataSource.saveLastUploadedTime(uploadedTime)
+        noteSyncDataSource.saveLastUploadedTime(uploadedTime = uploadedTime)
 
     override suspend fun saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout: Boolean) =
-        noteSyncDataSource.saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout)
+        noteSyncDataSource.saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout = deleteLocalNotesOnLogout)
 }

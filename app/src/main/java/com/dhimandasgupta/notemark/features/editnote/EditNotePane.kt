@@ -21,9 +21,9 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -57,7 +57,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.common.convertIsoToRelativeTimeFormat
 import com.dhimandasgupta.notemark.common.extensions.lockToLandscape
 import com.dhimandasgupta.notemark.common.extensions.turnOffImmersiveMode
 import com.dhimandasgupta.notemark.common.extensions.turnOnImmersiveMode
@@ -90,12 +89,12 @@ fun EditNotePane(
     editNoteAction: (EditNoteAction) -> Unit = {},
     onCloseClicked: () -> Unit = {}
 ) {
-    val updatedEditNoteUiModel by rememberUpdatedState(editNoteUiModel)
+    val updatedEditNoteUiModel by rememberUpdatedState(newValue = editNoteUiModel)
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(updatedEditNoteUiModel.saved) {
+    LaunchedEffect(key1 = updatedEditNoteUiModel.saved) {
         if (updatedEditNoteUiModel.saved == true) {
             focusManager.clearFocus()
             keyboardController?.hide()
@@ -105,7 +104,7 @@ fun EditNotePane(
 
     LaunchedEffect(key1 = noteId) {
         if (noteId.isNotEmpty()) {
-            editNoteAction(EditNoteAction.LoadNote(noteId))
+            editNoteAction(EditNoteAction.LoadNote(uuid = noteId))
         }
     }
 
@@ -117,6 +116,7 @@ fun EditNotePane(
                 context?.turnOnImmersiveMode()
                 context?.lockToLandscape()
             }
+
             false -> {
                 context?.turnOffImmersiveMode()
                 context?.unlockOrientation()
@@ -153,7 +153,7 @@ fun EditNotePane(
                         else -> 0.85f
                     }
                 )
-                .fillMaxHeight(1f)
+                .fillMaxHeight(fraction = 1f)
                 .lifecycleAwareDebouncedClickable(
                     onClick = {
                         if (updatedEditNoteUiModel.isReaderMode) {
@@ -165,9 +165,9 @@ fun EditNotePane(
             editEnabled = updatedEditNoteUiModel.editEnable,
             titleText = updatedEditNoteUiModel.title,
             bodyText = updatedEditNoteUiModel.content,
-            dateCreated = convertIsoToRelativeTimeFormat(updatedEditNoteUiModel.noteEntity?.createdAt ?: ""),
-            lastEdited = convertIsoToRelativeTimeFormat(updatedEditNoteUiModel.noteEntity?.lastEditedAt ?: ""),
-            onTitleTextChanged =  { value -> editNoteAction(EditNoteAction.UpdateTitle(title = value)) },
+            dateCreated = updatedEditNoteUiModel.noteEntity?.createdAt ?: "",
+            lastEdited = updatedEditNoteUiModel.noteEntity?.lastEditedAt ?: "",
+            onTitleTextChanged = { value -> editNoteAction(EditNoteAction.UpdateTitle(title = value)) },
             onBodyTextChanged = { value -> editNoteAction(EditNoteAction.UpdateContent(content = value)) },
             onEditClicked = { editNoteAction(EditNoteAction.ModeChange(Mode.EditMode)) },
             onViewClicked = { editNoteAction(EditNoteAction.ModeChange(Mode.ReaderMode)) }
@@ -192,13 +192,13 @@ fun EditNoteToolbar(
                 .background(color = colorScheme.surfaceContainerLowest)
                 .fillMaxWidth()
                 .padding(
-                    start = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                    start = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateLeftPadding(LayoutDirection.Ltr) + 16.dp,
-                    top = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                    top = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateTopPadding() + 16.dp,
-                    end = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                    end = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateEndPadding(LayoutDirection.Ltr) + 16.dp
                 ),
@@ -209,7 +209,7 @@ fun EditNoteToolbar(
                 onClick = onCloseClicked
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_x),
+                    painter = painterResource(id = R.drawable.ic_x),
                     contentDescription = "Close Note",
                     tint = colorScheme.onSurfaceVariant,
                     modifier = Modifier
@@ -235,13 +235,13 @@ fun EditNoteToolbar(
                 .background(color = colorScheme.surfaceContainerLowest)
                 .fillMaxWidth()
                 .padding(
-                    start = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                    start = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateLeftPadding(LayoutDirection.Ltr) + 16.dp,
-                    top = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                    top = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateTopPadding() + 16.dp,
-                    end = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                    end = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateEndPadding(LayoutDirection.Ltr) + 16.dp
                 ),
@@ -253,7 +253,7 @@ fun EditNoteToolbar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_back_arrow),
+                    painter = painterResource(id = R.drawable.ic_back_arrow),
                     contentDescription = "Settings",
                     tint = colorScheme.primary,
                     modifier = Modifier.requiredSize(size = 32.dp)
@@ -286,13 +286,13 @@ fun EditNoteBody(
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
 
-    LaunchedEffect(Unit) { focusManager.clearFocus() }
+    LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .padding(
-                bottom = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                bottom = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateBottomPadding() + 16.dp
             ),
@@ -303,14 +303,14 @@ fun EditNoteBody(
                 .fillMaxWidth()
                 .verticalScroll(scrollState)
                 .padding(
-                    start = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                    start = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateLeftPadding(LayoutDirection.Ltr),
-                    end = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                    end = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateEndPadding(LayoutDirection.Ltr)
                 )
-                .windowInsetsPadding(WindowInsets.ime)
+                .windowInsetsPadding(insets = WindowInsets.ime)
                 .padding(vertical = 16.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -348,7 +348,7 @@ fun EditNoteBody(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(1.dp)
+                    .height(height = 1.dp)
                     .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
             )
 
@@ -365,7 +365,7 @@ fun EditNoteBody(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(1.dp)
+                    .height(height = 1.dp)
                     .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
             )
 
@@ -378,7 +378,12 @@ fun EditNoteBody(
                     .fillMaxWidth()
                     .wrapContentHeight(align = Alignment.Top),
                 visualTransformation = VisualTransformation.None,
-                placeholder = { Text(text = "Tap to enter note content", style = typography.bodyLarge) },
+                placeholder = {
+                    Text(
+                        text = "Tap to enter note content",
+                        style = typography.bodyLarge
+                    )
+                },
                 colors = OutlinedTextFieldDefaults.colors().copy(
                     focusedTextColor = colorScheme.onSurface,
                     unfocusedTextColor = colorScheme.onSurface,
@@ -427,11 +432,11 @@ private fun NoteDateTime(
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(space = 16.dp)
     ) {
         Column(
             modifier = Modifier
-                .weight(1f)
+                .weight(weight = 1f)
         ) {
             Text(
                 text = "Date Created",
@@ -446,7 +451,7 @@ private fun NoteDateTime(
 
         Column(
             modifier = Modifier
-                .weight(1f)
+                .weight(weight = 1f)
         ) {
             Text(
                 text = "Last Edited",
@@ -478,11 +483,10 @@ private fun EditAndViewMode(
             onClick = onEditClicked,
             modifier = Modifier
                 .clip(shape = shapes.medium)
-                .width(56.dp)
-                .height(56.dp)
+                .size(size = 56.dp)
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_edit),
+                painter = painterResource(id = R.drawable.ic_edit),
                 contentDescription = "Edit",
                 tint = colorScheme.onSurfaceVariant,
             )
@@ -492,11 +496,10 @@ private fun EditAndViewMode(
             onClick = onViewClicked,
             modifier = Modifier
                 .clip(shape = shapes.medium)
-                .width(56.dp)
-                .height(56.dp)
+                .size(size = 56.dp)
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_view),
+                painter = painterResource(id = R.drawable.ic_view),
                 contentDescription = "Edit",
                 tint = colorScheme.onSurfaceVariant,
             )

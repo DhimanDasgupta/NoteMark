@@ -5,10 +5,8 @@ import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSource
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.database.NoteEntity
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
 
 interface NoteMarkRepository {
@@ -19,9 +17,21 @@ interface NoteMarkRepository {
     suspend fun getNoteById(noteId: Long): NoteEntity?
     suspend fun getNoteByUUID(uuid: String): NoteEntity?
     suspend fun createNote(noteEntity: NoteEntity): NoteEntity?
-    suspend fun updateLocalNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): NoteEntity?
-    suspend fun createNewRemoteNote(noteEntities: NoteEntity): Boolean
-    suspend fun updateRemoteNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): Boolean
+    suspend fun updateLocalNote(
+        title: String,
+        content: String,
+        lastEditedAt: String,
+        noteEntity: NoteEntity
+    ): NoteEntity?
+
+    suspend fun createNewRemoteNote(noteEntity: NoteEntity): Boolean
+    suspend fun updateRemoteNote(
+        title: String,
+        content: String,
+        lastEditedAt: String,
+        noteEntity: NoteEntity
+    ): Boolean
+
     suspend fun insertNotes(noteEntities: List<NoteEntity>): Boolean
     suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean
     suspend fun deleteRemoteNote(noteEntity: NoteEntity): Boolean
@@ -36,15 +46,17 @@ class NoteMarkRepositoryImpl(
 ) : NoteMarkRepository {
     override fun getAllNotes(): Flow<List<NoteEntity>> = localDataSource.getAllNotes()
 
-    override suspend fun getAllNonSyncedNotes(): List<NoteEntity> = localDataSource.getAllNonSyncedNotes()
+    override suspend fun getAllNonSyncedNotes(): List<NoteEntity> =
+        localDataSource.getAllNonSyncedNotes()
 
-    override suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity> = localDataSource.getAllMarkedAsDeletedNotes()
+    override suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity> =
+        localDataSource.getAllMarkedAsDeletedNotes()
 
     override suspend fun getRemoteNotesAndSaveInDB(page: Int, size: Int): Result<NoteResponse> {
-        val remoteNotes = remoteDataSource.getAllNotes(page, size)
+        val remoteNotes = remoteDataSource.getAllNotes(page = page, size = size)
         remoteNotes.getOrNull()?.notes?.let { note ->
             val notesToBeSavedInDB = note.map { note -> note.toNoteEntity(synced = true) }
-            return if (localDataSource.insertNotes(notesToBeSavedInDB)) {
+            return if (localDataSource.insertNotes(noteEntities = notesToBeSavedInDB)) {
                 remoteNotes
             } else
                 Result.failure(Exception("Failed to fetch notes from remote"))
@@ -52,11 +64,12 @@ class NoteMarkRepositoryImpl(
         return Result.failure(Exception("Failed to fetch notes from remote"))
     }
 
-    override suspend fun getNoteById(noteId: Long) = localDataSource.getNoteById(noteId)
+    override suspend fun getNoteById(noteId: Long) = localDataSource.getNoteById(noteId = noteId)
 
-    override suspend fun getNoteByUUID(uuid: String) = localDataSource.getNoteByUUID(uuid)
+    override suspend fun getNoteByUUID(uuid: String) = localDataSource.getNoteByUUID(uuid = uuid)
 
-    override suspend fun createNote(noteEntity: NoteEntity): NoteEntity? = localDataSource.createNote(noteEntity.copy(synced = false))
+    override suspend fun createNote(noteEntity: NoteEntity): NoteEntity? =
+        localDataSource.createNote(noteEntity = noteEntity.copy(synced = false))
 
     override suspend fun updateLocalNote(
         title: String,
@@ -70,14 +83,20 @@ class NoteMarkRepositoryImpl(
         uuid = noteEntity.uuid
     )
 
-    override suspend fun insertNotes(noteEntities: List<NoteEntity>) = localDataSource.insertNotes(noteEntities)
+    override suspend fun insertNotes(noteEntities: List<NoteEntity>) =
+        localDataSource.insertNotes(noteEntities = noteEntities)
 
-    override suspend fun createNewRemoteNote(noteEntities: NoteEntity): Boolean {
-        val noteCreatedRemotely = remoteDataSource.createNote(noteEntities)
+    override suspend fun createNewRemoteNote(noteEntity: NoteEntity): Boolean {
+        val noteCreatedRemotely = remoteDataSource.createNote(noteEntity = noteEntity)
         return noteCreatedRemotely.getOrNull() != null
     }
 
-    override suspend fun updateRemoteNote(title: String, content: String, lastEditedAt: String, noteEntity: NoteEntity): Boolean {
+    override suspend fun updateRemoteNote(
+        title: String,
+        content: String,
+        lastEditedAt: String,
+        noteEntity: NoteEntity
+    ): Boolean {
         val noteUpdatedRemotely = remoteDataSource.updateNote(
             title = title,
             content = content,
@@ -88,16 +107,17 @@ class NoteMarkRepositoryImpl(
     }
 
     override suspend fun deleteRemoteNote(noteEntity: NoteEntity): Boolean {
-        val noteDeletedRemotely = remoteDataSource.deleteNote(noteEntity)
+        val noteDeletedRemotely = remoteDataSource.deleteNote(noteEntity = noteEntity)
         return noteDeletedRemotely.getOrNull() == Unit
     }
 
     override suspend fun deleteLocalNote(noteEntity: NoteEntity): Boolean {
-        val noteDeletedLocally = localDataSource.deleteNote(noteEntity)
+        val noteDeletedLocally = localDataSource.deleteNote(noteEntity = noteEntity)
         return noteDeletedLocally
     }
 
-    override suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean  = localDataSource.markAsDeleted(noteEntity)
+    override suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean =
+        localDataSource.markAsDeleted(noteEntity = noteEntity)
 
     override suspend fun deleteAllLocalNotes() = try {
         localDataSource.deleteAllNotes()
@@ -106,13 +126,6 @@ class NoteMarkRepositoryImpl(
         false
     }
 
-    override suspend fun logout(request: RefreshRequest): Result<Unit> {
-        val result = remoteDataSource.logout(request)
-        result.onSuccess {
-            withContext(NonCancellable) {
-                localDataSource.deleteAllNotes()
-            }
-        }
-        return result
-    }
+    override suspend fun logout(request: RefreshRequest): Result<Unit> =
+        remoteDataSource.logout(request = request)
 }

@@ -30,12 +30,11 @@ class MainActivity : ComponentActivity() {
             val windowSizeClass = calculateWindowSizeClass(actualActivity as Activity)
 
             NoteMarkTheme {
-                Scaffold(modifier = Modifier.Companion.fillMaxSize()) { innerPadding ->
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NoteMarkRoot(
                         navController = navController,
                         windowSizeClass = windowSizeClass,
-                        modifier = Modifier.Companion
-                            .consumeWindowInsets(paddingValues = innerPadding)
+                        modifier = Modifier.consumeWindowInsets(paddingValues = innerPadding)
                     )
                 }
             }

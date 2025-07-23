@@ -11,8 +11,11 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.proto.User
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -36,22 +39,26 @@ class LauncherPresenter(
         val scope = rememberCoroutineScope()
         var launcherUiModel by remember(
             key1 = appStateMachine.state
-        ) { mutableStateOf(LauncherUiModel.Empty) }
+        ) { mutableStateOf(value = LauncherUiModel.Empty) }
 
         // Receives the State from the StateMachine
         LifecycleStartEffect(
             key1 = Unit
         ) {
             scope.launch {
-                appStateMachine.state.onStart { emit(AppStateMachine.defaultAppState) }.collect { appState ->
-                    launcherUiModel = launcherUiModel.copy(
-                        connectionState = appState.connectionState,
-                        loggedInUser = when (appState) {
-                            is AppState.NotLoggedIn -> null
-                            is AppState.LoggedIn -> appState.user
-                        }
-                    )
-                }
+                appStateMachine.state
+                    .flowOn(Dispatchers.Default)
+                    .catch { /* TODO if needed */  }
+                    .onStart { emit(AppStateMachine.defaultAppState) }
+                    .collect { appState ->
+                        launcherUiModel = launcherUiModel.copy(
+                            connectionState = appState.connectionState,
+                            loggedInUser = when (appState) {
+                                is AppState.NotLoggedIn -> null
+                                is AppState.LoggedIn -> appState.user
+                            }
+                        )
+                    }
             }
             onStopOrDispose { scope.cancel() }
         }
@@ -60,7 +67,7 @@ class LauncherPresenter(
         LifecycleResumeEffect(key1 = Unit) {
             scope.launch {
                 events.collect { event ->
-                    appStateMachine.dispatch(event)
+                    appStateMachine.dispatch(action = event)
                 }
             }
             onPauseOrDispose { scope.cancel() }
@@ -70,6 +77,6 @@ class LauncherPresenter(
     }
 
     fun processEvent(event: AppAction) {
-        events.tryEmit(event)
+        events.tryEmit(value = event)
     }
 }

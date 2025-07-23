@@ -8,8 +8,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleStartEffect
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -38,20 +41,24 @@ class AddNotePresenter(
         val scope = rememberCoroutineScope()
         var addNoteUiModel by remember(
             key1 = addNoteStateMachine.state
-        ) { mutableStateOf(AddNoteUiModel.Empty) }
+        ) { mutableStateOf(value = AddNoteUiModel.Empty) }
 
         // Receives the State from the StateMachine
         LifecycleStartEffect(
             key1 = Unit
         ) {
             scope.launch {
-                addNoteStateMachine.state.onStart { AddNoteStateMachine.defaultAddNoteState }.collect { addNoteState ->
-                    addNoteUiModel = addNoteUiModel.copy(
-                        title = addNoteState.title,
-                        content = addNoteState.content,
-                        saved = addNoteState.saved
-                    )
-                }
+                addNoteStateMachine.state
+                    .flowOn(Dispatchers.Default)
+                    .catch { /* TODO if needed */  }
+                    .onStart { AddNoteStateMachine.defaultAddNoteState }
+                    .collect { addNoteState ->
+                        addNoteUiModel = addNoteUiModel.copy(
+                            title = addNoteState.title,
+                            content = addNoteState.content,
+                            saved = addNoteState.saved
+                        )
+                    }
             }
             onStopOrDispose { scope.cancel() }
         }
@@ -70,6 +77,6 @@ class AddNotePresenter(
     }
 
     fun processEvent(event: AddNoteAction) {
-        events.tryEmit(event)
+        events.tryEmit(value = event)
     }
 }

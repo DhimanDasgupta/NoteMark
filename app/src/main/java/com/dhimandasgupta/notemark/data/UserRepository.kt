@@ -17,10 +17,10 @@ class UserRepositoryImpl(
 ) : UserRepository {
     override fun getUser(): Flow<User?> = userDataSource.getUser()
 
-    override suspend fun saveUser(user: User) = userDataSource.saveUser(user)
+    override suspend fun saveUser(user: User) = userDataSource.saveUser(user = user)
 
     override suspend fun saveBearToken(token: BearerTokens) {
-        userDataSource.saveBearToken(token)
+        userDataSource.saveBearToken(token = token)
     }
 
     override suspend fun deleteUser() {

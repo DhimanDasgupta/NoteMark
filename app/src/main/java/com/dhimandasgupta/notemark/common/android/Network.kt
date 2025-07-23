@@ -53,7 +53,7 @@ fun Context.observeConnectivityAsFlow() = callbackFlow {
 
     // Set current state
     val currentState = getCurrentConnectivityState(connectivityManager)
-    trySend(currentState)
+    trySend(element = currentState)
 
     // Remove callback when not used
     awaitClose {
@@ -88,11 +88,13 @@ private fun networkCallback(
 // Utility Composable to use ConnectionState from Compose UI...
 @Composable
 fun connectivityState(): State<ConnectionState> {
-    val context = LocalContext.current
+    val context = LocalContext.current.applicationContext
 
     // Creates a State<ConnectionState> with current connectivity state as initial value
     return produceState(initialValue = context.currentConnectivityState) {
         // In a coroutine, can make suspend calls
-        context.observeConnectivityAsFlow().collect { value = it }
+        context.observeConnectivityAsFlow().collect { connectivityState ->
+            this.value = connectivityState
+        }
     }
 }

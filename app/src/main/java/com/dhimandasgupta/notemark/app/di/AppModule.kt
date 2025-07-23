@@ -89,7 +89,7 @@ const val APP_BACKGROUND_SCOPE = "app_background_scope"
 
 val appModule = module {
     single<CoroutineScope>(
-        qualifier = named(APP_BACKGROUND_SCOPE)
+        qualifier = named(name = APP_BACKGROUND_SCOPE)
     ) {
         CoroutineScope(
             context = Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { context, throwable ->
@@ -100,10 +100,10 @@ val appModule = module {
     single<DataStore<User>>(qualifier = named(DataStoreType.USER_PREFERENCES)) {
         DataStoreFactory.create(
             serializer = UserSerializer(),
-            produceFile = { androidApplication().dataStoreFile("user_store.pb") },
+            produceFile = { androidApplication().dataStoreFile(fileName = "user_store.pb") },
             corruptionHandler = null,
             migrations = listOf(),
-            scope = get(qualifier = named(APP_BACKGROUND_SCOPE))
+            scope = get(qualifier = named(name = APP_BACKGROUND_SCOPE))
         )
     }
     single {
@@ -112,13 +112,13 @@ val appModule = module {
         )
     } bind UserDataSource::class
     single { UserRepositoryImpl(userDataSource = get()) } bind UserRepository::class
-    single<DataStore<Sync>>(qualifier = named(DataStoreType.SYNC_PREFERENCES)) {
+    single<DataStore<Sync>>(qualifier = named(enum = DataStoreType.SYNC_PREFERENCES)) {
         DataStoreFactory.create(
             serializer = SyncSerializer(),
             produceFile = { androidApplication().dataStoreFile(fileName = "sync_store.pb") },
             corruptionHandler = null,
             migrations = listOf(),
-            scope = get(qualifier = named(APP_BACKGROUND_SCOPE))
+            scope = get(qualifier = named(name = APP_BACKGROUND_SCOPE))
         )
     }
     single {

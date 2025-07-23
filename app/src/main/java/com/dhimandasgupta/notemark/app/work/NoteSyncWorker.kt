@@ -24,7 +24,7 @@ class NoteSyncWorker(
     context: Context,
     workerParameters: WorkerParameters
 ) : CoroutineWorker(appContext = context, params = workerParameters), KoinComponent {
-    private val applicationScope: CoroutineScope by inject(qualifier = named(APP_BACKGROUND_SCOPE))
+    private val applicationScope: CoroutineScope by inject(qualifier = named(name = APP_BACKGROUND_SCOPE))
     private val syncRepository: SyncRepository by KoinJavaComponent.inject(clazz = SyncRepository::class.java)
     private val noteMarkRepository: NoteMarkRepository by KoinJavaComponent.inject(
         clazz = NoteMarkRepository::class.java
@@ -32,7 +32,7 @@ class NoteSyncWorker(
 
     override suspend fun doWork(): Result = withContext(applicationScope.coroutineContext) {
         try {
-            syncRepository.saveSyncing(true)
+            syncRepository.saveSyncing(isSyncing = true)
 
             // Fetch all Remote notes.
             val allRemoteNotes = noteMarkRepository.getRemoteNotesAndSaveInDB()
@@ -49,15 +49,15 @@ class NoteSyncWorker(
                 notes = toBeSyncedNotes
             )
 
-            syncRepository.saveLastUploadedTime(getCurrentIso8601Timestamp())
-            syncRepository.saveLastDownloadedTime(getCurrentIso8601Timestamp())
+            syncRepository.saveLastUploadedTime(uploadedTime = getCurrentIso8601Timestamp())
+            syncRepository.saveLastDownloadedTime(downLoadedTime = getCurrentIso8601Timestamp())
 
             Result.success()
         } catch (_: Exception) {
             coroutineContext.ensureActive()
             Result.failure()
         } finally {
-            syncRepository.saveSyncing(false)
+            syncRepository.saveSyncing(isSyncing = false)
         }
     }
 
@@ -70,7 +70,7 @@ class NoteSyncWorker(
                 null -> uploadNote(note)
                 else -> updateNote(note)
             }
-            delay(1000L) // Just some delay for testing
+            delay(timeMillis = 1000L) // Just some delay for testing
         }
     }
 
@@ -92,7 +92,7 @@ class NoteSyncWorker(
     }
 
     private suspend fun uploadNote(note: NoteEntity) = supervisorScope {
-        val uploaded = noteMarkRepository.createNewRemoteNote(note)
+        val uploaded = noteMarkRepository.createNewRemoteNote(noteEntity = note)
         if (uploaded) {
             noteMarkRepository.updateLocalNote(
                 title = note.title,
@@ -106,14 +106,14 @@ class NoteSyncWorker(
     private suspend fun deleteNotes(notes: List<NoteEntity>) {
         notes.forEach { note ->
             deleteNote(note)
-            delay(1000L) // Just some delay for testing
+            delay(timeMillis = 1000L) // Just some delay for testing
         }
     }
 
     private suspend fun deleteNote(note: NoteEntity) = supervisorScope {
-        val deleted = noteMarkRepository.deleteRemoteNote(note)
+        val deleted = noteMarkRepository.deleteRemoteNote(noteEntity = note)
         if (deleted) {
-            noteMarkRepository.deleteLocalNote(note)
+            noteMarkRepository.deleteLocalNote(noteEntity = note)
         }
     }
 }

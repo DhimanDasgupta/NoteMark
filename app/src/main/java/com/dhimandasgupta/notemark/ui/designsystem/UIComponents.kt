@@ -86,8 +86,11 @@ fun NoteMarkButton(
     Button(
         modifier = modifier,
         onClick = onClick,
-        shape = RoundedCornerShape(8.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary, disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.12f)),
+        shape = RoundedCornerShape(size = 8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = colorScheme.primary,
+            disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.12f)
+        ),
         enabled = enabled
     ) {
         content()
@@ -104,11 +107,11 @@ fun NoteMarkOutlinedButton(
     OutlinedButton(
         modifier = modifier,
         onClick = onClick,
-        shape = RoundedCornerShape(8.dp),
-        border = BorderStroke(1.dp, colorScheme.primary),
+        shape = RoundedCornerShape(size = 8.dp),
+        border = BorderStroke(width = 1.dp, color = colorScheme.primary),
         enabled = enabled
     ) {
-         content()
+        content()
     }
 }
 
@@ -129,7 +132,7 @@ fun NoteMarkTextField(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(space = 4.dp),
         horizontalAlignment = Alignment.Start
     ) {
         label?.let {
@@ -139,7 +142,7 @@ fun NoteMarkTextField(
             )
         }
 
-        var hasFocus by rememberSaveable { mutableStateOf(false) }
+        var hasFocus by rememberSaveable { mutableStateOf(value = false) }
 
         TextField(
             enabled = enabled,
@@ -212,12 +215,12 @@ fun NoteMarkPasswordTextField(
     onNextClicked: (() -> Unit)? = null,
     onDoneClicked: (() -> Unit)? = null
 ) {
-    var hasFocus by rememberSaveable { mutableStateOf(false) }
-    var showPassword by rememberSaveable { mutableStateOf(false) }
+    var hasFocus by rememberSaveable { mutableStateOf(value = false) }
+    var showPassword by rememberSaveable { mutableStateOf(value = false) }
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(space = 4.dp),
         horizontalAlignment = Alignment.Start
     ) {
         label?.let {
@@ -234,14 +237,13 @@ fun NoteMarkPasswordTextField(
             trailingIcon = {
                 if (showPassword) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_eye_open),
+                        painter = painterResource(id = R.drawable.ic_eye_open),
                         modifier = Modifier
-                            .size(32.dp)
-                            .padding(4.dp)
+                            .size(size = 32.dp)
+                            .padding(all = 4.dp)
                             .lifecycleAwareDebouncedClickable {
                                 showPassword = !showPassword
-                            }
-                        ,
+                            },
                         contentDescription = "Hide Password",
                         tint = colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
                     )
@@ -249,12 +251,11 @@ fun NoteMarkPasswordTextField(
                     Icon(
                         painter = painterResource(R.drawable.ic_eye_off),
                         modifier = Modifier
-                            .size(32.dp)
-                            .padding(4.dp)
+                            .size(size = 32.dp)
+                            .padding(all = 4.dp)
                             .lifecycleAwareDebouncedClickable {
                                 showPassword = !showPassword
-                            }
-                        ,
+                            },
                         contentDescription = "Show Password",
                         tint = colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
                     )
@@ -347,16 +348,19 @@ fun NoteMarkFAB(
         shape = shapes.medium,
         modifier = modifier
             .padding(
-                end = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                end = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateEndPadding(LayoutDirection.Ltr),
-                bottom = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                bottom = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateBottomPadding()
             )
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(Color(0XFF58A1F8), Color(0xFF5A4CF7))
+                    colors = listOf(
+                        Color(color = 0XFF58A1F8),
+                        Color(color = 0xFF5A4CF7)
+                    )
                 ),
                 shape = shapes.medium
             ),
@@ -370,7 +374,7 @@ fun NoteMarkFAB(
         containerColor = Color.Transparent
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_plus_icon),
+            painter = painterResource(id = R.drawable.ic_plus_icon),
             contentDescription = "Add Note",
             tint = colorScheme.onPrimary,
             modifier = Modifier
@@ -386,7 +390,7 @@ fun LimitedText(
     color: Color,
     targetCharacterCount: Int = 100
 ) {
-    var textToDisplay by remember(fullText) { mutableStateOf(fullText) }
+    var textToDisplay by remember(key1 = fullText) { mutableStateOf(value = fullText) }
 
     Text(
         text = textToDisplay,
@@ -394,9 +398,9 @@ fun LimitedText(
         color = color,
         onTextLayout = { textLayoutResult ->
             if (textLayoutResult.layoutInput.text.length > targetCharacterCount) {
-                if (textLayoutResult.isLineEllipsized(textLayoutResult.lineCount - 1) ||
+                if (textLayoutResult.isLineEllipsized(lineIndex = textLayoutResult.lineCount - 1) ||
                     textLayoutResult.getLineEnd(
-                        textLayoutResult.lineCount - 1,
+                        lineIndex = textLayoutResult.lineCount - 1,
                         visibleEnd = true
                     ) < targetCharacterCount &&
                     fullText.length > targetCharacterCount
@@ -423,10 +427,10 @@ private fun BouncingDot(
     animationDurationMillis: Int = 500,
     delayMillis: Int = 0 // Delay before this specific dot starts its animation
 ) {
-    val offsetY = remember { Animatable(0f) }
+    val offsetY = remember { Animatable(initialValue = 0f) }
 
     LaunchedEffect(key1 = Unit) {
-        delay(delayMillis.toLong()) // Apply initial delay
+        delay(timeMillis = delayMillis.toLong()) // Apply initial delay
         offsetY.animateTo(
             targetValue = -bounceHeight.value, // Move up
             animationSpec = infiniteRepeatable(
@@ -465,7 +469,7 @@ fun ThreeBouncingDots(
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.Bottom, // Align to bottom so they bounce from the same baseline
-        horizontalArrangement = Arrangement.spacedBy(spaceBetweenDots)
+        horizontalArrangement = Arrangement.spacedBy(space = spaceBetweenDots)
     ) {
         BouncingDot(
             color = dotColor1,
@@ -502,8 +506,8 @@ fun SafeIconButton(
     debounceIntervalMs: Long = 700L,
     content: @Composable () -> Unit
 ) {
-    val currentOnClick by rememberUpdatedState(onClick)
-    var lastClickTime by remember { mutableLongStateOf(0L) }
+    val currentOnClick by rememberUpdatedState(newValue = onClick)
+    var lastClickTime by remember { mutableLongStateOf(value = 0L) }
     var lifecycleAllowsClick by remember {
         mutableStateOf(owner.lifecycle.currentState.isAtLeast(activeState))
     }

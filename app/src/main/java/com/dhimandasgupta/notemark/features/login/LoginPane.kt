@@ -80,16 +80,16 @@ fun LoginPane(
     loginUiModel: LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
 ) {
-    val updatedLoginUiModel by rememberUpdatedState(loginUiModel)
+    val updatedLoginUiModel by rememberUpdatedState(newValue = loginUiModel)
 
     Box(
         modifier = modifier
-            .background(color = colorResource(R.color.splash_blue))
+            .background(color = colorResource(id = R.color.splash_blue))
             .fillMaxSize()
     ) {
         val layoutType = getDeviceLayoutType(windowSizeClass)
 
-        when(layoutType) {
+        when (layoutType) {
             DeviceLayoutType.PHONE_LANDSCAPE -> {
                 Row(
                     modifier = Modifier
@@ -97,37 +97,37 @@ fun LoginPane(
                             top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
                         )
                         .clip(
-                            RoundedCornerShape(
+                            shape = RoundedCornerShape(
                                 topStart = 16.dp,
                                 topEnd = 16.dp
                             )
                         )
-                        .background(colorScheme.surfaceContainerLowest)
+                        .background(color = colorScheme.surfaceContainerLowest)
                         .fillMaxSize()
                         .padding(all = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
                     verticalAlignment = Alignment.Top
                 ) {
                     LeftPane(
                         modifier = Modifier
                             .safeContentPadding()
-                            .fillMaxWidth(0.4f)
+                            .fillMaxWidth(fraction = 0.4f)
                     )
                     RightPane(
-                        modifier =Modifier
+                        modifier = Modifier
                             .padding(
                                 top = WindowInsets.systemBars.asPaddingValues()
                                     .calculateTopPadding(),
                                 start = WindowInsets
-                                    .systemBars.union(WindowInsets.displayCutout)
+                                    .systemBars.union(insets = WindowInsets.displayCutout)
                                     .asPaddingValues()
                                     .calculateLeftPadding(LayoutDirection.Ltr),
                                 end = WindowInsets
-                                    .systemBars.union(WindowInsets.displayCutout)
+                                    .systemBars.union(insets = WindowInsets.displayCutout)
                                     .asPaddingValues()
                                     .calculateRightPadding(LayoutDirection.Ltr)
                             )
-                            .verticalScroll(rememberScrollState()),
+                            .verticalScroll(state = rememberScrollState()),
                         navigateToRegistration = navigateToRegistration,
                         navigateToAfterLogin = navigateToAfterLogin,
                         loginUiModel = updatedLoginUiModel,
@@ -135,6 +135,7 @@ fun LoginPane(
                     )
                 }
             }
+
             DeviceLayoutType.TABLET_LAYOUT -> {
                 Column(
                     modifier = Modifier
@@ -146,23 +147,23 @@ fun LoginPane(
                                 .calculateRightPadding(LayoutDirection.Ltr)
                         )
                         .clip(
-                            RoundedCornerShape(
+                            shape = RoundedCornerShape(
                                 topStart = 16.dp,
                                 topEnd = 16.dp
                             )
                         )
-                        .background(colorScheme.surfaceContainerLowest)
+                        .background(color = colorScheme.surfaceContainerLowest)
                         .fillMaxSize()
                         .padding(start = 64.dp, end = 64.dp, top = 64.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .verticalScroll(state = rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(space = 8.dp)
                 ) {
                     LeftPane(
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally),
                         horizontalAlignment = Alignment.CenterHorizontally
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(height = 16.dp))
                     RightPane(
                         navigateToRegistration = navigateToRegistration,
                         navigateToAfterLogin = navigateToAfterLogin,
@@ -171,6 +172,7 @@ fun LoginPane(
                     )
                 }
             }
+
             else -> {
                 Column(
                     modifier = Modifier
@@ -182,19 +184,19 @@ fun LoginPane(
                                 .calculateRightPadding(LayoutDirection.Ltr)
                         )
                         .clip(
-                            RoundedCornerShape(
+                            shape = RoundedCornerShape(
                                 topStart = 16.dp,
                                 topEnd = 16.dp
                             )
                         )
-                        .background(colorScheme.surfaceContainerLowest)
+                        .background(color = colorScheme.surfaceContainerLowest)
                         .fillMaxSize()
                         .padding(all = 16.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .verticalScroll(state = rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(space = 8.dp)
                 ) {
                     LeftPane()
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(height = 16.dp))
                     RightPane(
                         navigateToRegistration = navigateToRegistration,
                         navigateToAfterLogin = navigateToAfterLogin,
@@ -214,7 +216,7 @@ private fun LeftPane(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(space = 8.dp),
         horizontalAlignment = horizontalAlignment
     ) {
         Text(
@@ -242,11 +244,15 @@ private fun RightPane(
     val focusManager = LocalFocusManager.current
     val context = LocalActivity.current
 
-    LaunchedEffect(Unit) { focusManager.clearFocus() }
+    LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
-    LaunchedEffect(loginUiModel.loginSuccess) {
+    LaunchedEffect(key1 = loginUiModel.loginSuccess) {
         if (loginUiModel.loginSuccess == null) return@LaunchedEffect
-        Toast.makeText(context, if (loginUiModel.loginSuccess) "Login successful" else "Login failed", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            context,
+            if (loginUiModel.loginSuccess) "Login successful" else "Login failed",
+            Toast.LENGTH_SHORT
+        ).show()
         loginAction(LoginAction.LoginChangeConsumed)
         if (loginUiModel.loginSuccess) {
             navigateToAfterLogin()
@@ -255,10 +261,10 @@ private fun RightPane(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(space = 16.dp),
     ) {
-        var emailText by rememberSaveable { mutableStateOf(loginUiModel.email) }
-        LaunchedEffect(emailText) { loginAction(EmailEntered(emailText)) }
+        var emailText by rememberSaveable { mutableStateOf(value = loginUiModel.email) }
+        LaunchedEffect(key1 = emailText) { loginAction(EmailEntered(email = emailText)) }
 
         NoteMarkTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -269,8 +275,8 @@ private fun RightPane(
             onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
         )
 
-        var passwordText by rememberSaveable { mutableStateOf(loginUiModel.password) }
-        LaunchedEffect(passwordText) { loginAction(PasswordEntered(passwordText)) }
+        var passwordText by rememberSaveable { mutableStateOf(value = loginUiModel.password) }
+        LaunchedEffect(key1 = passwordText) { loginAction(PasswordEntered(password = passwordText)) }
 
         NoteMarkPasswordTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -281,7 +287,7 @@ private fun RightPane(
             onDoneClicked = {
                 focusManager.moveFocus(FocusDirection.Enter)
                 keyboardController?.hide()
-                focusManager.clearFocus(true)
+                focusManager.clearFocus(force = true)
 
                 if (loginUiModel.loginEnabled) {
                     loginAction(HideLoginButton)
@@ -293,7 +299,7 @@ private fun RightPane(
         NoteMarkButton(
             onClick = {
                 keyboardController?.hide()
-                focusManager.clearFocus(true)
+                focusManager.clearFocus(force = true)
                 loginAction(HideLoginButton)
                 loginAction(LoginClicked)
             },

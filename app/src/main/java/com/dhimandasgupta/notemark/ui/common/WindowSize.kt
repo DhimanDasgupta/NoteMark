@@ -23,7 +23,7 @@ enum class DeviceLayoutType {
 fun getDeviceLayoutType(windowSizeClass: WindowSizeClass): DeviceLayoutType {
     // Remember the calculation to avoid re-computation on every recomposition
     // if windowSizeClass itself is stable.
-    return remember(windowSizeClass) {
+    return remember(key1 = windowSizeClass) {
         val widthSizeClass = windowSizeClass.widthSizeClass
         val heightSizeClass = windowSizeClass.heightSizeClass
 

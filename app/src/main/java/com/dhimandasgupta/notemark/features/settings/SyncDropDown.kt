@@ -32,7 +32,7 @@ fun SyncDropDown(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentSize(Alignment.TopEnd) // Aligns the IconButton and thus the menu
-            .padding(16.dp)
+            .padding(all = 16.dp)
     ) {
         DropdownMenu(
             modifier = Modifier.background(color = colorScheme.surfaceContainerLowest),

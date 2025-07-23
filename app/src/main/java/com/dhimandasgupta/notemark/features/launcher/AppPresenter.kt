@@ -15,7 +15,7 @@ class AppPresenter(
 
     @Composable
     fun uiModel(): AppState {
-        var applicationState: AppState by remember { mutableStateOf(AppStateMachine.Companion.defaultAppState) }
+        var applicationState: AppState by remember { mutableStateOf(value = AppStateMachine.Companion.defaultAppState) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
@@ -35,6 +35,6 @@ class AppPresenter(
     }
 
     fun processEvent(event: AppAction) {
-        events.tryEmit(event)
+        events.tryEmit(value = event)
     }
 }

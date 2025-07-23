@@ -36,7 +36,7 @@ fun NoteDeleteDialog(
     ) {
         Column(
             modifier = modifier
-                .clip(shapes.medium)
+                .clip(shape = shapes.medium)
                 .wrapContentSize()
                 .background(color = colorScheme.surfaceContainerLowest)
                 .padding(all = 32.dp)
@@ -46,14 +46,14 @@ fun NoteDeleteDialog(
                 style = typography.titleMedium
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(height = 16.dp))
 
             Text(
                 text = "Click Discard to delete your note, else click Cancel to keep editing.",
                 style = typography.bodyLarge
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(height = 32.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -67,7 +67,7 @@ fun NoteDeleteDialog(
                     modifier = Modifier.lifecycleAwareDebouncedClickable { onDismiss() }
                 )
 
-                Spacer(modifier = Modifier.width(32.dp))
+                Spacer(modifier = Modifier.width(width = 32.dp))
 
                 Text(
                     text = "Discard",

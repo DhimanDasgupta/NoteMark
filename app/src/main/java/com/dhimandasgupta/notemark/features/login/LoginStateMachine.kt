@@ -32,7 +32,7 @@ sealed interface LoginAction {
 @OptIn(ExperimentalCoroutinesApi::class)
 class LoginStateMachine(
     val noteMarkApi: NoteMarkApi
-) : StateMachine<LoginState, LoginAction>(defaultLoginState) {
+) : StateMachine<LoginState, LoginAction>(initialState = defaultLoginState) {
     init {
         spec {
             inState<LoginState> {
@@ -56,7 +56,7 @@ class LoginStateMachine(
                     }
 
                     noteMarkApi.login(
-                        LoginRequest(
+                        request = LoginRequest(
                             email = state.snapshot.email,
                             password = state.snapshot.password
                         )

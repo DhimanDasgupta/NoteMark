@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleStartEffect
+import com.dhimandasgupta.notemark.common.convertIsoToRelativeYearFormat
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppState
@@ -15,8 +16,11 @@ import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -50,18 +54,19 @@ class NoteListPresenter(
             key1 = Unit
         ) {
             scope.launch {
-                appStateMachine.state.onStart { AppStateMachine.defaultAppState }.collect { appState ->
-                    noteListUiModel = noteListUiModel.copy(
-                        userName = when (appState) {
-                            is AppState.LoggedIn -> appState.user.userName
-                            else -> ""
-                        },
-                        showSyncProgress = when (appState) {
-                            is AppState.LoggedIn -> appState.sync?.syncing ?: false
-                            else -> true
-                        }
-                    )
-                }
+                appStateMachine.state.onStart { AppStateMachine.defaultAppState }
+                    .collect { appState ->
+                        noteListUiModel = noteListUiModel.copy(
+                            userName = when (appState) {
+                                is AppState.LoggedIn -> appState.user.userName
+                                else -> ""
+                            },
+                            showSyncProgress = when (appState) {
+                                is AppState.LoggedIn -> appState.sync?.syncing ?: false
+                                else -> true
+                            }
+                        )
+                    }
             }
             onStopOrDispose { scope.cancel() }
         }
@@ -70,20 +75,30 @@ class NoteListPresenter(
             key1 = Unit
         ) {
             scope.launch {
-                noteListStateMachine.state.onStart { NoteListStateMachine.defaultNoteListState }.collect { noteListState ->
-                    noteListUiModel = when (noteListState) {
-                        is NoteListState.NoteListStateWithNotes -> {
-                            noteListUiModel.copy(
-                                noteEntities = noteListState.notes.toPersistentList(),
-                                noteLongClickedUuid = noteListState.longClickedNoteUuid
+                noteListStateMachine.state
+                    .flowOn(Dispatchers.Default)
+                    .catch { /* TODO if needed */  }
+                    .onStart { NoteListStateMachine.defaultNoteListState }
+                    .collect { noteListState ->
+                        noteListUiModel = when (noteListState) {
+                            is NoteListState.NoteListStateWithNotes -> {
+                                noteListUiModel.copy(
+                                    noteEntities = noteListState.notes.map { noteEntity ->
+                                        noteEntity.copy(
+                                            lastEditedAt = convertIsoToRelativeYearFormat(
+                                                isoOffsetDateTimeString = noteEntity.lastEditedAt
+                                            )
+                                        )
+                                    }.toPersistentList(),
+                                    noteLongClickedUuid = noteListState.longClickedNoteUuid
+                                )
+                            }
+
+                            else -> noteListUiModel.copy(
+                                noteEntities = persistentListOf()
                             )
                         }
-
-                        else -> noteListUiModel.copy(
-                            noteEntities = persistentListOf()
-                        )
                     }
-                }
             }
             onStopOrDispose { scope.cancel() }
         }

@@ -77,10 +77,10 @@ fun AddNotePane(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    
-    val updatedAddNoteUiModel by rememberUpdatedState(addNoteUiModel)
 
-    LaunchedEffect(updatedAddNoteUiModel.saved) {
+    val updatedAddNoteUiModel by rememberUpdatedState(newValue = addNoteUiModel)
+
+    LaunchedEffect(key1 = updatedAddNoteUiModel.saved) {
         if (updatedAddNoteUiModel.saved == true) {
             focusManager.clearFocus()
             keyboardController?.hide()
@@ -116,10 +116,10 @@ fun AddNotePane(
                         else -> 0.85f
                     }
                 )
-                .fillMaxHeight(1f),
+                .fillMaxHeight(fraction = 1f),
             titleText = updatedAddNoteUiModel.title,
             bodyText = updatedAddNoteUiModel.content,
-            onTitleTextChanged =  { value -> addNoteAction(AddNoteAction.UpdateTitle(title = value)) },
+            onTitleTextChanged = { value -> addNoteAction(AddNoteAction.UpdateTitle(title = value)) },
             onBodyTextChanged = { value -> addNoteAction(AddNoteAction.UpdateContent(content = value)) }
         )
     }
@@ -136,13 +136,13 @@ private fun AddNoteToolbar(
             .background(color = colorScheme.surfaceContainerLowest)
             .fillMaxWidth()
             .padding(
-                start = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                start = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateLeftPadding(LayoutDirection.Ltr) + 16.dp,
-                top = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                top = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateTopPadding(),
-                end = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                end = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateEndPadding(LayoutDirection.Ltr) + 16.dp
             ),
@@ -154,7 +154,7 @@ private fun AddNoteToolbar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_back_arrow),
+                painter = painterResource(id = R.drawable.ic_back_arrow),
                 contentDescription = "Settings",
                 tint = colorScheme.primary,
                 modifier = Modifier.requiredSize(size = 32.dp)
@@ -187,13 +187,13 @@ private fun AddNoteBody(
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
 
-    LaunchedEffect(Unit) { focusManager.clearFocus() }
+    LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .padding(
-                bottom = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                bottom = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateBottomPadding() + 16.dp
             ),
@@ -204,14 +204,14 @@ private fun AddNoteBody(
                 .fillMaxWidth()
                 .verticalScroll(scrollState)
                 .padding(
-                    start = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                    start = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateLeftPadding(LayoutDirection.Ltr),
-                    end = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                    end = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateEndPadding(LayoutDirection.Ltr)
                 )
-                .windowInsetsPadding(WindowInsets.ime)
+                .windowInsetsPadding(insets = WindowInsets.ime)
                 .padding(vertical = 16.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -247,14 +247,14 @@ private fun AddNoteBody(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(1.dp)
+                    .height(height = 1.dp)
                     .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
             )
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(1.dp)
+                    .height(height = 1.dp)
                     .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
             )
 
@@ -266,7 +266,12 @@ private fun AddNoteBody(
                     .fillMaxWidth()
                     .wrapContentHeight(align = Alignment.Top),
                 visualTransformation = VisualTransformation.None,
-                placeholder = { Text(text = "Tap to enter note content", style = typography.bodyLarge) },
+                placeholder = {
+                    Text(
+                        text = "Tap to enter note content",
+                        style = typography.bodyLarge
+                    )
+                },
                 colors = OutlinedTextFieldDefaults.colors().copy(
                     focusedTextColor = colorScheme.onSurface,
                     unfocusedTextColor = colorScheme.onSurface,

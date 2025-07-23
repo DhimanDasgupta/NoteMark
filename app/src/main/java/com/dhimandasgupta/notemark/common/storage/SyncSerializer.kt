@@ -6,9 +6,9 @@ import kotlinx.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
-class SyncSerializer(
+class SyncSerializer : Serializer<Sync> {
     override val defaultValue: Sync = defaultSyncValue
-) : Serializer<Sync> {
+
     override suspend fun readFrom(input: InputStream): Sync  = try {
         Sync.parseFrom(input)
     } catch (_: IOException) {

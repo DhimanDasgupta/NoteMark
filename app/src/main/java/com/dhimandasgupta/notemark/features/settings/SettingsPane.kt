@@ -66,9 +66,9 @@ fun SettingsPane(
     onBackClicked: () -> Unit = {},
     onLogoutClicked: () -> Unit = {}
 ) {
-    val updatedSettingsUiModel by rememberUpdatedState(settingsUiModel)
+    val updatedSettingsUiModel by rememberUpdatedState(newValue = settingsUiModel)
 
-    var showSyncInterval by remember { mutableStateOf(false) }
+    var showSyncInterval by remember { mutableStateOf(value = false) }
 
     LaunchedEffect(key1 = updatedSettingsUiModel.logoutStatus) {
         if (updatedSettingsUiModel.logoutStatus == true) {
@@ -81,7 +81,7 @@ fun SettingsPane(
         modifier = modifier
             .background(color = colorScheme.surfaceContainerLowest)
             .fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(space = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         SettingsToolbar(
@@ -119,13 +119,13 @@ private fun SettingsToolbar(
             .background(color = colorScheme.surfaceContainerLowest)
             .fillMaxWidth()
             .padding(
-                start = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                start = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateLeftPadding(LayoutDirection.Ltr),
-                top = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                top = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateTopPadding(),
-                end = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                end = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateEndPadding(LayoutDirection.Ltr)
             )
@@ -134,11 +134,11 @@ private fun SettingsToolbar(
                 horizontal = 8.dp
             )
             .lifecycleAwareDebouncedClickable(onClick = onBackClicked),
-        horizontalArrangement = Arrangement.spacedBy(0.dp),
+        horizontalArrangement = Arrangement.spacedBy(space = 0.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_back_arrow),
+            painter = painterResource(id = R.drawable.ic_back_arrow),
             contentDescription = "Settings",
             tint = colorScheme.onSurface,
             modifier = Modifier.requiredSize(size = 32.dp)
@@ -148,7 +148,7 @@ private fun SettingsToolbar(
             text = "Settings",
             style = typography.titleMedium,
             color = colorScheme.onSurface,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(weight = 1f)
         )
     }
 }
@@ -172,10 +172,10 @@ private fun SettingsBody(
                 .background(color = colorScheme.surfaceContainerLowest)
                 .fillMaxWidth()
                 .padding(
-                    start = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                    start = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateLeftPadding(LayoutDirection.Ltr),
-                    end = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                    end = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateEndPadding(LayoutDirection.Ltr)
                 )
@@ -195,7 +195,7 @@ private fun SettingsBody(
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(1.dp)
+                    .height(height = 1.dp)
                     .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
             )
 
@@ -208,7 +208,7 @@ private fun SettingsBody(
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(1.dp)
+                    .height(height = 1.dp)
                     .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
             )
 
@@ -222,7 +222,7 @@ private fun SettingsBody(
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(1.dp)
+                    .height(height = 1.dp)
                     .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
             )
 
@@ -254,16 +254,16 @@ private fun SyncIntervalRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(shape = RoundedCornerShape(size = 8.dp))
             .combinedClickable(
                 onClick = toggleSyncIntervalVisibility
             )
             .padding(vertical = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(0.dp),
+        horizontalArrangement = Arrangement.spacedBy(space = 0.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_clock),
+            painter = painterResource(id = R.drawable.ic_clock),
             contentDescription = "Sync Interval",
             tint = colorScheme.onSurface,
             modifier = Modifier
@@ -281,7 +281,7 @@ private fun SyncIntervalRow(
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(weight = 1f)
         )
 
         Text(
@@ -292,7 +292,7 @@ private fun SyncIntervalRow(
         )
 
         Icon(
-            painter = painterResource(R.drawable.ic_right),
+            painter = painterResource(id = R.drawable.ic_right),
             contentDescription = "Sync Interval",
             tint = colorScheme.onSurfaceVariant,
             modifier = Modifier
@@ -310,16 +310,16 @@ private fun SyncDataRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(shape = RoundedCornerShape(size = 8.dp))
             .combinedClickable(
                 onClick = {}
             )
             .padding(vertical = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(0.dp),
+        horizontalArrangement = Arrangement.spacedBy(space = 0.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_sync),
+            painter = painterResource(id = R.drawable.ic_sync),
             contentDescription = "Settings",
             tint = colorScheme.onSurface,
             modifier = Modifier
@@ -354,12 +354,12 @@ private fun DeleteLocalDataRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(shape = RoundedCornerShape(size = 8.dp))
             .combinedClickable(
                 onClick = onCheckChange
             )
             .padding(vertical = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(0.dp),
+        horizontalArrangement = Arrangement.spacedBy(space = 0.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -368,7 +368,7 @@ private fun DeleteLocalDataRow(
             color = colorScheme.error,
             modifier = Modifier
                 .padding(horizontal = 8.dp)
-                .weight(1f)
+                .weight(weight = 1f)
         )
 
         Icon(
@@ -388,16 +388,16 @@ private fun LogoutRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(shape = RoundedCornerShape(size = 8.dp))
             .combinedClickable(
                 onClick = onLogoutClicked
             )
             .padding(vertical = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(0.dp),
+        horizontalArrangement = Arrangement.spacedBy(space = 0.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_log_out),
+            painter = painterResource(id = R.drawable.ic_log_out),
             contentDescription = "Settings",
             tint = colorScheme.error,
             modifier = Modifier
@@ -409,7 +409,7 @@ private fun LogoutRow(
             text = "Log out",
             style = typography.titleMedium,
             color = colorScheme.error,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(weight = 1f)
         )
     }
 }

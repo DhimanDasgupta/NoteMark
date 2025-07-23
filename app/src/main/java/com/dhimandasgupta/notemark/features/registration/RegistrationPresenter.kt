@@ -8,8 +8,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleStartEffect
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 @Immutable
@@ -41,26 +44,29 @@ class RegistrationPresenter(
     @Composable
     fun uiModel(): RegistrationUiModel {
         val scope = rememberCoroutineScope()
-        var registrationUiModel by remember { mutableStateOf(RegistrationUiModel.Empty) }
+        var registrationUiModel by remember { mutableStateOf(value = RegistrationUiModel.Empty) }
 
         // Receives the State from the StateMachine
         LifecycleStartEffect(key1 = Unit) {
             scope.launch {
-                registrationStateMachine.state.collect { registrationState ->
-                    registrationUiModel = RegistrationUiModel(
-                        userName = registrationState.userName,
-                        email = registrationState.email,
-                        password = registrationState.password,
-                        repeatPassword = registrationState.repeatPassword,
-                        userNameExplanation = registrationState.userNameExplanation,
-                        userNameError = registrationState.userNameError,
-                        emailError = registrationState.emailError,
-                        passwordError = registrationState.passwordError,
-                        repeatPasswordError = registrationState.repeatPasswordError,
-                        passwordExplanation = registrationState.passwordExplanation,
-                        registrationEnabled = registrationState.registrationEnabled,
-                        registrationSuccess = registrationState.registrationSuccess
-                    )
+                registrationStateMachine.state
+                    .flowOn(Dispatchers.Default)
+                    .catch { /* TODO if needed */  }
+                    .collect { registrationState ->
+                        registrationUiModel = RegistrationUiModel(
+                            userName = registrationState.userName,
+                            email = registrationState.email,
+                            password = registrationState.password,
+                            repeatPassword = registrationState.repeatPassword,
+                            userNameExplanation = registrationState.userNameExplanation,
+                            userNameError = registrationState.userNameError,
+                            emailError = registrationState.emailError,
+                            passwordError = registrationState.passwordError,
+                            repeatPasswordError = registrationState.repeatPasswordError,
+                            passwordExplanation = registrationState.passwordExplanation,
+                            registrationEnabled = registrationState.registrationEnabled,
+                            registrationSuccess = registrationState.registrationSuccess
+                        )
                 }
             }
             onStopOrDispose { scope.cancel() }
@@ -80,6 +86,6 @@ class RegistrationPresenter(
     }
 
     fun processEvent(event: RegistrationAction) {
-        events.tryEmit(event)
+        events.tryEmit(value = event)
     }
 }
