@@ -7,6 +7,8 @@ import com.dhimandasgupta.notemark.app.di.APP_BACKGROUND_SCOPE
 import com.dhimandasgupta.notemark.common.getCurrentIso8601Timestamp
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.SyncRepository
+import com.dhimandasgupta.notemark.data.UserRepository
+import com.dhimandasgupta.notemark.data.remote.api.AuthenticationException
 import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.database.NoteEntity
@@ -29,36 +31,50 @@ class NoteSyncWorker(
     private val noteMarkRepository: NoteMarkRepository by inject(
         clazz = NoteMarkRepository::class.java
     )
+    private val userRepository: UserRepository by inject(clazz = UserRepository::class.java)
 
     override suspend fun doWork(): Result = withContext(applicationScope.coroutineContext) {
         try {
             syncRepository.saveSyncing(isSyncing = true)
 
             // Fetch all Remote notes.
-            val allRemoteNotes = noteMarkRepository.getRemoteNotesAndSaveInDB()
-                .getOrElse { NoteResponse(notes = emptyList(), total = 0) }
+            noteMarkRepository.getRemoteNotesAndSaveInDB().fold(
+                onSuccess = { noteResponse ->
+                    executeSuccess(noteResponse)
+                    Result.success()
+                },
+                onFailure = { throwable ->
+                    if (throwable is AuthenticationException) {
+                        userRepository.deleteUser()
+                    }
 
-            // Delete all Remote notes waiting to be deleted.
-            val toBeDeletedNotes = noteMarkRepository.getAllMarkedAsDeletedNotes()
-            deleteNotes(toBeDeletedNotes)
-
-            // Update or Upload all Local notes.
-            val toBeSyncedNotes = noteMarkRepository.getAllNonSyncedNotes()
-            updateOrUploadNotes(
-                remoteNotes = allRemoteNotes.notes,
-                notes = toBeSyncedNotes
+                    Result.failure()
+                }
             )
-
-            syncRepository.saveLastUploadedTime(uploadedTime = getCurrentIso8601Timestamp())
-            syncRepository.saveLastDownloadedTime(downLoadedTime = getCurrentIso8601Timestamp())
-
-            Result.success()
         } catch (_: Exception) {
             coroutineContext.ensureActive()
             Result.failure()
         } finally {
             syncRepository.saveSyncing(isSyncing = false)
         }
+    }
+
+    private suspend fun executeSuccess(noteResponse: NoteResponse) {
+        val allRemoteNotes = noteResponse
+
+        // Delete all Remote notes waiting to be deleted.
+        val toBeDeletedNotes = noteMarkRepository.getAllMarkedAsDeletedNotes()
+        deleteNotes(toBeDeletedNotes)
+
+        // Update or Upload all Local notes.
+        val toBeSyncedNotes = noteMarkRepository.getAllNonSyncedNotes()
+        updateOrUploadNotes(
+            remoteNotes = allRemoteNotes.notes,
+            notes = toBeSyncedNotes
+        )
+
+        syncRepository.saveLastUploadedTime(uploadedTime = getCurrentIso8601Timestamp())
+        syncRepository.saveLastDownloadedTime(downLoadedTime = getCurrentIso8601Timestamp())
     }
 
     private suspend fun updateOrUploadNotes(
