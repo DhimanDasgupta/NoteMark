@@ -86,6 +86,8 @@ private enum class DataStoreType {
 }
 
 const val APP_BACKGROUND_SCOPE = "app_background_scope"
+private const val USER_DATA_STORE_FILE_NAME = "user_store.pb"
+private const val SYNC_DATA_STORE_FILE_NAME = "sync_store.pb"
 
 val appModule = module {
     single<CoroutineScope>(
@@ -100,7 +102,7 @@ val appModule = module {
     single<DataStore<User>>(qualifier = named(DataStoreType.USER_PREFERENCES)) {
         DataStoreFactory.create(
             serializer = UserSerializer(),
-            produceFile = { androidApplication().dataStoreFile(fileName = "user_store.pb") },
+            produceFile = { androidApplication().dataStoreFile(fileName = USER_DATA_STORE_FILE_NAME) },
             corruptionHandler = null,
             migrations = listOf(),
             scope = get(qualifier = named(name = APP_BACKGROUND_SCOPE))
@@ -115,7 +117,7 @@ val appModule = module {
     single<DataStore<Sync>>(qualifier = named(enum = DataStoreType.SYNC_PREFERENCES)) {
         DataStoreFactory.create(
             serializer = SyncSerializer(),
-            produceFile = { androidApplication().dataStoreFile(fileName = "sync_store.pb") },
+            produceFile = { androidApplication().dataStoreFile(fileName = SYNC_DATA_STORE_FILE_NAME) },
             corruptionHandler = null,
             migrations = listOf(),
             scope = get(qualifier = named(name = APP_BACKGROUND_SCOPE))
