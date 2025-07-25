@@ -18,15 +18,15 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
-import org.koin.java.KoinJavaComponent
+import org.koin.java.KoinJavaComponent.inject
 
 class NoteSyncWorker(
     context: Context,
     workerParameters: WorkerParameters
 ) : CoroutineWorker(appContext = context, params = workerParameters), KoinComponent {
     private val applicationScope: CoroutineScope by inject(qualifier = named(name = APP_BACKGROUND_SCOPE))
-    private val syncRepository: SyncRepository by KoinJavaComponent.inject(clazz = SyncRepository::class.java)
-    private val noteMarkRepository: NoteMarkRepository by KoinJavaComponent.inject(
+    private val syncRepository: SyncRepository by inject(clazz = SyncRepository::class.java)
+    private val noteMarkRepository: NoteMarkRepository by inject(
         clazz = NoteMarkRepository::class.java
     )
 
