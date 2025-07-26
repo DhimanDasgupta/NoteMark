@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
@@ -93,6 +95,10 @@ class AppStateMachine(
                             applicationContext.cancelPreviousAndTriggerNewWork()
                         }
                     }
+                    collectWhileInState(flow = userRepository.getUser()) { user, state ->
+                        if (user == null) onLogoutSuccessful()
+                        user?.let { state.noChange() } ?: state.override { AppState.NotLoggedIn(connectionState = state.snapshot.connectionState) }
+                    }
                 }
                 collectWhileInState(flow = syncRepository.getSync()) { sync, state ->
                     cachedSync = sync
@@ -126,13 +132,7 @@ class AppStateMachine(
                             refreshToken = userRepository.getUser().first()?.refreshToken ?: ""
                         )
                     ).getOrNull()?.let {
-                        if (cachedSync?.deleteLocalNotesOnLogout == true) {
-                            noteMarkRepository.deleteAllLocalNotes()
-                        }
-                        cachedUser = null
-                        cachedSync = null
-                        userRepository.reset()
-                        syncRepository.reset()
+                        onLogoutSuccessful()
                         state.override {
                             AppState.NotLoggedIn(
                                 connectionState = state.snapshot.connectionState
@@ -147,11 +147,20 @@ class AppStateMachine(
     companion object {
         val defaultAppState = AppState.NotLoggedIn()
     }
+
+    private suspend fun onLogoutSuccessful() {
+        if (cachedSync?.deleteLocalNotesOnLogout == true) {
+            noteMarkRepository.deleteAllLocalNotes()
+        }
+        cachedUser = null
+        cachedSync = null
+        userRepository.reset()
+        syncRepository.reset()
+    }
 }
 
 private fun Context.cancelPreviousAndTriggerNewWork(duration: Duration = Duration.ZERO) {
     val workManager = WorkManager.getInstance(context = this)
-    workManager.cancelAllWork()
 
     val constraints = Constraints.Builder()
         .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -161,21 +170,29 @@ private fun Context.cancelPreviousAndTriggerNewWork(duration: Duration = Duratio
 
     when (duration) {
         Duration.ZERO -> {
-            workManager.enqueue(
+            workManager.cancelAllWorkByTag(tag = ONE_TIME_SYNC_WORK)
+            workManager.enqueueUniqueWork(
+                uniqueWorkName = "one_time_sync_work",
+                existingWorkPolicy = ExistingWorkPolicy.REPLACE,
                 request = OneTimeWorkRequestBuilder<NoteSyncWorker>()
                     .setConstraints(constraints)
                     .build()
             )
         }
         else -> {
-            workManager.enqueue(
+            workManager.enqueueUniquePeriodicWork(
+                uniqueWorkName = PERIODIC_SYNC_WORK,
+                existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE,
                 request = PeriodicWorkRequestBuilder<NoteSyncWorker>(
-                    repeatInterval = duration
+                    repeatInterval = duration,
+                    flexTimeInterval = Duration.ofMinutes(5)
                 ).
                 setConstraints(constraints).
-                build()
-            )
+                build())
         }
     }
 }
+
+private const val ONE_TIME_SYNC_WORK = "one_time_sync_work"
+private const val PERIODIC_SYNC_WORK = "delayed_sync_work"
 

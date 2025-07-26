@@ -1,5 +1,11 @@
 package com.dhimandasgupta.notemark.features.settings
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
@@ -41,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -321,6 +328,17 @@ private fun SyncDataRow(
         horizontalArrangement = Arrangement.spacedBy(space = 0.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val infiniteTransition = rememberInfiniteTransition(label = "InfiniteTransition")
+        val rotationAngle by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 1000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "RotationAnimation"
+        )
+
         Icon(
             painter = painterResource(id = R.drawable.ic_sync),
             contentDescription = "Settings",
@@ -328,6 +346,15 @@ private fun SyncDataRow(
             modifier = Modifier
                 .padding(horizontal = 8.dp)
                 .requiredSize(size = 24.dp)
+                .then(
+                    other = if (settingsUiModel.isSyncing) {
+                        Modifier.graphicsLayer {
+                            rotationZ = rotationAngle
+                        }
+                    } else Modifier.graphicsLayer {
+                        rotationZ = 0f
+                    }
+                )
         )
 
         Column {

@@ -33,7 +33,8 @@ data class SettingsUiModel(
     val selectedSyncInterval: String = "Manual",
     val lastSynced: String = "--",
     val deleteLocalNotesOnLogout: Boolean = false,
-    val logoutStatus: Boolean? = null
+    val logoutStatus: Boolean? = null,
+    val isSyncing: Boolean = false
 ) {
     companion object {
         val Empty = SettingsUiModel()
@@ -88,6 +89,11 @@ class SettingsPresenter(
 
                                 else -> false
                             },
+                            isSyncing = when (appState) {
+                                is AppState.LoggedIn -> appState.sync?.syncing ?: false
+
+                                else -> false
+                            }
                         )
                     }
             }

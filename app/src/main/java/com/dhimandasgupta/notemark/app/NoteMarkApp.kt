@@ -14,7 +14,7 @@ class NoteMarkApp : Application() {
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG) {
-            enableStrictMode()
+            // enableStrictMode()
         }
 
         val config = Configuration.Builder()
@@ -35,7 +35,7 @@ class NoteMarkApp : Application() {
             StrictMode.VmPolicy.Builder()
                 .detectAll()
                 .penaltyLog()
-                //.penaltyDeath() // Koin causes crash on this
+                .penaltyDeath() // Koin causes crash on this
                 .build()
         )
 
@@ -43,7 +43,7 @@ class NoteMarkApp : Application() {
             StrictMode.ThreadPolicy.Builder()
                 .detectAll()
                 .penaltyLog()
-                //.penaltyDeath()  // Koin causes crash on this
+                .penaltyDeath()  // Koin causes crash on this
                 .build()
         )
     }
