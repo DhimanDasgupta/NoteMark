@@ -9,6 +9,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.NavGraphBuilder
@@ -34,7 +35,7 @@ import com.dhimandasgupta.notemark.features.notelist.NoteListPane
 import com.dhimandasgupta.notemark.features.registration.RegistrationPane
 import com.dhimandasgupta.notemark.features.settings.SettingsPane
 import kotlinx.serialization.Serializable
-import org.koin.compose.koinInject
+import org.koin.java.KoinJavaComponent.get
 
 @Composable
 fun NoteMarkRoot(
@@ -70,7 +71,7 @@ private fun NavGraphBuilder.noteMarkGraph(
             val context = LocalActivity.current
             SideEffect { context?.setDarkStatusBarIcons(true) }
 
-            val launcherPresenter = koinInject<LauncherPresenter>()
+            val launcherPresenter: LauncherPresenter = remember { get(LauncherPresenter::class.java) }
             val launcherUiModel = launcherPresenter.uiModel()
 
             BackHandler(
@@ -114,7 +115,7 @@ private fun NavGraphBuilder.noteMarkGraph(
             val context = LocalActivity.current
             SideEffect { context?.setDarkStatusBarIcons(false) }
 
-            val loginPresenter = koinInject<LoginPresenter>()
+            val loginPresenter: LoginPresenter = remember { get(clazz = LoginPresenter::class.java) }
 
             val loginUiModel = loginPresenter.uiModel()
             val loginEvents = loginPresenter::processEvent
@@ -145,7 +146,7 @@ private fun NavGraphBuilder.noteMarkGraph(
             val context = LocalActivity.current
             SideEffect { context?.setDarkStatusBarIcons(false) }
 
-            val registrationPresenter = koinInject<RegistrationPresenter>()
+            val registrationPresenter: RegistrationPresenter = remember { get(clazz = RegistrationPresenter::class.java) }
             val registrationUiModel = registrationPresenter.uiModel()
             val registrationAction = registrationPresenter::processEvent
 
@@ -168,7 +169,7 @@ private fun NavGraphBuilder.noteMarkGraph(
             val context = LocalActivity.current
             SideEffect { context?.setDarkStatusBarIcons(true) }
 
-            val noteListPresenter = koinInject<NoteListPresenter>()
+            val noteListPresenter: NoteListPresenter = remember { get(clazz = NoteListPresenter::class.java) }
             val noteListUiModel = noteListPresenter.uiModel()
             val noteListAction = noteListPresenter::processEvent
 
@@ -194,7 +195,7 @@ private fun NavGraphBuilder.noteMarkGraph(
             val context = LocalActivity.current
             SideEffect { context?.setDarkStatusBarIcons(true) }
 
-            val addNotePresenter = koinInject<AddNotePresenter>()
+            val addNotePresenter:AddNotePresenter = remember { get(clazz = AddNotePresenter::class.java) }
             val addNoteUiModel = addNotePresenter.uiModel()
             val addNoteAction = addNotePresenter::processEvent
 
@@ -222,7 +223,7 @@ private fun NavGraphBuilder.noteMarkGraph(
             SideEffect { context?.setDarkStatusBarIcons(true) }
 
             val arguments: NoteMarkDestination.NoteEditPane = backStackEntry.toRoute()
-            val editNotePresenter = koinInject<EditNotePresenter>()
+            val editNotePresenter: EditNotePresenter = remember { get(clazz = EditNotePresenter::class.java) }
             val editNoteUiModel = editNotePresenter.uiModel()
             val editNoteAction = editNotePresenter::processEvent
 
@@ -250,7 +251,7 @@ private fun NavGraphBuilder.noteMarkGraph(
             val context = LocalActivity.current
             SideEffect { context?.setDarkStatusBarIcons(true) }
 
-            val settingsPresenter = koinInject<SettingsPresenter>()
+            val settingsPresenter: SettingsPresenter = remember { get(clazz = SettingsPresenter::class.java) }
             val settingsUiModel = settingsPresenter.uiModel()
             val settingsAction = settingsPresenter::processEvent
 

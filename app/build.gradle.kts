@@ -72,6 +72,10 @@ android {
     buildFeatures {
         buildConfig = true
     }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 sqldelight {
@@ -159,8 +163,12 @@ dependencies {
     // Protobuf
     implementation(libs.kotlin.protobuf)
 
+    // Test dependencies
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    testImplementation(kotlin("test"))
 }

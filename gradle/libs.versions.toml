@@ -25,6 +25,7 @@ datastore = "1.1.7"
 kotlinxCollectionsImmutable = "0.4.0"
 gradleProtobufPlugin = "0.9.5"
 protocKotlinLite = "4.31.1"
+turbine = "1.2.1"
 
 minSdk = "28"
 compileSdk = "36"
@@ -89,6 +90,8 @@ kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collec
 
 protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protocKotlinLite" }
 kotlin-protobuf = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protocKotlinLite" }
+
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
