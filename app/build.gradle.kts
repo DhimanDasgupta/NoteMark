@@ -133,6 +133,7 @@ dependencies {
 
     // Flow Redux
     implementation(libs.flow.redux.jvm)
+    implementation(libs.flow.redux.compose)
 
     // Molecule
     implementation(libs.molecule)

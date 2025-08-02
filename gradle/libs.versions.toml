@@ -1,10 +1,10 @@
 [versions]
-agp = "8.11.1"
+agp = "8.12.0"
 kotlin = "2.2.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.9.2"
 activityCompose = "1.10.1"
 composeBom = "2025.07.00"
@@ -13,14 +13,14 @@ androidxSplashScreen = "1.0.1"
 desugar = "2.1.5"
 sqlDelight = "2.1.0"
 ksp = "2.1.21-2.0.1"
-composeNavigation = "2.9.2"
+composeNavigation = "2.9.3"
 kotlinxSerializationJson = "1.9.0"
 coroutines = "1.10.2"
 material3WindowSizeClassAndroid = "1.3.2"
-workRuntimeKtx = "2.10.2"
+workRuntimeKtx = "2.10.3"
 flowRedux = "1.2.2"
 molecule-runtime = "2.1.0"
-ktor = "3.2.2"
+ktor = "3.2.3"
 datastore = "1.1.7"
 kotlinxCollectionsImmutable = "0.4.0"
 gradleProtobufPlugin = "0.9.5"
@@ -73,6 +73,7 @@ koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", versi
 koin-androidx-compose-navigation = { module = "io.insert-koin:koin-androidx-compose-navigation", version.ref = "koinBom" }
 
 flow-redux-jvm = { module = "com.freeletics.flowredux:flowredux-jvm", version.ref = "flowRedux" }
+flow-redux-compose = { module = "com.freeletics.flowredux:compose", version.ref = "flowRedux" }
 
 molecule = { group = "app.cash.molecule", name = "molecule-runtime", version.ref = "molecule-runtime" }
 
