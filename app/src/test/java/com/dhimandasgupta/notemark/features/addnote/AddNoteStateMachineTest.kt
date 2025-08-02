@@ -2,11 +2,8 @@ package com.dhimandasgupta.notemark.features.addnote
 
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
-import com.dhimandasgupta.notemark.data.NoteMarkRepository
-import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
-import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
-import com.dhimandasgupta.notemark.database.NoteEntity
-import kotlinx.coroutines.flow.Flow
+import com.dhimandasgupta.notemark.data.FakeFailureNoteRepository
+import com.dhimandasgupta.notemark.data.FakeSuccessfulNoteRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -15,9 +12,16 @@ class AddNoteStateMachineTest {
     @Test
     fun `test AddNoteStateMachine with default state`() = runTest {
         turbineScope {
-            val stateMachine = AddNoteStateMachine(FakeSuccessfulNoteRepository())
+            // Setup state machine
+            val stateMachine = AddNoteStateMachine(
+                noteMarkRepository = FakeSuccessfulNoteRepository()
+            )
 
-            stateMachine.state.test {
+            // Setup state flow from state machine
+            val flow = stateMachine.state
+
+            // Start flow validation
+            flow.test {
                 val initialState = awaitItem()
                 assertEquals(AddNoteStateMachine.defaultAddNoteState, initialState)
             }
@@ -27,9 +31,16 @@ class AddNoteStateMachineTest {
     @Test
     fun `test AddNoteStateMachine with title and content`() = runTest {
         turbineScope {
-            val stateMachine = AddNoteStateMachine(FakeSuccessfulNoteRepository())
+            // Setup state machine
+            val stateMachine = AddNoteStateMachine(
+                noteMarkRepository = FakeSuccessfulNoteRepository()
+            )
 
-            stateMachine.state.test {
+            // Setup state flow from state machine
+            val flow = stateMachine.state
+
+            // Start flow validation
+            flow.test {
                 val currentState = awaitItem()
                 stateMachine.dispatch(AddNoteAction.UpdateTitle("Title"))
                 assertEquals(currentState.copy(title = "Title"), awaitItem())
@@ -42,9 +53,16 @@ class AddNoteStateMachineTest {
     @Test
     fun `test AddNoteStateMachine when create note is successful`() = runTest {
         turbineScope {
-            val stateMachine = AddNoteStateMachine(FakeSuccessfulNoteRepository())
+            // Setup state machine
+            val stateMachine = AddNoteStateMachine(
+                noteMarkRepository = FakeSuccessfulNoteRepository()
+            )
 
-            stateMachine.state.test {
+            // Setup state flow from state machine
+            val flow = stateMachine.state
+
+            // Start flow validation
+            flow.test {
                 val currentState = awaitItem()
                 stateMachine.dispatch(AddNoteAction.UpdateTitle("Title"))
                 assertEquals(currentState.copy(title = "Title"), awaitItem())
@@ -59,9 +77,16 @@ class AddNoteStateMachineTest {
     @Test
     fun `test AddNoteStateMachine when create note is failed`() = runTest {
         turbineScope {
-            val stateMachine = AddNoteStateMachine(FakeFailureNoteRepository())
+            // Setup state machine
+            val stateMachine = AddNoteStateMachine(
+                noteMarkRepository = FakeFailureNoteRepository()
+            )
 
-            stateMachine.state.test {
+            // Setup state flow from state machine
+            val flow = stateMachine.state
+
+            // Start flow validation
+            flow.test {
                 val currentState = awaitItem()
                 stateMachine.dispatch(AddNoteAction.UpdateTitle("Title"))
                 assertEquals(currentState.copy(title = "Title"), awaitItem())
@@ -73,164 +98,4 @@ class AddNoteStateMachineTest {
             }
         }
     }
-}
-
-class FakeFailureNoteRepository : NoteMarkRepository {
-    override fun getAllNotes(): Flow<List<NoteEntity>> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getRemoteNotesAndSaveInDB(
-        page: Int,
-        size: Int
-    ): Result<NoteResponse> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getAllNonSyncedNotes(): List<NoteEntity> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getNoteById(noteId: Long): NoteEntity? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getNoteByUUID(uuid: String): NoteEntity? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun createNote(noteEntity: NoteEntity): NoteEntity? {
-        return null
-    }
-
-    override suspend fun updateLocalNote(
-        title: String,
-        content: String,
-        lastEditedAt: String,
-        noteEntity: NoteEntity
-    ): NoteEntity? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun createNewRemoteNote(noteEntity: NoteEntity): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun updateRemoteNote(
-        title: String,
-        content: String,
-        lastEditedAt: String,
-        noteEntity: NoteEntity
-    ): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun insertNotes(noteEntities: List<NoteEntity>): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun deleteRemoteNote(noteEntity: NoteEntity): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun deleteLocalNote(noteEntity: NoteEntity): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun deleteAllLocalNotes(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun logout(request: RefreshRequest): Result<Unit> {
-        TODO("Not yet implemented")
-    }
-
-}
-
-class FakeSuccessfulNoteRepository : NoteMarkRepository {
-    override fun getAllNotes(): Flow<List<NoteEntity>> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getRemoteNotesAndSaveInDB(
-        page: Int,
-        size: Int
-    ): Result<NoteResponse> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getAllNonSyncedNotes(): List<NoteEntity> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getNoteById(noteId: Long): NoteEntity? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getNoteByUUID(uuid: String): NoteEntity? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun createNote(noteEntity: NoteEntity): NoteEntity? {
-        return noteEntity
-    }
-
-    override suspend fun updateLocalNote(
-        title: String,
-        content: String,
-        lastEditedAt: String,
-        noteEntity: NoteEntity
-    ): NoteEntity? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun createNewRemoteNote(noteEntity: NoteEntity): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun updateRemoteNote(
-        title: String,
-        content: String,
-        lastEditedAt: String,
-        noteEntity: NoteEntity
-    ): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun insertNotes(noteEntities: List<NoteEntity>): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun deleteRemoteNote(noteEntity: NoteEntity): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun deleteLocalNote(noteEntity: NoteEntity): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun deleteAllLocalNotes(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun logout(request: RefreshRequest): Result<Unit> {
-        TODO("Not yet implemented")
-    }
-
 }
