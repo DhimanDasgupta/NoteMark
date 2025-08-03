@@ -218,7 +218,7 @@ val appModule = module {
             remoteDataSource = get()
         )
     } bind NoteMarkRepository::class
-    single {
+    factory {
         AppStateMachine(
             applicationContext = androidContext(),
             userRepository = get(),

@@ -2,18 +2,15 @@ package com.dhimandasgupta.notemark.features.login
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.compose.LifecycleStartEffect
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
 
 @Immutable
 data class LoginUiModel(
@@ -36,37 +33,30 @@ class LoginPresenter(
 
     @Composable
     fun uiModel(): LoginUiModel {
-        val scope = rememberCoroutineScope()
         var loginUiModel by remember { mutableStateOf(value = LoginUiModel.Empty) }
 
         // Receives the State from the StateMachine
-        LifecycleStartEffect(key1 = Unit) {
-            scope.launch {
-                loginStateMachine.state
-                    .flowOn(Dispatchers.Default)
-                    .catch { /* TODO if needed */  }
-                    .collect { loginState ->
-                        loginUiModel = LoginUiModel(
-                            email = loginState.email,
-                            password = loginState.password,
-                            emailError = loginState.emailError,
-                            passwordError = loginState.passwordError,
-                            loginEnabled = loginState.loginEnabled,
-                            loginSuccess = loginState.loginSuccess
-                        )
-                    }
-            }
-            onStopOrDispose { scope.cancel() }
+        LaunchedEffect(key1 = Unit) {
+            loginStateMachine.state
+                .flowOn(Dispatchers.Default)
+                .catch { /* TODO if needed */  }
+                .collect { loginState ->
+                    loginUiModel = LoginUiModel(
+                        email = loginState.email,
+                        password = loginState.password,
+                        emailError = loginState.emailError,
+                        passwordError = loginState.passwordError,
+                        loginEnabled = loginState.loginEnabled,
+                        loginSuccess = loginState.loginSuccess
+                    )
+                }
         }
 
         // Send the Events to the State Machine through Actions
-        LifecycleStartEffect(key1 = Unit) {
-            scope.launch {
-                events.collect { loginAction ->
-                    loginStateMachine.dispatch(loginAction)
-                }
+        LaunchedEffect(key1 = Unit) {
+            events.collect { loginAction ->
+                loginStateMachine.dispatch(loginAction)
             }
-            onStopOrDispose { scope.cancel() }
         }
 
         return loginUiModel

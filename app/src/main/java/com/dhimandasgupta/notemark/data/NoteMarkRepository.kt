@@ -80,7 +80,8 @@ class NoteMarkRepositoryImpl(
         title = title,
         content = content,
         lastEditedAt = lastEditedAt,
-        uuid = noteEntity.uuid
+        uuid = noteEntity.uuid,
+        synced = noteEntity.synced
     )
 
     override suspend fun insertNotes(noteEntities: List<NoteEntity>) =

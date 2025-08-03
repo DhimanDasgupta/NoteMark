@@ -2,12 +2,11 @@ package com.dhimandasgupta.notemark.features.settings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.compose.LifecycleStartEffect
 import com.dhimandasgupta.notemark.common.convertNoteTimestampToReadableFormat
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppState
@@ -15,12 +14,10 @@ import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
 
 @Immutable
 data class SettingsUiModel(
@@ -48,66 +45,62 @@ class SettingsPresenter(
 
     @Composable
     fun uiModel(): SettingsUiModel {
-        val scope = rememberCoroutineScope()
-        var logoutUiModel by remember { mutableStateOf(value = SettingsUiModel.Empty) }
+        var logoutUiModel by remember(
+            key1 = appStateMachine.state
+        ) { mutableStateOf(value = SettingsUiModel.Empty) }
 
         // Receives the State from the StateMachine
-        LifecycleStartEffect(key1 = Unit) {
-            scope.launch {
-                appStateMachine.state
-                    .flowOn(Dispatchers.Default)
-                    .catch { /* TODO if needed */ }
-                    .onStart { AppStateMachine.defaultAppState }
-                    .collect { appState ->
-                        logoutUiModel = logoutUiModel.copy(
-                            logoutStatus = when (appState) {
-                                is AppState.NotLoggedIn -> true
-                                else -> null
-                            },
-                            lastSynced = when (appState) {
-                                is AppState.LoggedIn -> appState.sync?.lastUploadedTime?.let { time ->
-                                    convertNoteTimestampToReadableFormat(isoOffsetDateTimeString = time)
-                                } ?: "--"
+        LaunchedEffect(key1 = Unit) {
+            appStateMachine.state
+                .flowOn(Dispatchers.Default)
+                .catch { /* TODO if needed */ }
+                .onStart { AppStateMachine.defaultAppState }
+                .collect { appState ->
+                    logoutUiModel = logoutUiModel.copy(
+                        logoutStatus = when (appState) {
+                            is AppState.NotLoggedIn -> true
+                            else -> null
+                        },
+                        lastSynced = when (appState) {
+                            is AppState.LoggedIn -> appState.sync?.lastUploadedTime?.let { time ->
+                                convertNoteTimestampToReadableFormat(isoOffsetDateTimeString = time)
+                            } ?: "--"
 
-                                else -> "--"
-                            },
-                            selectedSyncInterval = when (appState) {
-                                is AppState.LoggedIn -> appState.sync?.syncDuration?.let {
-                                    when (it.ordinal) {
-                                        3 -> "15 Minutes"
-                                        4 -> "30 Minutes"
-                                        5 -> "1 Hour"
-                                        else -> "Manual"
-                                    }
-                                } ?: "Manual"
+                            else -> "--"
+                        },
+                        selectedSyncInterval = when (appState) {
+                            is AppState.LoggedIn -> appState.sync?.syncDuration?.let {
+                                when (it.ordinal) {
+                                    3 -> "15 Minutes"
+                                    4 -> "30 Minutes"
+                                    5 -> "1 Hour"
+                                    else -> "Manual"
+                                }
+                            } ?: "Manual"
 
-                                else -> "Manual"
-                            },
-                            deleteLocalNotesOnLogout = when (appState) {
-                                is AppState.LoggedIn -> appState.sync?.deleteLocalNotesOnLogout
-                                    ?: false
+                            else -> "Manual"
+                        },
+                        deleteLocalNotesOnLogout = when (appState) {
+                            is AppState.LoggedIn -> appState.sync?.deleteLocalNotesOnLogout
+                                ?: false
 
-                                else -> false
-                            },
-                            isSyncing = when (appState) {
-                                is AppState.LoggedIn -> appState.sync?.syncing ?: false
+                            else -> false
+                        },
+                        isSyncing = when (appState) {
+                            is AppState.LoggedIn -> appState.sync?.syncing ?: false
 
-                                else -> false
-                            }
-                        )
-                    }
-            }
-            onStopOrDispose { scope.cancel() }
+                            else -> false
+                        }
+                    )
+                }
+
         }
 
         // Send the Events to the State Machine through Actions
-        LifecycleStartEffect(key1 = Unit) {
-            scope.launch {
-                events.collect { loginAction ->
-                    appStateMachine.dispatch(loginAction)
-                }
+        LaunchedEffect(key1 = Unit) {
+            events.collect { loginAction ->
+                appStateMachine.dispatch(loginAction)
             }
-            onStopOrDispose { scope.cancel() }
         }
 
         return logoutUiModel

@@ -2,22 +2,18 @@ package com.dhimandasgupta.notemark.features.launcher
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.compose.LifecycleResumeEffect
-import androidx.lifecycle.compose.LifecycleStartEffect
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.proto.User
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
 
 @Immutable
 data class LauncherUiModel(
@@ -36,41 +32,32 @@ class LauncherPresenter(
 
     @Composable
     fun uiModel(): LauncherUiModel {
-        val scope = rememberCoroutineScope()
         var launcherUiModel by remember(
             key1 = appStateMachine.state
         ) { mutableStateOf(value = LauncherUiModel.Empty) }
 
         // Receives the State from the StateMachine
-        LifecycleStartEffect(
-            key1 = Unit
-        ) {
-            scope.launch {
-                appStateMachine.state
-                    .flowOn(Dispatchers.Default)
-                    .catch { /* TODO if needed */  }
-                    .onStart { emit(AppStateMachine.defaultAppState) }
-                    .collect { appState ->
-                        launcherUiModel = launcherUiModel.copy(
-                            connectionState = appState.connectionState,
-                            loggedInUser = when (appState) {
-                                is AppState.NotLoggedIn -> null
-                                is AppState.LoggedIn -> appState.user
-                            }
-                        )
-                    }
-            }
-            onStopOrDispose { scope.cancel() }
+        LaunchedEffect(key1 = Unit) {
+            appStateMachine.state
+                .flowOn(Dispatchers.Default)
+                .catch { /* TODO if needed */  }
+                .onStart { emit(AppStateMachine.defaultAppState) }
+                .collect { appState ->
+                    launcherUiModel = launcherUiModel.copy(
+                        connectionState = appState.connectionState,
+                        loggedInUser = when (appState) {
+                            is AppState.NotLoggedIn -> null
+                            is AppState.LoggedIn -> appState.user
+                        }
+                    )
+                }
         }
 
         // Send the Events to the State Machine through Actions
-        LifecycleResumeEffect(key1 = Unit) {
-            scope.launch {
-                events.collect { event ->
-                    appStateMachine.dispatch(action = event)
-                }
+        LaunchedEffect(key1 = Unit) {
+            events.collect { event ->
+                appStateMachine.dispatch(action = event)
             }
-            onPauseOrDispose { scope.cancel() }
         }
 
         return launcherUiModel

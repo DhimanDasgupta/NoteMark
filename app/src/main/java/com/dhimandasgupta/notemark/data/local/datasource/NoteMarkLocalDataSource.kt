@@ -19,7 +19,8 @@ interface NoteMarkLocalDataSource {
         title: String,
         content: String,
         lastEditedAt: String,
-        uuid: String
+        uuid: String,
+        synced: Boolean
     ): NoteEntity?
 
     suspend fun insertNote(noteEntity: NoteEntity): Boolean
@@ -64,13 +65,15 @@ class NoteMarkLocalDataSourceImpl(
         title: String,
         content: String,
         lastEditedAt: String,
-        uuid: String
+        uuid: String,
+        synced: Boolean
     ): NoteEntity = withContext(context = Dispatchers.IO) {
         val result = queries.updateNote(
-            title,
-            content,
-            lastEditedAt,
-            uuid
+            title = title,
+            content = content,
+            lastEditedAt = lastEditedAt,
+            synced = synced,
+            uuid = uuid,
         )
 
         return@withContext (if (result.value == 1L) {

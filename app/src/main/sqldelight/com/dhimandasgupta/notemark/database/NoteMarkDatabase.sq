@@ -69,7 +69,7 @@ SET
     title = :title,
     content = :content,
     lastEditedAt = :lastEditedAt,
-    synced = 0
+    synced = :synced
 WHERE uuid = :uuid;
 
 -- Permanently delete a note (use with caution)

@@ -137,6 +137,7 @@ fun EditNotePane(
             modifier = Modifier.wrapContentHeight(align = Alignment.Top),
             editEnabled = updatedEditNoteUiModel.editEnable,
             onCloseClicked = onCloseClicked,
+            onCrossClicked = { editNoteAction(EditNoteAction.ModeChange(Mode.ViewMode)) },
             onSaveClicked = {
                 focusManager.clearFocus()
                 keyboardController?.hide()
@@ -180,6 +181,7 @@ fun EditNoteToolbar(
     modifier: Modifier = Modifier,
     editEnabled: Boolean = false,
     onCloseClicked: () -> Unit = {},
+    onCrossClicked: () -> Unit = {},
     onSaveClicked: () -> Unit = {}
 ) {
     AnimatedVisibility(
@@ -206,7 +208,7 @@ fun EditNoteToolbar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             SafeIconButton(
-                onClick = onCloseClicked
+                onClick = onCrossClicked
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_x),

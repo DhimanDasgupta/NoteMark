@@ -71,7 +71,7 @@ private fun NavGraphBuilder.noteMarkGraph(
             val context = LocalActivity.current
             SideEffect { context?.setDarkStatusBarIcons(true) }
 
-            val launcherPresenter: LauncherPresenter = remember { get(LauncherPresenter::class.java) }
+            val launcherPresenter: LauncherPresenter = remember { get(clazz = LauncherPresenter::class.java) }
             val launcherUiModel = launcherPresenter.uiModel()
 
             BackHandler(
