@@ -38,7 +38,11 @@ class AddNotePresenterTest {
     fun `test presenter state when title is entered`() = runTest {
         turbineScope {
             // Setup Presenter
-            val presenter = AddNotePresenter(AddNoteStateMachine(FakeSuccessfulNoteRepository()))
+            val presenter = AddNotePresenter(
+                addNoteStateMachine = AddNoteStateMachine(
+                    noteMarkRepository = FakeSuccessfulNoteRepository()
+                )
+            )
 
             // Setup uiModel flow
             val flow = moleculeFlow(mode = RecompositionMode.Immediate) { presenter.uiModel() }
@@ -57,7 +61,11 @@ class AddNotePresenterTest {
     fun `test presenter state when title and content are entered`() = runTest {
         turbineScope {
             // Setup Presenter
-            val presenter = AddNotePresenter(AddNoteStateMachine(FakeSuccessfulNoteRepository()))
+            val presenter = AddNotePresenter(
+                addNoteStateMachine = AddNoteStateMachine(
+                    noteMarkRepository = FakeSuccessfulNoteRepository()
+                )
+            )
 
             // Setup uiModel flow
             val flow = moleculeFlow(mode = RecompositionMode.Immediate) { presenter.uiModel() }
@@ -78,7 +86,11 @@ class AddNotePresenterTest {
     fun `test presenter state when title and content are entered and then saved successfully`() = runTest {
         turbineScope {
             // Setup Presenter
-            val presenter = AddNotePresenter(AddNoteStateMachine(FakeSuccessfulNoteRepository()))
+            val presenter = AddNotePresenter(
+                addNoteStateMachine = AddNoteStateMachine(
+                    noteMarkRepository = FakeSuccessfulNoteRepository()
+                )
+            )
 
             // Setup uiModel flow
             val flow = moleculeFlow(mode = RecompositionMode.Immediate) { presenter.uiModel() }
@@ -101,7 +113,11 @@ class AddNotePresenterTest {
     fun `test presenter state when title and content are entered and then save failed`() = runTest {
         turbineScope {
             // Setup Presenter
-            val presenter = AddNotePresenter(AddNoteStateMachine(FakeFailureNoteRepository()))
+            val presenter = AddNotePresenter(
+                addNoteStateMachine = AddNoteStateMachine(
+                    noteMarkRepository = FakeFailureNoteRepository()
+                )
+            )
 
             // Setup uiModel flow
             val flow = moleculeFlow(mode = RecompositionMode.Immediate) { presenter.uiModel() }

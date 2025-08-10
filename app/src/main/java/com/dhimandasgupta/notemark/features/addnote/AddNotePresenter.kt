@@ -35,15 +35,13 @@ class AddNotePresenter(
 
     @Composable
     fun uiModel(): AddNoteUiModel {
-        var addNoteUiModel by remember(
-            key1 = addNoteStateMachine.state
-        ) { mutableStateOf(value = AddNoteUiModel.Empty) }
+        var addNoteUiModel by remember(key1 = Unit) { mutableStateOf(value = AddNoteUiModel.Empty) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             addNoteStateMachine.state
-                .flowOn(Dispatchers.Default)
                 .catch { /* TODO if needed */  }
+                .flowOn(Dispatchers.Default)
                 .onStart { AddNoteStateMachine.defaultAddNoteState }
                 .collect { addNoteState ->
                     addNoteUiModel = addNoteUiModel.copy(

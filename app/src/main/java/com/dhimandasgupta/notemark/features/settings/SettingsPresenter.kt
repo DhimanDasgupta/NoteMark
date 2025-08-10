@@ -45,9 +45,7 @@ class SettingsPresenter(
 
     @Composable
     fun uiModel(): SettingsUiModel {
-        var logoutUiModel by remember(
-            key1 = appStateMachine.state
-        ) { mutableStateOf(value = SettingsUiModel.Empty) }
+        var logoutUiModel by remember(key1 = Unit) { mutableStateOf(value = SettingsUiModel.Empty) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {

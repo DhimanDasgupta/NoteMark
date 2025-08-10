@@ -40,10 +40,7 @@ class NoteListPresenter(
 
     @Composable
     fun uiModel(): NoteListUiModel {
-        var noteListUiModel by remember(
-            key1 = appStateMachine.state,
-            key2 = noteListStateMachine.state
-        ) { mutableStateOf(defaultNoteListUiModel) }
+        var noteListUiModel by remember(key1 = Unit) { mutableStateOf(defaultNoteListUiModel) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
@@ -62,7 +59,7 @@ class NoteListPresenter(
                 }
         }
 
-        LaunchedEffect(key1 = Unit) {
+        LaunchedEffect(key1 = noteListStateMachine.state) {
             noteListStateMachine.state
                 .flowOn(Dispatchers.Default)
                 .catch { /* TODO if needed */  }

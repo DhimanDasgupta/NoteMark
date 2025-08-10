@@ -33,7 +33,7 @@ class LoginPresenter(
 
     @Composable
     fun uiModel(): LoginUiModel {
-        var loginUiModel by remember { mutableStateOf(value = LoginUiModel.Empty) }
+        var loginUiModel by remember(key1 = Unit) { mutableStateOf(value = LoginUiModel.Empty) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {

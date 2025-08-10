@@ -42,15 +42,13 @@ class EditNotePresenter(
 
     @Composable
     fun uiModel(): EditNoteUiModel {
-        var editNoteUiModel by remember(
-            key1 = editNoteStateMachine.state
-        ) { mutableStateOf(value = EditNoteUiModel.Empty) }
+        var editNoteUiModel by remember(key1 = Unit) { mutableStateOf(value = EditNoteUiModel.Empty) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             editNoteStateMachine.state
                 .flowOn(Dispatchers.Default)
-                .catch { /* TODO if needed */  }
+                .catch { /* TODO if needed */ }
                 .onStart { EditNoteStateMachine.defaultEditNoteState }
                 .collect { editNoteState ->
                     editNoteUiModel = editNoteUiModel.copy(

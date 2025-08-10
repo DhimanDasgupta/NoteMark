@@ -32,9 +32,7 @@ class LauncherPresenter(
 
     @Composable
     fun uiModel(): LauncherUiModel {
-        var launcherUiModel by remember(
-            key1 = appStateMachine.state
-        ) { mutableStateOf(value = LauncherUiModel.Empty) }
+        var launcherUiModel by remember(key1 = Unit) { mutableStateOf(value = LauncherUiModel.Empty) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {

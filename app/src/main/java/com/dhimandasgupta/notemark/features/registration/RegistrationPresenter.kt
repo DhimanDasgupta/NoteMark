@@ -40,9 +40,7 @@ class RegistrationPresenter(
 
     @Composable
     fun uiModel(): RegistrationUiModel {
-        var registrationUiModel by remember(
-            key1 = registrationStateMachine.state
-        ) { mutableStateOf(value = RegistrationUiModel.Empty) }
+        var registrationUiModel by remember(key1 = Unit) { mutableStateOf(value = RegistrationUiModel.Empty) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
@@ -50,7 +48,7 @@ class RegistrationPresenter(
                 .flowOn(Dispatchers.Default)
                 .catch { /* TODO if needed */  }
                 .collect { registrationState ->
-                    registrationUiModel = RegistrationUiModel(
+                    registrationUiModel = registrationUiModel.copy(
                         userName = registrationState.userName,
                         email = registrationState.email,
                         password = registrationState.password,
