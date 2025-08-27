@@ -9,31 +9,46 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import app.cash.molecule.RecompositionMode
+import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.common.extensions.setDarkStatusBarIcons
-import com.dhimandasgupta.notemark.features.addnote.AddNotePresenter
-import com.dhimandasgupta.notemark.features.editnote.EditNotePresenter
-import com.dhimandasgupta.notemark.features.launcher.AppAction
-import com.dhimandasgupta.notemark.features.launcher.LauncherPresenter
-import com.dhimandasgupta.notemark.features.login.LoginPresenter
-import com.dhimandasgupta.notemark.features.notelist.NoteListPresenter
-import com.dhimandasgupta.notemark.features.registration.RegistrationPresenter
-import com.dhimandasgupta.notemark.features.settings.SettingsPresenter
 import com.dhimandasgupta.notemark.features.addnote.AddNotePane
-import com.dhimandasgupta.notemark.features.launcher.LauncherPane
-import com.dhimandasgupta.notemark.features.login.LoginPane
+import com.dhimandasgupta.notemark.features.addnote.AddNotePresenter
+import com.dhimandasgupta.notemark.features.addnote.AddNoteUiModel
 import com.dhimandasgupta.notemark.features.editnote.EditNotePane
+import com.dhimandasgupta.notemark.features.editnote.EditNotePresenter
+import com.dhimandasgupta.notemark.features.editnote.EditNoteUiModel
+import com.dhimandasgupta.notemark.features.launcher.AppAction
+import com.dhimandasgupta.notemark.features.launcher.LauncherPane
+import com.dhimandasgupta.notemark.features.launcher.LauncherPresenter
+import com.dhimandasgupta.notemark.features.launcher.LauncherUiModel
+import com.dhimandasgupta.notemark.features.login.LoginPane
+import com.dhimandasgupta.notemark.features.login.LoginPresenter
+import com.dhimandasgupta.notemark.features.login.LoginUiModel
 import com.dhimandasgupta.notemark.features.notelist.NoteListPane
+import com.dhimandasgupta.notemark.features.notelist.NoteListPresenter
+import com.dhimandasgupta.notemark.features.notelist.NoteListUiModel
 import com.dhimandasgupta.notemark.features.registration.RegistrationPane
+import com.dhimandasgupta.notemark.features.registration.RegistrationPresenter
+import com.dhimandasgupta.notemark.features.registration.RegistrationUiModel
 import com.dhimandasgupta.notemark.features.settings.SettingsPane
+import com.dhimandasgupta.notemark.features.settings.SettingsPresenter
+import com.dhimandasgupta.notemark.features.settings.SettingsUiModel
+import kotlinx.coroutines.cancel
 import kotlinx.serialization.Serializable
 import org.koin.java.KoinJavaComponent.get
 
@@ -72,7 +87,18 @@ private fun NavGraphBuilder.noteMarkGraph(
             SideEffect { context?.setDarkStatusBarIcons(true) }
 
             val launcherPresenter: LauncherPresenter = remember { get(clazz = LauncherPresenter::class.java) }
-            val launcherUiModel = launcherPresenter.uiModel()
+            var launcherUiModel by remember { mutableStateOf(LauncherUiModel.Empty) }
+
+            val scope = rememberCoroutineScope()
+
+            LifecycleStartEffect(key1 = Unit) {
+                scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                    launcherUiModel = launcherPresenter.uiModel()
+                }
+                onStopOrDispose {
+                    scope.cancel()
+                }
+            }
 
             BackHandler(
                 enabled = launcherUiModel.loggedInUser == null
@@ -117,8 +143,19 @@ private fun NavGraphBuilder.noteMarkGraph(
 
             val loginPresenter: LoginPresenter = remember { get(clazz = LoginPresenter::class.java) }
 
-            val loginUiModel = loginPresenter.uiModel()
+            var loginUiModel by remember { mutableStateOf(LoginUiModel.Empty) }
             val loginEvents = loginPresenter::processEvent
+
+            val scope = rememberCoroutineScope()
+
+            LifecycleStartEffect(key1 = Unit) {
+                scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                    loginUiModel = loginPresenter.uiModel()
+                }
+                onStopOrDispose {
+                    scope.cancel()
+                }
+            }
 
             LoginPane(
                 windowSizeClass = windowSizeClass,
@@ -147,8 +184,19 @@ private fun NavGraphBuilder.noteMarkGraph(
             SideEffect { context?.setDarkStatusBarIcons(false) }
 
             val registrationPresenter: RegistrationPresenter = remember { get(clazz = RegistrationPresenter::class.java) }
-            val registrationUiModel = registrationPresenter.uiModel()
+            var registrationUiModel by remember { mutableStateOf(RegistrationUiModel.Empty) }
             val registrationAction = registrationPresenter::processEvent
+
+            val scope = rememberCoroutineScope()
+
+            LifecycleStartEffect(key1 = Unit) {
+                scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                    registrationUiModel = registrationPresenter.uiModel()
+                }
+                onStopOrDispose {
+                    scope.cancel()
+                }
+            }
 
             RegistrationPane(
                 modifier = Modifier,
@@ -170,8 +218,19 @@ private fun NavGraphBuilder.noteMarkGraph(
             SideEffect { context?.setDarkStatusBarIcons(true) }
 
             val noteListPresenter: NoteListPresenter = remember { get(clazz = NoteListPresenter::class.java) }
-            val noteListUiModel = noteListPresenter.uiModel()
+            var noteListUiModel by remember { mutableStateOf(NoteListUiModel.Empty) }
             val noteListAction = noteListPresenter::processEvent
+
+            val scope = rememberCoroutineScope()
+
+            LifecycleStartEffect(key1 = Unit) {
+                scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                    noteListUiModel = noteListPresenter.uiModel()
+                }
+                onStopOrDispose {
+                    scope.cancel()
+                }
+            }
 
             NoteListPane(
                 modifier = Modifier,
@@ -196,8 +255,19 @@ private fun NavGraphBuilder.noteMarkGraph(
             SideEffect { context?.setDarkStatusBarIcons(true) }
 
             val addNotePresenter:AddNotePresenter = remember { get(clazz = AddNotePresenter::class.java) }
-            val addNoteUiModel = addNotePresenter.uiModel()
+            var addNoteUiModel by remember { mutableStateOf(AddNoteUiModel.Empty) }
             val addNoteAction = addNotePresenter::processEvent
+
+            val scope = rememberCoroutineScope()
+
+            LifecycleStartEffect(key1 = Unit) {
+                scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                    addNoteUiModel = addNotePresenter.uiModel()
+                }
+                onStopOrDispose {
+                    scope.cancel()
+                }
+            }
 
             /**
              * To make sure the collection from AppState machine is canceled
@@ -224,8 +294,19 @@ private fun NavGraphBuilder.noteMarkGraph(
 
             val arguments: NoteMarkDestination.NoteEditPane = backStackEntry.toRoute()
             val editNotePresenter: EditNotePresenter = remember { get(clazz = EditNotePresenter::class.java) }
-            val editNoteUiModel = editNotePresenter.uiModel()
+            var editNoteUiModel by remember { mutableStateOf(EditNoteUiModel.Empty) }
             val editNoteAction = editNotePresenter::processEvent
+
+            val scope = rememberCoroutineScope()
+
+            LifecycleStartEffect(key1 = Unit) {
+                scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                    editNoteUiModel = editNotePresenter.uiModel()
+                }
+                onStopOrDispose {
+                    scope.cancel()
+                }
+            }
 
             /**
              * To make sure the collection from AppState machine is canceled
@@ -252,8 +333,19 @@ private fun NavGraphBuilder.noteMarkGraph(
             SideEffect { context?.setDarkStatusBarIcons(true) }
 
             val settingsPresenter: SettingsPresenter = remember { get(clazz = SettingsPresenter::class.java) }
-            val settingsUiModel = settingsPresenter.uiModel()
+            var settingsUiModel by remember { mutableStateOf(SettingsUiModel.Empty) }
             val settingsAction = settingsPresenter::processEvent
+
+            val scope = rememberCoroutineScope()
+
+            LifecycleStartEffect(key1 = Unit) {
+                scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                    settingsUiModel = settingsPresenter.uiModel()
+                }
+                onStopOrDispose {
+                    scope.cancel()
+                }
+            }
 
             /**
              * To make sure the collection from AppState machine is canceled

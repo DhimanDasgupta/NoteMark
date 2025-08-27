@@ -27,7 +27,11 @@ data class NoteListUiModel(
     val noteEntities: ImmutableList<NoteEntity>,
     val noteLongClickedUuid: String = "",
     val showSyncProgress: Boolean = false
-)
+) {
+    companion object {
+        val Empty = defaultNoteListUiModel
+    }
+}
 
 private val defaultNoteListUiModel = NoteListUiModel(noteEntities = persistentListOf())
 
