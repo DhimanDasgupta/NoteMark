@@ -90,7 +90,6 @@ private fun NavGraphBuilder.noteMarkGraph(
             var launcherUiModel by remember { mutableStateOf(LauncherUiModel.Empty) }
 
             val scope = rememberCoroutineScope()
-
             LifecycleStartEffect(key1 = Unit) {
                 scope.launchMolecule(mode = RecompositionMode.Immediate) {
                     launcherUiModel = launcherPresenter.uiModel()
@@ -147,7 +146,6 @@ private fun NavGraphBuilder.noteMarkGraph(
             val loginEvents = loginPresenter::processEvent
 
             val scope = rememberCoroutineScope()
-
             LifecycleStartEffect(key1 = Unit) {
                 scope.launchMolecule(mode = RecompositionMode.Immediate) {
                     loginUiModel = loginPresenter.uiModel()
@@ -155,6 +153,16 @@ private fun NavGraphBuilder.noteMarkGraph(
                 onStopOrDispose {
                     scope.cancel()
                 }
+            }
+
+            /**
+             * To make sure the collection from AppState machine is canceled
+             * Otherwise FlowRedux will throw an exception
+             * */
+            BackHandler(
+                enabled = true,
+            ) {
+                navController.navigateUp()
             }
 
             LoginPane(
@@ -188,7 +196,6 @@ private fun NavGraphBuilder.noteMarkGraph(
             val registrationAction = registrationPresenter::processEvent
 
             val scope = rememberCoroutineScope()
-
             LifecycleStartEffect(key1 = Unit) {
                 scope.launchMolecule(mode = RecompositionMode.Immediate) {
                     registrationUiModel = registrationPresenter.uiModel()
@@ -196,6 +203,16 @@ private fun NavGraphBuilder.noteMarkGraph(
                 onStopOrDispose {
                     scope.cancel()
                 }
+            }
+
+            /**
+             * To make sure the collection from AppState machine is canceled
+             * Otherwise FlowRedux will throw an exception
+             * */
+            BackHandler(
+                enabled = true,
+            ) {
+                navController.navigateUp()
             }
 
             RegistrationPane(
@@ -222,7 +239,6 @@ private fun NavGraphBuilder.noteMarkGraph(
             val noteListAction = noteListPresenter::processEvent
 
             val scope = rememberCoroutineScope()
-
             LifecycleStartEffect(key1 = Unit) {
                 scope.launchMolecule(mode = RecompositionMode.Immediate) {
                     noteListUiModel = noteListPresenter.uiModel()
@@ -230,6 +246,18 @@ private fun NavGraphBuilder.noteMarkGraph(
                 onStopOrDispose {
                     scope.cancel()
                 }
+            }
+
+            val activity = LocalActivity.current
+
+            /**
+             * To make sure the collection from AppState machine is canceled
+             * Otherwise FlowRedux will throw an exception
+             * */
+            BackHandler(
+                enabled = true,
+            ) {
+                activity?.finish()
             }
 
             NoteListPane(
@@ -337,7 +365,6 @@ private fun NavGraphBuilder.noteMarkGraph(
             val settingsAction = settingsPresenter::processEvent
 
             val scope = rememberCoroutineScope()
-
             LifecycleStartEffect(key1 = Unit) {
                 scope.launchMolecule(mode = RecompositionMode.Immediate) {
                     settingsUiModel = settingsPresenter.uiModel()
