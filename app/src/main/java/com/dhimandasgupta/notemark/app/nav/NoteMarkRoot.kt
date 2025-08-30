@@ -49,6 +49,7 @@ import com.dhimandasgupta.notemark.features.settings.SettingsPane
 import com.dhimandasgupta.notemark.features.settings.SettingsPresenter
 import com.dhimandasgupta.notemark.features.settings.SettingsUiModel
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.serialization.Serializable
 import org.koin.java.KoinJavaComponent.get
 
@@ -91,8 +92,10 @@ private fun NavGraphBuilder.noteMarkGraph(
 
             val scope = rememberCoroutineScope()
             LifecycleStartEffect(key1 = Unit) {
-                scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                    launcherUiModel = launcherPresenter.uiModel()
+                if (scope.isActive) {
+                    scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                        launcherUiModel = launcherPresenter.uiModel()
+                    }
                 }
                 onStopOrDispose {
                     scope.cancel()
@@ -147,8 +150,10 @@ private fun NavGraphBuilder.noteMarkGraph(
 
             val scope = rememberCoroutineScope()
             LifecycleStartEffect(key1 = Unit) {
-                scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                    loginUiModel = loginPresenter.uiModel()
+                if (scope.isActive) {
+                    scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                        loginUiModel = loginPresenter.uiModel()
+                    }
                 }
                 onStopOrDispose {
                     scope.cancel()
@@ -197,8 +202,10 @@ private fun NavGraphBuilder.noteMarkGraph(
 
             val scope = rememberCoroutineScope()
             LifecycleStartEffect(key1 = Unit) {
-                scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                    registrationUiModel = registrationPresenter.uiModel()
+                if (scope.isActive) {
+                    scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                        registrationUiModel = registrationPresenter.uiModel()
+                    }
                 }
                 onStopOrDispose {
                     scope.cancel()
@@ -240,15 +247,15 @@ private fun NavGraphBuilder.noteMarkGraph(
 
             val scope = rememberCoroutineScope()
             LifecycleStartEffect(key1 = Unit) {
-                scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                    noteListUiModel = noteListPresenter.uiModel()
+                if (scope.isActive) {
+                    scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                        noteListUiModel = noteListPresenter.uiModel()
+                    }
                 }
                 onStopOrDispose {
                     scope.cancel()
                 }
             }
-
-            val activity = LocalActivity.current
 
             /**
              * To make sure the collection from AppState machine is canceled
@@ -257,7 +264,7 @@ private fun NavGraphBuilder.noteMarkGraph(
             BackHandler(
                 enabled = true,
             ) {
-                activity?.finish()
+                context?.finish()
             }
 
             NoteListPane(
@@ -289,8 +296,10 @@ private fun NavGraphBuilder.noteMarkGraph(
             val scope = rememberCoroutineScope()
 
             LifecycleStartEffect(key1 = Unit) {
-                scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                    addNoteUiModel = addNotePresenter.uiModel()
+                if (scope.isActive) {
+                    scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                        addNoteUiModel = addNotePresenter.uiModel()
+                    }
                 }
                 onStopOrDispose {
                     scope.cancel()
@@ -328,8 +337,10 @@ private fun NavGraphBuilder.noteMarkGraph(
             val scope = rememberCoroutineScope()
 
             LifecycleStartEffect(key1 = Unit) {
-                scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                    editNoteUiModel = editNotePresenter.uiModel()
+                if (scope.isActive) {
+                    scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                        editNoteUiModel = editNotePresenter.uiModel()
+                    }
                 }
                 onStopOrDispose {
                     scope.cancel()
@@ -366,8 +377,10 @@ private fun NavGraphBuilder.noteMarkGraph(
 
             val scope = rememberCoroutineScope()
             LifecycleStartEffect(key1 = Unit) {
-                scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                    settingsUiModel = settingsPresenter.uiModel()
+                if (scope.isActive) {
+                    scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                        settingsUiModel = settingsPresenter.uiModel()
+                    }
                 }
                 onStopOrDispose {
                     scope.cancel()
