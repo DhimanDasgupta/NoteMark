@@ -43,6 +43,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.innerShadow
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -448,6 +450,15 @@ private fun NoteItem(
             .combinedClickable(
                 onClick = { onNoteClicked(note.uuid) },
                 onLongClick = { onNoteLongClicked(note.uuid) }
+            )
+            .innerShadow(
+                shape = shapes.medium,
+                shadow = Shadow(
+                    radius = 12.dp,
+                    color = colorScheme.primary,
+                    spread = 4.dp,
+                    alpha = 0.4f
+                )
             )
             .padding(all = 16.dp)
     ) {
