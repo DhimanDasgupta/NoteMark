@@ -38,7 +38,7 @@ class LauncherPresenter(
         LaunchedEffect(key1 = Unit) {
             appStateMachine.state
                 .flowOn(Dispatchers.Default)
-                .catch { /* TODO if needed */  }
+                .catch { /* TODO if needed */ }
                 .onStart { emit(AppStateMachine.defaultAppState) }
                 .collect { appState ->
                     launcherUiModel = launcherUiModel.copy(

@@ -40,7 +40,7 @@ class AddNotePresenter(
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             addNoteStateMachine.state
-                .catch { /* TODO if needed */  }
+                .catch { /* TODO if needed */ }
                 .flowOn(Dispatchers.Default)
                 .onStart { AddNoteStateMachine.defaultAddNoteState }
                 .collect { addNoteState ->

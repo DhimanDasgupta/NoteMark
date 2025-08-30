@@ -19,9 +19,10 @@ class AppPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            appStateMachine.state.collect { appState ->
-                applicationState = appState
-            }
+            appStateMachine.state
+                .collect { appState ->
+                    applicationState = appState
+                }
         }
 
         // Send the Events to the State Machine through Actions

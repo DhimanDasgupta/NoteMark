@@ -66,7 +66,7 @@ class NoteListPresenter(
         LaunchedEffect(key1 = Unit) {
             noteListStateMachine.state
                 .flowOn(Dispatchers.Default)
-                .catch { /* TODO if needed */  }
+                .catch { /* TODO if needed */ }
                 .onStart { NoteListStateMachine.defaultNoteListState }
                 .collect { noteListState ->
                     noteListUiModel = when (noteListState) {

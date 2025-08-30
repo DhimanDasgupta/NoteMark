@@ -46,7 +46,7 @@ class RegistrationPresenter(
         LaunchedEffect(key1 = Unit) {
             registrationStateMachine.state
                 .flowOn(Dispatchers.Default)
-                .catch { /* TODO if needed */  }
+                .catch { /* TODO if needed */ }
                 .collect { registrationState ->
                     registrationUiModel = registrationUiModel.copy(
                         userName = registrationState.userName,

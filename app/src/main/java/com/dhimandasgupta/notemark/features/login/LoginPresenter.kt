@@ -39,7 +39,7 @@ class LoginPresenter(
         LaunchedEffect(key1 = Unit) {
             loginStateMachine.state
                 .flowOn(Dispatchers.Default)
-                .catch { /* TODO if needed */  }
+                .catch { /* TODO if needed */ }
                 .collect { loginState ->
                     loginUiModel = LoginUiModel(
                         email = loginState.email,
