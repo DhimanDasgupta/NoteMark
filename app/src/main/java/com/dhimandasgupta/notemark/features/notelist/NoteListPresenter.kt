@@ -63,7 +63,7 @@ class NoteListPresenter(
                 }
         }
 
-        LaunchedEffect(key1 = noteListStateMachine.state) {
+        LaunchedEffect(key1 = Unit) {
             noteListStateMachine.state
                 .flowOn(Dispatchers.Default)
                 .catch { /* TODO if needed */  }
