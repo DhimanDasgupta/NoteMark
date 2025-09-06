@@ -92,7 +92,7 @@ fun NoteListPane(
 
     Box(
         modifier = modifier
-            .background(color = colorResource(id = R.color.splash_blue_background))
+            .background(color = colorScheme.surfaceContainerLow)
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {

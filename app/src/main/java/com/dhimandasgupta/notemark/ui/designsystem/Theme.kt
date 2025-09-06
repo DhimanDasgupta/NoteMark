@@ -5,6 +5,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -22,14 +23,14 @@ val LightColorScheme = lightColorScheme(
     error = Error
 )
 
-private val DarkColorScheme = lightColorScheme(
+private val DarkColorScheme = darkColorScheme(
     primary = PrimaryDark,
     surface = SurfaceDark,
     surfaceContainerLowest = SurfaceLowestDark,
     background = BackgroundDark,
     onSurface = OnSurfaceDark,
     onSurfaceVariant = OnSurfaceVariantDark,
-    error = Error
+    error = ErrorDark
 )
 
 val Shapes = Shapes(
@@ -56,7 +57,7 @@ fun NoteMarkTheme(
     }
 
     MaterialTheme(
-        colorScheme = LightColorScheme,
+        colorScheme = colorScheme,
         typography = Typography,
         shapes = Shapes,
         content = content
