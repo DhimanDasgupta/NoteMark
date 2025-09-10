@@ -63,6 +63,7 @@ import com.dhimandasgupta.notemark.ui.TabletExpandedPortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
+import com.dhimandasgupta.notemark.ui.common.alignToSafeDrawing
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
@@ -260,7 +261,9 @@ private fun RightPane(
         LaunchedEffect(key1 = userName) { registrationAction(UserNameEntered(userName)) }
 
         NoteMarkTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .alignToSafeDrawing(),
             label = "Username",
             enteredText = userName,
             hintText = "John.doe",
@@ -276,7 +279,9 @@ private fun RightPane(
         LaunchedEffect(key1 = email) { registrationAction(EmailEntered(email)) }
 
         NoteMarkTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .alignToSafeDrawing(),
             label = "Email",
             enteredText = email,
             hintText = "john.doe@gmail.com",
@@ -289,7 +294,9 @@ private fun RightPane(
         LaunchedEffect(key1 = password) { registrationAction(PasswordEntered(password)) }
 
         NoteMarkPasswordTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .alignToSafeDrawing(),
             label = "Password",
             enteredText = password,
             hintText = "Password",
@@ -310,7 +317,9 @@ private fun RightPane(
         }
 
         NoteMarkPasswordTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .alignToSafeDrawing(),
             label = "Repeat password",
             enteredText = repeatPassword,
             hintText = "Password",

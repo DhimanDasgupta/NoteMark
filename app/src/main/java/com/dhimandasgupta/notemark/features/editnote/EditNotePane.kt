@@ -69,6 +69,7 @@ import com.dhimandasgupta.notemark.ui.TabletExpandedPortraitPreview
 import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
+import com.dhimandasgupta.notemark.ui.common.alignToSafeDrawing
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
@@ -324,7 +325,8 @@ fun EditNoteBody(
                 textStyle = typography.titleLarge,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight(align = Alignment.Top),
+                    .wrapContentHeight(align = Alignment.Top)
+                    .alignToSafeDrawing(),
                 visualTransformation = VisualTransformation.None,
                 placeholder = { Text(text = "Note title", style = typography.titleLarge) },
                 colors = OutlinedTextFieldDefaults.colors().copy(
@@ -378,7 +380,8 @@ fun EditNoteBody(
                 textStyle = typography.bodyLarge,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight(align = Alignment.Top),
+                    .wrapContentHeight(align = Alignment.Top)
+                    .alignToSafeDrawing(),
                 visualTransformation = VisualTransformation.None,
                 placeholder = {
                     Text(
