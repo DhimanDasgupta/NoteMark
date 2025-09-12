@@ -54,9 +54,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -363,6 +365,15 @@ fun NoteMarkFAB(
                     )
                 ),
                 shape = shapes.medium
+            )
+            .innerShadow(
+                shape = shapes.medium,
+                shadow = Shadow(
+                    radius = 2.dp,
+                    color = colorScheme.onPrimary,
+                    spread = 2.dp,
+                    alpha = 0.5f
+                )
             ),
         elevation = FloatingActionButtonDefaults.elevation(
             defaultElevation = 0.dp,
