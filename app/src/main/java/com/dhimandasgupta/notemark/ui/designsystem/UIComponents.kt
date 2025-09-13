@@ -1,5 +1,6 @@
 package com.dhimandasgupta.notemark.ui.designsystem
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
@@ -183,7 +184,9 @@ fun NoteMarkTextField(
             )
         )
 
-        if (explanationText.isNotEmpty()) {
+        AnimatedVisibility(
+            visible = explanationText.isNotEmpty()
+        ) {
             Text(
                 text = explanationText,
                 style = typography.bodySmall,
@@ -192,7 +195,9 @@ fun NoteMarkTextField(
             )
         }
 
-        if (errorText.isNotEmpty()) {
+        AnimatedVisibility(
+            visible = errorText.isNotEmpty()
+        ) {
             Text(
                 text = errorText,
                 style = typography.bodySmall,
@@ -298,7 +303,9 @@ fun NoteMarkPasswordTextField(
             )
         )
 
-        if (explanationText.isNotEmpty()) {
+        AnimatedVisibility(
+            visible = explanationText.isNotEmpty()
+        ) {
             Text(
                 text = explanationText,
                 style = typography.bodySmall,
@@ -307,7 +314,9 @@ fun NoteMarkPasswordTextField(
             )
         }
 
-        if (errorText.isNotEmpty()) {
+        AnimatedVisibility(
+            visible = errorText.isNotEmpty()
+        ) {
             Text(
                 text = errorText,
                 style = typography.bodySmall,

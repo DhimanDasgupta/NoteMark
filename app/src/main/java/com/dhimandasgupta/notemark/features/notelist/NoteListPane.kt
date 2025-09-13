@@ -1,5 +1,10 @@
 package com.dhimandasgupta.notemark.features.notelist
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,10 +28,12 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
@@ -35,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -211,6 +219,13 @@ fun NoteListWithNotes(
         }
     }
 
+    val scrollState = rememberLazyStaggeredGridState()
+    val shouldShowFAB by remember {
+        derivedStateOf {
+            scrollState.firstVisibleItemIndex == 0 && !scrollState.isScrollInProgress
+        }
+    }
+
     Column(
         modifier = modifier.fillMaxSize()
     ) {
@@ -238,16 +253,33 @@ fun NoteListWithNotes(
                 modifier = Modifier.fillMaxSize(),
                 columnCount = columnCount,
                 maxLength = maxLength,
+                state = scrollState,
                 noteListUiModel = noteListState,
                 onNoteClicked = onNoteClicked,
                 onNoteLongClicked = onNoteLongClicked
             )
-            NoteMarkFAB(
-                modifier = Modifier
-                    .padding(all = 16.dp)
-                    .align(Alignment.BottomEnd),
-                onClick = onFabClicked,
-            )
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.End
+            ) {
+                AnimatedVisibility(
+                    visible = shouldShowFAB,
+                    enter = fadeIn() + slideInVertically(
+                        initialOffsetY = { it/2 }
+                    ),
+                    exit = fadeOut() + slideOutVertically(
+                        targetOffsetY = { it/2 }
+                    ),
+                ) {
+                    NoteMarkFAB(
+                        modifier = Modifier
+                            .padding(all = 16.dp),
+                        onClick = onFabClicked,
+                    )
+                }
+            }
         }
     }
 }
@@ -376,11 +408,13 @@ private fun NoteGrid(
     modifier: Modifier = Modifier,
     columnCount: Int,
     maxLength: Int,
+    state: LazyStaggeredGridState,
     noteListUiModel: NoteListUiModel,
     onNoteClicked: (String) -> Unit = {},
     onNoteLongClicked: (String) -> Unit = {}
 ) {
     LazyVerticalStaggeredGrid(
+        state = state,
         columns = StaggeredGridCells.Fixed(count = columnCount),
         contentPadding = PaddingValues(all = 8.dp),
         verticalItemSpacing = 8.dp,
