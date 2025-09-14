@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -84,341 +85,433 @@ private fun NavGraphBuilder.noteMarkGraph(
         startDestination = NoteMarkDestination.LauncherPane
     ) {
         composable<NoteMarkDestination.LauncherPane> {
-            val context = LocalActivity.current
-            SideEffect { context?.setDarkStatusBarIcons(true) }
-
-            val launcherPresenter: LauncherPresenter = remember { get(clazz = LauncherPresenter::class.java) }
-            var launcherUiModel by remember { mutableStateOf(LauncherUiModel.Empty) }
-
-            val scope = rememberCoroutineScope()
-            LifecycleStartEffect(key1 = Unit) {
-                if (scope.isActive) {
-                    scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                        launcherUiModel = launcherPresenter.uiModel()
-                    }
-                }
-                onStopOrDispose {
-                    scope.cancel()
-                }
-            }
-
-            BackHandler(
-                enabled = launcherUiModel.loggedInUser == null
-            ) {
-                context?.finish()
-            }
-
             LauncherPane(
+                modifier = Modifier,
                 windowSizeClass = windowSizeClass,
-                launcherUiModel = launcherUiModel,
-                navigateToAfterLogin = {
-                    if (launcherUiModel.loggedInUser == null) {
-                        Toast.makeText(context, "Oops!!! Please login first to get started", Toast.LENGTH_LONG).show()
-                        return@LauncherPane
-                    }
-                    navController.navigate(route = NoteMarkDestination.NoteListPane) {
-                        popUpTo(route = NoteMarkDestination.LauncherPane) {
-                            inclusive = true
-                        }
-                    }
-                },
-                navigateToLogin = {
-                    navController.navigate(route = NoteMarkDestination.LoginPane) {
-                        popUpTo(route = NoteMarkDestination.LauncherPane) {
-                            inclusive = true
-                        }
-                    }
-                },
-                navigateToList = {
-                    navController.navigate(route = NoteMarkDestination.NoteListPane) {
-                        popUpTo(route = NoteMarkDestination.LauncherPane) {
-                            inclusive = true
-                        }
-                    }
-                }
+                navController = navController
             )
         }
 
         composable<NoteMarkDestination.LoginPane> {
-            val context = LocalActivity.current
-            SideEffect { context?.setDarkStatusBarIcons(false) }
-
-            val loginPresenter: LoginPresenter = remember { get(clazz = LoginPresenter::class.java) }
-
-            var loginUiModel by remember { mutableStateOf(LoginUiModel.Empty) }
-            val loginEvents = loginPresenter::processEvent
-
-            val scope = rememberCoroutineScope()
-            LifecycleStartEffect(key1 = Unit) {
-                if (scope.isActive) {
-                    scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                        loginUiModel = loginPresenter.uiModel()
-                    }
-                }
-                onStopOrDispose {
-                    scope.cancel()
-                }
-            }
-
-            /**
-             * To make sure the collection from AppState machine is canceled
-             * Otherwise FlowRedux will throw an exception
-             * */
-            BackHandler(
-                enabled = true,
-            ) {
-                navController.navigateUp()
-            }
-
             LoginPane(
+                modifier = Modifier,
                 windowSizeClass = windowSizeClass,
-                navigateToAfterLogin = {
-                    navController.navigate(route = NoteMarkDestination.NoteListPane) {
-                        popUpTo(route = NoteMarkDestination.LoginPane) {
-                            inclusive = true
-                        }
-                    }
-                },
-                navigateToRegistration = {
-                    navController.navigate(route = NoteMarkDestination.RegistrationPane) {
-                        popUpTo(route = NoteMarkDestination.LoginPane) {
-                            inclusive = true
-                        }
-                    }
-                },
-                loginUiModel = loginUiModel,
-                loginAction = loginEvents,
-                modifier = Modifier
+                navController = navController
             )
         }
 
         composable<NoteMarkDestination.RegistrationPane> {
-            val context = LocalActivity.current
-            SideEffect { context?.setDarkStatusBarIcons(false) }
-
-            val registrationPresenter: RegistrationPresenter = remember { get(clazz = RegistrationPresenter::class.java) }
-            var registrationUiModel by remember { mutableStateOf(RegistrationUiModel.Empty) }
-            val registrationAction = registrationPresenter::processEvent
-
-            val scope = rememberCoroutineScope()
-            LifecycleStartEffect(key1 = Unit) {
-                if (scope.isActive) {
-                    scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                        registrationUiModel = registrationPresenter.uiModel()
-                    }
-                }
-                onStopOrDispose {
-                    scope.cancel()
-                }
-            }
-
-            /**
-             * To make sure the collection from AppState machine is canceled
-             * Otherwise FlowRedux will throw an exception
-             * */
-            BackHandler(
-                enabled = true,
-            ) {
-                navController.navigateUp()
-            }
-
             RegistrationPane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
-                navigateToLogin = {
-                    navController.navigate(route = NoteMarkDestination.LoginPane) {
-                        popUpTo(route = NoteMarkDestination.RegistrationPane) {
-                            inclusive = true
-                        }
-                    }
-                },
-                registrationUiModel = registrationUiModel,
-                registrationAction = registrationAction,
+                navController = navController
             )
         }
 
         composable<NoteMarkDestination.NoteListPane> {
-            val context = LocalActivity.current
-            SideEffect { context?.setDarkStatusBarIcons(true) }
-
-            val noteListPresenter: NoteListPresenter = remember { get(clazz = NoteListPresenter::class.java) }
-            var noteListUiModel by remember { mutableStateOf(NoteListUiModel.Empty) }
-            val noteListAction = noteListPresenter::processEvent
-
-            val scope = rememberCoroutineScope()
-            LifecycleStartEffect(key1 = Unit) {
-                if (scope.isActive) {
-                    scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                        noteListUiModel = noteListPresenter.uiModel()
-                    }
-                }
-                onStopOrDispose {
-                    scope.cancel()
-                }
-            }
-
-            /**
-             * To make sure the collection from AppState machine is canceled
-             * Otherwise FlowRedux will throw an exception
-             * */
-            BackHandler(
-                enabled = true,
-            ) {
-                context?.finish()
-            }
-
             NoteListPane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
-                noteListUiModel = noteListUiModel,
-                noteListAction = noteListAction,
-                onNoteClicked = { uuid ->
-                    navController.navigate(route = NoteMarkDestination.NoteEditPane(noteId = uuid))
-                },
-                onFabClicked = {
-                    navController.navigate(route = NoteMarkDestination.NoteCreatePane)
-                },
-                onSettingsClicked = {
-                    navController.navigate(route = NoteMarkDestination.SettingsPane)
-                },
-                onProfileClicked = {}
+                navController = navController
             )
         }
 
         composable<NoteMarkDestination.NoteCreatePane> {
-            val context = LocalActivity.current
-            SideEffect { context?.setDarkStatusBarIcons(true) }
-
-            val addNotePresenter:AddNotePresenter = remember { get(clazz = AddNotePresenter::class.java) }
-            var addNoteUiModel by remember { mutableStateOf(AddNoteUiModel.Empty) }
-            val addNoteAction = addNotePresenter::processEvent
-
-            val scope = rememberCoroutineScope()
-
-            LifecycleStartEffect(key1 = Unit) {
-                if (scope.isActive) {
-                    scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                        addNoteUiModel = addNotePresenter.uiModel()
-                    }
-                }
-                onStopOrDispose {
-                    scope.cancel()
-                }
-            }
-
-            /**
-             * To make sure the collection from AppState machine is canceled
-             * Otherwise FlowRedux will throw an exception
-             * */
-            BackHandler(
-                enabled = true,
-            ) {
-                navController.navigateUp()
-            }
-
-            AddNotePane(
+            NoteCreatePane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
-                addNoteUiModel = addNoteUiModel,
-                addNoteAction = addNoteAction,
-                onBackClicked = { navController.navigateUp() }
+                navController = navController
             )
         }
 
         composable<NoteMarkDestination.NoteEditPane> { backStackEntry ->
-            val context = LocalActivity.current
-            SideEffect { context?.setDarkStatusBarIcons(true) }
-
-            val arguments: NoteMarkDestination.NoteEditPane = backStackEntry.toRoute()
-            val editNotePresenter: EditNotePresenter = remember { get(clazz = EditNotePresenter::class.java) }
-            var editNoteUiModel by remember { mutableStateOf(EditNoteUiModel.Empty) }
-            val editNoteAction = editNotePresenter::processEvent
-
-            val scope = rememberCoroutineScope()
-
-            LifecycleStartEffect(key1 = Unit) {
-                if (scope.isActive) {
-                    scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                        editNoteUiModel = editNotePresenter.uiModel()
-                    }
-                }
-                onStopOrDispose {
-                    scope.cancel()
-                }
-            }
-
-            /**
-             * To make sure the collection from AppState machine is canceled
-             * Otherwise FlowRedux will throw an exception
-             * */
-            BackHandler(
-                enabled = true,
-            ) {
-                navController.navigateUp()
-            }
-
-            EditNotePane(
+            NoteEditPane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
-                noteId = arguments.noteId,
-                editNoteUiModel = editNoteUiModel,
-                editNoteAction = editNoteAction,
-                onCloseClicked = { navController.navigateUp() }
+                navController = navController,
+                backStackEntry = backStackEntry
             )
         }
 
         composable<NoteMarkDestination.SettingsPane> {
-            val context = LocalActivity.current
-            SideEffect { context?.setDarkStatusBarIcons(true) }
-
-            val settingsPresenter: SettingsPresenter = remember { get(clazz = SettingsPresenter::class.java) }
-            var settingsUiModel by remember { mutableStateOf(SettingsUiModel.Empty) }
-            val settingsAction = settingsPresenter::processEvent
-
-            val scope = rememberCoroutineScope()
-            LifecycleStartEffect(key1 = Unit) {
-                if (scope.isActive) {
-                    scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                        settingsUiModel = settingsPresenter.uiModel()
-                    }
-                }
-                onStopOrDispose {
-                    scope.cancel()
-                }
-            }
-
-            /**
-             * To make sure the collection from AppState machine is canceled
-             * Otherwise FlowRedux will throw an exception
-             * */
-            BackHandler(
-                enabled = true,
-            ) {
-                navController.navigateUp()
-            }
-
             SettingsPane(
                 modifier = Modifier,
-                settingsUiModel = settingsUiModel,
-                settingsAction = settingsAction,
-                onBackClicked = { navController.navigateUp() },
-                onLogoutSuccessful = {
-                    navController.navigate(route = NoteMarkDestination.LauncherPane) {
-                        launchSingleTop = true
-                    }
-                },
-                onDeleteNoteCheckChanged = {
-                    settingsAction(AppAction.DeleteLocalNotesOnLogout(deleteOnLogout = !settingsUiModel.deleteLocalNotesOnLogout))
-                },
-                onLogoutClicked = {
-                    settingsAction(AppAction.AppLogout)
-                }
+                navController = navController
             )
         }
     }
 }
 
-object NoteMarkDestination {
+@Composable
+private fun LauncherPane(
+    modifier: Modifier = Modifier,
+    windowSizeClass: WindowSizeClass,
+    navController: NavHostController
+) {
+    val context = LocalActivity.current
+    SideEffect { context?.setDarkStatusBarIcons(true) }
+
+    val launcherPresenter: LauncherPresenter = remember { get(clazz = LauncherPresenter::class.java) }
+    var launcherUiModel by remember { mutableStateOf(LauncherUiModel.Empty) }
+
+    val scope = rememberCoroutineScope()
+    LifecycleStartEffect(key1 = Unit) {
+        if (scope.isActive) {
+            scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                launcherUiModel = launcherPresenter.uiModel()
+            }
+        }
+        onStopOrDispose {
+            scope.cancel()
+        }
+    }
+
+    BackHandler(
+        enabled = launcherUiModel.loggedInUser == null
+    ) {
+        context?.finish()
+    }
+
+    LauncherPane(
+        modifier = modifier,
+        windowSizeClass = windowSizeClass,
+        launcherUiModel = launcherUiModel,
+        navigateToAfterLogin = {
+            if (launcherUiModel.loggedInUser == null) {
+                Toast.makeText(context, "Oops!!! Please login first to get started", Toast.LENGTH_LONG).show()
+                return@LauncherPane
+            }
+            navController.navigate(route = NoteMarkDestination.NoteListPane) {
+                popUpTo(route = NoteMarkDestination.LauncherPane) {
+                    inclusive = true
+                }
+            }
+        },
+        navigateToLogin = {
+            navController.navigate(route = NoteMarkDestination.LoginPane) {
+                popUpTo(route = NoteMarkDestination.LauncherPane) {
+                    inclusive = true
+                }
+            }
+        },
+        navigateToList = {
+            navController.navigate(route = NoteMarkDestination.NoteListPane) {
+                popUpTo(route = NoteMarkDestination.LauncherPane) {
+                    inclusive = true
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun LoginPane(
+    modifier: Modifier = Modifier,
+    windowSizeClass: WindowSizeClass,
+    navController: NavHostController
+) {
+    val context = LocalActivity.current
+    SideEffect { context?.setDarkStatusBarIcons(false) }
+
+    val loginPresenter: LoginPresenter = remember { get(clazz = LoginPresenter::class.java) }
+
+    var loginUiModel by remember { mutableStateOf(LoginUiModel.Empty) }
+    val loginEvents = loginPresenter::processEvent
+
+    val scope = rememberCoroutineScope()
+    LifecycleStartEffect(key1 = Unit) {
+        if (scope.isActive) {
+            scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                loginUiModel = loginPresenter.uiModel()
+            }
+        }
+        onStopOrDispose {
+            scope.cancel()
+        }
+    }
+
+    /**
+     * To make sure the collection from AppState machine is canceled
+     * Otherwise FlowRedux will throw an exception
+     * */
+    BackHandler(
+        enabled = true,
+    ) {
+        navController.navigateUp()
+    }
+
+    LoginPane(
+        modifier = modifier,
+        windowSizeClass = windowSizeClass,
+        navigateToAfterLogin = {
+            navController.navigate(route = NoteMarkDestination.NoteListPane) {
+                popUpTo(route = NoteMarkDestination.LoginPane) {
+                    inclusive = true
+                }
+            }
+        },
+        navigateToRegistration = {
+            navController.navigate(route = NoteMarkDestination.RegistrationPane) {
+                popUpTo(route = NoteMarkDestination.LoginPane) {
+                    inclusive = true
+                }
+            }
+        },
+        loginUiModel = loginUiModel,
+        loginAction = loginEvents
+    )
+}
+
+@Composable
+private fun RegistrationPane(
+    modifier: Modifier = Modifier,
+    windowSizeClass: WindowSizeClass,
+    navController: NavHostController
+) {
+    val context = LocalActivity.current
+    SideEffect { context?.setDarkStatusBarIcons(false) }
+
+    val registrationPresenter: RegistrationPresenter = remember { get(clazz = RegistrationPresenter::class.java) }
+    var registrationUiModel by remember { mutableStateOf(RegistrationUiModel.Empty) }
+    val registrationAction = registrationPresenter::processEvent
+
+    val scope = rememberCoroutineScope()
+    LifecycleStartEffect(key1 = Unit) {
+        if (scope.isActive) {
+            scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                registrationUiModel = registrationPresenter.uiModel()
+            }
+        }
+        onStopOrDispose {
+            scope.cancel()
+        }
+    }
+
+    /**
+     * To make sure the collection from AppState machine is canceled
+     * Otherwise FlowRedux will throw an exception
+     * */
+    BackHandler(
+        enabled = true,
+    ) {
+        navController.navigateUp()
+    }
+
+    RegistrationPane(
+        modifier = modifier,
+        windowSizeClass = windowSizeClass,
+        navigateToLogin = {
+            navController.navigate(route = NoteMarkDestination.LoginPane) {
+                popUpTo(route = NoteMarkDestination.RegistrationPane) {
+                    inclusive = true
+                }
+            }
+        },
+        registrationUiModel = registrationUiModel,
+        registrationAction = registrationAction,
+    )
+}
+
+@Composable
+private fun NoteListPane(
+    modifier: Modifier = Modifier,
+    windowSizeClass: WindowSizeClass,
+    navController: NavHostController
+) {
+    val context = LocalActivity.current
+    SideEffect { context?.setDarkStatusBarIcons(true) }
+
+    val noteListPresenter: NoteListPresenter = remember { get(clazz = NoteListPresenter::class.java) }
+    var noteListUiModel by remember { mutableStateOf(NoteListUiModel.Empty) }
+    val noteListAction = noteListPresenter::processEvent
+
+    val scope = rememberCoroutineScope()
+    LifecycleStartEffect(key1 = Unit) {
+        if (scope.isActive) {
+            scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                noteListUiModel = noteListPresenter.uiModel()
+            }
+        }
+        onStopOrDispose {
+            scope.cancel()
+        }
+    }
+
+    /**
+     * To make sure the collection from AppState machine is canceled
+     * Otherwise FlowRedux will throw an exception
+     * */
+    BackHandler(
+        enabled = true,
+    ) {
+        context?.finish()
+    }
+
+    NoteListPane(
+        modifier = modifier,
+        windowSizeClass = windowSizeClass,
+        noteListUiModel = noteListUiModel,
+        noteListAction = noteListAction,
+        onNoteClicked = { uuid ->
+            navController.navigate(route = NoteMarkDestination.NoteEditPane(noteId = uuid))
+        },
+        onFabClicked = {
+            navController.navigate(route = NoteMarkDestination.NoteCreatePane)
+        },
+        onSettingsClicked = {
+            navController.navigate(route = NoteMarkDestination.SettingsPane)
+        },
+        onProfileClicked = {}
+    )
+}
+
+@Composable
+private fun NoteCreatePane(
+    modifier: Modifier = Modifier,
+    windowSizeClass: WindowSizeClass,
+    navController: NavHostController
+) {
+    val context = LocalActivity.current
+    SideEffect { context?.setDarkStatusBarIcons(true) }
+
+    val addNotePresenter:AddNotePresenter = remember { get(clazz = AddNotePresenter::class.java) }
+    var addNoteUiModel by remember { mutableStateOf(AddNoteUiModel.Empty) }
+    val addNoteAction = addNotePresenter::processEvent
+
+    val scope = rememberCoroutineScope()
+
+    LifecycleStartEffect(key1 = Unit) {
+        if (scope.isActive) {
+            scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                addNoteUiModel = addNotePresenter.uiModel()
+            }
+        }
+        onStopOrDispose {
+            scope.cancel()
+        }
+    }
+
+    /**
+     * To make sure the collection from AppState machine is canceled
+     * Otherwise FlowRedux will throw an exception
+     * */
+    BackHandler(
+        enabled = true,
+    ) {
+        navController.navigateUp()
+    }
+
+    AddNotePane(
+        modifier = modifier,
+        windowSizeClass = windowSizeClass,
+        addNoteUiModel = addNoteUiModel,
+        addNoteAction = addNoteAction,
+        onBackClicked = { navController.navigateUp() }
+    )
+}
+
+@Composable
+private fun NoteEditPane(
+    modifier: Modifier = Modifier,
+    windowSizeClass: WindowSizeClass,
+    navController: NavHostController,
+    backStackEntry: NavBackStackEntry
+) {
+    val context = LocalActivity.current
+    SideEffect { context?.setDarkStatusBarIcons(true) }
+
+    val arguments: NoteMarkDestination.NoteEditPane = backStackEntry.toRoute()
+    val editNotePresenter: EditNotePresenter = remember { get(clazz = EditNotePresenter::class.java) }
+    var editNoteUiModel by remember { mutableStateOf(EditNoteUiModel.Empty) }
+    val editNoteAction = editNotePresenter::processEvent
+
+    val scope = rememberCoroutineScope()
+
+    LifecycleStartEffect(key1 = Unit) {
+        if (scope.isActive) {
+            scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                editNoteUiModel = editNotePresenter.uiModel()
+            }
+        }
+        onStopOrDispose {
+            scope.cancel()
+        }
+    }
+
+    /**
+     * To make sure the collection from AppState machine is canceled
+     * Otherwise FlowRedux will throw an exception
+     * */
+    BackHandler(
+        enabled = true,
+    ) {
+        navController.navigateUp()
+    }
+
+    EditNotePane(
+        modifier = modifier,
+        windowSizeClass = windowSizeClass,
+        noteId = arguments.noteId,
+        editNoteUiModel = editNoteUiModel,
+        editNoteAction = editNoteAction,
+        onCloseClicked = { navController.navigateUp() }
+    )
+}
+
+@Composable
+private fun SettingsPane(
+    modifier: Modifier = Modifier,
+    navController: NavHostController
+) {
+    val context = LocalActivity.current
+    SideEffect { context?.setDarkStatusBarIcons(true) }
+
+    val settingsPresenter: SettingsPresenter = remember { get(clazz = SettingsPresenter::class.java) }
+    var settingsUiModel by remember { mutableStateOf(SettingsUiModel.Empty) }
+    val settingsAction = settingsPresenter::processEvent
+
+    val scope = rememberCoroutineScope()
+    LifecycleStartEffect(key1 = Unit) {
+        if (scope.isActive) {
+            scope.launchMolecule(mode = RecompositionMode.Immediate) {
+                settingsUiModel = settingsPresenter.uiModel()
+            }
+        }
+        onStopOrDispose {
+            scope.cancel()
+        }
+    }
+
+    /**
+     * To make sure the collection from AppState machine is canceled
+     * Otherwise FlowRedux will throw an exception
+     * */
+    BackHandler(
+        enabled = true,
+    ) {
+        navController.navigateUp()
+    }
+
+    SettingsPane(
+        modifier = modifier,
+        settingsUiModel = settingsUiModel,
+        settingsAction = settingsAction,
+        onBackClicked = { navController.navigateUp() },
+        onLogoutSuccessful = {
+            navController.navigate(route = NoteMarkDestination.LauncherPane) {
+                launchSingleTop = true
+            }
+        },
+        onDeleteNoteCheckChanged = {
+            settingsAction(AppAction.DeleteLocalNotesOnLogout(deleteOnLogout = !settingsUiModel.deleteLocalNotesOnLogout))
+        },
+        onLogoutClicked = {
+            settingsAction(AppAction.AppLogout)
+        }
+    )
+}
+
+private object NoteMarkDestination {
     @Serializable
     data object RootPane
 
