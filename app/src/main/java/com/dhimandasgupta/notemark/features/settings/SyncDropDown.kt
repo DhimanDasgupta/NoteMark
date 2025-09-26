@@ -16,6 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
@@ -33,6 +36,10 @@ fun SyncDropDown(
             .fillMaxWidth()
             .wrapContentSize(Alignment.TopEnd) // Aligns the IconButton and thus the menu
             .padding(all = 16.dp)
+            .semantics(true) {
+                testTagsAsResourceId = true
+                testTag = "Duration drop down"
+            }
     ) {
         DropdownMenu(
             modifier = Modifier.background(color = colorScheme.surfaceContainerLowest),
@@ -60,6 +67,10 @@ fun SyncDropDown(
                                 tint = colorScheme.primary
                             )
                         } else null
+                    },
+                    modifier = Modifier.semantics {
+                        testTagsAsResourceId = true
+                        testTag = "DropDown_$label"
                     }
                 )
             }
