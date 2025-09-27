@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.convertNoteTimestampToReadableFormat
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppState
@@ -31,7 +32,8 @@ data class SettingsUiModel(
     val lastSynced: String = "--",
     val deleteLocalNotesOnLogout: Boolean = false,
     val logoutStatus: Boolean? = null,
-    val isSyncing: Boolean = false
+    val isSyncing: Boolean = false,
+    val isConnected: Boolean = false
 ) {
     companion object {
         val Empty = SettingsUiModel()
@@ -88,7 +90,8 @@ class SettingsPresenter(
                             is AppState.LoggedIn -> appState.sync?.syncing ?: false
 
                             else -> false
-                        }
+                        },
+                        isConnected = appState.connectionState == ConnectionState.Available
                     )
                 }
 

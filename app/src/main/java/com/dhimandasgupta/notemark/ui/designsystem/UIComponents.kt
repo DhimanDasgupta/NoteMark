@@ -330,12 +330,13 @@ fun NoteMarkPasswordTextField(
 fun NoteMarkToolbarButton(
     modifier: Modifier = Modifier,
     title: String,
+    isConnected: Boolean,
     onClick: () -> Unit = {}
 ) {
     Box(
         modifier = modifier
             .clip(shape = shapes.extraSmall)
-            .background(color = colorScheme.primary)
+            .background(color = if (isConnected) colorScheme.primary else colorScheme.primary.copy(alpha = 0.5f))
             .lifecycleAwareDebouncedClickable {
                 onClick()
             }
@@ -343,7 +344,7 @@ fun NoteMarkToolbarButton(
         Text(
             text = title.uppercase(),
             style = typography.titleMedium,
-            color = colorScheme.onPrimary,
+            color = if (isConnected) colorScheme.onPrimary else colorScheme.error,
             modifier = modifier.padding(all = 4.dp)
         )
     }

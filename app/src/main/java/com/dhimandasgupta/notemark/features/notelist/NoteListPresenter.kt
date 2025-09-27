@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.convertIsoToRelativeYearFormat
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.features.launcher.AppAction
@@ -26,7 +27,8 @@ data class NoteListUiModel(
     val userName: String? = null,
     val noteEntities: ImmutableList<NoteEntity>,
     val noteLongClickedUuid: String = "",
-    val showSyncProgress: Boolean = false
+    val showSyncProgress: Boolean = false,
+    val isConnected: Boolean = false
 ) {
     companion object {
         val Empty = defaultNoteListUiModel
@@ -58,7 +60,8 @@ class NoteListPresenter(
                         showSyncProgress = when (appState) {
                             is AppState.LoggedIn -> appState.sync?.syncing ?: false
                             else -> true
-                        }
+                        },
+                        isConnected = appState.connectionState == ConnectionState.Available
                     )
                 }
         }

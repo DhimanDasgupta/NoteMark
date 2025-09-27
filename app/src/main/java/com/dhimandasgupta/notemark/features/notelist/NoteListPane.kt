@@ -153,6 +153,7 @@ private fun NoteListValidPane(
         true -> NoteListWithEmptyNotes(
             modifier = modifier,
             userName = userName,
+            isConnected = noteListUiModel.isConnected,
             onFabClicked = onFabClicked,
             showSyncProgress = noteListUiModel.showSyncProgress,
             onSettingsClicked = onSettingsClicked,
@@ -177,6 +178,7 @@ private fun NoteListValidPane(
 private fun NoteListWithEmptyNotes(
     modifier: Modifier = Modifier,
     userName: String,
+    isConnected: Boolean,
     showSyncProgress: Boolean,
     onFabClicked: () -> Unit,
     onSettingsClicked: () -> Unit,
@@ -185,6 +187,7 @@ private fun NoteListWithEmptyNotes(
     NoNotes(
         modifier = modifier,
         userName = userName,
+        isConnected = isConnected,
         showSyncProgress = showSyncProgress,
         onFabClicked = onFabClicked,
         onSettingsClicked = onSettingsClicked,
@@ -233,6 +236,7 @@ fun NoteListWithNotes(
             modifier = Modifier,
             toolbarTitle = "NoteMark",
             userName = userName,
+            isConnected = noteListState.isConnected,
             onSettingsClicked = onSettingsClicked,
             onProfileClicked = onProfileClicked
         )
@@ -289,6 +293,7 @@ private fun NoteListPaneToolbar(
     modifier: Modifier = Modifier,
     toolbarTitle: String,
     userName: String,
+    isConnected: Boolean,
     onSettingsClicked: () -> Unit,
     onProfileClicked: () -> Unit,
 ) {
@@ -334,6 +339,7 @@ private fun NoteListPaneToolbar(
 
         NoteMarkToolbarButton(
             title = userName,
+            isConnected = isConnected,
             onClick = onProfileClicked
         )
     }
@@ -344,6 +350,7 @@ private fun NoNotes(
     modifier: Modifier = Modifier,
     toolbarTitle: String = "NoteMark",
     userName: String = "",
+    isConnected: Boolean,
     showSyncProgress: Boolean,
     onSettingsClicked: () -> Unit,
     onProfileClicked: () -> Unit,
@@ -356,6 +363,7 @@ private fun NoNotes(
             modifier = Modifier,
             toolbarTitle = toolbarTitle,
             userName = userName,
+            isConnected = isConnected,
             onSettingsClicked = onSettingsClicked,
             onProfileClicked = onProfileClicked
         )

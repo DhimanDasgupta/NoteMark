@@ -100,6 +100,9 @@ class AppStateMachine(
                         user?.let { state.noChange() } ?: state.override { AppState.NotLoggedIn(connectionState = state.snapshot.connectionState) }
                     }
                 }
+                collectWhileInState(flow = applicationContext.observeConnectivityAsFlow()) { connected, state ->
+                    state.mutate { state.snapshot.copy(connectionState = connected) }
+                }
                 collectWhileInState(flow = syncRepository.getSync()) { sync, state ->
                     cachedSync = sync
                     state.mutate { state.snapshot.copy(sync = sync) }

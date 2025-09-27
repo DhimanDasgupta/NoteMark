@@ -239,6 +239,7 @@ private fun SettingsBody(
             // Logout
             LogoutRow(
                 modifier = Modifier,
+                isConnected = settingsUiModel.isConnected,
                 onLogoutClicked = onLogoutClicked
             )
         }
@@ -413,6 +414,7 @@ private fun DeleteLocalDataRow(
 @Composable
 private fun LogoutRow(
     modifier: Modifier = Modifier,
+    isConnected: Boolean,
     onLogoutClicked: () -> Unit
 ) {
     Row(
@@ -420,7 +422,9 @@ private fun LogoutRow(
             .fillMaxWidth()
             .clip(shape = RoundedCornerShape(size = 8.dp))
             .combinedClickable(
-                onClick = onLogoutClicked
+                onClick = {
+                    if (isConnected) onLogoutClicked else Unit
+                }
             )
             .padding(vertical = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(space = 0.dp),
@@ -429,7 +433,7 @@ private fun LogoutRow(
         Icon(
             painter = painterResource(id = R.drawable.ic_log_out),
             contentDescription = "Settings",
-            tint = colorScheme.error,
+            tint = if (isConnected) colorScheme.error else colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .padding(horizontal = 8.dp)
                 .requiredSize(size = 32.dp)
@@ -438,7 +442,7 @@ private fun LogoutRow(
         Text(
             text = "Log out",
             style = typography.titleMedium,
-            color = colorScheme.error,
+            color = if (isConnected) colorScheme.error else colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(weight = 1f)
         )
     }
