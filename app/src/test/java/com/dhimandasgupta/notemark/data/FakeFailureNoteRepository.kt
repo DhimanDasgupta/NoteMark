@@ -11,6 +11,13 @@ class FakeFailureNoteRepository : NoteMarkRepository {
         value = emptyList()
     )
 
+    override suspend fun getRemoteNotes(
+        page: Int,
+        size: Int
+    ): Result<NoteResponse> = Result.failure(
+        Exception("Some exception")
+    )
+
     override suspend fun getRemoteNotesAndSaveInDB(
         page: Int,
         size: Int

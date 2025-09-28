@@ -12,6 +12,16 @@ class FakeSuccessfulNoteRepository : NoteMarkRepository {
         value = listOf(noteEntity)
     )
 
+    override suspend fun getRemoteNotes(
+        page: Int,
+        size: Int
+    ): Result<NoteResponse> = Result.success(
+        value = NoteResponse(
+            notes = listOf(noteEntity.toNote()),
+            total = 1
+        )
+    )
+
     override suspend fun getRemoteNotesAndSaveInDB(
         page: Int,
         size: Int

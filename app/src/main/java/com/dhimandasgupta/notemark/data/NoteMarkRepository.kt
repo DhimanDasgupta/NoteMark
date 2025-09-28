@@ -11,6 +11,7 @@ import kotlin.coroutines.coroutineContext
 
 interface NoteMarkRepository {
     fun getAllNotes(): Flow<List<NoteEntity>>
+    suspend fun getRemoteNotes(page: Int = -1, size: Int = 20): Result<NoteResponse>
     suspend fun getRemoteNotesAndSaveInDB(page: Int = -1, size: Int = 20): Result<NoteResponse>
     suspend fun getAllNonSyncedNotes(): List<NoteEntity>
     suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity>
@@ -51,6 +52,9 @@ class NoteMarkRepositoryImpl(
 
     override suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity> =
         localDataSource.getAllMarkedAsDeletedNotes()
+
+    override suspend fun getRemoteNotes(page: Int, size: Int): Result<NoteResponse> =
+        remoteDataSource.getAllNotes(page = page, size = size)
 
     override suspend fun getRemoteNotesAndSaveInDB(page: Int, size: Int): Result<NoteResponse> {
         val remoteNotes = remoteDataSource.getAllNotes(page = page, size = size)

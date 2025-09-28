@@ -13,6 +13,7 @@ import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.database.NoteEntity
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.supervisorScope
@@ -21,6 +22,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 import org.koin.java.KoinJavaComponent.inject
+
+private const val DELAY_IN_BETWEEN_EVERY_NOTE = 10L
 
 class NoteSyncWorker(
     context: Context,
@@ -38,7 +41,7 @@ class NoteSyncWorker(
             syncRepository.saveSyncing(isSyncing = true)
 
             // Fetch all Remote notes.
-            noteMarkRepository.getRemoteNotesAndSaveInDB().fold(
+            noteMarkRepository.getRemoteNotes().fold(
                 onSuccess = { noteResponse ->
                     executeSuccess(noteResponse)
                     Result.success()
@@ -59,19 +62,29 @@ class NoteSyncWorker(
         }
     }
 
-    private suspend fun executeSuccess(noteResponse: NoteResponse) {
+    private suspend fun executeSuccess(noteResponse: NoteResponse) = supervisorScope {
         val allRemoteNotes = noteResponse
 
         // Delete all Remote notes waiting to be deleted.
-        val toBeDeletedNotes = noteMarkRepository.getAllMarkedAsDeletedNotes()
-        deleteNotes(toBeDeletedNotes)
+        val deleteNotesDeferred = async {
+            val toBeDeletedNotes = noteMarkRepository.getAllMarkedAsDeletedNotes()
+            deleteNotes(toBeDeletedNotes)
+        }
 
         // Update or Upload all Local notes.
-        val toBeSyncedNotes = noteMarkRepository.getAllNonSyncedNotes()
-        updateOrUploadNotes(
-            remoteNotes = allRemoteNotes.notes,
-            notes = toBeSyncedNotes
-        )
+        val updateOrUploadNotesDeferred = async {
+            val toBeSyncedNotes = noteMarkRepository.getAllNonSyncedNotes()
+            updateOrUploadNotes(
+                remoteNotes = allRemoteNotes.notes,
+                notes = toBeSyncedNotes
+            )
+        }
+
+        deleteNotesDeferred.await()
+        updateOrUploadNotesDeferred.await()
+
+        // Insert all Remote notes.
+        noteMarkRepository.getRemoteNotesAndSaveInDB()
 
         syncRepository.saveLastUploadedTime(uploadedTime = getCurrentIso8601Timestamp())
         syncRepository.saveLastDownloadedTime(downLoadedTime = getCurrentIso8601Timestamp())
@@ -86,7 +99,7 @@ class NoteSyncWorker(
                 null -> uploadNote(note)
                 else -> updateNote(note)
             }
-            delay(timeMillis = 1000L) // Just some delay for testing
+            delay(timeMillis = DELAY_IN_BETWEEN_EVERY_NOTE) // Just some delay for testing
         }
     }
 
@@ -122,7 +135,7 @@ class NoteSyncWorker(
     private suspend fun deleteNotes(notes: List<NoteEntity>) {
         notes.forEach { note ->
             deleteNote(note)
-            delay(timeMillis = 1000L) // Just some delay for testing
+            delay(timeMillis = DELAY_IN_BETWEEN_EVERY_NOTE) // Just some delay for testing
         }
     }
 
