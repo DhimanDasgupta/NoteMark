@@ -42,7 +42,11 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -80,6 +84,7 @@ import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
 import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
+import kotlinx.coroutines.delay
 
 @Composable
 fun EditNotePane(
@@ -127,6 +132,22 @@ fun EditNotePane(
 
     val layoutType = getDeviceLayoutType(windowSizeClass)
 
+    var title by remember(key1 = updatedEditNoteUiModel) { mutableStateOf(value = updatedEditNoteUiModel.title) }
+    LaunchedEffect(key1 = title) {
+        snapshotFlow { title }.collect {
+            delay(50)
+            editNoteAction(EditNoteAction.UpdateTitle(title = title))
+        }
+    }
+
+    var body by remember(key1 = updatedEditNoteUiModel) { mutableStateOf(value = updatedEditNoteUiModel.content) }
+    LaunchedEffect(key1 = body) {
+        snapshotFlow { body }.collect {
+            delay(50)
+            editNoteAction(EditNoteAction.UpdateContent(content = body))
+        }
+    }
+
     Column(
         modifier = modifier
             .background(color = colorScheme.surfaceContainerLowest)
@@ -165,12 +186,12 @@ fun EditNotePane(
                 ),
             isReaderModeOn = updatedEditNoteUiModel.isReaderMode,
             editEnabled = updatedEditNoteUiModel.editEnable,
-            titleText = updatedEditNoteUiModel.title,
-            bodyText = updatedEditNoteUiModel.content,
+            titleText = title,
+            bodyText = body,
             dateCreated = updatedEditNoteUiModel.noteEntity?.createdAt ?: "",
             lastEdited = updatedEditNoteUiModel.noteEntity?.lastEditedAt ?: "",
-            onTitleTextChanged = { value -> editNoteAction(EditNoteAction.UpdateTitle(title = value)) },
-            onBodyTextChanged = { value -> editNoteAction(EditNoteAction.UpdateContent(content = value)) },
+            onTitleTextChanged = { value -> title = value },
+            onBodyTextChanged = { value -> body = value },
             onEditClicked = { editNoteAction(EditNoteAction.ModeChange(Mode.EditMode)) },
             onViewClicked = { editNoteAction(EditNoteAction.ModeChange(Mode.ReaderMode)) }
         )

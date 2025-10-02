@@ -36,7 +36,11 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -67,6 +71,7 @@ import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
 import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
+import kotlinx.coroutines.delay
 
 @Composable
 fun AddNotePane(
@@ -90,6 +95,22 @@ fun AddNotePane(
     }
 
     val layoutType = getDeviceLayoutType(windowSizeClass)
+
+    var title by remember { mutableStateOf(value = updatedAddNoteUiModel.title) }
+    LaunchedEffect(key1 = title) {
+        snapshotFlow { title }.collect {
+            delay(50)
+            addNoteAction(AddNoteAction.UpdateTitle(title = title))
+        }
+    }
+
+    var body by remember { mutableStateOf(value = updatedAddNoteUiModel.content) }
+    LaunchedEffect(key1 = body) {
+        snapshotFlow { body }.collect {
+            delay(50)
+            addNoteAction(AddNoteAction.UpdateContent(content = body))
+        }
+    }
 
     Column(
         modifier = modifier
@@ -118,10 +139,10 @@ fun AddNotePane(
                     }
                 )
                 .fillMaxHeight(fraction = 1f),
-            titleText = updatedAddNoteUiModel.title,
-            bodyText = updatedAddNoteUiModel.content,
-            onTitleTextChanged = { value -> addNoteAction(AddNoteAction.UpdateTitle(title = value)) },
-            onBodyTextChanged = { value -> addNoteAction(AddNoteAction.UpdateContent(content = value)) }
+            titleText = title,
+            bodyText = body,
+            onTitleTextChanged = { value -> title = value },
+            onBodyTextChanged = { value -> body = value }
         )
     }
 }
