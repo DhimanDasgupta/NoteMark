@@ -35,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -76,6 +77,7 @@ import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
 import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
+import kotlinx.coroutines.delay
 
 @Composable
 fun RegistrationPane(
@@ -258,7 +260,12 @@ private fun RightPane(
         verticalArrangement = Arrangement.spacedBy(space = 16.dp)
     ) {
         var userName by rememberSaveable { mutableStateOf(value = registrationUiModel.userName) }
-        LaunchedEffect(key1 = userName) { registrationAction(UserNameEntered(userName)) }
+        LaunchedEffect(key1 = userName) {
+            snapshotFlow { userName }.collect {
+                delay(timeMillis = 50)
+                registrationAction(UserNameEntered(userName))
+            }
+        }
 
         NoteMarkTextField(
             modifier = Modifier
@@ -276,7 +283,12 @@ private fun RightPane(
         )
 
         var email by rememberSaveable { mutableStateOf(value = registrationUiModel.email) }
-        LaunchedEffect(key1 = email) { registrationAction(EmailEntered(email)) }
+        LaunchedEffect(key1 = email) {
+            snapshotFlow { email }.collect {
+                delay(timeMillis = 50)
+                registrationAction(EmailEntered(email))
+            }
+        }
 
         NoteMarkTextField(
             modifier = Modifier
@@ -291,7 +303,12 @@ private fun RightPane(
         )
 
         var password by rememberSaveable { mutableStateOf(registrationUiModel.password) }
-        LaunchedEffect(key1 = password) { registrationAction(PasswordEntered(password)) }
+        LaunchedEffect(key1 = password) {
+            snapshotFlow { password }.collect {
+                delay(timeMillis = 50)
+                registrationAction(PasswordEntered(password))
+            }
+        }
 
         NoteMarkPasswordTextField(
             modifier = Modifier
@@ -309,11 +326,10 @@ private fun RightPane(
 
         var repeatPassword by rememberSaveable { mutableStateOf(value = registrationUiModel.repeatPassword) }
         LaunchedEffect(key1 = repeatPassword) {
-            registrationAction(
-                RepeatPasswordEntered(
-                    repeatPassword
-                )
-            )
+            snapshotFlow { repeatPassword }.collect {
+                delay(timeMillis = 50)
+                registrationAction(RepeatPasswordEntered(repeatPassword))
+            }
         }
 
         NoteMarkPasswordTextField(

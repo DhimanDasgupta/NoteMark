@@ -99,7 +99,7 @@ fun AddNotePane(
     var title by remember { mutableStateOf(value = updatedAddNoteUiModel.title) }
     LaunchedEffect(key1 = title) {
         snapshotFlow { title }.collect {
-            delay(50)
+            delay(timeMillis = 50)
             addNoteAction(AddNoteAction.UpdateTitle(title = title))
         }
     }
@@ -107,7 +107,7 @@ fun AddNotePane(
     var body by remember { mutableStateOf(value = updatedAddNoteUiModel.content) }
     LaunchedEffect(key1 = body) {
         snapshotFlow { body }.collect {
-            delay(50)
+            delay(timeMillis = 50)
             addNoteAction(AddNoteAction.UpdateContent(content = body))
         }
     }

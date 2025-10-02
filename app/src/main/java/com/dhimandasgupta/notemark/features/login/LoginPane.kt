@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -70,6 +71,7 @@ import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
 import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
@@ -265,7 +267,12 @@ private fun RightPane(
         verticalArrangement = Arrangement.spacedBy(space = 16.dp),
     ) {
         var emailText by rememberSaveable { mutableStateOf(value = loginUiModel.email) }
-        LaunchedEffect(key1 = emailText) { loginAction(EmailEntered(email = emailText)) }
+        LaunchedEffect(key1 = emailText) {
+            snapshotFlow { emailText }.collect {
+                delay(timeMillis = 50)
+                loginAction(EmailEntered(email = emailText))
+            }
+        }
 
         NoteMarkTextField(
             modifier = Modifier
@@ -279,7 +286,12 @@ private fun RightPane(
         )
 
         var passwordText by rememberSaveable { mutableStateOf(value = loginUiModel.password) }
-        LaunchedEffect(key1 = passwordText) { loginAction(PasswordEntered(password = passwordText)) }
+        LaunchedEffect(key1 = passwordText) {
+            snapshotFlow { passwordText }.collect {
+                delay(timeMillis = 50)
+                loginAction(PasswordEntered(password = passwordText))
+            }
+        }
 
         NoteMarkPasswordTextField(
             modifier = Modifier

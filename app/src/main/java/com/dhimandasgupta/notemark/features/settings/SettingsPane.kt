@@ -423,7 +423,7 @@ private fun LogoutRow(
             .clip(shape = RoundedCornerShape(size = 8.dp))
             .combinedClickable(
                 onClick = {
-                    if (isConnected) onLogoutClicked else Unit
+                    if (isConnected) onLogoutClicked() else Unit
                 }
             )
             .padding(vertical = 16.dp),

@@ -135,7 +135,7 @@ fun EditNotePane(
     var title by remember(key1 = updatedEditNoteUiModel) { mutableStateOf(value = updatedEditNoteUiModel.title) }
     LaunchedEffect(key1 = title) {
         snapshotFlow { title }.collect {
-            delay(50)
+            delay(timeMillis = 50)
             editNoteAction(EditNoteAction.UpdateTitle(title = title))
         }
     }
@@ -143,7 +143,7 @@ fun EditNotePane(
     var body by remember(key1 = updatedEditNoteUiModel) { mutableStateOf(value = updatedEditNoteUiModel.content) }
     LaunchedEffect(key1 = body) {
         snapshotFlow { body }.collect {
-            delay(50)
+            delay(timeMillis = 50)
             editNoteAction(EditNoteAction.UpdateContent(content = body))
         }
     }
