@@ -79,7 +79,8 @@ import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
 import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 
 @Composable
 fun RegistrationPane(
@@ -350,6 +351,7 @@ private fun RightPane(
     }
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 private fun RegistrationUsernameField(
     modifier: Modifier = Modifier,
@@ -358,11 +360,10 @@ private fun RegistrationUsernameField(
     focusManager: FocusManager,
 ) {
     var userName by rememberSaveable { mutableStateOf(value = registrationUiModel.userName) }
-    LaunchedEffect(key1 = userName) {
-        snapshotFlow { userName }.collect {
-            delay(timeMillis = 50)
-            registrationAction(UserNameEntered(userName))
-        }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { userName }
+            .debounce(timeoutMillis = 300)
+            .collect { registrationAction(UserNameEntered(userName)) }
     }
 
     NoteMarkTextField(
@@ -381,6 +382,7 @@ private fun RegistrationUsernameField(
     )
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 private fun RegistrationEmailField(
     modifier: Modifier = Modifier,
@@ -389,11 +391,10 @@ private fun RegistrationEmailField(
     focusManager: FocusManager,
 ) {
     var email by rememberSaveable { mutableStateOf(value = registrationUiModel.email) }
-    LaunchedEffect(key1 = email) {
-        snapshotFlow { email }.collect {
-            delay(timeMillis = 50)
-            registrationAction(EmailEntered(email))
-        }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { email }
+            .debounce(timeoutMillis = 300)
+            .collect { registrationAction(EmailEntered(email)) }
     }
 
     NoteMarkTextField(
@@ -409,6 +410,7 @@ private fun RegistrationEmailField(
     )
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 private fun RegistrationPasswordField(
     modifier: Modifier = Modifier,
@@ -418,10 +420,9 @@ private fun RegistrationPasswordField(
 ) {
     var password by rememberSaveable { mutableStateOf(registrationUiModel.password) }
     LaunchedEffect(key1 = password) {
-        snapshotFlow { password }.collect {
-            delay(timeMillis = 50)
-            registrationAction(PasswordEntered(password))
-        }
+        snapshotFlow { password }
+            .debounce(timeoutMillis = 300)
+            .collect { registrationAction(PasswordEntered(password)) }
     }
 
     NoteMarkPasswordTextField(
@@ -439,6 +440,7 @@ private fun RegistrationPasswordField(
     )
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 private fun RegistrationRepeatPasswordField(
     modifier: Modifier = Modifier,
@@ -448,11 +450,10 @@ private fun RegistrationRepeatPasswordField(
     focusManager: FocusManager,
 ) {
     var repeatPassword by rememberSaveable { mutableStateOf(value = registrationUiModel.repeatPassword) }
-    LaunchedEffect(key1 = repeatPassword) {
-        snapshotFlow { repeatPassword }.collect {
-            delay(timeMillis = 50)
-            registrationAction(RepeatPasswordEntered(repeatPassword))
-        }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { repeatPassword }
+            .debounce(timeoutMillis = 300)
+            .collect { registrationAction(RepeatPasswordEntered(repeatPassword)) }
     }
 
     NoteMarkPasswordTextField(

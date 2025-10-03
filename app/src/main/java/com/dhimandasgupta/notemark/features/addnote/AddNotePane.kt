@@ -71,7 +71,8 @@ import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
 import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 
 @Composable
 fun AddNotePane(
@@ -180,6 +181,7 @@ private fun AddNoteToolbar(
     }
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 private fun AddNoteBody(
     modifier: Modifier = Modifier,
@@ -192,19 +194,17 @@ private fun AddNoteBody(
     LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
     var title by remember { mutableStateOf(value = addNoteUiModel.title) }
-    LaunchedEffect(key1 = title) {
-        snapshotFlow { title }.collect {
-            delay(timeMillis = 50)
-            addNoteAction(AddNoteAction.UpdateTitle(title = title))
-        }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { title }
+            .debounce(timeoutMillis = 300)
+            .collect { addNoteAction(AddNoteAction.UpdateTitle(title = title)) }
     }
 
     var body by remember { mutableStateOf(value = addNoteUiModel.content) }
-    LaunchedEffect(key1 = body) {
-        snapshotFlow { body }.collect {
-            delay(timeMillis = 50)
-            addNoteAction(AddNoteAction.UpdateContent(content = body))
-        }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { body }
+            .debounce(timeoutMillis = 300)
+            .collect { addNoteAction(AddNoteAction.UpdateContent(content = body)) }
     }
 
     Box(

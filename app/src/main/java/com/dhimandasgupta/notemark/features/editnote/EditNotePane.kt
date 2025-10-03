@@ -84,7 +84,8 @@ import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
 import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 
 @Composable
 fun EditNotePane(
@@ -269,6 +270,7 @@ private fun EditNoteToolbar(
     }
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 private fun EditNoteBody(
     modifier: Modifier = Modifier,
@@ -281,19 +283,17 @@ private fun EditNoteBody(
     LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
     var title by remember(key1 = editNoteUiModel) { mutableStateOf(value = editNoteUiModel.title) }
-    LaunchedEffect(key1 = title) {
-        snapshotFlow { title }.collect {
-            delay(timeMillis = 50)
-            editNoteAction(EditNoteAction.UpdateTitle(title = title))
-        }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { title }
+            .debounce(timeoutMillis = 300)
+            .collect { editNoteAction(EditNoteAction.UpdateTitle(title = title)) }
     }
 
     var body by remember(key1 = editNoteUiModel) { mutableStateOf(value = editNoteUiModel.content) }
-    LaunchedEffect(key1 = body) {
-        snapshotFlow { body }.collect {
-            delay(timeMillis = 50)
-            editNoteAction(EditNoteAction.UpdateContent(content = body))
-        }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { body }
+            .debounce(timeoutMillis = 300)
+            .collect { editNoteAction(EditNoteAction.UpdateContent(content = body)) }
     }
 
     Box(

@@ -73,7 +73,8 @@ import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
 import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
@@ -345,6 +346,7 @@ private fun RightPane(
     }
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 private fun LoginEmailField(
     modifier: Modifier = Modifier,
@@ -353,11 +355,10 @@ private fun LoginEmailField(
     focusManager: FocusManager,
 ) {
     var emailText by rememberSaveable { mutableStateOf(value = loginUiModel.email) }
-    LaunchedEffect(key1 = emailText) {
-        snapshotFlow { emailText }.collect {
-            delay(timeMillis = 50)
-            loginAction(EmailEntered(email = emailText))
-        }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { emailText }
+            .debounce(timeoutMillis = 300)
+            .collect { loginAction(EmailEntered(email = emailText)) }
     }
 
     NoteMarkTextField(
@@ -372,6 +373,7 @@ private fun LoginEmailField(
     )
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 private fun LoginPasswordField(
     modifier: Modifier = Modifier,
@@ -381,11 +383,10 @@ private fun LoginPasswordField(
     focusManager: FocusManager,
 ) {
     var passwordText by rememberSaveable { mutableStateOf(value = loginUiModel.password) }
-    LaunchedEffect(key1 = passwordText) {
-        snapshotFlow { passwordText }.collect {
-            delay(timeMillis = 50)
-            loginAction(PasswordEntered(password = passwordText))
-        }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { passwordText }
+            .debounce(timeoutMillis = 300)
+            .collect { loginAction(PasswordEntered(password = passwordText)) }
     }
 
     NoteMarkPasswordTextField(
