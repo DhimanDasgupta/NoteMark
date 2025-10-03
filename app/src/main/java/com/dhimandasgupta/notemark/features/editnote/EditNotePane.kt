@@ -132,22 +132,6 @@ fun EditNotePane(
 
     val layoutType = getDeviceLayoutType(windowSizeClass)
 
-    var title by remember(key1 = updatedEditNoteUiModel) { mutableStateOf(value = updatedEditNoteUiModel.title) }
-    LaunchedEffect(key1 = title) {
-        snapshotFlow { title }.collect {
-            delay(timeMillis = 50)
-            editNoteAction(EditNoteAction.UpdateTitle(title = title))
-        }
-    }
-
-    var body by remember(key1 = updatedEditNoteUiModel) { mutableStateOf(value = updatedEditNoteUiModel.content) }
-    LaunchedEffect(key1 = body) {
-        snapshotFlow { body }.collect {
-            delay(timeMillis = 50)
-            editNoteAction(EditNoteAction.UpdateContent(content = body))
-        }
-    }
-
     Column(
         modifier = modifier
             .background(color = colorScheme.surfaceContainerLowest)
@@ -184,22 +168,14 @@ fun EditNotePane(
                         }
                     }
                 ),
-            isReaderModeOn = updatedEditNoteUiModel.isReaderMode,
-            editEnabled = updatedEditNoteUiModel.editEnable,
-            titleText = title,
-            bodyText = body,
-            dateCreated = updatedEditNoteUiModel.noteEntity?.createdAt ?: "",
-            lastEdited = updatedEditNoteUiModel.noteEntity?.lastEditedAt ?: "",
-            onTitleTextChanged = { value -> title = value },
-            onBodyTextChanged = { value -> body = value },
-            onEditClicked = { editNoteAction(EditNoteAction.ModeChange(Mode.EditMode)) },
-            onViewClicked = { editNoteAction(EditNoteAction.ModeChange(Mode.ReaderMode)) }
+            editNoteUiModel = updatedEditNoteUiModel,
+            editNoteAction = editNoteAction
         )
     }
 }
 
 @Composable
-fun EditNoteToolbar(
+private fun EditNoteToolbar(
     modifier: Modifier = Modifier,
     editEnabled: Boolean = false,
     onCloseClicked: () -> Unit = {},
@@ -294,23 +270,31 @@ fun EditNoteToolbar(
 }
 
 @Composable
-fun EditNoteBody(
+private fun EditNoteBody(
     modifier: Modifier = Modifier,
-    isReaderModeOn: Boolean = false,
-    editEnabled: Boolean = false,
-    titleText: String = "",
-    bodyText: String = "",
-    dateCreated: String = "",
-    lastEdited: String = "",
-    onTitleTextChanged: (String) -> Unit = {},
-    onBodyTextChanged: (String) -> Unit = {},
-    onEditClicked: () -> Unit = {},
-    onViewClicked: () -> Unit = {}
+    editNoteUiModel: EditNoteUiModel,
+    editNoteAction: (EditNoteAction) -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
 
     LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
+
+    var title by remember(key1 = editNoteUiModel) { mutableStateOf(value = editNoteUiModel.title) }
+    LaunchedEffect(key1 = title) {
+        snapshotFlow { title }.collect {
+            delay(timeMillis = 50)
+            editNoteAction(EditNoteAction.UpdateTitle(title = title))
+        }
+    }
+
+    var body by remember(key1 = editNoteUiModel) { mutableStateOf(value = editNoteUiModel.content) }
+    LaunchedEffect(key1 = body) {
+        snapshotFlow { body }.collect {
+            delay(timeMillis = 50)
+            editNoteAction(EditNoteAction.UpdateContent(content = body))
+        }
+    }
 
     Box(
         modifier = modifier
@@ -340,9 +324,9 @@ fun EditNoteBody(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextField(
-                enabled = editEnabled,
-                value = titleText,
-                onValueChange = { value -> onTitleTextChanged(value) },
+                enabled = editNoteUiModel.editEnable,
+                value = title,
+                onValueChange = { value -> title = value },
                 textStyle = typography.titleLarge,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -378,12 +362,12 @@ fun EditNoteBody(
             )
 
             AnimatedVisibility(
-                visible = !editEnabled,
+                visible = !editNoteUiModel.editEnable,
             ) {
                 NoteDateTime(
                     modifier = Modifier,
-                    dateCreated = dateCreated,
-                    lastEdited = lastEdited
+                    dateCreated = editNoteUiModel.noteEntity?.createdAt ?: "",
+                    lastEdited = editNoteUiModel.noteEntity?.lastEditedAt ?: "",
                 )
             }
 
@@ -395,9 +379,9 @@ fun EditNoteBody(
             )
 
             TextField(
-                enabled = editEnabled,
-                value = bodyText,
-                onValueChange = { value -> onBodyTextChanged(value) },
+                enabled = editNoteUiModel.editEnable,
+                value = body,
+                onValueChange = { value -> body = value },
                 textStyle = typography.bodyLarge,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -433,14 +417,14 @@ fun EditNoteBody(
             contentAlignment = Alignment.BottomCenter
         ) {
             AnimatedVisibility(
-                visible = !isReaderModeOn,
+                visible = !editNoteUiModel.isReaderMode,
                 enter = expandVertically(),
                 exit = shrinkVertically()
             ) {
                 EditAndViewMode(
                     modifier = Modifier.align(Alignment.BottomCenter),
-                    onEditClicked = onEditClicked,
-                    onViewClicked = onViewClicked
+                    onEditClicked = { editNoteAction(EditNoteAction.ModeChange(Mode.EditMode)) },
+                    onViewClicked = { editNoteAction(EditNoteAction.ModeChange(Mode.ReaderMode)) }
                 )
             }
         }

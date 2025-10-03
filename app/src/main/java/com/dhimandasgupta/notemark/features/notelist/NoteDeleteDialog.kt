@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -88,7 +89,7 @@ fun NoteDeleteDialog(
 private fun DeleteDialogPreview() {
     NoteMarkTheme {
         NoteDeleteDialog(
-            modifier = Modifier,
+            modifier = Modifier.fillMaxSize(),
             noteId = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d"
         )
     }

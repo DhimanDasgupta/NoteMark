@@ -40,8 +40,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -83,8 +85,8 @@ import kotlinx.coroutines.delay
 fun RegistrationPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    navigateToLogin: () -> Unit = {},
     registrationUiModel: RegistrationUiModel,
+    navigateToLogin: () -> Unit = {},
     registrationAction: (RegistrationAction) -> Unit = {}
 ) {
     val updatedRegistrationUiModel by rememberUpdatedState(newValue = registrationUiModel)
@@ -97,118 +99,157 @@ fun RegistrationPane(
         val layoutType = getDeviceLayoutType(windowSizeClass)
 
         when (layoutType) {
-            DeviceLayoutType.PHONE_LANDSCAPE -> {
-                Row(
-                    modifier = Modifier
-                        .padding(
-                            top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-                        )
-                        .clip(
-                            shape = RoundedCornerShape(
-                                topStart = 16.dp,
-                                topEnd = 16.dp
-                            )
-                        )
-                        .background(color = colorScheme.surfaceContainerLowest)
-                        .fillMaxSize()
-                        .padding(all = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    LeftPane(
-                        modifier = Modifier
-                            .safeContentPadding()
-                            .fillMaxWidth(fraction = 0.4f)
-                            .wrapContentHeight(align = Alignment.Top)
-                    )
-                    RightPane(
-                        modifier = Modifier
-                            .padding(
-                                top = WindowInsets.systemBars.asPaddingValues()
-                                    .calculateTopPadding(),
-                                start = WindowInsets
-                                    .systemBars.union(insets = WindowInsets.displayCutout)
-                                    .asPaddingValues()
-                                    .calculateLeftPadding(LayoutDirection.Ltr),
-                                end = WindowInsets
-                                    .systemBars.union(insets = WindowInsets.displayCutout)
-                                    .asPaddingValues()
-                                    .calculateRightPadding(LayoutDirection.Ltr)
-                            )
-                            .verticalScroll(state = rememberScrollState()),
-                        navigateToLogin = navigateToLogin,
-                        registrationUiModel = updatedRegistrationUiModel,
-                        registrationAction = registrationAction
-                    )
-                }
-            }
+            DeviceLayoutType.PHONE_LANDSCAPE -> PhoneLandscapeLayout(
+                modifier = Modifier,
+                registrationUiModel = updatedRegistrationUiModel,
+                registrationAction = registrationAction,
+                navigateToLogin = navigateToLogin
+            )
 
-            DeviceLayoutType.TABLET_LAYOUT -> {
-                Column(
-                    modifier = Modifier
-                        .padding(
-                            top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-                            start = WindowInsets.systemBars.asPaddingValues()
-                                .calculateLeftPadding(LayoutDirection.Ltr),
-                            end = WindowInsets.systemBars.asPaddingValues()
-                                .calculateRightPadding(LayoutDirection.Ltr)
-                        )
-                        .clip(
-                            shape = RoundedCornerShape(
-                                topStart = 16.dp,
-                                topEnd = 16.dp
-                            )
-                        )
-                        .background(color = colorScheme.surfaceContainerLowest)
-                        .fillMaxSize()
-                        .padding(start = 128.dp, end = 128.dp, top = 128.dp)
-                        .verticalScroll(state = rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(space = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    LeftPane()
-                    Spacer(modifier = Modifier.height(height = 16.dp))
-                    RightPane(
-                        modifier = Modifier.fillMaxWidth(),
-                        navigateToLogin = navigateToLogin,
-                        registrationUiModel = updatedRegistrationUiModel,
-                        registrationAction = registrationAction
-                    )
-                }
-            }
+            DeviceLayoutType.TABLET_LAYOUT -> TabletLayout(
+                modifier = Modifier,
+                registrationUiModel = updatedRegistrationUiModel,
+                registrationAction = registrationAction,
+                navigateToLogin = navigateToLogin
+            )
 
-            else -> {
-                Column(
-                    modifier = Modifier
-                        .padding(
-                            top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-                            start = WindowInsets.systemBars.asPaddingValues()
-                                .calculateLeftPadding(LayoutDirection.Ltr),
-                            end = WindowInsets.systemBars.asPaddingValues()
-                                .calculateRightPadding(LayoutDirection.Ltr)
-                        )
-                        .clip(
-                            shape = RoundedCornerShape(
-                                topStart = 16.dp,
-                                topEnd = 16.dp
-                            )
-                        )
-                        .background(color = colorScheme.surfaceContainerLowest)
-                        .fillMaxSize()
-                        .padding(all = 16.dp)
-                        .verticalScroll(state = rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(space = 8.dp)
-                ) {
-                    LeftPane()
-                    Spacer(modifier = Modifier.height(height = 16.dp))
-                    RightPane(
-                        navigateToLogin = navigateToLogin,
-                        registrationUiModel = updatedRegistrationUiModel,
-                        registrationAction = registrationAction
-                    )
-                }
-            }
+            else -> OtherLayout(
+                modifier = Modifier,
+                registrationUiModel = updatedRegistrationUiModel,
+                registrationAction = registrationAction,
+                navigateToLogin = navigateToLogin
+            )
         }
+    }
+}
+
+@Composable
+private fun PhoneLandscapeLayout(
+    modifier: Modifier = Modifier,
+    registrationUiModel: RegistrationUiModel,
+    registrationAction: (RegistrationAction) -> Unit = {},
+    navigateToLogin: () -> Unit = {}
+) {
+    Row(
+        modifier = modifier
+            .padding(
+                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+            )
+            .clip(
+                shape = RoundedCornerShape(
+                    topStart = 16.dp,
+                    topEnd = 16.dp
+                )
+            )
+            .background(color = colorScheme.surfaceContainerLowest)
+            .fillMaxSize()
+            .padding(all = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        LeftPane(
+            modifier = Modifier
+                .safeContentPadding()
+                .fillMaxWidth(fraction = 0.4f)
+                .wrapContentHeight(align = Alignment.Top)
+        )
+        RightPane(
+            modifier = Modifier
+                .padding(
+                    top = WindowInsets.systemBars.asPaddingValues()
+                        .calculateTopPadding(),
+                    start = WindowInsets
+                        .systemBars.union(insets = WindowInsets.displayCutout)
+                        .asPaddingValues()
+                        .calculateLeftPadding(LayoutDirection.Ltr),
+                    end = WindowInsets
+                        .systemBars.union(insets = WindowInsets.displayCutout)
+                        .asPaddingValues()
+                        .calculateRightPadding(LayoutDirection.Ltr)
+                )
+                .verticalScroll(state = rememberScrollState()),
+            navigateToLogin = navigateToLogin,
+            registrationUiModel = registrationUiModel,
+            registrationAction = registrationAction
+        )
+    }
+}
+
+@Composable
+private fun TabletLayout(
+    modifier: Modifier = Modifier,
+    registrationUiModel: RegistrationUiModel,
+    registrationAction: (RegistrationAction) -> Unit = {},
+    navigateToLogin: () -> Unit = {}
+) {
+    Column(
+        modifier = modifier
+            .padding(
+                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+                start = WindowInsets.systemBars.asPaddingValues()
+                    .calculateLeftPadding(LayoutDirection.Ltr),
+                end = WindowInsets.systemBars.asPaddingValues()
+                    .calculateRightPadding(LayoutDirection.Ltr)
+            )
+            .clip(
+                shape = RoundedCornerShape(
+                    topStart = 16.dp,
+                    topEnd = 16.dp
+                )
+            )
+            .background(color = colorScheme.surfaceContainerLowest)
+            .fillMaxSize()
+            .padding(start = 128.dp, end = 128.dp, top = 128.dp)
+            .verticalScroll(state = rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(space = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        LeftPane()
+        Spacer(modifier = Modifier.height(height = 16.dp))
+        RightPane(
+            modifier = Modifier.fillMaxWidth(),
+            navigateToLogin = navigateToLogin,
+            registrationUiModel = registrationUiModel,
+            registrationAction = registrationAction
+        )
+    }
+}
+
+@Composable
+private fun OtherLayout(
+    modifier: Modifier = Modifier,
+    registrationUiModel: RegistrationUiModel,
+    registrationAction: (RegistrationAction) -> Unit = {},
+    navigateToLogin: () -> Unit = {}
+) {
+    Column(
+        modifier = modifier
+            .padding(
+                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+                start = WindowInsets.systemBars.asPaddingValues()
+                    .calculateLeftPadding(LayoutDirection.Ltr),
+                end = WindowInsets.systemBars.asPaddingValues()
+                    .calculateRightPadding(LayoutDirection.Ltr)
+            )
+            .clip(
+                shape = RoundedCornerShape(
+                    topStart = 16.dp,
+                    topEnd = 16.dp
+                )
+            )
+            .background(color = colorScheme.surfaceContainerLowest)
+            .fillMaxSize()
+            .padding(all = 16.dp)
+            .verticalScroll(state = rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(space = 8.dp)
+    ) {
+        LeftPane()
+        Spacer(modifier = Modifier.height(height = 16.dp))
+        RightPane(
+            navigateToLogin = navigateToLogin,
+            registrationUiModel = registrationUiModel,
+            registrationAction = registrationAction
+        )
     }
 }
 
@@ -259,125 +300,46 @@ private fun RightPane(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(space = 16.dp)
     ) {
-        var userName by rememberSaveable { mutableStateOf(value = registrationUiModel.userName) }
-        LaunchedEffect(key1 = userName) {
-            snapshotFlow { userName }.collect {
-                delay(timeMillis = 50)
-                registrationAction(UserNameEntered(userName))
-            }
-        }
-
-        NoteMarkTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .alignToSafeDrawing(),
-            label = "Username",
-            enteredText = userName,
-            hintText = "John.doe",
-            onFocusGained = { registrationAction(UserNameFiledInFocus(userName = registrationUiModel.userName)) },
-            onFocusLost = { registrationAction(UserNameFiledLostFocus(userName = registrationUiModel.userName)) },
-            explanationText = registrationUiModel.userNameExplanation ?: "",
-            errorText = registrationUiModel.userNameError ?: "",
-            onTextChanged = { userName = it },
-            onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
+        RegistrationUsernameField(
+            modifier = Modifier,
+            registrationUiModel = registrationUiModel,
+            registrationAction = registrationAction,
+            focusManager = focusManager
         )
 
-        var email by rememberSaveable { mutableStateOf(value = registrationUiModel.email) }
-        LaunchedEffect(key1 = email) {
-            snapshotFlow { email }.collect {
-                delay(timeMillis = 50)
-                registrationAction(EmailEntered(email))
-            }
-        }
-
-        NoteMarkTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .alignToSafeDrawing(),
-            label = "Email",
-            enteredText = email,
-            hintText = "john.doe@gmail.com",
-            errorText = registrationUiModel.emailError ?: "",
-            onTextChanged = { email = it },
-            onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
+        RegistrationEmailField(
+            modifier = Modifier,
+            registrationUiModel = registrationUiModel,
+            registrationAction = registrationAction,
+            focusManager = focusManager
         )
 
-        var password by rememberSaveable { mutableStateOf(registrationUiModel.password) }
-        LaunchedEffect(key1 = password) {
-            snapshotFlow { password }.collect {
-                delay(timeMillis = 50)
-                registrationAction(PasswordEntered(password))
-            }
-        }
-
-        NoteMarkPasswordTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .alignToSafeDrawing(),
-            label = "Password",
-            enteredText = password,
-            hintText = "Password",
-            explanationText = registrationUiModel.passwordExplanation ?: "",
-            errorText = registrationUiModel.passwordError ?: "",
-            onFocusGained = { registrationAction(PasswordFiledInFocus(password = registrationUiModel.password)) },
-            onTextChanged = { password = it },
-            onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
+        RegistrationPasswordField(
+            modifier = Modifier,
+            registrationUiModel = registrationUiModel,
+            registrationAction = registrationAction,
+            focusManager = focusManager
         )
 
-        var repeatPassword by rememberSaveable { mutableStateOf(value = registrationUiModel.repeatPassword) }
-        LaunchedEffect(key1 = repeatPassword) {
-            snapshotFlow { repeatPassword }.collect {
-                delay(timeMillis = 50)
-                registrationAction(RepeatPasswordEntered(repeatPassword))
-            }
-        }
-
-        NoteMarkPasswordTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .alignToSafeDrawing(),
-            label = "Repeat password",
-            enteredText = repeatPassword,
-            hintText = "Password",
-            errorText = registrationUiModel.repeatPasswordError ?: "",
-            onTextChanged = { repeatPassword = it },
-            onDoneClicked = {
-                if (registrationUiModel.registrationEnabled) {
-                    registrationAction(RegisterClicked)
-                }
-                focusManager.moveFocus(FocusDirection.Exit)
-                keyboardController?.hide()
-                focusManager.clearFocus(force = true)
-            }
+        RegistrationRepeatPasswordField(
+            modifier = Modifier,
+            registrationUiModel = registrationUiModel,
+            registrationAction = registrationAction,
+            keyboardController = keyboardController,
+            focusManager = focusManager
         )
 
-        NoteMarkButton(
-            onClick = {
-                keyboardController?.hide()
-                focusManager.clearFocus(force = true)
-                registrationAction(RegisterClicked)
-            },
-            modifier = Modifier
-                .fillMaxWidth(),
-            enabled = registrationUiModel.registrationEnabled
-        ) {
-            Text(
-                text = "Create account",
-                style = typography.titleSmall
-            )
-        }
+        RegistrationButton(
+            modifier = Modifier,
+            registrationUiModel = registrationUiModel,
+            registrationAction = registrationAction,
+            keyboardController = keyboardController,
+            focusManager = focusManager
+        )
 
-        Text(
-            text = "Already have and account?",
-            style = typography.titleSmall,
-            fontWeight = FontWeight.Normal,
-            modifier = Modifier
-                .fillMaxSize()
-                .lifecycleAwareDebouncedClickable {
-                    navigateToLogin()
-                },
-            textAlign = TextAlign.Center,
-            color = colorScheme.primary
+        RegistrationFooterField(
+            modifier = Modifier,
+            navigateToLogin = navigateToLogin
         )
 
         Spacer(
@@ -386,6 +348,175 @@ private fun RightPane(
                 .imePadding()
         )
     }
+}
+
+@Composable
+private fun RegistrationUsernameField(
+    modifier: Modifier = Modifier,
+    registrationUiModel: RegistrationUiModel,
+    registrationAction: (RegistrationAction) -> Unit = {},
+    focusManager: FocusManager,
+) {
+    var userName by rememberSaveable { mutableStateOf(value = registrationUiModel.userName) }
+    LaunchedEffect(key1 = userName) {
+        snapshotFlow { userName }.collect {
+            delay(timeMillis = 50)
+            registrationAction(UserNameEntered(userName))
+        }
+    }
+
+    NoteMarkTextField(
+        modifier = modifier
+            .fillMaxWidth()
+            .alignToSafeDrawing(),
+        label = "Username",
+        enteredText = userName,
+        hintText = "John.doe",
+        onFocusGained = { registrationAction(UserNameFiledInFocus(userName = registrationUiModel.userName)) },
+        onFocusLost = { registrationAction(UserNameFiledLostFocus(userName = registrationUiModel.userName)) },
+        explanationText = registrationUiModel.userNameExplanation ?: "",
+        errorText = registrationUiModel.userNameError ?: "",
+        onTextChanged = { userName = it },
+        onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
+    )
+}
+
+@Composable
+private fun RegistrationEmailField(
+    modifier: Modifier = Modifier,
+    registrationUiModel: RegistrationUiModel,
+    registrationAction: (RegistrationAction) -> Unit = {},
+    focusManager: FocusManager,
+) {
+    var email by rememberSaveable { mutableStateOf(value = registrationUiModel.email) }
+    LaunchedEffect(key1 = email) {
+        snapshotFlow { email }.collect {
+            delay(timeMillis = 50)
+            registrationAction(EmailEntered(email))
+        }
+    }
+
+    NoteMarkTextField(
+        modifier = modifier
+            .fillMaxWidth()
+            .alignToSafeDrawing(),
+        label = "Email",
+        enteredText = email,
+        hintText = "john.doe@gmail.com",
+        errorText = registrationUiModel.emailError ?: "",
+        onTextChanged = { email = it },
+        onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
+    )
+}
+
+@Composable
+private fun RegistrationPasswordField(
+    modifier: Modifier = Modifier,
+    registrationUiModel: RegistrationUiModel,
+    registrationAction: (RegistrationAction) -> Unit = {},
+    focusManager: FocusManager,
+) {
+    var password by rememberSaveable { mutableStateOf(registrationUiModel.password) }
+    LaunchedEffect(key1 = password) {
+        snapshotFlow { password }.collect {
+            delay(timeMillis = 50)
+            registrationAction(PasswordEntered(password))
+        }
+    }
+
+    NoteMarkPasswordTextField(
+        modifier = modifier
+            .fillMaxWidth()
+            .alignToSafeDrawing(),
+        label = "Password",
+        enteredText = password,
+        hintText = "Password",
+        explanationText = registrationUiModel.passwordExplanation ?: "",
+        errorText = registrationUiModel.passwordError ?: "",
+        onFocusGained = { registrationAction(PasswordFiledInFocus(password = registrationUiModel.password)) },
+        onTextChanged = { password = it },
+        onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
+    )
+}
+
+@Composable
+private fun RegistrationRepeatPasswordField(
+    modifier: Modifier = Modifier,
+    registrationUiModel: RegistrationUiModel,
+    registrationAction: (RegistrationAction) -> Unit = {},
+    keyboardController: SoftwareKeyboardController? = null,
+    focusManager: FocusManager,
+) {
+    var repeatPassword by rememberSaveable { mutableStateOf(value = registrationUiModel.repeatPassword) }
+    LaunchedEffect(key1 = repeatPassword) {
+        snapshotFlow { repeatPassword }.collect {
+            delay(timeMillis = 50)
+            registrationAction(RepeatPasswordEntered(repeatPassword))
+        }
+    }
+
+    NoteMarkPasswordTextField(
+        modifier = modifier
+            .fillMaxWidth()
+            .alignToSafeDrawing(),
+        label = "Repeat password",
+        enteredText = repeatPassword,
+        hintText = "Password",
+        errorText = registrationUiModel.repeatPasswordError ?: "",
+        onTextChanged = { repeatPassword = it },
+        onDoneClicked = {
+            if (registrationUiModel.registrationEnabled) {
+                registrationAction(RegisterClicked)
+            }
+            focusManager.moveFocus(FocusDirection.Exit)
+            keyboardController?.hide()
+            focusManager.clearFocus(force = true)
+        }
+    )
+}
+
+@Composable
+private fun RegistrationButton(
+    modifier: Modifier = Modifier,
+    registrationUiModel: RegistrationUiModel,
+    registrationAction: (RegistrationAction) -> Unit = {},
+    keyboardController: SoftwareKeyboardController? = null,
+    focusManager: FocusManager,
+) {
+    NoteMarkButton(
+        onClick = {
+            keyboardController?.hide()
+            focusManager.clearFocus(force = true)
+            registrationAction(RegisterClicked)
+        },
+        modifier = modifier
+            .fillMaxWidth(),
+        enabled = registrationUiModel.registrationEnabled
+    ) {
+        Text(
+            text = "Create account",
+            style = typography.titleSmall
+        )
+    }
+}
+
+@Composable
+private fun RegistrationFooterField(
+    modifier: Modifier = Modifier,
+    navigateToLogin: () -> Unit = {}
+) {
+    Text(
+        text = "Already have and account?",
+        style = typography.titleSmall,
+        fontWeight = FontWeight.Normal,
+        modifier = modifier
+            .fillMaxSize()
+            .lifecycleAwareDebouncedClickable {
+                navigateToLogin()
+            },
+        textAlign = TextAlign.Center,
+        color = colorScheme.primary
+    )
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)

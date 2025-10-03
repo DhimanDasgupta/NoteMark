@@ -96,22 +96,6 @@ fun AddNotePane(
 
     val layoutType = getDeviceLayoutType(windowSizeClass)
 
-    var title by remember { mutableStateOf(value = updatedAddNoteUiModel.title) }
-    LaunchedEffect(key1 = title) {
-        snapshotFlow { title }.collect {
-            delay(timeMillis = 50)
-            addNoteAction(AddNoteAction.UpdateTitle(title = title))
-        }
-    }
-
-    var body by remember { mutableStateOf(value = updatedAddNoteUiModel.content) }
-    LaunchedEffect(key1 = body) {
-        snapshotFlow { body }.collect {
-            delay(timeMillis = 50)
-            addNoteAction(AddNoteAction.UpdateContent(content = body))
-        }
-    }
-
     Column(
         modifier = modifier
             .background(color = colorScheme.surfaceContainerLowest)
@@ -139,10 +123,8 @@ fun AddNotePane(
                     }
                 )
                 .fillMaxHeight(fraction = 1f),
-            titleText = title,
-            bodyText = body,
-            onTitleTextChanged = { value -> title = value },
-            onBodyTextChanged = { value -> body = value }
+            addNoteUiModel = updatedAddNoteUiModel,
+            addNoteAction = addNoteAction
         )
     }
 }
@@ -201,15 +183,29 @@ private fun AddNoteToolbar(
 @Composable
 private fun AddNoteBody(
     modifier: Modifier = Modifier,
-    titleText: String = "",
-    bodyText: String = "",
-    onTitleTextChanged: (String) -> Unit = {},
-    onBodyTextChanged: (String) -> Unit = {}
+    addNoteUiModel: AddNoteUiModel,
+    addNoteAction: (AddNoteAction) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
 
     LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
+
+    var title by remember { mutableStateOf(value = addNoteUiModel.title) }
+    LaunchedEffect(key1 = title) {
+        snapshotFlow { title }.collect {
+            delay(timeMillis = 50)
+            addNoteAction(AddNoteAction.UpdateTitle(title = title))
+        }
+    }
+
+    var body by remember { mutableStateOf(value = addNoteUiModel.content) }
+    LaunchedEffect(key1 = body) {
+        snapshotFlow { body }.collect {
+            delay(timeMillis = 50)
+            addNoteAction(AddNoteAction.UpdateContent(content = body))
+        }
+    }
 
     Box(
         modifier = modifier
@@ -239,8 +235,8 @@ private fun AddNoteBody(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextField(
-                value = titleText,
-                onValueChange = { value -> onTitleTextChanged(value) },
+                value = title,
+                onValueChange = { value -> title = value },
                 textStyle = typography.titleLarge,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -282,8 +278,8 @@ private fun AddNoteBody(
             )
 
             TextField(
-                value = bodyText,
-                onValueChange = { value -> onBodyTextChanged(value) },
+                value = body,
+                onValueChange = { value -> body = value },
                 textStyle = typography.bodyLarge,
                 modifier = Modifier
                     .fillMaxWidth()

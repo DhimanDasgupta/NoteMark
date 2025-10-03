@@ -39,8 +39,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -78,10 +80,10 @@ import kotlinx.coroutines.delay
 fun LoginPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    navigateToAfterLogin: () -> Unit = {},
-    navigateToRegistration: () -> Unit = {},
     loginUiModel: LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
+    navigateToAfterLogin: () -> Unit = {},
+    navigateToRegistration: () -> Unit = {},
 ) {
     val updatedLoginUiModel by rememberUpdatedState(newValue = loginUiModel)
 
@@ -93,122 +95,167 @@ fun LoginPane(
         val layoutType = getDeviceLayoutType(windowSizeClass)
 
         when (layoutType) {
-            DeviceLayoutType.PHONE_LANDSCAPE -> {
-                Row(
-                    modifier = Modifier
-                        .padding(
-                            top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-                        )
-                        .clip(
-                            shape = RoundedCornerShape(
-                                topStart = 16.dp,
-                                topEnd = 16.dp
-                            )
-                        )
-                        .background(color = colorScheme.surfaceContainerLowest)
-                        .fillMaxSize()
-                        .padding(all = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    LeftPane(
-                        modifier = Modifier
-                            .safeContentPadding()
-                            .fillMaxWidth(fraction = 0.4f)
-                    )
-                    RightPane(
-                        modifier = Modifier
-                            .padding(
-                                top = WindowInsets.systemBars.asPaddingValues()
-                                    .calculateTopPadding(),
-                                start = WindowInsets
-                                    .systemBars.union(insets = WindowInsets.displayCutout)
-                                    .asPaddingValues()
-                                    .calculateLeftPadding(LayoutDirection.Ltr),
-                                end = WindowInsets
-                                    .systemBars.union(insets = WindowInsets.displayCutout)
-                                    .asPaddingValues()
-                                    .calculateRightPadding(LayoutDirection.Ltr)
-                            )
-                            .verticalScroll(state = rememberScrollState()),
-                        navigateToRegistration = navigateToRegistration,
-                        navigateToAfterLogin = navigateToAfterLogin,
-                        loginUiModel = updatedLoginUiModel,
-                        loginAction = loginAction
-                    )
-                }
-            }
+            DeviceLayoutType.PHONE_LANDSCAPE -> PhoneLandscapeLayout(
+                modifier = Modifier,
+                loginUiModel = updatedLoginUiModel,
+                loginAction = loginAction,
+                navigateToAfterLogin = navigateToAfterLogin,
+                navigateToRegistration = navigateToRegistration
+            )
 
-            DeviceLayoutType.TABLET_LAYOUT -> {
-                Column(
-                    modifier = Modifier
-                        .padding(
-                            top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-                            start = WindowInsets.systemBars.asPaddingValues()
-                                .calculateLeftPadding(LayoutDirection.Ltr),
-                            end = WindowInsets.systemBars.asPaddingValues()
-                                .calculateRightPadding(LayoutDirection.Ltr)
-                        )
-                        .clip(
-                            shape = RoundedCornerShape(
-                                topStart = 16.dp,
-                                topEnd = 16.dp
-                            )
-                        )
-                        .background(color = colorScheme.surfaceContainerLowest)
-                        .fillMaxSize()
-                        .padding(start = 64.dp, end = 64.dp, top = 64.dp)
-                        .verticalScroll(state = rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(space = 8.dp)
-                ) {
-                    LeftPane(
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    )
-                    Spacer(modifier = Modifier.height(height = 16.dp))
-                    RightPane(
-                        navigateToRegistration = navigateToRegistration,
-                        navigateToAfterLogin = navigateToAfterLogin,
-                        loginUiModel = loginUiModel,
-                        loginAction = loginAction
-                    )
-                }
-            }
+            DeviceLayoutType.TABLET_LAYOUT -> TabletLayout(
+                modifier = Modifier,
+                loginUiModel = updatedLoginUiModel,
+                loginAction = loginAction,
+                navigateToAfterLogin = navigateToAfterLogin,
+                navigateToRegistration = navigateToRegistration
+            )
 
-            else -> {
-                Column(
-                    modifier = Modifier
-                        .padding(
-                            top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-                            start = WindowInsets.systemBars.asPaddingValues()
-                                .calculateLeftPadding(LayoutDirection.Ltr),
-                            end = WindowInsets.systemBars.asPaddingValues()
-                                .calculateRightPadding(LayoutDirection.Ltr)
-                        )
-                        .clip(
-                            shape = RoundedCornerShape(
-                                topStart = 16.dp,
-                                topEnd = 16.dp
-                            )
-                        )
-                        .background(color = colorScheme.surfaceContainerLowest)
-                        .fillMaxSize()
-                        .padding(all = 16.dp)
-                        .verticalScroll(state = rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(space = 8.dp)
-                ) {
-                    LeftPane()
-                    Spacer(modifier = Modifier.height(height = 16.dp))
-                    RightPane(
-                        navigateToRegistration = navigateToRegistration,
-                        navigateToAfterLogin = navigateToAfterLogin,
-                        loginUiModel = updatedLoginUiModel,
-                        loginAction = loginAction
-                    )
-                }
-            }
+            else -> OtherLayout(
+                modifier = Modifier,
+                loginUiModel = updatedLoginUiModel,
+                loginAction = loginAction,
+                navigateToAfterLogin = navigateToAfterLogin,
+                navigateToRegistration = navigateToRegistration
+            )
         }
+    }
+}
+
+@Composable
+private fun PhoneLandscapeLayout(
+    modifier: Modifier = Modifier,
+    loginUiModel: LoginUiModel,
+    loginAction: (LoginAction) -> Unit = {},
+    navigateToAfterLogin: () -> Unit = {},
+    navigateToRegistration: () -> Unit = {},
+) {
+    Row(
+        modifier = modifier
+            .padding(
+                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+            )
+            .clip(
+                shape = RoundedCornerShape(
+                    topStart = 16.dp,
+                    topEnd = 16.dp
+                )
+            )
+            .background(color = colorScheme.surfaceContainerLowest)
+            .fillMaxSize()
+            .padding(all = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        LeftPane(
+            modifier = Modifier
+                .safeContentPadding()
+                .fillMaxWidth(fraction = 0.4f)
+        )
+        RightPane(
+            modifier = Modifier
+                .padding(
+                    top = WindowInsets.systemBars.asPaddingValues()
+                        .calculateTopPadding(),
+                    start = WindowInsets
+                        .systemBars.union(insets = WindowInsets.displayCutout)
+                        .asPaddingValues()
+                        .calculateLeftPadding(LayoutDirection.Ltr),
+                    end = WindowInsets
+                        .systemBars.union(insets = WindowInsets.displayCutout)
+                        .asPaddingValues()
+                        .calculateRightPadding(LayoutDirection.Ltr)
+                )
+                .verticalScroll(state = rememberScrollState()),
+            navigateToRegistration = navigateToRegistration,
+            navigateToAfterLogin = navigateToAfterLogin,
+            loginUiModel = loginUiModel,
+            loginAction = loginAction
+        )
+    }
+}
+
+@Composable
+private fun TabletLayout(
+    modifier: Modifier = Modifier,
+    loginUiModel: LoginUiModel,
+    loginAction: (LoginAction) -> Unit = {},
+    navigateToAfterLogin: () -> Unit = {},
+    navigateToRegistration: () -> Unit = {},
+) {
+    Column(
+        modifier = modifier
+            .padding(
+                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+                start = WindowInsets.systemBars.asPaddingValues()
+                    .calculateLeftPadding(LayoutDirection.Ltr),
+                end = WindowInsets.systemBars.asPaddingValues()
+                    .calculateRightPadding(LayoutDirection.Ltr)
+            )
+            .clip(
+                shape = RoundedCornerShape(
+                    topStart = 16.dp,
+                    topEnd = 16.dp
+                )
+            )
+            .background(color = colorScheme.surfaceContainerLowest)
+            .fillMaxSize()
+            .padding(start = 64.dp, end = 64.dp, top = 64.dp)
+            .verticalScroll(state = rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(space = 8.dp)
+    ) {
+        LeftPane(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally),
+            horizontalAlignment = Alignment.CenterHorizontally
+        )
+        Spacer(modifier = Modifier.height(height = 16.dp))
+        RightPane(
+            navigateToRegistration = navigateToRegistration,
+            navigateToAfterLogin = navigateToAfterLogin,
+            loginUiModel = loginUiModel,
+            loginAction = loginAction
+        )
+    }
+}
+
+@Composable
+private fun OtherLayout(
+    modifier: Modifier = Modifier,
+    loginUiModel: LoginUiModel,
+    loginAction: (LoginAction) -> Unit = {},
+    navigateToAfterLogin: () -> Unit = {},
+    navigateToRegistration: () -> Unit = {},
+) {
+    Column(
+        modifier = modifier
+            .padding(
+                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+                start = WindowInsets.systemBars.asPaddingValues()
+                    .calculateLeftPadding(LayoutDirection.Ltr),
+                end = WindowInsets.systemBars.asPaddingValues()
+                    .calculateRightPadding(LayoutDirection.Ltr)
+            )
+            .clip(
+                shape = RoundedCornerShape(
+                    topStart = 16.dp,
+                    topEnd = 16.dp
+                )
+            )
+            .background(color = colorScheme.surfaceContainerLowest)
+            .fillMaxSize()
+            .padding(all = 16.dp)
+            .verticalScroll(state = rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(space = 8.dp)
+    ) {
+        LeftPane()
+        Spacer(modifier = Modifier.height(height = 16.dp))
+        RightPane(
+            navigateToRegistration = navigateToRegistration,
+            navigateToAfterLogin = navigateToAfterLogin,
+            loginUiModel = loginUiModel,
+            loginAction = loginAction
+        )
     }
 }
 
@@ -266,84 +313,144 @@ private fun RightPane(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(space = 16.dp),
     ) {
-        var emailText by rememberSaveable { mutableStateOf(value = loginUiModel.email) }
-        LaunchedEffect(key1 = emailText) {
-            snapshotFlow { emailText }.collect {
-                delay(timeMillis = 50)
-                loginAction(EmailEntered(email = emailText))
-            }
-        }
-
-        NoteMarkTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .alignToSafeDrawing(),
-            label = "Email",
-            enteredText = emailText,
-            hintText = "john.doe@gmail.com",
-            onTextChanged = { emailText = it },
-            onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
+        LoginEmailField(
+            modifier = Modifier,
+            loginUiModel = loginUiModel,
+            loginAction = loginAction,
+            focusManager = focusManager
         )
 
-        var passwordText by rememberSaveable { mutableStateOf(value = loginUiModel.password) }
-        LaunchedEffect(key1 = passwordText) {
-            snapshotFlow { passwordText }.collect {
-                delay(timeMillis = 50)
-                loginAction(PasswordEntered(password = passwordText))
-            }
-        }
-
-        NoteMarkPasswordTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .alignToSafeDrawing(),
-            label = "Password",
-            enteredText = passwordText,
-            hintText = "Password",
-            onTextChanged = { passwordText = it },
-            onDoneClicked = {
-                focusManager.moveFocus(FocusDirection.Enter)
-                keyboardController?.hide()
-                focusManager.clearFocus(force = true)
-
-                if (loginUiModel.loginEnabled) {
-                    loginAction(HideLoginButton)
-                    loginAction(LoginClicked)
-                }
-            }
+        LoginPasswordField(
+            modifier = Modifier,
+            loginUiModel = loginUiModel,
+            loginAction = loginAction,
+            keyboardController = keyboardController,
+            focusManager = focusManager
         )
 
-        NoteMarkButton(
-            onClick = {
-                keyboardController?.hide()
-                focusManager.clearFocus(force = true)
-                loginAction(HideLoginButton)
-                loginAction(LoginClicked)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = loginUiModel.loginEnabled
-        ) {
-            Text(
-                text = "Log in",
-                style = typography.titleSmall
-            )
-        }
+        LoginButton(
+            modifier = Modifier,
+            loginUiModel = loginUiModel,
+            loginAction = loginAction,
+            keyboardController = keyboardController,
+            focusManager = focusManager
+        )
 
-        Text(
-            text = "Don't have an account?",
-            style = typography.titleSmall,
-            fontWeight = FontWeight.Normal,
-            modifier = Modifier
-                .fillMaxSize()
-                .lifecycleAwareDebouncedClickable {
-                    navigateToRegistration()
-                },
-            textAlign = TextAlign.Center,
-            color = colorScheme.primary
+        LoginFooterField(
+            modifier = Modifier,
+            navigateToRegistration = navigateToRegistration
         )
 
         Spacer(modifier = Modifier.imePadding())
     }
+}
+
+@Composable
+private fun LoginEmailField(
+    modifier: Modifier = Modifier,
+    loginUiModel: LoginUiModel,
+    loginAction: (LoginAction) -> Unit = {},
+    focusManager: FocusManager,
+) {
+    var emailText by rememberSaveable { mutableStateOf(value = loginUiModel.email) }
+    LaunchedEffect(key1 = emailText) {
+        snapshotFlow { emailText }.collect {
+            delay(timeMillis = 50)
+            loginAction(EmailEntered(email = emailText))
+        }
+    }
+
+    NoteMarkTextField(
+        modifier = modifier
+            .fillMaxWidth()
+            .alignToSafeDrawing(),
+        label = "Email",
+        enteredText = emailText,
+        hintText = "john.doe@gmail.com",
+        onTextChanged = { emailText = it },
+        onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
+    )
+}
+
+@Composable
+private fun LoginPasswordField(
+    modifier: Modifier = Modifier,
+    loginUiModel: LoginUiModel,
+    loginAction: (LoginAction) -> Unit = {},
+    keyboardController: SoftwareKeyboardController?,
+    focusManager: FocusManager,
+) {
+    var passwordText by rememberSaveable { mutableStateOf(value = loginUiModel.password) }
+    LaunchedEffect(key1 = passwordText) {
+        snapshotFlow { passwordText }.collect {
+            delay(timeMillis = 50)
+            loginAction(PasswordEntered(password = passwordText))
+        }
+    }
+
+    NoteMarkPasswordTextField(
+        modifier = modifier
+            .fillMaxWidth()
+            .alignToSafeDrawing(),
+        label = "Password",
+        enteredText = passwordText,
+        hintText = "Password",
+        onTextChanged = { passwordText = it },
+        onDoneClicked = {
+            focusManager.moveFocus(FocusDirection.Enter)
+            keyboardController?.hide()
+            focusManager.clearFocus(force = true)
+
+            if (loginUiModel.loginEnabled) {
+                loginAction(HideLoginButton)
+                loginAction(LoginClicked)
+            }
+        }
+    )
+}
+
+@Composable
+private fun LoginButton(
+    modifier: Modifier = Modifier,
+    loginUiModel: LoginUiModel,
+    loginAction: (LoginAction) -> Unit = {},
+    keyboardController: SoftwareKeyboardController?,
+    focusManager: FocusManager,
+) {
+    NoteMarkButton(
+        onClick = {
+            keyboardController?.hide()
+            focusManager.clearFocus(force = true)
+            loginAction(HideLoginButton)
+            loginAction(LoginClicked)
+        },
+        modifier = modifier.fillMaxWidth(),
+        enabled = loginUiModel.loginEnabled
+    ) {
+        Text(
+            text = "Log in",
+            style = typography.titleSmall
+        )
+    }
+}
+
+@Composable
+private fun LoginFooterField(
+    modifier: Modifier = Modifier,
+    navigateToRegistration: () -> Unit = {},
+) {
+    Text(
+        text = "Don't have an account?",
+        style = typography.titleSmall,
+        fontWeight = FontWeight.Normal,
+        modifier = modifier
+            .fillMaxSize()
+            .lifecycleAwareDebouncedClickable {
+                navigateToRegistration()
+            },
+        textAlign = TextAlign.Center,
+        color = colorScheme.primary
+    )
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
