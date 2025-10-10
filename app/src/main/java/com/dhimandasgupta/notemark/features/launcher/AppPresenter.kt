@@ -6,7 +6,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 
 class AppPresenter(
     private val appStateMachine: AppStateMachine
@@ -20,9 +26,13 @@ class AppPresenter(
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             appStateMachine.state
-                .collect { appState ->
+                .onEach { appState ->
                     applicationState = appState
                 }
+                .flowOn(Dispatchers.Default)
+                .cancellable()
+                .catch { /* TODO if needed */ }
+                .collect()
         }
 
         // Send the Events to the State Machine through Actions

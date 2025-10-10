@@ -121,6 +121,7 @@ fun NoteListPane(
         // Dialog check
         if (!noteDeleteId.isNullOrEmpty()) {
             NoteDeleteDialog(
+                modifier = Modifier,
                 noteId = updateNoteListUiModel.noteLongClickedUuid,
                 onDelete = { _ ->
                     noteDeleteId?.let { id ->
@@ -613,6 +614,56 @@ private val noteListUiModel = NoteListUiModel(
     noteEntities = listOf(
         NoteEntity(
             id = 0,
+            title = "This is a title for the Note\nThis is a title for the Note",
+            content = "This is content For the Note\nThis is content For the Note",
+            createdAt = "19th Apr",
+            lastEditedAt = "20th Apr",
+            uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+            synced = true,
+            markAsDeleted = false
+        ),
+        NoteEntity(
+            id = 1,
+            title = "This is a title for the Note",
+            content = "This is content For the Note",
+            createdAt = "19th Apr",
+            lastEditedAt = "20th Apr",
+            uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+            synced = true,
+            markAsDeleted = false
+        ),
+        NoteEntity(
+            id = 2,
+            title = "This is a title for the Note\nThis is a title for the Note",
+            content = "This is content For the Note\nThis is content For the Note",
+            createdAt = "19th Apr",
+            lastEditedAt = "20th Apr",
+            uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+            synced = true,
+            markAsDeleted = false
+        ),
+        NoteEntity(
+            id = 3,
+            title = "This is a title for the Note",
+            content = "This is content For the Note",
+            createdAt = "19th Apr",
+            lastEditedAt = "20th Apr",
+            uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+            synced = true,
+            markAsDeleted = false
+        ),
+        NoteEntity(
+            id = 4,
+            title = "This is a title for the Note\nThis is a title for the Note",
+            content = "This is content For the Note\nThis is content For the Note",
+            createdAt = "19th Apr",
+            lastEditedAt = "20th Apr",
+            uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+            synced = true,
+            markAsDeleted = false
+        ),
+        NoteEntity(
+            id = 5,
             title = "This is a title for the Note",
             content = "This is content For the Note",
             createdAt = "19th Apr",
@@ -623,5 +674,6 @@ private val noteListUiModel = NoteListUiModel(
         )
     ).toPersistentList(),
     noteLongClickedUuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
-    showSyncProgress = true
+    showSyncProgress = true,
+    isConnected = true
 )

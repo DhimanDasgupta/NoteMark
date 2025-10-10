@@ -9,8 +9,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 
 @Immutable
 data class LoginUiModel(
@@ -38,9 +41,7 @@ class LoginPresenter(
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             loginStateMachine.state
-                .flowOn(Dispatchers.Default)
-                .catch { /* TODO if needed */ }
-                .collect { loginState ->
+                .onEach { loginState ->
                     loginUiModel = LoginUiModel(
                         email = loginState.email,
                         password = loginState.password,
@@ -50,6 +51,10 @@ class LoginPresenter(
                         loginSuccess = loginState.loginSuccess
                     )
                 }
+                .flowOn(Dispatchers.Default)
+                .cancellable()
+                .catch { /* TODO if needed */ }
+                .collect()
         }
 
         // Send the Events to the State Machine through Actions

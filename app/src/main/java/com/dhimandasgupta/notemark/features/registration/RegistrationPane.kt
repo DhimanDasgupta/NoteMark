@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -100,21 +99,19 @@ fun RegistrationPane(
         val layoutType = getDeviceLayoutType(windowSizeClass)
 
         when (layoutType) {
+            DeviceLayoutType.PHONE_PORTRAIT -> PhonePortraitLayout(
+                modifier = Modifier,
+                registrationUiModel = updatedRegistrationUiModel,
+                registrationAction = registrationAction,
+                navigateToLogin = navigateToLogin
+            )
             DeviceLayoutType.PHONE_LANDSCAPE -> PhoneLandscapeLayout(
                 modifier = Modifier,
                 registrationUiModel = updatedRegistrationUiModel,
                 registrationAction = registrationAction,
                 navigateToLogin = navigateToLogin
             )
-
-            DeviceLayoutType.TABLET_LAYOUT -> TabletLayout(
-                modifier = Modifier,
-                registrationUiModel = updatedRegistrationUiModel,
-                registrationAction = registrationAction,
-                navigateToLogin = navigateToLogin
-            )
-
-            else -> OtherLayout(
+            else -> TabletLayout(
                 modifier = Modifier,
                 registrationUiModel = updatedRegistrationUiModel,
                 registrationAction = registrationAction,
@@ -151,8 +148,8 @@ private fun PhoneLandscapeLayout(
         LeftPane(
             modifier = Modifier
                 .safeContentPadding()
-                .fillMaxWidth(fraction = 0.4f)
-                .wrapContentHeight(align = Alignment.Top)
+                .fillMaxSize(fraction = 0.4f)
+                .align(alignment = Alignment.CenterVertically)
         )
         RightPane(
             modifier = Modifier
@@ -217,7 +214,7 @@ private fun TabletLayout(
 }
 
 @Composable
-private fun OtherLayout(
+private fun PhonePortraitLayout(
     modifier: Modifier = Modifier,
     registrationUiModel: RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {},
@@ -360,7 +357,7 @@ private fun RegistrationUsernameField(
     focusManager: FocusManager,
 ) {
     var userName by rememberSaveable { mutableStateOf(value = registrationUiModel.userName) }
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(key1 = userName) {
         snapshotFlow { userName }
             .debounce(timeoutMillis = 300)
             .collect { registrationAction(UserNameEntered(userName)) }
@@ -391,7 +388,7 @@ private fun RegistrationEmailField(
     focusManager: FocusManager,
 ) {
     var email by rememberSaveable { mutableStateOf(value = registrationUiModel.email) }
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(key1 = email) {
         snapshotFlow { email }
             .debounce(timeoutMillis = 300)
             .collect { registrationAction(EmailEntered(email)) }
@@ -450,7 +447,7 @@ private fun RegistrationRepeatPasswordField(
     focusManager: FocusManager,
 ) {
     var repeatPassword by rememberSaveable { mutableStateOf(value = registrationUiModel.repeatPassword) }
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(key1 = repeatPassword) {
         snapshotFlow { repeatPassword }
             .debounce(timeoutMillis = 300)
             .collect { registrationAction(RepeatPasswordEntered(repeatPassword)) }

@@ -141,7 +141,7 @@ private fun SettingsToolbar(
             )
             .padding(
                 vertical = 4.dp,
-                horizontal = 8.dp
+                horizontal = 16.dp
             )
             .lifecycleAwareDebouncedClickable(onClick = onBackClicked),
         horizontalArrangement = Arrangement.spacedBy(space = 0.dp),

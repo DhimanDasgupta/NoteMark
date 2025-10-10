@@ -16,8 +16,11 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 
 @Immutable
@@ -52,10 +55,7 @@ class SettingsPresenter(
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             appStateMachine.state
-                .flowOn(Dispatchers.Default)
-                .catch { /* TODO if needed */ }
-                .onStart { AppStateMachine.defaultAppState }
-                .collect { appState ->
+                .onEach { appState ->
                     logoutUiModel = logoutUiModel.copy(
                         logoutStatus = when (appState) {
                             is AppState.NotLoggedIn -> true
@@ -94,6 +94,11 @@ class SettingsPresenter(
                         isConnected = appState.connectionState == ConnectionState.Available
                     )
                 }
+                .flowOn(Dispatchers.Default)
+                .onStart { AppStateMachine.defaultAppState }
+                .cancellable()
+                .catch { /* TODO if needed */ }
+                .collect()
 
         }
 

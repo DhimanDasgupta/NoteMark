@@ -195,7 +195,7 @@ private fun EditNoteToolbar(
                 .padding(
                     start = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
-                        .calculateLeftPadding(LayoutDirection.Ltr) + 16.dp,
+                        .calculateLeftPadding(LayoutDirection.Ltr) + 0.dp,
                     top = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateTopPadding() + 16.dp,
@@ -238,7 +238,7 @@ private fun EditNoteToolbar(
                 .padding(
                     start = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
-                        .calculateLeftPadding(LayoutDirection.Ltr) + 16.dp,
+                        .calculateLeftPadding(LayoutDirection.Ltr) + 0.dp,
                     top = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateTopPadding() + 16.dp,
@@ -283,14 +283,14 @@ private fun EditNoteBody(
     LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
     var title by remember(key1 = editNoteUiModel) { mutableStateOf(value = editNoteUiModel.title) }
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(key1 = title) {
         snapshotFlow { title }
             .debounce(timeoutMillis = 300)
             .collect { editNoteAction(EditNoteAction.UpdateTitle(title = title)) }
     }
 
     var body by remember(key1 = editNoteUiModel) { mutableStateOf(value = editNoteUiModel.content) }
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(key1 = body) {
         snapshotFlow { body }
             .debounce(timeoutMillis = 300)
             .collect { editNoteAction(EditNoteAction.UpdateContent(content = body)) }

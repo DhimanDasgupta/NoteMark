@@ -9,8 +9,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 
 @Immutable
@@ -40,16 +43,18 @@ class AddNotePresenter(
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             addNoteStateMachine.state
-                .catch { /* TODO if needed */ }
-                .flowOn(Dispatchers.Default)
-                .onStart { AddNoteStateMachine.defaultAddNoteState }
-                .collect { addNoteState ->
+                .onEach { addNoteState ->
                     addNoteUiModel = addNoteUiModel.copy(
                         title = addNoteState.title,
                         content = addNoteState.content,
                         saved = addNoteState.saved
                     )
                 }
+                .flowOn(Dispatchers.Default)
+                .onStart { AddNoteStateMachine.defaultAddNoteState }
+                .cancellable()
+                .catch { /* TODO if needed */ }
+                .collect()
         }
 
         // Send the Events to the State Machine through Actions

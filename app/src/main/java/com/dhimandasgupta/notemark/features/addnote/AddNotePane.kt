@@ -143,7 +143,7 @@ private fun AddNoteToolbar(
             .padding(
                 start = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
-                    .calculateLeftPadding(LayoutDirection.Ltr) + 16.dp,
+                    .calculateLeftPadding(LayoutDirection.Ltr) + 0.dp,
                 top = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                     .asPaddingValues()
                     .calculateTopPadding(),
@@ -194,14 +194,14 @@ private fun AddNoteBody(
     LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
     var title by remember { mutableStateOf(value = addNoteUiModel.title) }
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(key1 = title) {
         snapshotFlow { title }
             .debounce(timeoutMillis = 300)
             .collect { addNoteAction(AddNoteAction.UpdateTitle(title = title)) }
     }
 
     var body by remember { mutableStateOf(value = addNoteUiModel.content) }
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(key1 = body) {
         snapshotFlow { body }
             .debounce(timeoutMillis = 300)
             .collect { addNoteAction(AddNoteAction.UpdateContent(content = body)) }

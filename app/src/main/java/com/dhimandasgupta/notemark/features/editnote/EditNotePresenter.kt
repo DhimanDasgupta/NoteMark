@@ -11,8 +11,11 @@ import com.dhimandasgupta.notemark.common.convertIsoToRelativeTimeFormat
 import com.dhimandasgupta.notemark.database.NoteEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 
 @Immutable
@@ -47,10 +50,7 @@ class EditNotePresenter(
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             editNoteStateMachine.state
-                .flowOn(Dispatchers.Default)
-                .catch { /* TODO if needed */ }
-                .onStart { EditNoteStateMachine.defaultEditNoteState }
-                .collect { editNoteState ->
+                .onEach { editNoteState ->
                     editNoteUiModel = editNoteUiModel.copy(
                         title = editNoteState.title,
                         content = editNoteState.content,
@@ -65,6 +65,11 @@ class EditNotePresenter(
                         isReaderMode = editNoteState.mode == Mode.ReaderMode
                     )
                 }
+                .flowOn(Dispatchers.Default)
+                .onStart { EditNoteStateMachine.defaultEditNoteState }
+                .cancellable()
+                .catch { /* TODO if needed */ }
+                .collect()
         }
 
         // Send the Events to the State Machine through Actions

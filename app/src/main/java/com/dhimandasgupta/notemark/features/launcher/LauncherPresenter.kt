@@ -11,8 +11,11 @@ import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.proto.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 
 @Immutable
@@ -37,10 +40,7 @@ class LauncherPresenter(
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             appStateMachine.state
-                .flowOn(Dispatchers.Default)
-                .catch { /* TODO if needed */ }
-                .onStart { emit(AppStateMachine.defaultAppState) }
-                .collect { appState ->
+                .onEach { appState ->
                     launcherUiModel = launcherUiModel.copy(
                         connectionState = appState.connectionState,
                         loggedInUser = when (appState) {
@@ -49,6 +49,11 @@ class LauncherPresenter(
                         }
                     )
                 }
+                .flowOn(Dispatchers.Default)
+                .onStart { emit(AppStateMachine.defaultAppState) }
+                .cancellable()
+                .catch { /* TODO if needed */ }
+                .collect()
         }
 
         // Send the Events to the State Machine through Actions

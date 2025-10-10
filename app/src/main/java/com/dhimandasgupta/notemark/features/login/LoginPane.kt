@@ -96,6 +96,13 @@ fun LoginPane(
         val layoutType = getDeviceLayoutType(windowSizeClass)
 
         when (layoutType) {
+            DeviceLayoutType.PHONE_PORTRAIT -> PhonePortraitLayout(
+                modifier = Modifier,
+                loginUiModel = updatedLoginUiModel,
+                loginAction = loginAction,
+                navigateToAfterLogin = navigateToAfterLogin,
+                navigateToRegistration = navigateToRegistration
+            )
             DeviceLayoutType.PHONE_LANDSCAPE -> PhoneLandscapeLayout(
                 modifier = Modifier,
                 loginUiModel = updatedLoginUiModel,
@@ -103,16 +110,7 @@ fun LoginPane(
                 navigateToAfterLogin = navigateToAfterLogin,
                 navigateToRegistration = navigateToRegistration
             )
-
-            DeviceLayoutType.TABLET_LAYOUT -> TabletLayout(
-                modifier = Modifier,
-                loginUiModel = updatedLoginUiModel,
-                loginAction = loginAction,
-                navigateToAfterLogin = navigateToAfterLogin,
-                navigateToRegistration = navigateToRegistration
-            )
-
-            else -> OtherLayout(
+            else -> TabletLayout(
                 modifier = Modifier,
                 loginUiModel = updatedLoginUiModel,
                 loginAction = loginAction,
@@ -152,6 +150,7 @@ private fun PhoneLandscapeLayout(
             modifier = Modifier
                 .safeContentPadding()
                 .fillMaxWidth(fraction = 0.4f)
+                .align(Alignment.CenterVertically)
         )
         RightPane(
             modifier = Modifier
@@ -221,7 +220,7 @@ private fun TabletLayout(
 }
 
 @Composable
-private fun OtherLayout(
+private fun PhonePortraitLayout(
     modifier: Modifier = Modifier,
     loginUiModel: LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
@@ -355,7 +354,7 @@ private fun LoginEmailField(
     focusManager: FocusManager,
 ) {
     var emailText by rememberSaveable { mutableStateOf(value = loginUiModel.email) }
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(key1 = emailText) {
         snapshotFlow { emailText }
             .debounce(timeoutMillis = 300)
             .collect { loginAction(EmailEntered(email = emailText)) }
@@ -383,7 +382,7 @@ private fun LoginPasswordField(
     focusManager: FocusManager,
 ) {
     var passwordText by rememberSaveable { mutableStateOf(value = loginUiModel.password) }
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(key1 = passwordText) {
         snapshotFlow { passwordText }
             .debounce(timeoutMillis = 300)
             .collect { loginAction(PasswordEntered(password = passwordText)) }

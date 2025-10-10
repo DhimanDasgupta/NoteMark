@@ -18,8 +18,11 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 
 @Immutable
@@ -50,8 +53,8 @@ class NoteListPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            appStateMachine.state.onStart { AppStateMachine.defaultAppState }
-                .collect { appState ->
+            appStateMachine.state
+                .onEach { appState ->
                     noteListUiModel = noteListUiModel.copy(
                         userName = when (appState) {
                             is AppState.LoggedIn -> appState.user.userName
@@ -64,14 +67,16 @@ class NoteListPresenter(
                         isConnected = appState.connectionState == ConnectionState.Available
                     )
                 }
+                .flowOn(Dispatchers.Default)
+                .onStart { AppStateMachine.defaultAppState }
+                .cancellable()
+                .catch { /* TODO if needed */ }
+                .collect()
         }
 
         LaunchedEffect(key1 = Unit) {
             noteListStateMachine.state
-                .flowOn(Dispatchers.Default)
-                .catch { /* TODO if needed */ }
-                .onStart { NoteListStateMachine.defaultNoteListState }
-                .collect { noteListState ->
+                .onEach { noteListState ->
                     noteListUiModel = when (noteListState) {
                         is NoteListState.NoteListStateWithNotes -> {
                             noteListUiModel.copy(
@@ -91,6 +96,10 @@ class NoteListPresenter(
                         )
                     }
                 }
+                .flowOn(Dispatchers.Default)
+                .onStart { NoteListStateMachine.defaultNoteListState }
+                .catch { /* TODO if needed */ }
+                .collect {  }
         }
 
         LaunchedEffect(key1 = Unit) {
