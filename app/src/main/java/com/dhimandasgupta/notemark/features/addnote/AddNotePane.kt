@@ -73,12 +73,13 @@ import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddNotePane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    addNoteUiModel: AddNoteUiModel,
+    addNoteUiModel: () -> AddNoteUiModel,
     addNoteAction: (AddNoteAction) -> Unit = {},
     onBackClicked: () -> Unit = {}
 ) {
@@ -87,12 +88,15 @@ fun AddNotePane(
 
     val updatedAddNoteUiModel by rememberUpdatedState(newValue = addNoteUiModel)
 
-    LaunchedEffect(key1 = updatedAddNoteUiModel.saved) {
-        if (updatedAddNoteUiModel.saved == true) {
-            focusManager.clearFocus()
-            keyboardController?.hide()
-            onBackClicked()
-        }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { updatedAddNoteUiModel().saved }
+            .collect { isSaved ->
+                if (isSaved == true) {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                    onBackClicked()
+                }
+            }
     }
 
     val layoutType = getDeviceLayoutType(windowSizeClass)
@@ -185,7 +189,7 @@ private fun AddNoteToolbar(
 @Composable
 private fun AddNoteBody(
     modifier: Modifier = Modifier,
-    addNoteUiModel: AddNoteUiModel,
+    addNoteUiModel: () -> AddNoteUiModel,
     addNoteAction: (AddNoteAction) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
@@ -193,18 +197,21 @@ private fun AddNoteBody(
 
     LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
-    var title by remember { mutableStateOf(value = addNoteUiModel.title) }
-    LaunchedEffect(key1 = title) {
-        snapshotFlow { title }
-            .debounce(timeoutMillis = 300)
-            .collect { addNoteAction(AddNoteAction.UpdateTitle(title = title)) }
-    }
+    var title by remember { mutableStateOf(value = addNoteUiModel().title) }
+    var body by remember { mutableStateOf(value = addNoteUiModel().content) }
 
-    var body by remember { mutableStateOf(value = addNoteUiModel.content) }
-    LaunchedEffect(key1 = body) {
-        snapshotFlow { body }
-            .debounce(timeoutMillis = 300)
-            .collect { addNoteAction(AddNoteAction.UpdateContent(content = body)) }
+    LaunchedEffect(key1 = Unit) {
+        launch {
+            snapshotFlow { title }
+                .debounce(timeoutMillis = 300)
+                .collect { addNoteAction(AddNoteAction.UpdateTitle(title = title)) }
+        }
+
+        launch {
+            snapshotFlow { body }
+                .debounce(timeoutMillis = 300)
+                .collect { addNoteAction(AddNoteAction.UpdateContent(content = body)) }
+        }
     }
 
     Box(
@@ -319,7 +326,7 @@ private fun PhonePortraitPreview() {
         AddNotePane(
             modifier = Modifier,
             windowSizeClass = phonePortrait,
-            addNoteUiModel = defaultAddNoteUiModel
+            addNoteUiModel = { defaultAddNoteUiModel }
         )
     }
 }
@@ -332,7 +339,7 @@ private fun PhoneLandscapePreview() {
         AddNotePane(
             modifier = Modifier,
             windowSizeClass = phoneLandscape,
-            addNoteUiModel = defaultAddNoteUiModel
+            addNoteUiModel = { defaultAddNoteUiModel }
         )
     }
 }
@@ -345,7 +352,7 @@ private fun TabletMediumPortraitPreview() {
         AddNotePane(
             modifier = Modifier,
             windowSizeClass = mediumTabletPortrait,
-            addNoteUiModel = defaultAddNoteUiModel
+            addNoteUiModel = { defaultAddNoteUiModel }
         )
     }
 }
@@ -358,7 +365,7 @@ private fun TabletMediumLandscapePreview() {
         AddNotePane(
             modifier = Modifier,
             windowSizeClass = mediumTabletLandscape,
-            addNoteUiModel = defaultAddNoteUiModel
+            addNoteUiModel = { defaultAddNoteUiModel }
         )
     }
 }
@@ -371,7 +378,7 @@ private fun TabletExpandedPortraitPreview() {
         AddNotePane(
             modifier = Modifier,
             windowSizeClass = extendedTabletPortrait,
-            addNoteUiModel = defaultAddNoteUiModel
+            addNoteUiModel = { defaultAddNoteUiModel }
         )
     }
 }
@@ -384,7 +391,7 @@ private fun TabletExpandedLandscapePreview() {
         AddNotePane(
             modifier = Modifier,
             windowSizeClass = extendedTabletLandscape,
-            addNoteUiModel = defaultAddNoteUiModel
+            addNoteUiModel = { defaultAddNoteUiModel }
         )
     }
 }

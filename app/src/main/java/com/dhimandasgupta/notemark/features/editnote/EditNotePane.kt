@@ -86,13 +86,14 @@ import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
 
 @Composable
 fun EditNotePane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
     noteId: String,
-    editNoteUiModel: EditNoteUiModel,
+    editNoteUiModel: () -> EditNoteUiModel,
     editNoteAction: (EditNoteAction) -> Unit = {},
     onCloseClicked: () -> Unit = {}
 ) {
@@ -101,8 +102,8 @@ fun EditNotePane(
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(key1 = updatedEditNoteUiModel.saved) {
-        if (updatedEditNoteUiModel.saved == true) {
+    LaunchedEffect(key1 = updatedEditNoteUiModel().saved) {
+        if (updatedEditNoteUiModel().saved == true) {
             focusManager.clearFocus()
             keyboardController?.hide()
             onCloseClicked()
@@ -117,8 +118,8 @@ fun EditNotePane(
 
     val context = LocalActivity.current
 
-    LaunchedEffect(key1 = updatedEditNoteUiModel.isReaderMode) {
-        when (updatedEditNoteUiModel.isReaderMode) {
+    LaunchedEffect(key1 = updatedEditNoteUiModel().isReaderMode) {
+        when (updatedEditNoteUiModel().isReaderMode) {
             true -> {
                 context?.turnOnImmersiveMode()
                 context?.lockToLandscape()
@@ -142,7 +143,7 @@ fun EditNotePane(
     ) {
         EditNoteToolbar(
             modifier = Modifier.wrapContentHeight(align = Alignment.Top),
-            editEnabled = updatedEditNoteUiModel.editEnable,
+            editEnabled = updatedEditNoteUiModel().editEnable,
             onCloseClicked = onCloseClicked,
             onCrossClicked = { editNoteAction(EditNoteAction.ModeChange(Mode.ViewMode)) },
             onSaveClicked = {
@@ -164,7 +165,7 @@ fun EditNotePane(
                 .fillMaxHeight(fraction = 1f)
                 .lifecycleAwareDebouncedClickable(
                     onClick = {
-                        if (updatedEditNoteUiModel.isReaderMode) {
+                        if (updatedEditNoteUiModel().isReaderMode) {
                             editNoteAction(EditNoteAction.ModeChange(Mode.ViewMode))
                         }
                     }
@@ -274,7 +275,7 @@ private fun EditNoteToolbar(
 @Composable
 private fun EditNoteBody(
     modifier: Modifier = Modifier,
-    editNoteUiModel: EditNoteUiModel,
+    editNoteUiModel: () -> EditNoteUiModel,
     editNoteAction: (EditNoteAction) -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
@@ -282,18 +283,36 @@ private fun EditNoteBody(
 
     LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
-    var title by remember(key1 = editNoteUiModel) { mutableStateOf(value = editNoteUiModel.title) }
-    LaunchedEffect(key1 = title) {
-        snapshotFlow { title }
-            .debounce(timeoutMillis = 300)
-            .collect { editNoteAction(EditNoteAction.UpdateTitle(title = title)) }
+    val updatedEditNoteAction by rememberUpdatedState(editNoteAction)
+
+    var title by remember { mutableStateOf(editNoteUiModel().title) }
+    var body by remember { mutableStateOf(editNoteUiModel().content) }
+
+    LaunchedEffect(key1 = editNoteUiModel().title, key2 = editNoteUiModel().content) {
+        if (title != editNoteUiModel().title) {
+            title = editNoteUiModel().title
+        }
+        if (body != editNoteUiModel().content) {
+            body = editNoteUiModel().content
+        }
     }
 
-    var body by remember(key1 = editNoteUiModel) { mutableStateOf(value = editNoteUiModel.content) }
-    LaunchedEffect(key1 = body) {
-        snapshotFlow { body }
-            .debounce(timeoutMillis = 300)
-            .collect { editNoteAction(EditNoteAction.UpdateContent(content = body)) }
+    LaunchedEffect(key1 = Unit) {
+        launch {
+            snapshotFlow { title }
+                .debounce(timeoutMillis = 300)
+                .collect { debouncedTitle ->
+                    updatedEditNoteAction(EditNoteAction.UpdateTitle(title = debouncedTitle))
+                }
+        }
+
+        launch {
+            snapshotFlow { body }
+                .debounce(timeoutMillis = 300)
+                .collect { debouncedContent ->
+                    updatedEditNoteAction(EditNoteAction.UpdateContent(content = debouncedContent))
+                }
+        }
     }
 
     Box(
@@ -324,7 +343,7 @@ private fun EditNoteBody(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextField(
-                enabled = editNoteUiModel.editEnable,
+                enabled = editNoteUiModel().editEnable,
                 value = title,
                 onValueChange = { value -> title = value },
                 textStyle = typography.titleLarge,
@@ -362,12 +381,12 @@ private fun EditNoteBody(
             )
 
             AnimatedVisibility(
-                visible = !editNoteUiModel.editEnable,
+                visible = !editNoteUiModel().editEnable,
             ) {
                 NoteDateTime(
                     modifier = Modifier,
-                    dateCreated = editNoteUiModel.noteEntity?.createdAt ?: "",
-                    lastEdited = editNoteUiModel.noteEntity?.lastEditedAt ?: "",
+                    dateCreated = editNoteUiModel().noteEntity?.createdAt ?: "",
+                    lastEdited = editNoteUiModel().noteEntity?.lastEditedAt ?: "",
                 )
             }
 
@@ -379,7 +398,7 @@ private fun EditNoteBody(
             )
 
             TextField(
-                enabled = editNoteUiModel.editEnable,
+                enabled = editNoteUiModel().editEnable,
                 value = body,
                 onValueChange = { value -> body = value },
                 textStyle = typography.bodyLarge,
@@ -417,7 +436,7 @@ private fun EditNoteBody(
             contentAlignment = Alignment.BottomCenter
         ) {
             AnimatedVisibility(
-                visible = !editNoteUiModel.isReaderMode,
+                visible = !editNoteUiModel().isReaderMode,
                 enter = expandVertically(),
                 exit = shrinkVertically()
             ) {
@@ -525,7 +544,7 @@ private fun PhonePortraitPreview() {
         EditNotePane(
             modifier = Modifier,
             windowSizeClass = phonePortrait,
-            editNoteUiModel = defaultEditNoteUiModel,
+            editNoteUiModel = { defaultEditNoteUiModel },
             noteId = "1",
         )
     }
@@ -539,7 +558,7 @@ private fun PhoneLandscapePreview() {
         EditNotePane(
             modifier = Modifier,
             windowSizeClass = phoneLandscape,
-            editNoteUiModel = defaultEditNoteUiModel,
+            editNoteUiModel = { defaultEditNoteUiModel },
             noteId = "1",
         )
     }
@@ -553,7 +572,7 @@ private fun TabletMediumPortraitPreview() {
         EditNotePane(
             modifier = Modifier,
             windowSizeClass = mediumTabletPortrait,
-            editNoteUiModel = defaultEditNoteUiModel,
+            editNoteUiModel = { defaultEditNoteUiModel },
             noteId = "1",
         )
     }
@@ -567,7 +586,7 @@ private fun TabletMediumLandscapePreview() {
         EditNotePane(
             modifier = Modifier,
             windowSizeClass = mediumTabletLandscape,
-            editNoteUiModel = defaultEditNoteUiModel,
+            editNoteUiModel = { defaultEditNoteUiModel },
             noteId = "1",
         )
     }
@@ -581,7 +600,7 @@ private fun TabletExpandedPortraitPreview() {
         EditNotePane(
             modifier = Modifier,
             windowSizeClass = extendedTabletPortrait,
-            editNoteUiModel = defaultEditNoteUiModel,
+            editNoteUiModel = { defaultEditNoteUiModel },
             noteId = "1",
         )
     }
@@ -595,7 +614,7 @@ private fun TabletExpandedLandscapePreview() {
         EditNotePane(
             modifier = Modifier,
             windowSizeClass = extendedTabletLandscape,
-            editNoteUiModel = defaultEditNoteUiModel,
+            editNoteUiModel = { defaultEditNoteUiModel },
             noteId = "1",
         )
     }

@@ -88,7 +88,7 @@ import kotlinx.collections.immutable.toPersistentList
 fun NoteListPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    noteListUiModel: NoteListUiModel,
+    noteListUiModel: () -> NoteListUiModel,
     noteListAction: (NoteListAction) -> Unit = {},
     onNoteClicked: (String) -> Unit = {},
     onFabClicked: () -> Unit = {},
@@ -107,7 +107,7 @@ fun NoteListPane(
         NoteListValidPane(
             modifier = Modifier,
             windowSizeClass = windowSizeClass,
-            userName = noteListUiModel.userName?.formatUserName() ?: "",
+            userName = noteListUiModel().userName?.formatUserName() ?: "",
             noteListUiModel = updateNoteListUiModel,
             onNoteClicked = onNoteClicked,
             onNoteLongClicked = { id ->
@@ -122,7 +122,7 @@ fun NoteListPane(
         if (!noteDeleteId.isNullOrEmpty()) {
             NoteDeleteDialog(
                 modifier = Modifier,
-                noteId = updateNoteListUiModel.noteLongClickedUuid,
+                noteId = updateNoteListUiModel().noteLongClickedUuid,
                 onDelete = { _ ->
                     noteDeleteId?.let { id ->
                         noteListAction(NoteListAction.NoteDelete(uuid = id))
@@ -143,20 +143,20 @@ private fun NoteListValidPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
     userName: String,
-    noteListUiModel: NoteListUiModel,
+    noteListUiModel: () -> NoteListUiModel,
     onNoteClicked: (String) -> Unit = {},
     onNoteLongClicked: (String) -> Unit = {},
     onFabClicked: () -> Unit = {},
     onSettingsClicked: () -> Unit = {},
     onProfileClicked: () -> Unit = {},
 ) {
-    when (noteListUiModel.noteEntities.isEmpty()) {
+    when (noteListUiModel().noteEntities.isEmpty()) {
         true -> NoteListWithEmptyNotes(
             modifier = modifier,
             userName = userName,
-            isConnected = noteListUiModel.isConnected,
+            isConnected = noteListUiModel().isConnected,
             onFabClicked = onFabClicked,
-            showSyncProgress = noteListUiModel.showSyncProgress,
+            showSyncProgress = noteListUiModel().showSyncProgress,
             onSettingsClicked = onSettingsClicked,
             onProfileClicked = onProfileClicked
         )
@@ -197,11 +197,11 @@ private fun NoteListWithEmptyNotes(
 }
 
 @Composable
-fun NoteListWithNotes(
+private fun NoteListWithNotes(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
     userName: String,
-    noteListState: NoteListUiModel,
+    noteListState: () -> NoteListUiModel,
     onNoteClicked: (String) -> Unit = {},
     onNoteLongClicked: (String) -> Unit = {},
     onFabClicked: () -> Unit = {},
@@ -237,7 +237,7 @@ fun NoteListWithNotes(
             modifier = Modifier,
             toolbarTitle = "NoteMark",
             userName = userName,
-            isConnected = noteListState.isConnected,
+            isConnected = noteListState().isConnected,
             onSettingsClicked = onSettingsClicked,
             onProfileClicked = onProfileClicked
         )
@@ -418,7 +418,7 @@ private fun NoteGrid(
     columnCount: Int,
     maxLength: Int,
     state: LazyStaggeredGridState,
-    noteListUiModel: NoteListUiModel,
+    noteListUiModel: () -> NoteListUiModel,
     onNoteClicked: (String) -> Unit = {},
     onNoteLongClicked: (String) -> Unit = {}
 ) {
@@ -430,7 +430,7 @@ private fun NoteGrid(
         horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
         modifier = modifier.fillMaxSize()
     ) {
-        if (noteListUiModel.showSyncProgress) {
+        if (noteListUiModel().showSyncProgress) {
             item(
                 span = StaggeredGridItemSpan.FullLine,
                 key = "sync_progress",
@@ -448,7 +448,7 @@ private fun NoteGrid(
         }
 
         items(
-            items = noteListUiModel.noteEntities,
+            items = noteListUiModel().noteEntities,
             key = { note -> note.id },
             contentType = { "notes" }
         ) { noteEntity ->
@@ -539,7 +539,7 @@ private fun PhonePortraitPreview() {
         NoteListPane(
             modifier = Modifier,
             windowSizeClass = phonePortrait,
-            noteListUiModel = noteListUiModel
+            noteListUiModel = { noteListUiModel }
         )
     }
 }
@@ -552,7 +552,7 @@ private fun PhoneLandscapePreview() {
         NoteListPane(
             modifier = Modifier,
             windowSizeClass = phoneLandscape,
-            noteListUiModel = noteListUiModel
+            noteListUiModel = { noteListUiModel }
         )
     }
 }
@@ -565,7 +565,7 @@ private fun TabletMediumPortraitPreview() {
         NoteListPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletPortrait,
-            noteListUiModel = noteListUiModel
+            noteListUiModel = { noteListUiModel }
         )
     }
 }
@@ -578,7 +578,7 @@ private fun TabletMediumLandscapePreview() {
         NoteListPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletLandscape,
-            noteListUiModel = noteListUiModel
+            noteListUiModel = { noteListUiModel }
         )
     }
 }
@@ -591,7 +591,7 @@ private fun TabletExpandedPortraitPreview() {
         NoteListPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletPortrait,
-            noteListUiModel = noteListUiModel
+            noteListUiModel = { noteListUiModel }
         )
     }
 }
@@ -604,7 +604,7 @@ private fun TabletExpandedLandscapePreview() {
         NoteListPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletLandscape,
-            noteListUiModel = noteListUiModel
+            noteListUiModel = { noteListUiModel }
         )
     }
 }

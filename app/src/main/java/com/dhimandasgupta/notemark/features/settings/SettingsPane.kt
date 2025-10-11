@@ -44,6 +44,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,12 +63,14 @@ import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
 import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
 import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 
+@OptIn(FlowPreview::class)
 @Composable
 fun SettingsPane(
     modifier: Modifier = Modifier,
-    settingsUiModel: SettingsUiModel,
+    settingsUiModel: () -> SettingsUiModel,
     settingsAction: (AppAction) -> Unit = {},
     onDeleteNoteCheckChanged: () -> Unit = {},
     onLogoutSuccessful: () -> Unit = {},
@@ -75,16 +78,18 @@ fun SettingsPane(
     onLogoutClicked: () -> Unit = {}
 ) {
     val updatedSettingsUiModel by rememberUpdatedState(newValue = settingsUiModel)
+    val updatedOnLogoutSuccessful by rememberUpdatedState(onLogoutSuccessful)
 
     var showSyncInterval by remember { mutableStateOf(value = false) }
 
-    LaunchedEffect(key1 = updatedSettingsUiModel.logoutStatus) {
-        if (updatedSettingsUiModel.logoutStatus == null) return@LaunchedEffect
-        delay(100)
-        if (updatedSettingsUiModel.logoutStatus == true) {
-            onLogoutSuccessful()
-            return@LaunchedEffect
-        }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { updatedSettingsUiModel().logoutStatus }
+            .debounce(timeoutMillis = 100)
+            .collect { status ->
+                if (status == true) {
+                    updatedOnLogoutSuccessful()
+                }
+            }
     }
 
     Column(
@@ -166,7 +171,7 @@ private fun SettingsToolbar(
 @Composable
 private fun SettingsBody(
     modifier: Modifier = Modifier,
-    settingsUiModel: SettingsUiModel,
+    settingsUiModel: () -> SettingsUiModel,
     showSyncInterval: Boolean = false,
     toggleSyncIntervalVisibility: () -> Unit = {},
     onSyncIntervalSelected: (String) -> Unit = {},
@@ -239,7 +244,7 @@ private fun SettingsBody(
             // Logout
             LogoutRow(
                 modifier = Modifier,
-                isConnected = settingsUiModel.isConnected,
+                isConnected = settingsUiModel().isConnected,
                 onLogoutClicked = onLogoutClicked
             )
         }
@@ -247,8 +252,8 @@ private fun SettingsBody(
         if (showSyncInterval) {
             SyncDropDown(
                 modifier = Modifier,
-                selectedSyncInterval = settingsUiModel.selectedSyncInterval,
-                syncIntervals = settingsUiModel.syncIntervals,
+                selectedSyncInterval = settingsUiModel().selectedSyncInterval,
+                syncIntervals = settingsUiModel().syncIntervals,
                 toggleDropDownVisibility = toggleSyncIntervalVisibility,
                 onDropDownItemSelected = onSyncIntervalSelected
             )
@@ -259,7 +264,7 @@ private fun SettingsBody(
 @Composable
 private fun SyncIntervalRow(
     modifier: Modifier = Modifier,
-    settingsUiModel: SettingsUiModel,
+    settingsUiModel: () -> SettingsUiModel,
     toggleSyncIntervalVisibility: () -> Unit
 ) {
     Row(
@@ -296,7 +301,7 @@ private fun SyncIntervalRow(
         )
 
         Text(
-            text = settingsUiModel.selectedSyncInterval,
+            text = settingsUiModel().selectedSyncInterval,
             style = typography.bodyLarge,
             color = colorScheme.onSurfaceVariant,
             modifier = Modifier.wrapContentSize()
@@ -316,7 +321,7 @@ private fun SyncIntervalRow(
 @Composable
 private fun SyncDataRow(
     modifier: Modifier = Modifier,
-    settingsUiModel: SettingsUiModel,
+    settingsUiModel: () -> SettingsUiModel,
 ) {
     Row(
         modifier = modifier
@@ -348,7 +353,7 @@ private fun SyncDataRow(
                 .padding(horizontal = 8.dp)
                 .requiredSize(size = 24.dp)
                 .then(
-                    other = if (settingsUiModel.isSyncing) {
+                    other = if (settingsUiModel().isSyncing) {
                         Modifier.graphicsLayer {
                             rotationZ = rotationAngle
                         }
@@ -367,7 +372,7 @@ private fun SyncDataRow(
             )
 
             Text(
-                text = "Last synced: ${settingsUiModel.lastSynced}",
+                text = "Last synced: ${settingsUiModel().lastSynced}",
                 style = typography.bodySmall,
                 color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.wrapContentSize()
@@ -379,7 +384,7 @@ private fun SyncDataRow(
 @Composable
 private fun DeleteLocalDataRow(
     modifier: Modifier = Modifier,
-    settingsUiModel: SettingsUiModel,
+    settingsUiModel: () -> SettingsUiModel,
     onCheckChange: () -> Unit
 ) {
     Row(
@@ -403,8 +408,8 @@ private fun DeleteLocalDataRow(
         )
 
         Icon(
-            imageVector = if (settingsUiModel.deleteLocalNotesOnLogout) Icons.Default.Check else Icons.Filled.Close,
-            contentDescription = if (settingsUiModel.deleteLocalNotesOnLogout) "Checked" else "Unchecked",
+            imageVector = if (settingsUiModel().deleteLocalNotesOnLogout) Icons.Default.Check else Icons.Filled.Close,
+            contentDescription = if (settingsUiModel().deleteLocalNotesOnLogout) "Checked" else "Unchecked",
             tint = colorScheme.primary,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
@@ -520,4 +525,4 @@ private fun TabletExpandedLandscapePreview() {
     }
 }
 
-private val defaultSettingsUiModel = SettingsUiModel.Empty
+private val defaultSettingsUiModel = { SettingsUiModel.Empty }

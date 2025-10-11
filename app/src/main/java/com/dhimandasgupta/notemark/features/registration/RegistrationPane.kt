@@ -31,8 +31,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -85,7 +85,7 @@ import kotlinx.coroutines.flow.debounce
 fun RegistrationPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    registrationUiModel: RegistrationUiModel,
+    registrationUiModel: () -> RegistrationUiModel,
     navigateToLogin: () -> Unit = {},
     registrationAction: (RegistrationAction) -> Unit = {}
 ) {
@@ -124,7 +124,7 @@ fun RegistrationPane(
 @Composable
 private fun PhoneLandscapeLayout(
     modifier: Modifier = Modifier,
-    registrationUiModel: RegistrationUiModel,
+    registrationUiModel: () -> RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {},
     navigateToLogin: () -> Unit = {}
 ) {
@@ -176,7 +176,7 @@ private fun PhoneLandscapeLayout(
 @Composable
 private fun TabletLayout(
     modifier: Modifier = Modifier,
-    registrationUiModel: RegistrationUiModel,
+    registrationUiModel: () -> RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {},
     navigateToLogin: () -> Unit = {}
 ) {
@@ -216,7 +216,7 @@ private fun TabletLayout(
 @Composable
 private fun PhonePortraitLayout(
     modifier: Modifier = Modifier,
-    registrationUiModel: RegistrationUiModel,
+    registrationUiModel: () -> RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {},
     navigateToLogin: () -> Unit = {}
 ) {
@@ -274,7 +274,7 @@ private fun LeftPane(modifier: Modifier = Modifier) {
 private fun RightPane(
     modifier: Modifier = Modifier,
     navigateToLogin: () -> Unit = {},
-    registrationUiModel: RegistrationUiModel,
+    registrationUiModel: () -> RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -283,12 +283,12 @@ private fun RightPane(
 
     LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
-    LaunchedEffect(key1 = registrationUiModel.registrationSuccess) {
-        if (registrationUiModel.registrationSuccess == null) return@LaunchedEffect
+    LaunchedEffect(key1 = registrationUiModel().registrationSuccess) {
+        if (registrationUiModel().registrationSuccess == null) return@LaunchedEffect
         registrationAction(RegistrationChangeStatusConsumed)
         Toast.makeText(
             context,
-            if (registrationUiModel.registrationSuccess) "Registration successful" else "Registration failed",
+            if (registrationUiModel().registrationSuccess == true) "Registration successful" else "Registration failed",
             Toast.LENGTH_SHORT
         ).show()
         navigateToLogin()
@@ -352,12 +352,12 @@ private fun RightPane(
 @Composable
 private fun RegistrationUsernameField(
     modifier: Modifier = Modifier,
-    registrationUiModel: RegistrationUiModel,
+    registrationUiModel: () -> RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {},
     focusManager: FocusManager,
 ) {
-    var userName by rememberSaveable { mutableStateOf(value = registrationUiModel.userName) }
-    LaunchedEffect(key1 = userName) {
+    var userName by remember { mutableStateOf(value = registrationUiModel().userName) }
+    LaunchedEffect(key1 = Unit) {
         snapshotFlow { userName }
             .debounce(timeoutMillis = 300)
             .collect { registrationAction(UserNameEntered(userName)) }
@@ -370,10 +370,10 @@ private fun RegistrationUsernameField(
         label = "Username",
         enteredText = userName,
         hintText = "John.doe",
-        onFocusGained = { registrationAction(UserNameFiledInFocus(userName = registrationUiModel.userName)) },
-        onFocusLost = { registrationAction(UserNameFiledLostFocus(userName = registrationUiModel.userName)) },
-        explanationText = registrationUiModel.userNameExplanation ?: "",
-        errorText = registrationUiModel.userNameError ?: "",
+        onFocusGained = { registrationAction(UserNameFiledInFocus(userName = registrationUiModel().userName)) },
+        onFocusLost = { registrationAction(UserNameFiledLostFocus(userName = registrationUiModel().userName)) },
+        explanationText = registrationUiModel().userNameExplanation ?: "",
+        errorText = registrationUiModel().userNameError ?: "",
         onTextChanged = { userName = it },
         onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
     )
@@ -383,12 +383,12 @@ private fun RegistrationUsernameField(
 @Composable
 private fun RegistrationEmailField(
     modifier: Modifier = Modifier,
-    registrationUiModel: RegistrationUiModel,
+    registrationUiModel: () -> RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {},
     focusManager: FocusManager,
 ) {
-    var email by rememberSaveable { mutableStateOf(value = registrationUiModel.email) }
-    LaunchedEffect(key1 = email) {
+    var email by remember { mutableStateOf(value = registrationUiModel().email) }
+    LaunchedEffect(key1 = Unit) {
         snapshotFlow { email }
             .debounce(timeoutMillis = 300)
             .collect { registrationAction(EmailEntered(email)) }
@@ -401,7 +401,7 @@ private fun RegistrationEmailField(
         label = "Email",
         enteredText = email,
         hintText = "john.doe@gmail.com",
-        errorText = registrationUiModel.emailError ?: "",
+        errorText = registrationUiModel().emailError ?: "",
         onTextChanged = { email = it },
         onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
     )
@@ -411,12 +411,12 @@ private fun RegistrationEmailField(
 @Composable
 private fun RegistrationPasswordField(
     modifier: Modifier = Modifier,
-    registrationUiModel: RegistrationUiModel,
+    registrationUiModel: () -> RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {},
     focusManager: FocusManager,
 ) {
-    var password by rememberSaveable { mutableStateOf(registrationUiModel.password) }
-    LaunchedEffect(key1 = password) {
+    var password by remember { mutableStateOf(registrationUiModel().password) }
+    LaunchedEffect(key1 = Unit) {
         snapshotFlow { password }
             .debounce(timeoutMillis = 300)
             .collect { registrationAction(PasswordEntered(password)) }
@@ -429,9 +429,9 @@ private fun RegistrationPasswordField(
         label = "Password",
         enteredText = password,
         hintText = "Password",
-        explanationText = registrationUiModel.passwordExplanation ?: "",
-        errorText = registrationUiModel.passwordError ?: "",
-        onFocusGained = { registrationAction(PasswordFiledInFocus(password = registrationUiModel.password)) },
+        explanationText = registrationUiModel().passwordExplanation ?: "",
+        errorText = registrationUiModel().passwordError ?: "",
+        onFocusGained = { registrationAction(PasswordFiledInFocus(password = registrationUiModel().password)) },
         onTextChanged = { password = it },
         onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
     )
@@ -441,13 +441,13 @@ private fun RegistrationPasswordField(
 @Composable
 private fun RegistrationRepeatPasswordField(
     modifier: Modifier = Modifier,
-    registrationUiModel: RegistrationUiModel,
+    registrationUiModel: () -> RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {},
     keyboardController: SoftwareKeyboardController? = null,
     focusManager: FocusManager,
 ) {
-    var repeatPassword by rememberSaveable { mutableStateOf(value = registrationUiModel.repeatPassword) }
-    LaunchedEffect(key1 = repeatPassword) {
+    var repeatPassword by remember { mutableStateOf(value = registrationUiModel().repeatPassword) }
+    LaunchedEffect(key1 = Unit) {
         snapshotFlow { repeatPassword }
             .debounce(timeoutMillis = 300)
             .collect { registrationAction(RepeatPasswordEntered(repeatPassword)) }
@@ -460,10 +460,10 @@ private fun RegistrationRepeatPasswordField(
         label = "Repeat password",
         enteredText = repeatPassword,
         hintText = "Password",
-        errorText = registrationUiModel.repeatPasswordError ?: "",
+        errorText = registrationUiModel().repeatPasswordError ?: "",
         onTextChanged = { repeatPassword = it },
         onDoneClicked = {
-            if (registrationUiModel.registrationEnabled) {
+            if (registrationUiModel().registrationEnabled) {
                 registrationAction(RegisterClicked)
             }
             focusManager.moveFocus(FocusDirection.Exit)
@@ -476,7 +476,7 @@ private fun RegistrationRepeatPasswordField(
 @Composable
 private fun RegistrationButton(
     modifier: Modifier = Modifier,
-    registrationUiModel: RegistrationUiModel,
+    registrationUiModel: () -> RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {},
     keyboardController: SoftwareKeyboardController? = null,
     focusManager: FocusManager,
@@ -489,7 +489,7 @@ private fun RegistrationButton(
         },
         modifier = modifier
             .fillMaxWidth(),
-        enabled = registrationUiModel.registrationEnabled
+        enabled = registrationUiModel().registrationEnabled
     ) {
         Text(
             text = "Create account",
@@ -525,7 +525,7 @@ private fun PhonePortraitPreview() {
         RegistrationPane(
             modifier = Modifier,
             windowSizeClass = phonePortrait,
-            registrationUiModel = RegistrationUiModel.Empty
+            registrationUiModel = { RegistrationUiModel.Empty }
         )
     }
 }
@@ -538,7 +538,7 @@ private fun PhoneLandscapePreview() {
         RegistrationPane(
             modifier = Modifier,
             windowSizeClass = phoneLandscape,
-            registrationUiModel = RegistrationUiModel.Empty
+            registrationUiModel = { RegistrationUiModel.Empty }
         )
     }
 }
@@ -551,7 +551,7 @@ private fun TabletMediumPortraitPreview() {
         RegistrationPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletPortrait,
-            registrationUiModel = RegistrationUiModel.Empty
+            registrationUiModel = { RegistrationUiModel.Empty }
         )
     }
 }
@@ -564,7 +564,7 @@ private fun TabletMediumLandscapePreview() {
         RegistrationPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletLandscape,
-            registrationUiModel = RegistrationUiModel.Empty
+            registrationUiModel = { RegistrationUiModel.Empty }
         )
     }
 }
@@ -577,7 +577,7 @@ private fun TabletExpandedPortraitPreview() {
         RegistrationPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletPortrait,
-            registrationUiModel = RegistrationUiModel.Empty
+            registrationUiModel = { RegistrationUiModel.Empty }
         )
     }
 }
@@ -590,7 +590,7 @@ private fun TabletExpandedLandscapePreview() {
         RegistrationPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletLandscape,
-            registrationUiModel = RegistrationUiModel.Empty
+            registrationUiModel = { RegistrationUiModel.Empty }
         )
     }
 }

@@ -175,7 +175,7 @@ private fun LauncherPane(
     LauncherPane(
         modifier = modifier,
         windowSizeClass = windowSizeClass,
-        launcherUiModel = launcherUiModel,
+        launcherUiModel = { launcherUiModel },
         navigateToAfterLogin = {
             if (launcherUiModel.loggedInUser == null) {
                 Toast.makeText(context, "Oops!!! Please login first to get started", Toast.LENGTH_LONG).show()
@@ -243,13 +243,8 @@ private fun LoginPane(
     LoginPane(
         modifier = modifier,
         windowSizeClass = windowSizeClass,
-        navigateToAfterLogin = {
-            navController.navigate(route = NoteMarkDestination.NoteListPane) {
-                popUpTo(route = NoteMarkDestination.LoginPane) {
-                    inclusive = true
-                }
-            }
-        },
+        loginUiModel = { loginUiModel },
+        loginAction = loginEvents,
         navigateToRegistration = {
             navController.navigate(route = NoteMarkDestination.RegistrationPane) {
                 popUpTo(route = NoteMarkDestination.LoginPane) {
@@ -257,8 +252,13 @@ private fun LoginPane(
                 }
             }
         },
-        loginUiModel = loginUiModel,
-        loginAction = loginEvents
+        navigateToAfterLogin = {
+            navController.navigate(route = NoteMarkDestination.NoteListPane) {
+                popUpTo(route = NoteMarkDestination.LoginPane) {
+                    inclusive = true
+                }
+            }
+        },
     )
 }
 
@@ -300,6 +300,7 @@ private fun RegistrationPane(
     RegistrationPane(
         modifier = modifier,
         windowSizeClass = windowSizeClass,
+        registrationUiModel = { registrationUiModel },
         navigateToLogin = {
             navController.navigate(route = NoteMarkDestination.LoginPane) {
                 popUpTo(route = NoteMarkDestination.RegistrationPane) {
@@ -307,7 +308,6 @@ private fun RegistrationPane(
                 }
             }
         },
-        registrationUiModel = registrationUiModel,
         registrationAction = registrationAction,
     )
 }
@@ -350,7 +350,7 @@ private fun NoteListPane(
     NoteListPane(
         modifier = modifier,
         windowSizeClass = windowSizeClass,
-        noteListUiModel = noteListUiModel,
+        noteListUiModel = { noteListUiModel },
         noteListAction = noteListAction,
         onNoteClicked = { uuid ->
             navController.navigate(route = NoteMarkDestination.NoteEditPane(noteId = uuid))
@@ -404,7 +404,7 @@ private fun NoteCreatePane(
     AddNotePane(
         modifier = modifier,
         windowSizeClass = windowSizeClass,
-        addNoteUiModel = addNoteUiModel,
+        addNoteUiModel = { addNoteUiModel },
         addNoteAction = addNoteAction,
         onBackClicked = { navController.navigateUp() }
     )
@@ -452,7 +452,7 @@ private fun NoteEditPane(
         modifier = modifier,
         windowSizeClass = windowSizeClass,
         noteId = arguments.noteId,
-        editNoteUiModel = editNoteUiModel,
+        editNoteUiModel = { editNoteUiModel },
         editNoteAction = editNoteAction,
         onCloseClicked = { navController.navigateUp() }
     )
@@ -494,7 +494,7 @@ private fun SettingsPane(
 
     SettingsPane(
         modifier = modifier,
-        settingsUiModel = settingsUiModel,
+        settingsUiModel = { settingsUiModel },
         settingsAction = settingsAction,
         onBackClicked = { navController.navigateUp() },
         onLogoutSuccessful = {

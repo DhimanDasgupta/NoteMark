@@ -31,8 +31,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -75,18 +75,36 @@ import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun LoginPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    loginUiModel: LoginUiModel,
+    loginUiModel: () -> LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
     navigateToAfterLogin: () -> Unit = {},
     navigateToRegistration: () -> Unit = {},
 ) {
     val updatedLoginUiModel by rememberUpdatedState(newValue = loginUiModel)
+
+    val context = LocalActivity.current
+
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { loginUiModel().loginSuccess }
+            .filter { it != null }
+            .collect { isSuccess ->
+                val message = if (isSuccess == true) "Login successful" else "Login failed"
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+
+                // Always call the latest lambdas
+                loginAction(LoginAction.LoginChangeConsumed)
+                if (isSuccess == true) {
+                    navigateToAfterLogin()
+                }
+            }
+    }
 
     Box(
         modifier = modifier
@@ -100,21 +118,18 @@ fun LoginPane(
                 modifier = Modifier,
                 loginUiModel = updatedLoginUiModel,
                 loginAction = loginAction,
-                navigateToAfterLogin = navigateToAfterLogin,
                 navigateToRegistration = navigateToRegistration
             )
             DeviceLayoutType.PHONE_LANDSCAPE -> PhoneLandscapeLayout(
                 modifier = Modifier,
                 loginUiModel = updatedLoginUiModel,
                 loginAction = loginAction,
-                navigateToAfterLogin = navigateToAfterLogin,
                 navigateToRegistration = navigateToRegistration
             )
             else -> TabletLayout(
                 modifier = Modifier,
                 loginUiModel = updatedLoginUiModel,
                 loginAction = loginAction,
-                navigateToAfterLogin = navigateToAfterLogin,
                 navigateToRegistration = navigateToRegistration
             )
         }
@@ -124,9 +139,8 @@ fun LoginPane(
 @Composable
 private fun PhoneLandscapeLayout(
     modifier: Modifier = Modifier,
-    loginUiModel: LoginUiModel,
+    loginUiModel: () -> LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
-    navigateToAfterLogin: () -> Unit = {},
     navigateToRegistration: () -> Unit = {},
 ) {
     Row(
@@ -168,7 +182,6 @@ private fun PhoneLandscapeLayout(
                 )
                 .verticalScroll(state = rememberScrollState()),
             navigateToRegistration = navigateToRegistration,
-            navigateToAfterLogin = navigateToAfterLogin,
             loginUiModel = loginUiModel,
             loginAction = loginAction
         )
@@ -178,9 +191,8 @@ private fun PhoneLandscapeLayout(
 @Composable
 private fun TabletLayout(
     modifier: Modifier = Modifier,
-    loginUiModel: LoginUiModel,
+    loginUiModel: () -> LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
-    navigateToAfterLogin: () -> Unit = {},
     navigateToRegistration: () -> Unit = {},
 ) {
     Column(
@@ -212,7 +224,6 @@ private fun TabletLayout(
         Spacer(modifier = Modifier.height(height = 16.dp))
         RightPane(
             navigateToRegistration = navigateToRegistration,
-            navigateToAfterLogin = navigateToAfterLogin,
             loginUiModel = loginUiModel,
             loginAction = loginAction
         )
@@ -222,9 +233,8 @@ private fun TabletLayout(
 @Composable
 private fun PhonePortraitLayout(
     modifier: Modifier = Modifier,
-    loginUiModel: LoginUiModel,
+    loginUiModel: () -> LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
-    navigateToAfterLogin: () -> Unit = {},
     navigateToRegistration: () -> Unit = {},
 ) {
     Column(
@@ -252,7 +262,6 @@ private fun PhonePortraitLayout(
         Spacer(modifier = Modifier.height(height = 16.dp))
         RightPane(
             navigateToRegistration = navigateToRegistration,
-            navigateToAfterLogin = navigateToAfterLogin,
             loginUiModel = loginUiModel,
             loginAction = loginAction
         )
@@ -285,29 +294,14 @@ private fun LeftPane(
 @Composable
 private fun RightPane(
     modifier: Modifier = Modifier,
+    loginUiModel: () -> LoginUiModel,
     navigateToRegistration: () -> Unit = {},
-    loginUiModel: LoginUiModel,
-    loginAction: (LoginAction) -> Unit = {},
-    navigateToAfterLogin: () -> Unit = {},
+    loginAction: (LoginAction) -> Unit = {}
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    val context = LocalActivity.current
 
     LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
-
-    LaunchedEffect(key1 = loginUiModel.loginSuccess) {
-        if (loginUiModel.loginSuccess == null) return@LaunchedEffect
-        Toast.makeText(
-            context,
-            if (loginUiModel.loginSuccess) "Login successful" else "Login failed",
-            Toast.LENGTH_SHORT
-        ).show()
-        loginAction(LoginAction.LoginChangeConsumed)
-        if (loginUiModel.loginSuccess) {
-            navigateToAfterLogin()
-        }
-    }
 
     Column(
         modifier = modifier,
@@ -349,15 +343,15 @@ private fun RightPane(
 @Composable
 private fun LoginEmailField(
     modifier: Modifier = Modifier,
-    loginUiModel: LoginUiModel,
+    loginUiModel: () -> LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
     focusManager: FocusManager,
 ) {
-    var emailText by rememberSaveable { mutableStateOf(value = loginUiModel.email) }
-    LaunchedEffect(key1 = emailText) {
-        snapshotFlow { emailText }
+    var email by remember { mutableStateOf(value = loginUiModel().email) }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { email }
             .debounce(timeoutMillis = 300)
-            .collect { loginAction(EmailEntered(email = emailText)) }
+            .collect { loginAction(EmailEntered(email = email)) }
     }
 
     NoteMarkTextField(
@@ -365,9 +359,9 @@ private fun LoginEmailField(
             .fillMaxWidth()
             .alignToSafeDrawing(),
         label = "Email",
-        enteredText = emailText,
+        enteredText = email,
         hintText = "john.doe@gmail.com",
-        onTextChanged = { emailText = it },
+        onTextChanged = { email = it },
         onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
     )
 }
@@ -376,16 +370,16 @@ private fun LoginEmailField(
 @Composable
 private fun LoginPasswordField(
     modifier: Modifier = Modifier,
-    loginUiModel: LoginUiModel,
+    loginUiModel: () -> LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
     keyboardController: SoftwareKeyboardController?,
     focusManager: FocusManager,
 ) {
-    var passwordText by rememberSaveable { mutableStateOf(value = loginUiModel.password) }
-    LaunchedEffect(key1 = passwordText) {
-        snapshotFlow { passwordText }
+    var password by remember { mutableStateOf(value = loginUiModel().password) }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { password }
             .debounce(timeoutMillis = 300)
-            .collect { loginAction(PasswordEntered(password = passwordText)) }
+            .collect { loginAction(PasswordEntered(password = password)) }
     }
 
     NoteMarkPasswordTextField(
@@ -393,15 +387,15 @@ private fun LoginPasswordField(
             .fillMaxWidth()
             .alignToSafeDrawing(),
         label = "Password",
-        enteredText = passwordText,
+        enteredText = password,
         hintText = "Password",
-        onTextChanged = { passwordText = it },
+        onTextChanged = { password = it },
         onDoneClicked = {
             focusManager.moveFocus(FocusDirection.Enter)
             keyboardController?.hide()
             focusManager.clearFocus(force = true)
 
-            if (loginUiModel.loginEnabled) {
+            if (loginUiModel().loginEnabled) {
                 loginAction(HideLoginButton)
                 loginAction(LoginClicked)
             }
@@ -412,7 +406,7 @@ private fun LoginPasswordField(
 @Composable
 private fun LoginButton(
     modifier: Modifier = Modifier,
-    loginUiModel: LoginUiModel,
+    loginUiModel: () -> LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
     keyboardController: SoftwareKeyboardController?,
     focusManager: FocusManager,
@@ -425,7 +419,7 @@ private fun LoginButton(
             loginAction(LoginClicked)
         },
         modifier = modifier.fillMaxWidth(),
-        enabled = loginUiModel.loginEnabled
+        enabled = loginUiModel().loginEnabled
     ) {
         Text(
             text = "Log in",
@@ -461,7 +455,7 @@ private fun PhonePortraitPreview() {
         LoginPane(
             modifier = Modifier,
             windowSizeClass = phonePortrait,
-            loginUiModel = LoginUiModel.Empty
+            loginUiModel = { LoginUiModel.Empty }
         )
     }
 }
@@ -474,7 +468,7 @@ private fun PhoneLandscapePreview() {
         LoginPane(
             modifier = Modifier,
             windowSizeClass = phoneLandscape,
-            loginUiModel = LoginUiModel.Empty
+            loginUiModel = { LoginUiModel.Empty }
         )
     }
 }
@@ -487,7 +481,7 @@ private fun TabletMediumPortraitPreview() {
         LoginPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletPortrait,
-            loginUiModel = LoginUiModel.Empty
+            loginUiModel = { LoginUiModel.Empty }
         )
     }
 }
@@ -500,7 +494,7 @@ private fun TabletMediumLandscapePreview() {
         LoginPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletLandscape,
-            loginUiModel = LoginUiModel.Empty
+            loginUiModel = { LoginUiModel.Empty }
         )
     }
 }
@@ -513,7 +507,7 @@ private fun TabletExpandedPortraitPreview() {
         LoginPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletPortrait,
-            loginUiModel = LoginUiModel.Empty
+            loginUiModel = { LoginUiModel.Empty }
         )
     }
 }
@@ -526,7 +520,7 @@ private fun TabletExpandedLandscapePreview() {
         LoginPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletLandscape,
-            loginUiModel = LoginUiModel.Empty
+            loginUiModel = { LoginUiModel.Empty }
         )
     }
 }

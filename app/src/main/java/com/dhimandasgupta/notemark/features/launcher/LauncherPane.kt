@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,18 +65,22 @@ import com.dhimandasgupta.notemark.ui.phonePortrait
 fun LauncherPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    launcherUiModel: LauncherUiModel,
+    launcherUiModel: () -> LauncherUiModel,
     navigateToAfterLogin: () -> Unit = {},
     navigateToLogin: () -> Unit = {},
     navigateToList: () -> Unit = {}
 ) {
     val updatedLauncherUiModel by rememberUpdatedState(newValue = launcherUiModel)
+    val updatedNavigateToList by rememberUpdatedState(navigateToList)
+    val updatedNavigateToLogin by rememberUpdatedState(navigateToLogin)
 
-    LaunchedEffect(key1 = updatedLauncherUiModel) {
-        if (updatedLauncherUiModel.loggedInUser != null) {
-            navigateToList()
-            return@LaunchedEffect
-        }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { updatedLauncherUiModel().loggedInUser }
+            .collect { loggedInUser ->
+                if (loggedInUser != null) {
+                    updatedNavigateToList()
+                }
+            }
     }
     Box(
         modifier = modifier
@@ -87,7 +92,7 @@ fun LauncherPane(
         when (layoutType) {
             DeviceLayoutType.PHONE_PORTRAIT -> {
                 LandingPanePortrait(
-                    navigateToLogin = navigateToLogin,
+                    navigateToLogin = updatedNavigateToLogin,
                     deviceLayoutType = layoutType,
                     navigateToAfterLogin = navigateToAfterLogin
                 )
@@ -95,7 +100,7 @@ fun LauncherPane(
 
             DeviceLayoutType.PHONE_LANDSCAPE -> {
                 LandingPaneLandscape(
-                    navigateToLogin = navigateToLogin,
+                    navigateToLogin = updatedNavigateToLogin,
                     deviceLayoutType = layoutType,
                     navigateToAfterLogin = navigateToAfterLogin
                 )
@@ -103,7 +108,7 @@ fun LauncherPane(
 
             DeviceLayoutType.TABLET_LAYOUT -> {
                 LandingPaneTablet(
-                    navigateToLogin = navigateToLogin,
+                    navigateToLogin = updatedNavigateToLogin,
                     deviceLayoutType = layoutType,
                     navigateToAfterLogin = navigateToAfterLogin
                 )
@@ -253,7 +258,7 @@ private fun LandingPaneTablet(
 }
 
 @Composable
-fun ForegroundPane(
+private fun ForegroundPane(
     modifier: Modifier = Modifier,
     navigateToAfterLogin: () -> Unit = {},
     navigateToLogin: () -> Unit = {},
@@ -333,7 +338,7 @@ private fun PhonePortraitPreview() {
         LauncherPane(
             modifier = Modifier,
             windowSizeClass = phonePortrait,
-            launcherUiModel = LauncherUiModel.Empty
+            launcherUiModel = { LauncherUiModel.Empty }
         )
     }
 }
@@ -346,7 +351,7 @@ private fun PhoneLandscapePreview() {
         LauncherPane(
             modifier = Modifier,
             windowSizeClass = phoneLandscape,
-            launcherUiModel = LauncherUiModel.Empty
+            launcherUiModel = { LauncherUiModel.Empty }
         )
     }
 }
@@ -359,7 +364,7 @@ private fun TabletMediumPortraitPreview() {
         LauncherPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletPortrait,
-            launcherUiModel = LauncherUiModel.Empty
+            launcherUiModel = { LauncherUiModel.Empty }
         )
     }
 }
@@ -372,7 +377,7 @@ private fun TabletMediumLandscapePreview() {
         LauncherPane(
             modifier = Modifier,
             windowSizeClass = mediumTabletLandscape,
-            launcherUiModel = LauncherUiModel.Empty
+            launcherUiModel = { LauncherUiModel.Empty }
         )
     }
 }
@@ -385,7 +390,7 @@ private fun TabletExpandedPortraitPreview() {
         LauncherPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletPortrait,
-            launcherUiModel = LauncherUiModel.Empty
+            launcherUiModel = { LauncherUiModel.Empty }
         )
     }
 }
@@ -398,7 +403,7 @@ private fun TabletExpandedLandscapePreview() {
         LauncherPane(
             modifier = Modifier,
             windowSizeClass = extendedTabletLandscape,
-            launcherUiModel = LauncherUiModel.Empty
+            launcherUiModel = { LauncherUiModel.Empty }
         )
     }
 }
