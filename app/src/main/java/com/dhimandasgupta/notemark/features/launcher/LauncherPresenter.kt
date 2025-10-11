@@ -9,13 +9,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.proto.User
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 
 @Immutable
@@ -40,7 +39,14 @@ class LauncherPresenter(
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             appStateMachine.state
-                .onEach { appState ->
+                .flowOn(context = Dispatchers.Default)
+                .onStart { emit(value = AppStateMachine.defaultAppState) }
+                .cancellable()
+                .catch { throwable ->
+                    if (throwable is CancellationException) throw throwable
+                    // else can can be something like page level error etc.
+                }
+                .collect { appState ->
                     launcherUiModel = launcherUiModel.copy(
                         connectionState = appState.connectionState,
                         loggedInUser = when (appState) {
@@ -49,11 +55,6 @@ class LauncherPresenter(
                         }
                     )
                 }
-                .flowOn(Dispatchers.Default)
-                .onStart { emit(AppStateMachine.defaultAppState) }
-                .cancellable()
-                .catch { /* TODO if needed */ }
-                .collect()
         }
 
         // Send the Events to the State Machine through Actions

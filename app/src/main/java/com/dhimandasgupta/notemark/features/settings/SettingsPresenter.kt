@@ -14,13 +14,12 @@ import com.dhimandasgupta.notemark.features.launcher.AppState
 import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 
 @Immutable
@@ -55,7 +54,14 @@ class SettingsPresenter(
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             appStateMachine.state
-                .onEach { appState ->
+                .flowOn(context = Dispatchers.Default)
+                .onStart { emit(value = AppStateMachine.defaultAppState) }
+                .cancellable()
+                .catch { throwable ->
+                    if (throwable is CancellationException) throw throwable
+                    // else can can be something like page level error etc.
+                }
+                .collect { appState ->
                     logoutUiModel = logoutUiModel.copy(
                         logoutStatus = when (appState) {
                             is AppState.NotLoggedIn -> true
@@ -94,11 +100,6 @@ class SettingsPresenter(
                         isConnected = appState.connectionState == ConnectionState.Available
                     )
                 }
-                .flowOn(Dispatchers.Default)
-                .onStart { AppStateMachine.defaultAppState }
-                .cancellable()
-                .catch { /* TODO if needed */ }
-                .collect()
 
         }
 

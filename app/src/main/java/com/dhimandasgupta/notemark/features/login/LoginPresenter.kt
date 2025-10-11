@@ -7,13 +7,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 
 @Immutable
 data class LoginUiModel(
@@ -41,7 +41,14 @@ class LoginPresenter(
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             loginStateMachine.state
-                .onEach { loginState ->
+                .flowOn(context = Dispatchers.Default)
+                .onStart { emit(value = LoginStateMachine.defaultLoginState) }
+                .cancellable()
+                .catch { throwable ->
+                    if (throwable is CancellationException) throw throwable
+                    // else can can be something like page level error etc.
+                }
+                .collect { loginState ->
                     loginUiModel = LoginUiModel(
                         email = loginState.email,
                         password = loginState.password,
@@ -51,10 +58,6 @@ class LoginPresenter(
                         loginSuccess = loginState.loginSuccess
                     )
                 }
-                .flowOn(Dispatchers.Default)
-                .cancellable()
-                .catch { /* TODO if needed */ }
-                .collect()
         }
 
         // Send the Events to the State Machine through Actions
