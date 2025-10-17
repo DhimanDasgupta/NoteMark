@@ -16,14 +16,13 @@ import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 
 @Immutable
 data class NoteListUiModel(
@@ -49,59 +48,26 @@ class NoteListPresenter(
 
     @Composable
     fun uiModel(): NoteListUiModel {
-        var noteListUiModel by remember(key1 = Unit) { mutableStateOf(defaultNoteListUiModel) }
+        var noteListUiModel by remember { mutableStateOf(value = defaultNoteListUiModel) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            appStateMachine.state
-                .flowOn(context = Dispatchers.Default)
-                .onStart { emit(value = AppStateMachine.defaultAppState) }
-                .cancellable()
-                .catch { throwable ->
-                    if (throwable is CancellationException) throw throwable
-                    // else can can be something like page level error etc.
-                }
-                .collect { appState ->
-                    noteListUiModel = noteListUiModel.copy(
-                        userName = when (appState) {
-                            is AppState.LoggedIn -> appState.user.userName
-                            else -> ""
-                        },
-                        showSyncProgress = when (appState) {
-                            is AppState.LoggedIn -> appState.sync?.syncing ?: false
-                            else -> true
-                        },
-                        isConnected = appState.connectionState == ConnectionState.Available
-                    )
-                }
-        }
-
-        LaunchedEffect(key1 = Unit) {
-            noteListStateMachine.state
-                .onEach { noteListState ->
-                    noteListUiModel = when (noteListState) {
-                        is NoteListState.NoteListStateWithNotes -> {
-                            noteListUiModel.copy(
-                                noteEntities = noteListState.notes.map { noteEntity ->
-                                    noteEntity.copy(
-                                        lastEditedAt = convertIsoToRelativeYearFormat(
-                                            isoOffsetDateTimeString = noteEntity.lastEditedAt
-                                        )
-                                    )
-                                }.toPersistentList(),
-                                noteLongClickedUuid = noteListState.longClickedNoteUuid
-                            )
-                        }
-
-                        else -> noteListUiModel.copy(
-                            noteEntities = persistentListOf()
-                        )
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .onStart { NoteListStateMachine.defaultNoteListState }
-                .catch { /* TODO if needed */ }
-                .collect {  }
+            combine(
+                flow = appStateMachine.state.filter { appState -> appState is AppState.LoggedIn },
+                flow2 = noteListStateMachine.state
+            ) {
+                appState, noteListState -> mapToNoteListUiModel(
+                    loggedIn = appState as AppState.LoggedIn,
+                    noteListState = noteListState
+                )
+            }
+            .flowOn(context = Dispatchers.Default)
+            /*.onStart { emit(value = NoteListUiModel.Empty) } // Do not emit the default state as data will come from State Machine */
+            .cancellable()
+            .catch {} // Do something with error if required
+            .collect { mappedNoteListUiModel ->
+                noteListUiModel = mappedNoteListUiModel
+            }
         }
 
         LaunchedEffect(key1 = Unit) {
@@ -126,5 +92,29 @@ class NoteListPresenter(
 
     fun processAppActionEvent(event: AppAction) {
         appActionEvents.tryEmit(event)
+    }
+
+    private fun mapToNoteListUiModel(loggedIn: AppState.LoggedIn, noteListState: NoteListState): NoteListUiModel {
+        return NoteListUiModel(
+            userName = loggedIn.user.userName,
+            noteEntities = if (noteListState is NoteListState.NoteListStateWithNotes) {
+                noteListState.notes.map { noteEntity ->
+                    noteEntity.copy(
+                        lastEditedAt = convertIsoToRelativeYearFormat(
+                            isoOffsetDateTimeString = noteEntity.lastEditedAt
+                        )
+                    )
+                }.toPersistentList()
+            } else {
+                persistentListOf()
+            },
+            noteLongClickedUuid = if (noteListState is NoteListState.NoteListStateWithNotes) {
+                noteListState.longClickedNoteUuid
+            } else {
+                ""
+            },
+            showSyncProgress = loggedIn.sync?.syncing ?: false,
+            isConnected = loggedIn.connectionState == ConnectionState.Available
+        )
     }
 }

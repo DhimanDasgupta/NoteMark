@@ -12,6 +12,7 @@ import com.dhimandasgupta.notemark.common.convertNoteTimestampToReadableFormat
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppState
 import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
+import com.dhimandasgupta.notemark.proto.Sync
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CancellationException
@@ -19,8 +20,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.map
 
 @Immutable
 data class SettingsUiModel(
@@ -49,56 +51,19 @@ class SettingsPresenter(
 
     @Composable
     fun uiModel(): SettingsUiModel {
-        var logoutUiModel by remember(key1 = Unit) { mutableStateOf(value = SettingsUiModel.Empty) }
+        var settingsUiModel by remember { mutableStateOf(value = SettingsUiModel.Empty) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             appStateMachine.state
+                .filter { appState -> (appState is AppState.LoggedIn && appState.sync != null) || appState is AppState.NotLoggedIn }
+                .map { appState -> mapToSettingsUiModel(appState = appState) }
                 .flowOn(context = Dispatchers.Default)
-                .onStart { emit(value = AppStateMachine.defaultAppState) }
+                /*.onStart { emit(value = AppStateMachine.defaultAppState) } // Do not emit the default state as data will come from State Machine */
                 .cancellable()
-                .catch { throwable ->
-                    if (throwable is CancellationException) throw throwable
-                    // else can can be something like page level error etc.
-                }
-                .collect { appState ->
-                    logoutUiModel = logoutUiModel.copy(
-                        logoutStatus = when (appState) {
-                            is AppState.NotLoggedIn -> true
-                            else -> null
-                        },
-                        lastSynced = when (appState) {
-                            is AppState.LoggedIn -> appState.sync?.lastUploadedTime?.let { time ->
-                                convertNoteTimestampToReadableFormat(isoOffsetDateTimeString = time)
-                            } ?: "--"
-
-                            else -> "--"
-                        },
-                        selectedSyncInterval = when (appState) {
-                            is AppState.LoggedIn -> appState.sync?.syncDuration?.let {
-                                when (it.ordinal) {
-                                    3 -> "15 Minutes"
-                                    4 -> "30 Minutes"
-                                    5 -> "1 Hour"
-                                    else -> "Manual"
-                                }
-                            } ?: "Manual"
-
-                            else -> "Manual"
-                        },
-                        deleteLocalNotesOnLogout = when (appState) {
-                            is AppState.LoggedIn -> appState.sync?.deleteLocalNotesOnLogout
-                                ?: false
-
-                            else -> false
-                        },
-                        isSyncing = when (appState) {
-                            is AppState.LoggedIn -> appState.sync?.syncing ?: false
-
-                            else -> false
-                        },
-                        isConnected = appState.connectionState == ConnectionState.Available
-                    )
+                .catch {} // Do something with error if required
+                .collect { mappedUiModel ->
+                    settingsUiModel = mappedUiModel
                 }
 
         }
@@ -110,11 +75,42 @@ class SettingsPresenter(
             }
         }
 
-        return logoutUiModel
+        return settingsUiModel
     }
 
     fun processEvent(event: AppAction) {
         events.tryEmit(value = event)
+    }
+
+    private fun mapToSettingsUiModel(appState: AppState): SettingsUiModel {
+        when (appState) {
+            is AppState.LoggedIn -> {
+                return SettingsUiModel(
+                    logoutStatus = null,
+                    lastSynced = appState.sync?.lastUploadedTime?.let { time ->
+                        convertNoteTimestampToReadableFormat(isoOffsetDateTimeString = time)
+                    } ?: "--",
+                    selectedSyncInterval = appState.sync?.syncDuration?.toReadableString() ?: "Manual",
+                    deleteLocalNotesOnLogout = appState.sync?.deleteLocalNotesOnLogout ?: false,
+                    isSyncing = appState.sync?.syncing ?: false,
+                    isConnected = appState.connectionState == ConnectionState.Available
+                )
+            }
+            else -> {
+                return SettingsUiModel.Empty.copy(
+                    logoutStatus = true,
+                )
+            }
+        }
+    }
+
+    private fun Sync.SyncDuration.toReadableString(): String {
+        return when (this) {
+            Sync.SyncDuration.SYNC_DURATION_FIFTEEN_MINUTES -> "15 Minutes"
+            Sync.SyncDuration.SYNC_DURATION_THIRTY_MINUTES -> "30 Minutes"
+            Sync.SyncDuration.SYNC_DURATION_ONE_HOUR -> "1 Hour"
+            else -> "Manual"
+        }
     }
 }
 

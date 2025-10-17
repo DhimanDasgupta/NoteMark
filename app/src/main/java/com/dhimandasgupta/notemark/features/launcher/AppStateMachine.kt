@@ -21,6 +21,7 @@ import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.proto.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import java.time.Duration
 import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
@@ -54,23 +55,15 @@ class AppStateMachine(
     private val syncRepository: SyncRepository,
     private val noteMarkRepository: NoteMarkRepository
 ) : StateMachine<AppState, AppAction>(initialState = defaultAppState) {
-    private var cachedUser: User? = null
-    private var cachedSync: Sync? = null
+    private var lastKnownConnectionState: ConnectionState? = null
 
     init {
         if (applicationContext is Activity) throw IllegalStateException("Context cannot be an Activity")
 
         spec {
             inState<AppState.NotLoggedIn> {
-                condition(condition = { cachedUser != null }) {
-                    onEnter { state ->
-                        state.override { AppState.LoggedIn(user = cachedUser!!, sync = cachedSync) }
-                    }
-                }
-                // All Flows while in the app state should be collected here
-                collectWhileInState(flow = userRepository.getUser()) { user, state ->
-                    user?.let { cachedUser = it }
-                    cachedUser?.let { user ->
+                collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user, state ->
+                    user?.let {
                         state.override {
                             AppState.LoggedIn(
                                 connectionState = state.snapshot.connectionState,
@@ -80,32 +73,30 @@ class AppStateMachine(
                     } ?: state.noChange()
                 }
                 collectWhileInState(flow = applicationContext.observeConnectivityAsFlow()) { connected, state ->
+                    lastKnownConnectionState = connected
                     state.mutate { state.snapshot.copy(connectionState = connected) }
                 }
             }
 
             inState<AppState.LoggedIn> {
-                condition(condition = { cachedSync != null } ) {
-                    onEnterEffect { state ->
-                        val sync = cachedSync ?: syncRepository.getSync().first()
-                        val neverSynced = sync.lastUploadedTime == ""
-                        val lastSyncTimeIsMoreThan5Minutes = getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString = sync.lastUploadedTime) > 5L
-                        // Start sync if never synced or last sync time is more than 5 mins and not syncing.
-                        if (neverSynced || (lastSyncTimeIsMoreThan5Minutes && !sync.syncing)) {
-                            applicationContext.cancelPreviousAndTriggerNewWork()
-                        }
-                    }
-                    collectWhileInState(flow = userRepository.getUser()) { user, state ->
-                        if (user == null) onLogoutSuccessful()
-                        user?.let { state.noChange() } ?: state.override { AppState.NotLoggedIn(connectionState = state.snapshot.connectionState) }
-                    }
-                }
+                onEnterEffect { syncOnEnter() }
                 collectWhileInState(flow = applicationContext.observeConnectivityAsFlow()) { connected, state ->
+                    lastKnownConnectionState = connected
                     state.mutate { state.snapshot.copy(connectionState = connected) }
                 }
                 collectWhileInState(flow = syncRepository.getSync()) { sync, state ->
-                    cachedSync = sync
                     state.mutate { state.snapshot.copy(sync = sync) }
+                }
+                collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user, state ->
+                    if (user == null) {
+                        state.override {
+                            AppState.NotLoggedIn(
+                                connectionState = state.snapshot.connectionState
+                            )
+                        }
+                    } else {
+                        state.noChange()
+                    }
                 }
 
                 // All the actions valid for app state should be handled here
@@ -130,12 +121,14 @@ class AppStateMachine(
                     syncRepository.saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout = action.deleteOnLogout)
                 }
                 on<AppAction.AppLogout> { _, state ->
+                    if (lastKnownConnectionState == ConnectionState.Unavailable) return@on state.noChange()
+
                     noteMarkRepository.logout(
                         request = RefreshRequest(
                             refreshToken = userRepository.getUser().first()?.refreshToken ?: ""
                         )
                     ).getOrNull()?.let {
-                        onLogoutSuccessful()
+                        onLogoutSuccessful(deleteLocalNotesOnLogout = syncRepository.getSync().first().deleteLocalNotesOnLogout)
                         state.override {
                             AppState.NotLoggedIn(
                                 connectionState = state.snapshot.connectionState
@@ -151,14 +144,22 @@ class AppStateMachine(
         val defaultAppState = AppState.NotLoggedIn()
     }
 
-    private suspend fun onLogoutSuccessful() {
-        if (cachedSync?.deleteLocalNotesOnLogout == true) {
+    private suspend fun onLogoutSuccessful(deleteLocalNotesOnLogout: Boolean = false) {
+        if (deleteLocalNotesOnLogout) {
             noteMarkRepository.deleteAllLocalNotes()
         }
-        cachedUser = null
-        cachedSync = null
         userRepository.reset()
         syncRepository.reset()
+    }
+
+    private suspend fun syncOnEnter() {
+        val sync = syncRepository.getSync().first()
+        val neverSynced = sync.lastUploadedTime == ""
+        val lastSyncTimeIsMoreThan5Minutes = getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString = sync.lastUploadedTime) > 5L
+        // Start sync if never synced or last sync time is more than 5 mins and not syncing.
+        if (neverSynced || (lastSyncTimeIsMoreThan5Minutes && !sync.syncing)) {
+            applicationContext.cancelPreviousAndTriggerNewWork()
+        }
     }
 }
 
@@ -175,7 +176,7 @@ private fun Context.cancelPreviousAndTriggerNewWork(duration: Duration = Duratio
         Duration.ZERO -> {
             workManager.cancelAllWorkByTag(tag = ONE_TIME_SYNC_WORK)
             workManager.enqueueUniqueWork(
-                uniqueWorkName = "one_time_sync_work",
+                uniqueWorkName = ONE_TIME_SYNC_WORK,
                 existingWorkPolicy = ExistingWorkPolicy.REPLACE,
                 request = OneTimeWorkRequestBuilder<NoteSyncWorker>()
                     .setConstraints(constraints)
@@ -188,7 +189,7 @@ private fun Context.cancelPreviousAndTriggerNewWork(duration: Duration = Duratio
                 existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE,
                 request = PeriodicWorkRequestBuilder<NoteSyncWorker>(
                     repeatInterval = duration,
-                    flexTimeInterval = Duration.ofMinutes(5)
+                    flexTimeInterval = Duration.ofMinutes(5) // 5 mins earlier or after the schedule
                 ).
                 setConstraints(constraints).
                 build())
