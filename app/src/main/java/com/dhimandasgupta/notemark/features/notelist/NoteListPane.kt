@@ -453,7 +453,7 @@ private fun NoteGrid(
             contentType = { "notes" }
         ) { noteEntity ->
             NoteItem(
-                modifier = Modifier,
+                modifier = Modifier.animateItem(),
                 note = noteEntity,
                 maxLength = maxLength,
                 onNoteClicked = onNoteClicked,
