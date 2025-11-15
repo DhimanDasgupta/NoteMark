@@ -78,7 +78,7 @@ fun SettingsPane(
     onLogoutClicked: () -> Unit = {}
 ) {
     val updatedSettingsUiModel by rememberUpdatedState(newValue = settingsUiModel)
-    val updatedOnLogoutSuccessful by rememberUpdatedState(onLogoutSuccessful)
+    val updatedOnLogoutSuccessful by rememberUpdatedState(newValue = onLogoutSuccessful)
 
     var showSyncInterval by remember { mutableStateOf(value = false) }
 

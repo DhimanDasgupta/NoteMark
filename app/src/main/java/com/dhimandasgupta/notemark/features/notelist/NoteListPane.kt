@@ -1,6 +1,9 @@
 package com.dhimandasgupta.notemark.features.notelist
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -56,6 +59,8 @@ import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntOffset.Companion
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
@@ -272,10 +277,10 @@ private fun NoteListWithNotes(
                 AnimatedVisibility(
                     visible = shouldShowFAB,
                     enter = fadeIn() + slideInVertically(
-                        initialOffsetY = { it/2 }
+                        initialOffsetY = { it / 2 }
                     ),
                     exit = fadeOut() + slideOutVertically(
-                        targetOffsetY = { it/2 }
+                        targetOffsetY = { it / 2 }
                     ),
                 ) {
                     NoteMarkFAB(
@@ -453,7 +458,21 @@ private fun NoteGrid(
             contentType = { "notes" }
         ) { noteEntity ->
             NoteItem(
-                modifier = Modifier.animateItem(),
+                modifier = Modifier.animateItem(
+                    fadeInSpec = spring(
+                        stiffness = Spring.StiffnessVeryLow,
+                        dampingRatio = Spring.DampingRatioLowBouncy
+                    ),
+                    placementSpec =
+                        spring(
+                            stiffness = Spring.StiffnessVeryLow,
+                            visibilityThreshold = IntOffset.VisibilityThreshold,
+                        ),
+                    fadeOutSpec = spring(
+                        stiffness = Spring.StiffnessVeryLow,
+                        dampingRatio = Spring.DampingRatioLowBouncy
+                    ),
+                ),
                 note = noteEntity,
                 maxLength = maxLength,
                 onNoteClicked = onNoteClicked,
