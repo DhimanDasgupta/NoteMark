@@ -359,7 +359,7 @@ private fun RegistrationUsernameField(
     var userName by remember { mutableStateOf(value = registrationUiModel().userName) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { userName }
-            .debounce(timeoutMillis = 300)
+            .debounce(timeoutMillis = 200)
             .collect { registrationAction(UserNameEntered(userName)) }
     }
 
@@ -390,7 +390,7 @@ private fun RegistrationEmailField(
     var email by remember { mutableStateOf(value = registrationUiModel().email) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { email }
-            .debounce(timeoutMillis = 300)
+            .debounce(timeoutMillis = 200)
             .collect { registrationAction(EmailEntered(email)) }
     }
 
@@ -418,7 +418,7 @@ private fun RegistrationPasswordField(
     var password by remember { mutableStateOf(registrationUiModel().password) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { password }
-            .debounce(timeoutMillis = 300)
+            .debounce(timeoutMillis = 200)
             .collect { registrationAction(PasswordEntered(password)) }
     }
 
@@ -449,7 +449,7 @@ private fun RegistrationRepeatPasswordField(
     var repeatPassword by remember { mutableStateOf(value = registrationUiModel().repeatPassword) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { repeatPassword }
-            .debounce(timeoutMillis = 300)
+            .debounce(timeoutMillis = 200)
             .collect { registrationAction(RepeatPasswordEntered(repeatPassword)) }
     }
 

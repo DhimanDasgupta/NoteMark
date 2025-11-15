@@ -17,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.LifecycleStartEffect
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -88,7 +87,8 @@ private fun NavGraphBuilder.noteMarkGraph(
             LauncherPane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
-                navController = navController
+                navigateAfterLogin = navController::navigateAfterLogin,
+                navigateToLogin = navController::navigateToLogin
             )
         }
 
@@ -96,7 +96,9 @@ private fun NavGraphBuilder.noteMarkGraph(
             LoginPane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
-                navController = navController
+                navigateToRegistration = navController::navigateToRegistration,
+                navigateToAfterLogin = navController::navigateToAfterLogin,
+                navigateUp = navController::navigateAppUp
             )
         }
 
@@ -104,7 +106,8 @@ private fun NavGraphBuilder.noteMarkGraph(
             RegistrationPane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
-                navController = navController
+                navigateToLoginFromRegistration = navController::navigateToLoginFromRegistration,
+                navigateUp = navController::navigateAppUp
             )
         }
 
@@ -112,7 +115,9 @@ private fun NavGraphBuilder.noteMarkGraph(
             NoteListPane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
-                navController = navController
+                navigateToAdd = navController::navigateToAdd,
+                navigateToEdit = navController::navigateToEdit,
+                navigateToSettings = navController::navigateToSettings
             )
         }
 
@@ -120,23 +125,26 @@ private fun NavGraphBuilder.noteMarkGraph(
             NoteCreatePane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
-                navController = navController
+                navigateUp = navController::navigateAppUp
             )
         }
 
         composable<NoteMarkDestination.NoteEditPane> { backStackEntry ->
+            val arguments: NoteMarkDestination.NoteEditPane = backStackEntry.toRoute()
+
             NoteEditPane(
                 modifier = Modifier,
                 windowSizeClass = windowSizeClass,
-                navController = navController,
-                backStackEntry = backStackEntry
+                arguments = arguments,
+                navigateUp = navController::navigateAppUp
             )
         }
 
         composable<NoteMarkDestination.SettingsPane> {
             SettingsPane(
                 modifier = Modifier,
-                navController = navController
+                navigateUp = navController::navigateAppUp,
+                navigateToLauncherAfterLogout = navController::navigateToLauncherAfterLogout
             )
         }
     }
@@ -146,7 +154,8 @@ private fun NavGraphBuilder.noteMarkGraph(
 private fun LauncherPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    navController: NavHostController
+    navigateAfterLogin: () -> Unit,
+    navigateToLogin: () -> Unit
 ) {
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(true) }
@@ -181,26 +190,10 @@ private fun LauncherPane(
                 Toast.makeText(context, "Oops!!! Please login first to get started", Toast.LENGTH_LONG).show()
                 return@LauncherPane
             }
-            navController.navigate(route = NoteMarkDestination.NoteListPane) {
-                popUpTo(route = NoteMarkDestination.LauncherPane) {
-                    inclusive = true
-                }
-            }
+            navigateAfterLogin()
         },
-        navigateToLogin = {
-            navController.navigate(route = NoteMarkDestination.LoginPane) {
-                popUpTo(route = NoteMarkDestination.LauncherPane) {
-                    inclusive = true
-                }
-            }
-        },
-        navigateToList = {
-            navController.navigate(route = NoteMarkDestination.NoteListPane) {
-                popUpTo(route = NoteMarkDestination.LauncherPane) {
-                    inclusive = true
-                }
-            }
-        }
+        navigateToLogin = { navigateToLogin() },
+        navigateToList = { navigateAfterLogin() }
     )
 }
 
@@ -208,7 +201,9 @@ private fun LauncherPane(
 private fun LoginPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    navController: NavHostController
+    navigateToRegistration: () -> Unit,
+    navigateToAfterLogin: () -> Unit,
+    navigateUp: () -> Unit
 ) {
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(false) }
@@ -237,7 +232,7 @@ private fun LoginPane(
     BackHandler(
         enabled = true,
     ) {
-        navController.navigateUp()
+        navigateUp()
     }
 
     LoginPane(
@@ -245,20 +240,8 @@ private fun LoginPane(
         windowSizeClass = windowSizeClass,
         loginUiModel = { loginUiModel },
         loginAction = loginEvents,
-        navigateToRegistration = {
-            navController.navigate(route = NoteMarkDestination.RegistrationPane) {
-                popUpTo(route = NoteMarkDestination.LoginPane) {
-                    inclusive = true
-                }
-            }
-        },
-        navigateToAfterLogin = {
-            navController.navigate(route = NoteMarkDestination.NoteListPane) {
-                popUpTo(route = NoteMarkDestination.LoginPane) {
-                    inclusive = true
-                }
-            }
-        },
+        navigateToRegistration = { navigateToRegistration() },
+        navigateToAfterLogin = { navigateToAfterLogin() },
     )
 }
 
@@ -266,7 +249,8 @@ private fun LoginPane(
 private fun RegistrationPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    navController: NavHostController
+    navigateToLoginFromRegistration: () -> Unit,
+    navigateUp: () -> Unit
 ) {
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(false) }
@@ -294,20 +278,14 @@ private fun RegistrationPane(
     BackHandler(
         enabled = true,
     ) {
-        navController.navigateUp()
+        navigateUp()
     }
 
     RegistrationPane(
         modifier = modifier,
         windowSizeClass = windowSizeClass,
         registrationUiModel = { registrationUiModel },
-        navigateToLogin = {
-            navController.navigate(route = NoteMarkDestination.LoginPane) {
-                popUpTo(route = NoteMarkDestination.RegistrationPane) {
-                    inclusive = true
-                }
-            }
-        },
+        navigateToLogin = { navigateToLoginFromRegistration() },
         registrationAction = registrationAction,
     )
 }
@@ -316,7 +294,9 @@ private fun RegistrationPane(
 private fun NoteListPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    navController: NavHostController
+    navigateToAdd: () -> Unit,
+    navigateToEdit: (String) -> Unit,
+    navigateToSettings: () -> Unit
 ) {
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(true) }
@@ -352,15 +332,9 @@ private fun NoteListPane(
         windowSizeClass = windowSizeClass,
         noteListUiModel = { noteListUiModel },
         noteListAction = noteListAction,
-        onNoteClicked = { uuid ->
-            navController.navigate(route = NoteMarkDestination.NoteEditPane(noteId = uuid))
-        },
-        onFabClicked = {
-            navController.navigate(route = NoteMarkDestination.NoteCreatePane)
-        },
-        onSettingsClicked = {
-            navController.navigate(route = NoteMarkDestination.SettingsPane)
-        },
+        onNoteClicked = { uuid -> navigateToEdit(uuid) },
+        onFabClicked = { navigateToAdd() },
+        onSettingsClicked = { navigateToSettings() },
         onProfileClicked = {}
     )
 }
@@ -369,7 +343,7 @@ private fun NoteListPane(
 private fun NoteCreatePane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    navController: NavHostController
+    navigateUp: () -> Unit
 ) {
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(true) }
@@ -398,7 +372,7 @@ private fun NoteCreatePane(
     BackHandler(
         enabled = true,
     ) {
-        navController.navigateUp()
+        navigateUp()
     }
 
     AddNotePane(
@@ -406,7 +380,7 @@ private fun NoteCreatePane(
         windowSizeClass = windowSizeClass,
         addNoteUiModel = { addNoteUiModel },
         addNoteAction = addNoteAction,
-        onBackClicked = { navController.navigateUp() }
+        onBackClicked = { navigateUp() }
     )
 }
 
@@ -414,20 +388,19 @@ private fun NoteCreatePane(
 private fun NoteEditPane(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    navController: NavHostController,
-    backStackEntry: NavBackStackEntry
+    arguments: NoteMarkDestination.NoteEditPane,
+    navigateUp: () -> Unit
 ) {
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(true) }
 
-    val arguments: NoteMarkDestination.NoteEditPane = backStackEntry.toRoute()
     val editNotePresenter: EditNotePresenter = remember { get(clazz = EditNotePresenter::class.java) }
     var editNoteUiModel by remember { mutableStateOf(EditNoteUiModel.Empty) }
     val editNoteAction = editNotePresenter::processEvent
 
     val scope = rememberCoroutineScope()
 
-    LifecycleStartEffect(key1 = Unit) {
+    LifecycleStartEffect(key1 = Unit, key2 = arguments.noteId) {
         if (scope.isActive) {
             scope.launchMolecule(mode = RecompositionMode.Immediate) {
                 editNoteUiModel = editNotePresenter.uiModel()
@@ -445,7 +418,7 @@ private fun NoteEditPane(
     BackHandler(
         enabled = true,
     ) {
-        navController.navigateUp()
+        navigateUp()
     }
 
     EditNotePane(
@@ -454,14 +427,15 @@ private fun NoteEditPane(
         noteId = arguments.noteId,
         editNoteUiModel = { editNoteUiModel },
         editNoteAction = editNoteAction,
-        onCloseClicked = { navController.navigateUp() }
+        onCloseClicked = { navigateUp() }
     )
 }
 
 @Composable
 private fun SettingsPane(
     modifier: Modifier = Modifier,
-    navController: NavHostController
+    navigateUp: () -> Unit,
+    navigateToLauncherAfterLogout: () -> Unit
 ) {
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(true) }
@@ -489,19 +463,15 @@ private fun SettingsPane(
     BackHandler(
         enabled = true,
     ) {
-        navController.navigateUp()
+        navigateUp()
     }
 
     SettingsPane(
         modifier = modifier,
         settingsUiModel = { settingsUiModel },
         settingsAction = settingsAction,
-        onBackClicked = { navController.navigateUp() },
-        onLogoutSuccessful = {
-            navController.navigate(route = NoteMarkDestination.LauncherPane) {
-                launchSingleTop = true
-            }
-        },
+        onBackClicked = { navigateUp() },
+        onLogoutSuccessful = { navigateToLauncherAfterLogout() },
         onDeleteNoteCheckChanged = {
             settingsAction(AppAction.DeleteLocalNotesOnLogout(deleteOnLogout = !settingsUiModel.deleteLocalNotesOnLogout))
         },
@@ -511,6 +481,21 @@ private fun SettingsPane(
     )
 }
 
+private fun NavHostController.navigateToLogin() = navigate(route = NoteMarkDestination.LoginPane) {
+    popUpTo(route = NoteMarkDestination.LauncherPane) {
+        inclusive = true
+    }
+}
+
+private fun NavHostController.navigateAfterLogin() = navigate(route = NoteMarkDestination.NoteListPane) {
+    popUpTo(route = NoteMarkDestination.LauncherPane) {
+        inclusive = true
+    }
+}
+
+/**
+ * Start of Navigation routes
+ * */
 private object NoteMarkDestination {
     @Serializable
     data object RootPane
@@ -538,3 +523,44 @@ private object NoteMarkDestination {
     @Serializable
     data object SettingsPane
 }
+/**
+ * End of Navigation routes
+ * */
+
+/**
+ * Start of all navigation functions
+ * */
+private fun NavHostController.navigateToRegistration() = navigate(route = NoteMarkDestination.RegistrationPane) {
+    popUpTo(route = NoteMarkDestination.LoginPane) {
+        inclusive = true
+    }
+}
+
+private fun NavHostController.navigateToAfterLogin() = navigate(route = NoteMarkDestination.NoteListPane) {
+    popUpTo(route = NoteMarkDestination.LoginPane) {
+        inclusive = true
+    }
+}
+
+private fun NavHostController.navigateToLoginFromRegistration() = navigate(route = NoteMarkDestination.LoginPane) {
+    popUpTo(route = NoteMarkDestination.RegistrationPane) {
+        inclusive = true
+    }
+}
+
+private fun NavHostController.navigateToAdd() = navigate(route = NoteMarkDestination.NoteCreatePane)
+
+private fun NavHostController.navigateToEdit(uuid: String) {
+    navigate(route = NoteMarkDestination.NoteEditPane(noteId = uuid))
+}
+
+private fun NavHostController.navigateToSettings() = navigate(route = NoteMarkDestination.SettingsPane)
+
+private fun NavHostController.navigateToLauncherAfterLogout() = navigate(route = NoteMarkDestination.LauncherPane) {
+    launchSingleTop = true
+}
+
+private fun NavHostController.navigateAppUp() = navigateUp()
+/**
+ * End of all navigation functions
+ * */

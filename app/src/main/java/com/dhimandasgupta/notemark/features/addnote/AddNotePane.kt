@@ -203,13 +203,13 @@ private fun AddNoteBody(
     LaunchedEffect(key1 = Unit) {
         launch {
             snapshotFlow { title }
-                .debounce(timeoutMillis = 300)
+                .debounce(timeoutMillis = 200)
                 .collect { addNoteAction(AddNoteAction.UpdateTitle(title = title)) }
         }
 
         launch {
             snapshotFlow { body }
-                .debounce(timeoutMillis = 300)
+                .debounce(timeoutMillis = 200)
                 .collect { addNoteAction(AddNoteAction.UpdateContent(content = body)) }
         }
     }

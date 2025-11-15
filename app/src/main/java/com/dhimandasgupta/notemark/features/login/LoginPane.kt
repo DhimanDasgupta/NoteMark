@@ -350,7 +350,7 @@ private fun LoginEmailField(
     var email by remember { mutableStateOf(value = loginUiModel().email) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { email }
-            .debounce(timeoutMillis = 300)
+            .debounce(timeoutMillis = 200)
             .collect { loginAction(EmailEntered(email = email)) }
     }
 
@@ -378,7 +378,7 @@ private fun LoginPasswordField(
     var password by remember { mutableStateOf(value = loginUiModel().password) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { password }
-            .debounce(timeoutMillis = 300)
+            .debounce(timeoutMillis = 200)
             .collect { loginAction(PasswordEntered(password = password)) }
     }
 

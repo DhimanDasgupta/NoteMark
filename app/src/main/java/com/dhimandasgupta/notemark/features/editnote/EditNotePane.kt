@@ -300,7 +300,7 @@ private fun EditNoteBody(
     LaunchedEffect(key1 = Unit) {
         launch {
             snapshotFlow { title }
-                .debounce(timeoutMillis = 300)
+                .debounce(timeoutMillis = 200)
                 .collect { debouncedTitle ->
                     updatedEditNoteAction(EditNoteAction.UpdateTitle(title = debouncedTitle))
                 }
@@ -308,7 +308,7 @@ private fun EditNoteBody(
 
         launch {
             snapshotFlow { body }
-                .debounce(timeoutMillis = 300)
+                .debounce(timeoutMillis = 200)
                 .collect { debouncedContent ->
                     updatedEditNoteAction(EditNoteAction.UpdateContent(content = debouncedContent))
                 }
