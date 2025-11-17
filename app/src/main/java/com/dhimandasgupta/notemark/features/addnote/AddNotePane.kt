@@ -72,6 +72,7 @@ import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
@@ -203,14 +204,14 @@ private fun AddNoteBody(
     LaunchedEffect(key1 = Unit) {
         launch {
             snapshotFlow { title }
-                .debounce(timeoutMillis = 200)
-                .collect { addNoteAction(AddNoteAction.UpdateTitle(title = title)) }
+                .debounce(timeoutMillis = 100)
+                .collectLatest { addNoteAction(AddNoteAction.UpdateTitle(title = title)) }
         }
 
         launch {
             snapshotFlow { body }
-                .debounce(timeoutMillis = 200)
-                .collect { addNoteAction(AddNoteAction.UpdateContent(content = body)) }
+                .debounce(timeoutMillis = 100)
+                .collectLatest { addNoteAction(AddNoteAction.UpdateContent(content = body)) }
         }
     }
 

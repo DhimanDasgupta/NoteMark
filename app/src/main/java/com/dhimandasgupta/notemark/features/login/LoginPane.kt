@@ -74,6 +74,7 @@ import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 
@@ -350,8 +351,8 @@ private fun LoginEmailField(
     var email by remember { mutableStateOf(value = loginUiModel().email) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { email }
-            .debounce(timeoutMillis = 200)
-            .collect { loginAction(EmailEntered(email = email)) }
+            .debounce(timeoutMillis = 100)
+            .collectLatest { loginAction(EmailEntered(email = email)) }
     }
 
     NoteMarkTextField(
@@ -378,8 +379,8 @@ private fun LoginPasswordField(
     var password by remember { mutableStateOf(value = loginUiModel().password) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { password }
-            .debounce(timeoutMillis = 200)
-            .collect { loginAction(PasswordEntered(password = password)) }
+            .debounce(timeoutMillis = 100)
+            .collectLatest { loginAction(PasswordEntered(password = password)) }
     }
 
     NoteMarkPasswordTextField(

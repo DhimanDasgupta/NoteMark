@@ -79,6 +79,7 @@ import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 
 @Composable
@@ -359,8 +360,8 @@ private fun RegistrationUsernameField(
     var userName by remember { mutableStateOf(value = registrationUiModel().userName) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { userName }
-            .debounce(timeoutMillis = 200)
-            .collect { registrationAction(UserNameEntered(userName)) }
+            .debounce(timeoutMillis = 100)
+            .collectLatest { registrationAction(UserNameEntered(userName)) }
     }
 
     NoteMarkTextField(
@@ -390,8 +391,8 @@ private fun RegistrationEmailField(
     var email by remember { mutableStateOf(value = registrationUiModel().email) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { email }
-            .debounce(timeoutMillis = 200)
-            .collect { registrationAction(EmailEntered(email)) }
+            .debounce(timeoutMillis = 100)
+            .collectLatest { registrationAction(EmailEntered(email)) }
     }
 
     NoteMarkTextField(
@@ -418,8 +419,8 @@ private fun RegistrationPasswordField(
     var password by remember { mutableStateOf(registrationUiModel().password) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { password }
-            .debounce(timeoutMillis = 200)
-            .collect { registrationAction(PasswordEntered(password)) }
+            .debounce(timeoutMillis = 100)
+            .collectLatest { registrationAction(PasswordEntered(password)) }
     }
 
     NoteMarkPasswordTextField(
@@ -449,8 +450,8 @@ private fun RegistrationRepeatPasswordField(
     var repeatPassword by remember { mutableStateOf(value = registrationUiModel().repeatPassword) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { repeatPassword }
-            .debounce(timeoutMillis = 200)
-            .collect { registrationAction(RepeatPasswordEntered(repeatPassword)) }
+            .debounce(timeoutMillis = 100)
+            .collectLatest { registrationAction(RepeatPasswordEntered(repeatPassword)) }
     }
 
     NoteMarkPasswordTextField(

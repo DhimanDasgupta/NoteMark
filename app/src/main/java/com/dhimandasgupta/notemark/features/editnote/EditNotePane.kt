@@ -85,6 +85,7 @@ import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
@@ -300,16 +301,16 @@ private fun EditNoteBody(
     LaunchedEffect(key1 = Unit) {
         launch {
             snapshotFlow { title }
-                .debounce(timeoutMillis = 200)
-                .collect { debouncedTitle ->
+                .debounce(timeoutMillis = 100)
+                .collectLatest { debouncedTitle ->
                     updatedEditNoteAction(EditNoteAction.UpdateTitle(title = debouncedTitle))
                 }
         }
 
         launch {
             snapshotFlow { body }
-                .debounce(timeoutMillis = 200)
-                .collect { debouncedContent ->
+                .debounce(timeoutMillis = 100)
+                .collectLatest { debouncedContent ->
                     updatedEditNoteAction(EditNoteAction.UpdateContent(content = debouncedContent))
                 }
         }
