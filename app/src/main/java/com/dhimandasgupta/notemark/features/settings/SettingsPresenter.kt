@@ -15,7 +15,6 @@ import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
 import com.dhimandasgupta.notemark.proto.Sync
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
