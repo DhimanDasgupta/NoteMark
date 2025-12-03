@@ -18,7 +18,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Constraints
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlin.math.roundToInt
 
 /**
@@ -28,7 +28,6 @@ import kotlin.math.roundToInt
  * 1. The Composable's lifecycle is at least in the RESUMED state (configurable).
  * 2. Enough time (debounceIntervalMs) has passed since the last processed click.
  *
- * @param owner The LifecycleOwner to observe. Defaults to LocalLifecycleOwner.current.
  * @param activeState The minimum Lifecycle.State required for the click to be processed. Defaults to RESUMED.
  * @param interactionSource The [MutableInteractionSource] for this clickable.
  * @param enabled Global enabled state for the clickable. Overrides lifecycle check if false.
@@ -39,7 +38,6 @@ import kotlin.math.roundToInt
  */
 @Composable
 fun Modifier.lifecycleAwareDebouncedClickable(
-    owner: LifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current,
     activeState: Lifecycle.State = Lifecycle.State.RESUMED,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     enabled: Boolean = true,
@@ -48,12 +46,14 @@ fun Modifier.lifecycleAwareDebouncedClickable(
     debounceIntervalMs: Long = 700L, // Default debounce interval
     onClick: () -> Unit
 ): Modifier = composed {
+    val owner = LocalLifecycleOwner.current
+
     val currentOnClick by rememberUpdatedState(newValue = onClick)
     var lastClickTime by remember { mutableLongStateOf(value = 0L) }
     var lifecycleAllowsClick by remember { mutableStateOf(value = owner.lifecycle.currentState.isAtLeast(activeState)) }
 
     DisposableEffect(key1 = owner, key2 = activeState) {
-        val observer = LifecycleEventObserver { _, event ->
+        val observer = LifecycleEventObserver { _, _ ->
             lifecycleAllowsClick = owner.lifecycle.currentState.isAtLeast(activeState)
         }
         owner.lifecycle.addObserver(observer)

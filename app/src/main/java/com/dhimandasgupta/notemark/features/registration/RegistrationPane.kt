@@ -39,7 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -303,21 +302,18 @@ private fun RightPane(
             modifier = Modifier,
             registrationUiModel = registrationUiModel,
             registrationAction = registrationAction,
-            focusManager = focusManager
         )
 
         RegistrationEmailField(
             modifier = Modifier,
             registrationUiModel = registrationUiModel,
             registrationAction = registrationAction,
-            focusManager = focusManager
         )
 
         RegistrationPasswordField(
             modifier = Modifier,
             registrationUiModel = registrationUiModel,
             registrationAction = registrationAction,
-            focusManager = focusManager
         )
 
         RegistrationRepeatPasswordField(
@@ -325,7 +321,6 @@ private fun RightPane(
             registrationUiModel = registrationUiModel,
             registrationAction = registrationAction,
             keyboardController = keyboardController,
-            focusManager = focusManager
         )
 
         RegistrationButton(
@@ -333,7 +328,6 @@ private fun RightPane(
             registrationUiModel = registrationUiModel,
             registrationAction = registrationAction,
             keyboardController = keyboardController,
-            focusManager = focusManager
         )
 
         RegistrationFooterField(
@@ -355,8 +349,9 @@ private fun RegistrationUsernameField(
     modifier: Modifier = Modifier,
     registrationUiModel: () -> RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {},
-    focusManager: FocusManager,
 ) {
+    val focusManager = LocalFocusManager.current
+
     var userName by remember { mutableStateOf(value = registrationUiModel().userName) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { userName }
@@ -386,8 +381,9 @@ private fun RegistrationEmailField(
     modifier: Modifier = Modifier,
     registrationUiModel: () -> RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {},
-    focusManager: FocusManager,
 ) {
+    val focusManager = LocalFocusManager.current
+
     var email by remember { mutableStateOf(value = registrationUiModel().email) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { email }
@@ -414,8 +410,9 @@ private fun RegistrationPasswordField(
     modifier: Modifier = Modifier,
     registrationUiModel: () -> RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {},
-    focusManager: FocusManager,
 ) {
+    val focusManager = LocalFocusManager.current
+
     var password by remember { mutableStateOf(registrationUiModel().password) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { password }
@@ -445,8 +442,9 @@ private fun RegistrationRepeatPasswordField(
     registrationUiModel: () -> RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {},
     keyboardController: SoftwareKeyboardController? = null,
-    focusManager: FocusManager,
 ) {
+    val focusManager = LocalFocusManager.current
+
     var repeatPassword by remember { mutableStateOf(value = registrationUiModel().repeatPassword) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { repeatPassword }
@@ -480,8 +478,9 @@ private fun RegistrationButton(
     registrationUiModel: () -> RegistrationUiModel,
     registrationAction: (RegistrationAction) -> Unit = {},
     keyboardController: SoftwareKeyboardController? = null,
-    focusManager: FocusManager,
 ) {
+    val focusManager = LocalFocusManager.current
+
     NoteMarkButton(
         onClick = {
             keyboardController?.hide()

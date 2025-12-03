@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.sqlDelight)
     alias(libs.plugins.google.protobuf)
+    alias(libs.plugins.compose.stability.analyser)
 }
 
 // Create a Properties object to hold our values

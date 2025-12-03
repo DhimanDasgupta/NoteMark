@@ -522,11 +522,12 @@ fun SafeIconButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
-    owner: LifecycleOwner = LocalLifecycleOwner.current,
     activeState: Lifecycle.State = Lifecycle.State.RESUMED,
     debounceIntervalMs: Long = 1000L,
     content: @Composable () -> Unit
 ) {
+    val owner = LocalLifecycleOwner.current
+
     val currentOnClick by rememberUpdatedState(newValue = onClick)
     var lastClickTime by remember { mutableLongStateOf(value = 0L) }
     var lifecycleAllowsClick by remember {

@@ -14,7 +14,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 @Immutable
@@ -49,27 +51,16 @@ class EditNotePresenter(
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             editNoteStateMachine.state
-                .flowOn(context = Dispatchers.Default)
                 .onStart { emit(value = EditNoteStateMachine.defaultEditNoteState) }
+                .map { editNoteState -> mapToEditNoteUiModel(editNoteState) }
+                .flowOn(context = Dispatchers.Default)
                 .cancellable()
                 .catch { throwable ->
                     if (throwable is CancellationException) throw throwable
                     // else can can be something like page level error etc.
                 }
-                .collect { editNoteState ->
-                    editNoteUiModel = editNoteUiModel.copy(
-                        title = editNoteState.title,
-                        content = editNoteState.content,
-                        noteEntity = editNoteState.noteEntity?.copy(
-                            createdAt = convertIsoToRelativeTimeFormat(isoOffsetDateTimeString = editNoteState.noteEntity.createdAt),
-                            lastEditedAt = convertIsoToRelativeTimeFormat(
-                                isoOffsetDateTimeString = editNoteState.noteEntity.lastEditedAt
-                            )
-                        ),
-                        saved = editNoteState.saved,
-                        editEnable = editNoteState.mode == Mode.EditMode,
-                        isReaderMode = editNoteState.mode == Mode.ReaderMode
-                    )
+                .collectLatest { uiModel ->
+                    editNoteUiModel = uiModel
                 }
         }
 
@@ -82,6 +73,25 @@ class EditNotePresenter(
 
         return editNoteUiModel
     }
+
+    private fun mapToEditNoteUiModel(
+        editNoteState: EditNoteState
+    ): EditNoteUiModel {
+        return EditNoteUiModel(
+            title = editNoteState.title,
+            content = editNoteState.content,
+            noteEntity = editNoteState.noteEntity?.copy(
+                createdAt = convertIsoToRelativeTimeFormat(isoOffsetDateTimeString = editNoteState.noteEntity.createdAt),
+                lastEditedAt = convertIsoToRelativeTimeFormat(
+                    isoOffsetDateTimeString = editNoteState.noteEntity.lastEditedAt
+                )
+            ),
+            saved = editNoteState.saved,
+            editEnable = editNoteState.mode == Mode.EditMode,
+            isReaderMode = editNoteState.mode == Mode.ReaderMode
+        )
+    }
+
 
     fun processEvent(event: EditNoteAction) {
         events.tryEmit(value = event)

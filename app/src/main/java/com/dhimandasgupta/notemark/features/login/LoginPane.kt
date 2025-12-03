@@ -39,7 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -311,24 +310,21 @@ private fun RightPane(
         LoginEmailField(
             modifier = Modifier,
             loginUiModel = loginUiModel,
-            loginAction = loginAction,
-            focusManager = focusManager
+            loginAction = loginAction
         )
 
         LoginPasswordField(
             modifier = Modifier,
             loginUiModel = loginUiModel,
             loginAction = loginAction,
-            keyboardController = keyboardController,
-            focusManager = focusManager
+            keyboardController = keyboardController
         )
 
         LoginButton(
             modifier = Modifier,
             loginUiModel = loginUiModel,
             loginAction = loginAction,
-            keyboardController = keyboardController,
-            focusManager = focusManager
+            keyboardController = keyboardController
         )
 
         LoginFooterField(
@@ -346,8 +342,9 @@ private fun LoginEmailField(
     modifier: Modifier = Modifier,
     loginUiModel: () -> LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
-    focusManager: FocusManager,
 ) {
+    val focusManager = LocalFocusManager.current
+
     var email by remember { mutableStateOf(value = loginUiModel().email) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { email }
@@ -374,8 +371,9 @@ private fun LoginPasswordField(
     loginUiModel: () -> LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
     keyboardController: SoftwareKeyboardController?,
-    focusManager: FocusManager,
 ) {
+    val focusManager = LocalFocusManager.current
+
     var password by remember { mutableStateOf(value = loginUiModel().password) }
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { password }
@@ -410,8 +408,9 @@ private fun LoginButton(
     loginUiModel: () -> LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},
     keyboardController: SoftwareKeyboardController?,
-    focusManager: FocusManager,
 ) {
+    val focusManager = LocalFocusManager.current
+
     NoteMarkButton(
         onClick = {
             keyboardController?.hide()

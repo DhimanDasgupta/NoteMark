@@ -12,7 +12,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 @Immutable
@@ -36,6 +38,8 @@ data class RegistrationUiModel(
 }
 
 
+
+
 class RegistrationPresenter(
     private val registrationStateMachine: RegistrationStateMachine
 ) {
@@ -48,28 +52,16 @@ class RegistrationPresenter(
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
             registrationStateMachine.state
-                .flowOn(context = Dispatchers.Default)
                 .onStart { emit(value = RegistrationStateMachine.defaultRegistrationState) }
+                .map { registrationState -> mapToRegistrationModel(registrationState) }
+                .flowOn(context = Dispatchers.Default)
                 .cancellable()
                 .catch { throwable ->
                     if (throwable is CancellationException) throw throwable
                     // else can can be something like page level error etc.
                 }
-                .collect { registrationState ->
-                    registrationUiModel = registrationUiModel.copy(
-                        userName = registrationState.userName,
-                        email = registrationState.email,
-                        password = registrationState.password,
-                        repeatPassword = registrationState.repeatPassword,
-                        userNameExplanation = registrationState.userNameExplanation,
-                        userNameError = registrationState.userNameError,
-                        emailError = registrationState.emailError,
-                        passwordError = registrationState.passwordError,
-                        repeatPasswordError = registrationState.repeatPasswordError,
-                        passwordExplanation = registrationState.passwordExplanation,
-                        registrationEnabled = registrationState.registrationEnabled,
-                        registrationSuccess = registrationState.registrationSuccess
-                    )
+                .collectLatest { mappedUiModel ->
+                    registrationUiModel = mappedUiModel
                 }
         }
 
@@ -81,6 +73,23 @@ class RegistrationPresenter(
         }
 
         return registrationUiModel
+    }
+
+    private fun mapToRegistrationModel(registrationState: RegistrationState): RegistrationUiModel {
+        return RegistrationUiModel(
+            userName = registrationState.userName,
+            email = registrationState.email,
+            password = registrationState.password,
+            repeatPassword = registrationState.repeatPassword,
+            userNameExplanation = registrationState.userNameExplanation,
+            userNameError = registrationState.userNameError,
+            emailError = registrationState.emailError,
+            passwordError = registrationState.passwordError,
+            repeatPasswordError = registrationState.repeatPasswordError,
+            passwordExplanation = registrationState.passwordExplanation,
+            registrationEnabled = registrationState.registrationEnabled,
+            registrationSuccess = registrationState.registrationSuccess
+        )
     }
 
     fun processEvent(event: RegistrationAction) {
