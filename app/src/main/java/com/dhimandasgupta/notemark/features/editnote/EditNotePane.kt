@@ -85,6 +85,7 @@ import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
 import com.dhimandasgupta.notemark.ui.phoneLandscape
 import com.dhimandasgupta.notemark.ui.phonePortrait
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
@@ -113,6 +114,7 @@ fun EditNotePane(
 
     LaunchedEffect(key1 = noteId) {
         if (noteId.isNotEmpty()) {
+            delay(timeMillis = 50)
             editNoteAction(EditNoteAction.LoadNote(uuid = noteId))
         }
     }

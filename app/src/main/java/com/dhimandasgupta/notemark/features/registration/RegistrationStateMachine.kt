@@ -129,7 +129,7 @@ class RegistrationStateMachine(
                     )
                     state.mutate { modifiedState.validateNonEmptyInputs() }
                 }
-                on<RegisterClicked> { action, state ->
+                on<RegisterClicked> { _, state ->
                     val modifiedState = state.snapshot.validateInputs()
 
                     if (modifiedState.userNameError != null) {
@@ -155,7 +155,7 @@ class RegistrationStateMachine(
                         state.mutate { state.snapshot.copy(registrationSuccess = false) }
                     })
                 }
-                on<RegistrationAction.RegistrationChangeStatusConsumed> { action, state ->
+                on<RegistrationAction.RegistrationChangeStatusConsumed> { _, state ->
                     state.mutate { state.snapshot.copy(registrationSuccess = null) }
                 }
             }

@@ -23,8 +23,8 @@ import io.ktor.client.request.url
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
-import kotlin.coroutines.coroutineContext
 import kotlin.uuid.ExperimentalUuidApi
 
 class UserAlreadyExistsException(
@@ -67,7 +67,7 @@ class NoteMarkApiImpl(
     override suspend fun register(request: RegisterRequest): Result<Unit> {
         return try {
             val response = client.post {
-                url { "/api/auth/register" }
+                url(urlString = "/api/auth/register")
                 contentType(type = ContentType.Application.Json)
                 setBody(request)
             }
@@ -88,7 +88,7 @@ class NoteMarkApiImpl(
                 )
             )
         } catch (e: ClientRequestException) { // Ktor exception for 4xx/5xx
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             when (e.response.status) {
                 HttpStatusCode.Conflict -> Result.failure(exception = UserAlreadyExistsException())
                 HttpStatusCode.Unauthorized -> Result.failure(
@@ -106,7 +106,7 @@ class NoteMarkApiImpl(
                 )
             }
         } catch (e: Exception) { // Catch other potential exceptions (network, serialization)
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             Result.failure(
                 exception = ApiGenericException(
                     message = "An unexpected error occurred during registration",
@@ -150,7 +150,7 @@ class NoteMarkApiImpl(
                 )
             )
         } catch (e: ClientRequestException) { // Ktor exception for 4xx/5xx
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             when (e.response.status) {
                 HttpStatusCode.Unauthorized -> Result.failure(
                     exception = AuthenticationException(
@@ -167,7 +167,7 @@ class NoteMarkApiImpl(
                 )
             }
         } catch (e: Exception) { // Catch other potential exceptions (network, serialization)
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             Result.failure(
                 exception = ApiGenericException(
                     message = "An unexpected error occurred during registration",
@@ -202,7 +202,7 @@ class NoteMarkApiImpl(
                 )
             )
         } catch (e: ClientRequestException) {
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             when (e.response.status) {
                 HttpStatusCode.Unauthorized -> Result.failure(
                     exception = AuthenticationException(
@@ -219,7 +219,7 @@ class NoteMarkApiImpl(
                 )
             }
         } catch (e: Exception) {
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             Result.failure(
                 exception = ApiGenericException(
                     message = "An unexpected error occurred during registration",
@@ -255,7 +255,7 @@ class NoteMarkApiImpl(
                 )
             )
         } catch (e: ClientRequestException) { // Ktor exception for 4xx/5xx
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             when (e.response.status) {
                 HttpStatusCode.Unauthorized -> Result.failure(
                     exception = AuthenticationException(
@@ -272,7 +272,7 @@ class NoteMarkApiImpl(
                 )
             }
         } catch (e: Exception) { // Catch other potential exceptions (network, serialization)
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             Result.failure(
                 exception = ApiGenericException(
                     message = "An unexpected error occurred during registration",
@@ -307,7 +307,7 @@ class NoteMarkApiImpl(
                 )
             )
         } catch (e: ClientRequestException) {
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             when (e.response.status) {
                 HttpStatusCode.Unauthorized -> Result.failure(
                     exception = AuthenticationException(
@@ -324,7 +324,7 @@ class NoteMarkApiImpl(
                 )
             }
         } catch (e: Exception) {
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             Result.failure(
                 exception = ApiGenericException(
                     message = "An unexpected error occurred during registration",
@@ -369,7 +369,7 @@ class NoteMarkApiImpl(
                 )
             )
         } catch (e: ClientRequestException) {
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             when (e.response.status) {
                 HttpStatusCode.Unauthorized -> Result.failure(
                     exception = AuthenticationException(
@@ -386,7 +386,7 @@ class NoteMarkApiImpl(
                 )
             }
         } catch (e: Exception) {
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             Result.failure(
                 exception = ApiGenericException(
                     message = "An unexpected error occurred during registration",
@@ -415,7 +415,7 @@ class NoteMarkApiImpl(
                 )
             )
         } catch (e: ClientRequestException) {
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             when (e.response.status) {
                 HttpStatusCode.Unauthorized -> Result.failure(
                     exception = AuthenticationException(
@@ -432,7 +432,7 @@ class NoteMarkApiImpl(
                 )
             }
         } catch (e: Exception) {
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             Result.failure(
                 exception = ApiGenericException(
                     message = "An unexpected error occurred during registration",

@@ -84,7 +84,7 @@ fun String.formatUserName(): String {
             if (singleName.length <= 2) {
                 singleName.uppercase()
             } else {
-                singleName.substring(0, 2).uppercase()
+                singleName.take(n = 2).uppercase()
             }
         }
         else -> "" // Should not happen if trim().ifEmpty{} is used, but good for safety

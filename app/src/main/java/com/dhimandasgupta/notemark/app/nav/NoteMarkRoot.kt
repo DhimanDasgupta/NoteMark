@@ -13,6 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
@@ -160,8 +162,8 @@ private fun LauncherPane(
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(true) }
 
-    val launcherPresenter: LauncherPresenter = remember { get(clazz = LauncherPresenter::class.java) }
-    var launcherUiModel by remember { mutableStateOf(LauncherUiModel.Empty) }
+    val launcherPresenter: LauncherPresenter = retain { get(clazz = LauncherPresenter::class.java) }
+    var launcherUiModel by remember { mutableStateOf(value = LauncherUiModel.Empty) }
 
     val scope = rememberCoroutineScope()
     LifecycleStartEffect(key1 = Unit) {
@@ -208,10 +210,9 @@ private fun LoginPane(
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(false) }
 
-    val loginPresenter: LoginPresenter = remember { get(clazz = LoginPresenter::class.java) }
-
-    var loginUiModel by remember { mutableStateOf(LoginUiModel.Empty) }
-    val loginEvents = loginPresenter::processEvent
+    val loginPresenter: LoginPresenter = retain { get(clazz = LoginPresenter::class.java) }
+    var loginUiModel by remember { mutableStateOf(value = LoginUiModel.Empty) }
+    val loginEvents by rememberUpdatedState(newValue = loginPresenter::processEvent)
 
     val scope = rememberCoroutineScope()
     LifecycleStartEffect(key1 = Unit) {
@@ -239,7 +240,7 @@ private fun LoginPane(
         modifier = modifier,
         windowSizeClass = windowSizeClass,
         loginUiModel = { loginUiModel },
-        loginAction = loginEvents,
+        loginAction = { event -> loginEvents(event) },
         navigateToRegistration = { navigateToRegistration() },
         navigateToAfterLogin = { navigateToAfterLogin() },
     )
@@ -255,9 +256,9 @@ private fun RegistrationPane(
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(false) }
 
-    val registrationPresenter: RegistrationPresenter = remember { get(clazz = RegistrationPresenter::class.java) }
-    var registrationUiModel by remember { mutableStateOf(RegistrationUiModel.Empty) }
-    val registrationAction = registrationPresenter::processEvent
+    val registrationPresenter: RegistrationPresenter = retain { get(clazz = RegistrationPresenter::class.java) }
+    var registrationUiModel by remember { mutableStateOf(value = RegistrationUiModel.Empty) }
+    val registrationAction by rememberUpdatedState(newValue = registrationPresenter::processEvent)
 
     val scope = rememberCoroutineScope()
     LifecycleStartEffect(key1 = Unit) {
@@ -286,7 +287,7 @@ private fun RegistrationPane(
         windowSizeClass = windowSizeClass,
         registrationUiModel = { registrationUiModel },
         navigateToLogin = { navigateToLoginFromRegistration() },
-        registrationAction = registrationAction,
+        registrationAction = { event -> registrationAction(event) },
     )
 }
 
@@ -301,9 +302,9 @@ private fun NoteListPane(
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(true) }
 
-    val noteListPresenter: NoteListPresenter = remember { get(clazz = NoteListPresenter::class.java) }
-    var noteListUiModel by remember { mutableStateOf(NoteListUiModel.Empty) }
-    val noteListAction = noteListPresenter::processEvent
+    val noteListPresenter: NoteListPresenter = retain { get(clazz = NoteListPresenter::class.java) }
+    var noteListUiModel by remember { mutableStateOf(value = NoteListUiModel.Empty) }
+    val noteListAction by rememberUpdatedState(newValue = noteListPresenter::processEvent)
 
     val scope = rememberCoroutineScope()
     LifecycleStartEffect(key1 = Unit) {
@@ -331,7 +332,7 @@ private fun NoteListPane(
         modifier = modifier,
         windowSizeClass = windowSizeClass,
         noteListUiModel = { noteListUiModel },
-        noteListAction = noteListAction,
+        noteListAction = { event -> noteListAction(event) },
         onNoteClicked = { uuid -> navigateToEdit(uuid) },
         onFabClicked = { navigateToAdd() },
         onSettingsClicked = { navigateToSettings() },
@@ -348,9 +349,9 @@ private fun NoteCreatePane(
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(true) }
 
-    val addNotePresenter:AddNotePresenter = remember { get(clazz = AddNotePresenter::class.java) }
-    var addNoteUiModel by remember { mutableStateOf(AddNoteUiModel.Empty) }
-    val addNoteAction = addNotePresenter::processEvent
+    val addNotePresenter:AddNotePresenter = retain { get(clazz = AddNotePresenter::class.java) }
+    var addNoteUiModel by remember { mutableStateOf(value = AddNoteUiModel.Empty) }
+    val addNoteAction by rememberUpdatedState(newValue = addNotePresenter::processEvent)
 
     val scope = rememberCoroutineScope()
 
@@ -379,7 +380,7 @@ private fun NoteCreatePane(
         modifier = modifier,
         windowSizeClass = windowSizeClass,
         addNoteUiModel = { addNoteUiModel },
-        addNoteAction = addNoteAction,
+        addNoteAction = { event -> addNoteAction(event) },
         onBackClicked = { navigateUp() }
     )
 }
@@ -394,13 +395,13 @@ private fun NoteEditPane(
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(true) }
 
-    val editNotePresenter: EditNotePresenter = remember { get(clazz = EditNotePresenter::class.java) }
-    var editNoteUiModel by remember { mutableStateOf(EditNoteUiModel.Empty) }
-    val editNoteAction = editNotePresenter::processEvent
+    val editNotePresenter: EditNotePresenter = retain { get(clazz = EditNotePresenter::class.java) }
+    var editNoteUiModel by remember { mutableStateOf(value = EditNoteUiModel.Empty) }
+    val editNoteAction by rememberUpdatedState(newValue = editNotePresenter::processEvent)
 
     val scope = rememberCoroutineScope()
 
-    LifecycleStartEffect(key1 = Unit, key2 = arguments.noteId) {
+    LifecycleStartEffect(key1 = arguments.noteId) {
         if (scope.isActive) {
             scope.launchMolecule(mode = RecompositionMode.Immediate) {
                 editNoteUiModel = editNotePresenter.uiModel()
@@ -426,7 +427,7 @@ private fun NoteEditPane(
         windowSizeClass = windowSizeClass,
         noteId = arguments.noteId,
         editNoteUiModel = { editNoteUiModel },
-        editNoteAction = editNoteAction,
+        editNoteAction = { event -> editNoteAction(event) },
         onCloseClicked = { navigateUp() }
     )
 }
@@ -440,9 +441,9 @@ private fun SettingsPane(
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(true) }
 
-    val settingsPresenter: SettingsPresenter = remember { get(clazz = SettingsPresenter::class.java) }
-    var settingsUiModel by remember { mutableStateOf(SettingsUiModel.Empty) }
-    val settingsAction = settingsPresenter::processEvent
+    val settingsPresenter: SettingsPresenter = retain { get(clazz = SettingsPresenter::class.java) }
+    var settingsUiModel by remember { mutableStateOf(value =  SettingsUiModel.Empty) }
+    val settingsAction by rememberUpdatedState(newValue = settingsPresenter::processEvent)
 
     val scope = rememberCoroutineScope()
     LifecycleStartEffect(key1 = Unit) {
@@ -469,7 +470,7 @@ private fun SettingsPane(
     SettingsPane(
         modifier = modifier,
         settingsUiModel = { settingsUiModel },
-        settingsAction = settingsAction,
+        settingsAction = { event -> settingsAction(event) },
         onBackClicked = { navigateUp() },
         onLogoutSuccessful = { navigateToLauncherAfterLogout() },
         onDeleteNoteCheckChanged = {

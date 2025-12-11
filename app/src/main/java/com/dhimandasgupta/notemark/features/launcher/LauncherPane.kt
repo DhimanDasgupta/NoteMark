@@ -87,9 +87,7 @@ fun LauncherPane(
             .fillMaxSize()
             .background(color = colorResource(id = R.color.splash_blue_background))
     ) {
-        val layoutType = getDeviceLayoutType(windowSizeClass)
-
-        when (layoutType) {
+        when (val layoutType = getDeviceLayoutType(windowSizeClass)) {
             DeviceLayoutType.PHONE_PORTRAIT -> {
                 LandingPanePortrait(
                     navigateToLogin = updatedNavigateToLogin,

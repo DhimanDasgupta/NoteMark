@@ -2,6 +2,8 @@ package com.dhimandasgupta.notemark.app
 
 import android.app.Application
 import android.os.StrictMode
+import android.util.Log.DEBUG
+import android.util.Log.ERROR
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.dhimandasgupta.notemark.BuildConfig
@@ -18,7 +20,7 @@ class NoteMarkApp : Application() {
         }
 
         val config = Configuration.Builder()
-            .setMinimumLoggingLevel(if (BuildConfig.DEBUG) android.util.Log.DEBUG else android.util.Log.ERROR)
+            .setMinimumLoggingLevel(if (BuildConfig.DEBUG) DEBUG else ERROR)
             .build()
 
         WorkManager.initialize(context = this, configuration = config)

@@ -50,7 +50,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -144,7 +144,7 @@ fun NoteMarkTextField(
             )
         }
 
-        var hasFocus by rememberSaveable { mutableStateOf(value = false) }
+        var hasFocus by retain { mutableStateOf(value = false) }
 
         TextField(
             enabled = enabled,
@@ -221,8 +221,8 @@ fun NoteMarkPasswordTextField(
     onNextClicked: (() -> Unit)? = null,
     onDoneClicked: (() -> Unit)? = null
 ) {
-    var hasFocus by rememberSaveable { mutableStateOf(value = false) }
-    var showPassword by rememberSaveable { mutableStateOf(value = false) }
+    var hasFocus by retain { mutableStateOf(value = false) }
+    var showPassword by retain { mutableStateOf(value = false) }
 
     Column(
         modifier = modifier,

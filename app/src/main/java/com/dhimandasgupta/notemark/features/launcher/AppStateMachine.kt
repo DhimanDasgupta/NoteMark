@@ -117,7 +117,7 @@ class AppStateMachine(
                     syncRepository.saveSyncDuration(syncDuration = action.syncDuration)
                     state.mutate { state.snapshot.copy(sync = updatedSync) }
                 }
-                onActionEffect<AppAction.DeleteLocalNotesOnLogout> { action, state ->
+                onActionEffect<AppAction.DeleteLocalNotesOnLogout> { action, _ ->
                     syncRepository.saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout = action.deleteOnLogout)
                 }
                 on<AppAction.AppLogout> { _, state ->

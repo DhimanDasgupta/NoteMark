@@ -5,9 +5,9 @@ import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSource
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.database.NoteEntity
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
-import kotlin.coroutines.coroutineContext
 
 interface NoteMarkRepository {
     fun getAllNotes(): Flow<List<NoteEntity>>
@@ -127,7 +127,7 @@ class NoteMarkRepositoryImpl(
     override suspend fun deleteAllLocalNotes() = try {
         localDataSource.deleteAllNotes()
     } catch (_: Exception) {
-        coroutineContext.ensureActive()
+        currentCoroutineContext().ensureActive()
         false
     }
 

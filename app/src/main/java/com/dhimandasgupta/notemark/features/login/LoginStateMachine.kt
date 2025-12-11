@@ -44,11 +44,11 @@ class LoginStateMachine(
                     val modifiedState = state.snapshot.copy(password = action.password)
                     state.mutate { modifiedState.validateNonEmptyInputs() }
                 }
-                on<LoginAction.HideLoginButton> { action, state ->
+                on<LoginAction.HideLoginButton> { _, state ->
                     val modifiedState = state.snapshot.copy(loginEnabled = false)
                     state.mutate { modifiedState }
                 }
-                on<LoginAction.LoginClicked> { action, state ->
+                on<LoginAction.LoginClicked> { _, state ->
                     val modifiedState = state.snapshot.validateInputs()
 
                     if (modifiedState.emailError?.isNotEmpty() == true && modifiedState.passwordError?.isNotEmpty() == true) {
@@ -66,7 +66,7 @@ class LoginStateMachine(
                         state.mutate { state.snapshot.copy(loginSuccess = false, loginEnabled = true) }
                     })
                 }
-                on<LoginAction.LoginChangeConsumed> { action, state ->
+                on<LoginAction.LoginChangeConsumed> { _, state ->
                     state.mutate { state.snapshot.copy(loginSuccess = null) }
                 }
             }
