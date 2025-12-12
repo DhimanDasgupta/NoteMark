@@ -5,6 +5,7 @@ import app.cash.sqldelight.coroutines.mapToList
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.database.NoteMarkDatabase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
@@ -67,7 +68,7 @@ class NoteMarkLocalDataSourceImpl(
         lastEditedAt: String,
         uuid: String,
         synced: Boolean
-    ): NoteEntity = withContext(context = Dispatchers.IO) {
+    ): NoteEntity = withContext(context = Dispatchers.IO + NonCancellable) {
         val result = queries.updateNote(
             title = title,
             content = content,
@@ -84,7 +85,7 @@ class NoteMarkLocalDataSourceImpl(
     }
 
     override suspend fun createNote(noteEntity: NoteEntity): NoteEntity =
-        withContext(Dispatchers.IO) {
+        withContext(context = Dispatchers.IO + NonCancellable) {
             val result = queries.insertNote(
                 title = noteEntity.title,
                 content = noteEntity.content,
@@ -102,7 +103,7 @@ class NoteMarkLocalDataSourceImpl(
         }
 
     override suspend fun insertNote(noteEntity: NoteEntity): Boolean =
-        withContext(context = Dispatchers.IO) {
+        withContext(context = Dispatchers.IO + NonCancellable) {
             val result = queries.transactionWithResult {
                 queries.insertNote(
                     title = noteEntity.title,
@@ -118,7 +119,7 @@ class NoteMarkLocalDataSourceImpl(
         }
 
     override suspend fun insertNotes(noteEntities: List<NoteEntity>) =
-        withContext(context = Dispatchers.IO) {
+        withContext(context = Dispatchers.IO + NonCancellable) {
             val result = queries.transactionWithResult {
                 noteEntities.forEach { noteEntity ->
                     queries.insertNote(
@@ -136,18 +137,18 @@ class NoteMarkLocalDataSourceImpl(
         }
 
     override suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean =
-        withContext(context = Dispatchers.IO) {
+        withContext(context = Dispatchers.IO + NonCancellable) {
             val result = queries.markNoteAsDeletedByUUID(uuid = noteEntity.uuid)
             return@withContext result.value == 1L
         }
 
     override suspend fun deleteNote(noteEntity: NoteEntity) =
-        withContext(context = Dispatchers.IO) {
+        withContext(context = Dispatchers.IO + NonCancellable) {
             val result = queries.deleteNoteByUUID(uuid = noteEntity.uuid)
             return@withContext result.value == 1L
         }
 
-    override suspend fun deleteAllNotes() = withContext(context = Dispatchers.IO) {
+    override suspend fun deleteAllNotes() = withContext(context = Dispatchers.IO + NonCancellable) {
         val result = queries.transactionWithResult {
             queries.deleteAll()
         }
