@@ -164,6 +164,7 @@ dependencies {
 
     // Protobuf
     implementation(libs.kotlin.protobuf)
+    implementation(libs.protobuf.protoc)
 
     // Test dependencies
     testImplementation(libs.junit)

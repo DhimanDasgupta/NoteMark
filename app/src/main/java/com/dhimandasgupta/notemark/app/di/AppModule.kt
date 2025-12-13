@@ -69,6 +69,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
 import kotlinx.serialization.json.Json
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
@@ -95,7 +96,7 @@ val appModule = module {
     ) {
         CoroutineScope(
             context = Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { context, throwable ->
-                println(throwable.message ?: "CoroutineExceptionHandler got $throwable")
+                println(throwable.message ?: "CoroutineExceptionHandler got $throwable in ${context.job} and ${Thread.currentThread()}")
             }
         )
     }
