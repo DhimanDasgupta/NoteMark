@@ -56,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -63,6 +64,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.common.convertIsoToRelativeYearFormat
 import com.dhimandasgupta.notemark.common.extensions.formatUserName
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
@@ -523,8 +525,16 @@ private fun NoteItem(
             )
             .padding(all = 16.dp)
     ) {
+        val configuration = LocalConfiguration.current
+        val locale by remember(key1 = configuration) {
+            mutableStateOf(configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0))
+        }
+
         Text(
-            text = note.lastEditedAt,
+            text = convertIsoToRelativeYearFormat(
+                locale = locale,
+                isoOffsetDateTimeString = note.lastEditedAt
+            ),
             style = typography.bodyMedium,
             color = colorScheme.primary
         )

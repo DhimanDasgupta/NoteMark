@@ -52,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -61,6 +62,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.common.convertIsoToRelativeTimeFormat
 import com.dhimandasgupta.notemark.common.extensions.lockToLandscape
 import com.dhimandasgupta.notemark.common.extensions.turnOffImmersiveMode
 import com.dhimandasgupta.notemark.common.extensions.turnOnImmersiveMode
@@ -459,6 +461,11 @@ private fun NoteDateTime(
     dateCreated: String,
     lastEdited: String
 ) {
+    val configuration = LocalConfiguration.current
+    val locale by remember(key1 = configuration) {
+        mutableStateOf(configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0))
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -476,7 +483,10 @@ private fun NoteDateTime(
                 style = typography.bodyMedium
             )
             Text(
-                text = dateCreated,
+                text = convertIsoToRelativeTimeFormat(
+                    locale = locale,
+                    isoOffsetDateTimeString = dateCreated
+                ),
                 style = typography.titleSmall
             )
         }
@@ -491,7 +501,10 @@ private fun NoteDateTime(
                 style = typography.bodyMedium
             )
             Text(
-                text = lastEdited,
+                text = convertIsoToRelativeTimeFormat(
+                    locale = locale,
+                    isoOffsetDateTimeString = lastEdited
+                ),
                 style = typography.titleSmall
             )
         }

@@ -7,7 +7,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.dhimandasgupta.notemark.common.convertIsoToRelativeTimeFormat
 import com.dhimandasgupta.notemark.database.NoteEntity
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -81,10 +80,8 @@ class EditNotePresenter(
             title = editNoteState.title,
             content = editNoteState.content,
             noteEntity = editNoteState.noteEntity?.copy(
-                createdAt = convertIsoToRelativeTimeFormat(isoOffsetDateTimeString = editNoteState.noteEntity.createdAt),
-                lastEditedAt = convertIsoToRelativeTimeFormat(
-                    isoOffsetDateTimeString = editNoteState.noteEntity.lastEditedAt
-                )
+                createdAt = editNoteState.noteEntity.createdAt,
+                lastEditedAt = editNoteState.noteEntity.lastEditedAt
             ),
             saved = editNoteState.saved,
             editEnable = editNoteState.mode == Mode.EditMode,

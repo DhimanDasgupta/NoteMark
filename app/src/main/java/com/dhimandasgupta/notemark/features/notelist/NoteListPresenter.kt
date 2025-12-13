@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.android.ConnectionState
-import com.dhimandasgupta.notemark.common.convertIsoToRelativeYearFormat
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppState
@@ -100,13 +99,7 @@ class NoteListPresenter(
         return NoteListUiModel(
             userName = loggedIn.user.userName,
             noteEntities = if (noteListState is NoteListState.NoteListStateWithNotes) {
-                noteListState.notes.map { noteEntity ->
-                    noteEntity.copy(
-                        lastEditedAt = convertIsoToRelativeYearFormat(
-                            isoOffsetDateTimeString = noteEntity.lastEditedAt
-                        )
-                    )
-                }.toPersistentList()
+                noteListState.notes.toPersistentList()
             } else {
                 persistentListOf()
             },

@@ -49,10 +49,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.common.convertNoteTimestampToReadableFormat
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
@@ -371,8 +373,13 @@ private fun SyncDataRow(
                 modifier = Modifier.wrapContentSize()
             )
 
+            val configuration = LocalConfiguration.current
+            val locale by remember(key1 = configuration) {
+                mutableStateOf(configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0))
+            }
+
             Text(
-                text = "Last synced: ${settingsUiModel().lastSynced}",
+                text = "Last synced: ${convertNoteTimestampToReadableFormat(locale = locale, isoOffsetDateTimeString = settingsUiModel().lastSynced)}",
                 style = typography.bodySmall,
                 color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.wrapContentSize()

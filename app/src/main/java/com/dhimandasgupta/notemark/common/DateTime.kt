@@ -5,10 +5,12 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-
 // Constants for time thresholds
 private const val FIVE_MINUTES_IN_SECONDS = 5 * 60L
 private const val SIXTY_MINUTES_IN_SECONDS = 60 * 60L
+private const val CURRENT_YEAR_PATTERN = "dd MMM"
+private const val PREVIOUS_YEAR_PATTERN = "dd MMM yyyy"
+private const val YEAR_MONTH_DAY_TIME_MINUTE_PATTERN = "dd MMM yyyy, HH:mm"
 
 fun getCurrentIso8601Timestamp(): String {
     val currentDateTime = OffsetDateTime.now()
@@ -29,13 +31,18 @@ fun getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString: String): Long {
     }
 }
 
-fun convertIsoToRelativeYearFormat(isoOffsetDateTimeString: String): String {
+fun convertIsoToRelativeYearFormat(
+    locale: Locale,
+    isoOffsetDateTimeString: String
+): String {
     return try {
         val offsetDateTime = OffsetDateTime.parse(isoOffsetDateTimeString, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        val targetFormatterCurrentYear = DateTimeFormatter.ofPattern("dd MMM", Locale.getDefault())
-        val targetFormatterPreviousYear = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.getDefault())
+        val targetFormatterCurrentYear = DateTimeFormatter.ofPattern(CURRENT_YEAR_PATTERN, locale)
+        val targetFormatterPreviousYear = DateTimeFormatter.ofPattern(PREVIOUS_YEAR_PATTERN, locale)
 
-        if (offsetDateTime.year == OffsetDateTime.now().year) {
+        if (offsetDateTime.dayOfYear == OffsetDateTime.now().dayOfYear)
+            "Today"
+        else if (offsetDateTime.year == OffsetDateTime.now().year) {
             offsetDateTime.format(targetFormatterCurrentYear)
         } else {
             offsetDateTime.format(targetFormatterPreviousYear)
@@ -45,7 +52,10 @@ fun convertIsoToRelativeYearFormat(isoOffsetDateTimeString: String): String {
     }
 }
 
-fun convertIsoToRelativeTimeFormat(isoOffsetDateTimeString: String): String {
+fun convertIsoToRelativeTimeFormat(
+    locale: Locale,
+    isoOffsetDateTimeString: String
+): String {
     return try {
         val parsedDateTime = OffsetDateTime.parse(isoOffsetDateTimeString, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
         val currentDateTime = OffsetDateTime.now(parsedDateTime.offset) // Use the same offset for accurate comparison
@@ -59,21 +69,24 @@ fun convertIsoToRelativeTimeFormat(isoOffsetDateTimeString: String): String {
                 // or show the date if that's preferred.
                 // For now, let's fall back to showing the date as if it were in the past.
                 // Or, you could return "In the future" or ""
-                convertNoteTimestampToReadableFormat(isoOffsetDateTimeString)
+                convertNoteTimestampToReadableFormat(locale, isoOffsetDateTimeString)
             }
             differenceInSeconds < FIVE_MINUTES_IN_SECONDS -> "Just now"
             differenceInSeconds <= SIXTY_MINUTES_IN_SECONDS -> "Last hour"
-            else -> convertNoteTimestampToReadableFormat(isoOffsetDateTimeString)
+            else -> convertNoteTimestampToReadableFormat(locale, isoOffsetDateTimeString)
         }
     } catch (_: Exception) {
         "Unknown"
     }
 }
 
-fun convertNoteTimestampToReadableFormat(isoOffsetDateTimeString: String): String {
+fun convertNoteTimestampToReadableFormat(
+    locale: Locale,
+    isoOffsetDateTimeString: String
+): String {
     return try {
         val offsetDateTime = OffsetDateTime.parse(isoOffsetDateTimeString, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        val targetFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.getDefault())
+        val targetFormatter = DateTimeFormatter.ofPattern(YEAR_MONTH_DAY_TIME_MINUTE_PATTERN, locale)
 
         offsetDateTime.format(targetFormatter)
     } catch (_: Exception) {
