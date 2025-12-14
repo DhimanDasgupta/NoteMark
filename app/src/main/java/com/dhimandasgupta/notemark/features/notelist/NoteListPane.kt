@@ -218,14 +218,16 @@ private fun NoteListWithNotes(
     val columnCount = remember(key1 = layoutType) {
         when (layoutType) {
             DeviceLayoutType.PHONE_PORTRAIT -> 2
-            else -> 3
+            DeviceLayoutType.PHONE_LANDSCAPE -> 3
+            DeviceLayoutType.TABLET_LAYOUT -> 4
         }
     }
 
     val maxLength = remember(key1 = layoutType) {
         when (layoutType) {
+            DeviceLayoutType.PHONE_PORTRAIT -> 150
+            DeviceLayoutType.PHONE_LANDSCAPE -> 200
             DeviceLayoutType.TABLET_LAYOUT -> 250
-            else -> 150
         }
     }
 

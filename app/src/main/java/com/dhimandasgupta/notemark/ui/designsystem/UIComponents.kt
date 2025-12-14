@@ -46,6 +46,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,8 +82,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun NoteMarkButton(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
     enabled: Boolean = false,
+    onClick: () -> Unit = {},
     content: @Composable RowScope.() -> Unit
 ) {
     Button(
@@ -102,8 +103,8 @@ fun NoteMarkButton(
 @Composable
 fun NoteMarkOutlinedButton(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
     enabled: Boolean = false,
+    onClick: () -> Unit = {},
     content: @Composable RowScope.() -> Unit
 ) {
     OutlinedButton(
@@ -412,30 +413,32 @@ fun LimitedText(
 ) {
     var textToDisplay by remember(key1 = fullText) { mutableStateOf(value = fullText) }
 
-    Text(
-        text = textToDisplay,
-        style = style,
-        color = color,
-        onTextLayout = { textLayoutResult ->
-            if (textLayoutResult.layoutInput.text.length > targetCharacterCount) {
-                if (textLayoutResult.isLineEllipsized(lineIndex = textLayoutResult.lineCount - 1) ||
-                    textLayoutResult.getLineEnd(
-                        lineIndex = textLayoutResult.lineCount - 1,
-                        visibleEnd = true
-                    ) < targetCharacterCount &&
-                    fullText.length > targetCharacterCount
-                ) {
-                    if (textToDisplay.length > targetCharacterCount) { // Ensure we only shorten once
-                        textToDisplay = fullText.substring(0, targetCharacterCount)
+    key(textToDisplay) {
+        Text(
+            text = textToDisplay,
+            style = style,
+            color = color,
+            onTextLayout = { textLayoutResult ->
+                if (textLayoutResult.layoutInput.text.length > targetCharacterCount) {
+                    if (textLayoutResult.isLineEllipsized(lineIndex = textLayoutResult.lineCount - 1) ||
+                        textLayoutResult.getLineEnd(
+                            lineIndex = textLayoutResult.lineCount - 1,
+                            visibleEnd = true
+                        ) < targetCharacterCount &&
+                        fullText.length > targetCharacterCount
+                    ) {
+                        if (textToDisplay.length > targetCharacterCount) { // Ensure we only shorten once
+                            textToDisplay = fullText.take(targetCharacterCount)
+                        }
+                    } else if (fullText.length > targetCharacterCount && textToDisplay.length > targetCharacterCount) {
+                        textToDisplay = fullText.take(targetCharacterCount)
                     }
-                } else if (fullText.length > targetCharacterCount && textToDisplay.length > targetCharacterCount) {
-                    textToDisplay = fullText.substring(0, targetCharacterCount)
                 }
-            }
-        },
-        maxLines = 5,
-        overflow = TextOverflow.Ellipsis
-    )
+            },
+            maxLines = 5,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
 }
 
 @Composable
@@ -457,7 +460,7 @@ private fun BouncingDot(
                 animation = keyframes {
                     durationMillis = animationDurationMillis
                     0f at 0 // Start at original position
-                    -bounceHeight.value at animationDurationMillis / 2 // Peak
+                    bounceHeight.value.times(-1) at animationDurationMillis / 2 // Peak
                     0f at animationDurationMillis // Return to original position
                 },
                 repeatMode = RepeatMode.Restart // Could also be Reverse for a different effect
@@ -551,7 +554,6 @@ fun SafeIconButton(
             if (isButtonEnabled) {
                 val currentTime = System.currentTimeMillis()
                 if (currentTime - lastClickTime >= debounceIntervalMs) {
-                    lastClickTime = currentTime
                     currentOnClick()
                 }
             }
