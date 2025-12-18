@@ -20,7 +20,6 @@ data class LoginState(
     val loginSuccess: Boolean? = null
 )
 
-
 sealed interface LoginAction {
     data class EmailEntered(val email: String) : LoginAction
     data class PasswordEntered(val password: String) : LoginAction

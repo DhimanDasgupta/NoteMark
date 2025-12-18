@@ -27,8 +27,6 @@ data class LauncherUiModel(
     }
 }
 
-
-
 class LauncherPresenter(
     private val appStateMachine: AppStateMachine
 ) {

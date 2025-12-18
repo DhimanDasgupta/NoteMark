@@ -38,8 +38,6 @@ data class NoteListUiModel(
 
 private val defaultNoteListUiModel = NoteListUiModel(noteEntities = persistentListOf())
 
-
-
 class NoteListPresenter(
     private val appStateMachine: AppStateMachine,
     private val noteListStateMachine: NoteListStateMachine

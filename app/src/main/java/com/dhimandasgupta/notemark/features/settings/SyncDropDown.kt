@@ -66,7 +66,7 @@ fun SyncDropDown(
                                 contentDescription = null,
                                 tint = colorScheme.primary
                             )
-                        } else null
+                        }
                     },
                     modifier = Modifier.semantics {
                         testTagsAsResourceId = true

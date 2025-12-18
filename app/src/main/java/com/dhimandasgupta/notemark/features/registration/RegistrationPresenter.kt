@@ -37,9 +37,6 @@ data class RegistrationUiModel(
     }
 }
 
-
-
-
 class RegistrationPresenter(
     private val registrationStateMachine: RegistrationStateMachine
 ) {

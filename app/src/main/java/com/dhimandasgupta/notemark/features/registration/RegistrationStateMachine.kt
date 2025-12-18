@@ -33,7 +33,6 @@ data class RegistrationState(
     val registrationSuccess: Boolean? = null
 )
 
-
 sealed interface RegistrationAction {
     data class UserNameEntered(val userName: String) : RegistrationAction
     data class UserNameFiledInFocus(val userName: String) : RegistrationAction
