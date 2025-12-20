@@ -3,7 +3,11 @@ package com.dhimandasgupta.notemark.features.editnote
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +46,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -52,7 +57,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -292,6 +299,7 @@ private fun EditNoteBody(
 
     var title by remember { mutableStateOf(editNoteUiModel().title) }
     var body by remember { mutableStateOf(editNoteUiModel().content) }
+    var bodyBottomPadding by remember { mutableIntStateOf(value = 0) }
 
     LaunchedEffect(key1 = editNoteUiModel().title, key2 = editNoteUiModel().content) {
         if (title != editNoteUiModel().title) {
@@ -347,6 +355,11 @@ private fun EditNoteBody(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val lineModifier = Modifier
+                .fillMaxWidth()
+                .height(height = 1.dp)
+                .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
+
             TextField(
                 enabled = editNoteUiModel().editEnable,
                 value = title,
@@ -378,12 +391,7 @@ private fun EditNoteBody(
                 )
             )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(height = 1.dp)
-                    .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
-            )
+            Box(modifier = lineModifier)
 
             AnimatedVisibility(
                 visible = !editNoteUiModel().editEnable,
@@ -395,12 +403,7 @@ private fun EditNoteBody(
                 )
             }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(height = 1.dp)
-                    .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
-            )
+            Box(modifier = lineModifier)
 
             TextField(
                 enabled = editNoteUiModel().editEnable,
@@ -408,6 +411,7 @@ private fun EditNoteBody(
                 onValueChange = { value -> body = value },
                 textStyle = typography.bodyLarge,
                 modifier = Modifier
+                    .padding(bottom = with(receiver = LocalDensity.current) { bodyBottomPadding.toDp() })
                     .fillMaxWidth()
                     .wrapContentHeight(align = Alignment.Top)
                     .alignToSafeDrawing(),
@@ -434,6 +438,8 @@ private fun EditNoteBody(
                     imeAction = ImeAction.Unspecified
                 )
             )
+
+            Box(modifier = lineModifier)
         }
 
         Box(
@@ -441,9 +447,16 @@ private fun EditNoteBody(
             contentAlignment = Alignment.BottomCenter
         ) {
             AnimatedVisibility(
+                modifier = Modifier.onGloballyPositioned { layoutCoordinates ->
+                    bodyBottomPadding = layoutCoordinates.size.height
+                },
                 visible = !editNoteUiModel().isReaderMode,
-                enter = expandVertically(),
-                exit = shrinkVertically()
+                enter = fadeIn() + slideInVertically(
+                    initialOffsetY = { it / 2 }
+                ),
+                exit = fadeOut() + slideOutVertically(
+                    targetOffsetY = { it / 2 }
+                ),
             ) {
                 EditAndViewMode(
                     modifier = Modifier.align(Alignment.BottomCenter),
