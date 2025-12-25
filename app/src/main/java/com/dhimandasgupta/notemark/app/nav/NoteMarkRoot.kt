@@ -5,7 +5,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideOut
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,7 +69,6 @@ fun NoteMarkRoot(
     }
 }
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 private fun NavGraphBuilder.noteMarkGraph(
     navController: NavHostController
 ) {
