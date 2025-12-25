@@ -43,7 +43,6 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
@@ -68,7 +67,6 @@ import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.convertIsoToRelativeYearFormat
 import com.dhimandasgupta.notemark.common.extensions.formatUserName
 import com.dhimandasgupta.notemark.common.extensions.setDarkStatusBarIcons
-import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
@@ -80,7 +78,6 @@ import com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton
 import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
 import kotlinx.collections.immutable.toPersistentList
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun NoteListPane(
     modifier: Modifier = Modifier,
@@ -492,7 +489,7 @@ private fun NoteGrid(
 @Composable
 private fun NoteItem(
     modifier: Modifier = Modifier,
-    note: NoteEntity,
+    note: NoteEntityUiModel,
     maxLength: Int,
     onNoteClicked: (String) -> Unit = {},
     onNoteLongClicked: (String) -> Unit = {}
@@ -564,7 +561,7 @@ private fun NoteListPanePreview() {
 private val noteListUiModel = NoteListUiModel(
     userName = "Dhiman",
     noteEntities = listOf(
-        NoteEntity(
+        NoteEntityUiModel(
             id = 0,
             title = "This is a title for the Note\nThis is a title for the Note",
             content = "This is content For the Note\nThis is content For the Note",
@@ -574,7 +571,7 @@ private val noteListUiModel = NoteListUiModel(
             synced = true,
             markAsDeleted = false
         ),
-        NoteEntity(
+        NoteEntityUiModel(
             id = 1,
             title = "This is a title for the Note",
             content = "This is content For the Note",
@@ -584,7 +581,7 @@ private val noteListUiModel = NoteListUiModel(
             synced = true,
             markAsDeleted = false
         ),
-        NoteEntity(
+        NoteEntityUiModel(
             id = 2,
             title = "This is a title for the Note\nThis is a title for the Note",
             content = "This is content For the Note\nThis is content For the Note",
@@ -594,7 +591,7 @@ private val noteListUiModel = NoteListUiModel(
             synced = true,
             markAsDeleted = false
         ),
-        NoteEntity(
+        NoteEntityUiModel(
             id = 3,
             title = "This is a title for the Note",
             content = "This is content For the Note",
@@ -604,7 +601,7 @@ private val noteListUiModel = NoteListUiModel(
             synced = true,
             markAsDeleted = false
         ),
-        NoteEntity(
+        NoteEntityUiModel(
             id = 4,
             title = "This is a title for the Note\nThis is a title for the Note",
             content = "This is content For the Note\nThis is content For the Note",
@@ -614,7 +611,7 @@ private val noteListUiModel = NoteListUiModel(
             synced = true,
             markAsDeleted = false
         ),
-        NoteEntity(
+        NoteEntityUiModel(
             id = 5,
             title = "This is a title for the Note",
             content = "This is content For the Note",

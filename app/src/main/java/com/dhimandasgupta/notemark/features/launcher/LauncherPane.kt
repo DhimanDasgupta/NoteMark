@@ -26,7 +26,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -51,7 +50,6 @@ import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkOutlinedButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun LauncherPane(
     modifier: Modifier = Modifier,

@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.android.ConnectionState
-import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppState
 import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
@@ -26,7 +25,7 @@ import kotlinx.coroutines.flow.flowOn
 @Immutable
 data class NoteListUiModel(
     val userName: String? = null,
-    val noteEntities: ImmutableList<NoteEntity>,
+    val noteEntities: ImmutableList<NoteEntityUiModel>,
     val noteLongClickedUuid: String = "",
     val showSyncProgress: Boolean = false,
     val isConnected: Boolean = false
@@ -35,6 +34,18 @@ data class NoteListUiModel(
         val Empty = defaultNoteListUiModel
     }
 }
+
+@Immutable
+data class NoteEntityUiModel(
+    val id: Long,
+    val title: String,
+    val content: String,
+    val createdAt: String,
+    val lastEditedAt: String,
+    val uuid: String,
+    val synced: Boolean,
+    val markAsDeleted: Boolean,
+)
 
 private val defaultNoteListUiModel = NoteListUiModel(noteEntities = persistentListOf())
 
@@ -97,7 +108,21 @@ class NoteListPresenter(
         return NoteListUiModel(
             userName = loggedIn.user.userName,
             noteEntities = if (noteListState is NoteListState.NoteListStateWithNotes) {
-                noteListState.notes.toPersistentList()
+                noteListState
+                    .notes
+                    .map { note ->
+                        NoteEntityUiModel(
+                            id = note.id,
+                            title = note.title,
+                            content = note.content,
+                            createdAt = note.createdAt,
+                            lastEditedAt = note.lastEditedAt,
+                            uuid = note.uuid,
+                            synced = note.synced,
+                            markAsDeleted = note.markAsDeleted
+                        )
+                    }
+                    .toPersistentList()
             } else {
                 persistentListOf()
             },
