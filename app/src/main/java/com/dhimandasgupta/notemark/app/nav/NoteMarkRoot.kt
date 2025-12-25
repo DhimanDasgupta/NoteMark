@@ -6,9 +6,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideOut
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +25,6 @@ import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
-import com.dhimandasgupta.notemark.common.extensions.setDarkStatusBarIcons
 import com.dhimandasgupta.notemark.features.addnote.AddNotePane
 import com.dhimandasgupta.notemark.features.addnote.AddNotePresenter
 import com.dhimandasgupta.notemark.features.addnote.AddNoteUiModel
@@ -58,7 +55,6 @@ import org.koin.java.KoinJavaComponent.get
 @Composable
 fun NoteMarkRoot(
     navController: NavHostController,
-    windowSizeClass: WindowSizeClass,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -70,17 +66,13 @@ fun NoteMarkRoot(
         popEnterTransition = { slideIn { IntOffset(x = -it.width, y = 0) } },
         popExitTransition = { slideOut { IntOffset(x = it.width, y = 0) } }
     ) {
-        noteMarkGraph(
-            navController = navController,
-            windowSizeClass = windowSizeClass
-        )
+        noteMarkGraph(navController = navController)
     }
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 private fun NavGraphBuilder.noteMarkGraph(
-    navController: NavHostController,
-    windowSizeClass: WindowSizeClass
+    navController: NavHostController
 ) {
     navigation<NoteMarkDestination.RootPane>(
         startDestination = NoteMarkDestination.LauncherPane
@@ -88,7 +80,6 @@ private fun NavGraphBuilder.noteMarkGraph(
         composable<NoteMarkDestination.LauncherPane> {
             LauncherPane(
                 modifier = Modifier,
-                windowSizeClass = windowSizeClass,
                 navigateAfterLogin = navController::navigateAfterLogin,
                 navigateToLogin = navController::navigateToLogin
             )
@@ -97,7 +88,6 @@ private fun NavGraphBuilder.noteMarkGraph(
         composable<NoteMarkDestination.LoginPane> {
             LoginPane(
                 modifier = Modifier,
-                windowSizeClass = windowSizeClass,
                 navigateToRegistration = navController::navigateToRegistration,
                 navigateToAfterLogin = navController::navigateToAfterLogin,
                 navigateUp = navController::navigateAppUp
@@ -107,7 +97,6 @@ private fun NavGraphBuilder.noteMarkGraph(
         composable<NoteMarkDestination.RegistrationPane> {
             RegistrationPane(
                 modifier = Modifier,
-                windowSizeClass = windowSizeClass,
                 navigateToLoginFromRegistration = navController::navigateToLoginFromRegistration,
                 navigateUp = navController::navigateAppUp
             )
@@ -116,7 +105,6 @@ private fun NavGraphBuilder.noteMarkGraph(
         composable<NoteMarkDestination.NoteListPane> {
             NoteListPane(
                 modifier = Modifier,
-                windowSizeClass = windowSizeClass,
                 navigateToAdd = navController::navigateToAdd,
                 navigateToEdit = navController::navigateToEdit,
                 navigateToSettings = navController::navigateToSettings
@@ -126,7 +114,6 @@ private fun NavGraphBuilder.noteMarkGraph(
         composable<NoteMarkDestination.NoteCreatePane> {
             NoteCreatePane(
                 modifier = Modifier,
-                windowSizeClass = windowSizeClass,
                 navigateUp = navController::navigateAppUp
             )
         }
@@ -136,7 +123,6 @@ private fun NavGraphBuilder.noteMarkGraph(
 
             NoteEditPane(
                 modifier = Modifier,
-                windowSizeClass = windowSizeClass,
                 arguments = arguments,
                 navigateUp = navController::navigateAppUp
             )
@@ -155,12 +141,10 @@ private fun NavGraphBuilder.noteMarkGraph(
 @Composable
 private fun LauncherPane(
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass,
     navigateAfterLogin: () -> Unit,
     navigateToLogin: () -> Unit
 ) {
     val context = LocalActivity.current
-    SideEffect { context?.setDarkStatusBarIcons(true) }
 
     val launcherPresenter: LauncherPresenter = retain { get(clazz = LauncherPresenter::class.java) }
     var launcherUiModel by remember { mutableStateOf(value = LauncherUiModel.Empty) }
@@ -185,7 +169,6 @@ private fun LauncherPane(
 
     LauncherPane(
         modifier = modifier,
-        windowSizeClass = windowSizeClass,
         launcherUiModel = { launcherUiModel },
         navigateToAfterLogin = {
             if (launcherUiModel.loggedInUser == null) {
@@ -202,14 +185,10 @@ private fun LauncherPane(
 @Composable
 private fun LoginPane(
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass,
     navigateToRegistration: () -> Unit,
     navigateToAfterLogin: () -> Unit,
     navigateUp: () -> Unit
 ) {
-    val context = LocalActivity.current
-    SideEffect { context?.setDarkStatusBarIcons(false) }
-
     val loginPresenter: LoginPresenter = retain { get(clazz = LoginPresenter::class.java) }
     var loginUiModel by remember { mutableStateOf(value = LoginUiModel.Empty) }
     val loginEvents by rememberUpdatedState(newValue = loginPresenter::processEvent)
@@ -238,7 +217,6 @@ private fun LoginPane(
 
     LoginPane(
         modifier = modifier,
-        windowSizeClass = windowSizeClass,
         loginUiModel = { loginUiModel },
         loginAction = { event -> loginEvents(event) },
         navigateToRegistration = { navigateToRegistration() },
@@ -249,13 +227,9 @@ private fun LoginPane(
 @Composable
 private fun RegistrationPane(
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass,
     navigateToLoginFromRegistration: () -> Unit,
     navigateUp: () -> Unit
 ) {
-    val context = LocalActivity.current
-    SideEffect { context?.setDarkStatusBarIcons(false) }
-
     val registrationPresenter: RegistrationPresenter = retain { get(clazz = RegistrationPresenter::class.java) }
     var registrationUiModel by remember { mutableStateOf(value = RegistrationUiModel.Empty) }
     val registrationAction by rememberUpdatedState(newValue = registrationPresenter::processEvent)
@@ -284,7 +258,6 @@ private fun RegistrationPane(
 
     RegistrationPane(
         modifier = modifier,
-        windowSizeClass = windowSizeClass,
         registrationUiModel = { registrationUiModel },
         navigateToLogin = { navigateToLoginFromRegistration() },
         registrationAction = { event -> registrationAction(event) },
@@ -294,13 +267,11 @@ private fun RegistrationPane(
 @Composable
 private fun NoteListPane(
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass,
     navigateToAdd: () -> Unit,
     navigateToEdit: (String) -> Unit,
     navigateToSettings: () -> Unit
 ) {
     val context = LocalActivity.current
-    SideEffect { context?.setDarkStatusBarIcons(true) }
 
     val noteListPresenter: NoteListPresenter = retain { get(clazz = NoteListPresenter::class.java) }
     var noteListUiModel by remember { mutableStateOf(value = NoteListUiModel.Empty) }
@@ -330,7 +301,6 @@ private fun NoteListPane(
 
     NoteListPane(
         modifier = modifier,
-        windowSizeClass = windowSizeClass,
         noteListUiModel = { noteListUiModel },
         noteListAction = { event -> noteListAction(event) },
         onNoteClicked = { uuid -> navigateToEdit(uuid) },
@@ -343,12 +313,8 @@ private fun NoteListPane(
 @Composable
 private fun NoteCreatePane(
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass,
     navigateUp: () -> Unit
 ) {
-    val context = LocalActivity.current
-    SideEffect { context?.setDarkStatusBarIcons(true) }
-
     val addNotePresenter:AddNotePresenter = retain { get(clazz = AddNotePresenter::class.java) }
     var addNoteUiModel by remember { mutableStateOf(value = AddNoteUiModel.Empty) }
     val addNoteAction by rememberUpdatedState(newValue = addNotePresenter::processEvent)
@@ -378,7 +344,6 @@ private fun NoteCreatePane(
 
     AddNotePane(
         modifier = modifier,
-        windowSizeClass = windowSizeClass,
         addNoteUiModel = { addNoteUiModel },
         addNoteAction = { event -> addNoteAction(event) },
         onBackClicked = { navigateUp() }
@@ -388,13 +353,9 @@ private fun NoteCreatePane(
 @Composable
 private fun NoteEditPane(
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass,
     arguments: NoteMarkDestination.NoteEditPane,
     navigateUp: () -> Unit
 ) {
-    val context = LocalActivity.current
-    SideEffect { context?.setDarkStatusBarIcons(true) }
-
     val editNotePresenter: EditNotePresenter = retain { get(clazz = EditNotePresenter::class.java) }
     var editNoteUiModel by remember { mutableStateOf(value = EditNoteUiModel.Empty) }
     val editNoteAction by rememberUpdatedState(newValue = editNotePresenter::processEvent)
@@ -424,7 +385,6 @@ private fun NoteEditPane(
 
     EditNotePane(
         modifier = modifier,
-        windowSizeClass = windowSizeClass,
         noteId = arguments.noteId,
         editNoteUiModel = { editNoteUiModel },
         editNoteAction = { event -> editNoteAction(event) },
@@ -438,9 +398,6 @@ private fun SettingsPane(
     navigateUp: () -> Unit,
     navigateToLauncherAfterLogout: () -> Unit
 ) {
-    val context = LocalActivity.current
-    SideEffect { context?.setDarkStatusBarIcons(true) }
-
     val settingsPresenter: SettingsPresenter = retain { get(clazz = SettingsPresenter::class.java) }
     var settingsUiModel by remember { mutableStateOf(value =  SettingsUiModel.Empty) }
     val settingsAction by rememberUpdatedState(newValue = settingsPresenter::processEvent)

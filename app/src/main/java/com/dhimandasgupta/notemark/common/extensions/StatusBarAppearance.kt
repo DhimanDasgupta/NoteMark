@@ -13,6 +13,10 @@ fun Activity.setDarkStatusBarIcons(isLight: Boolean) = WindowCompat.getInsetsCon
     }
 }
 
+fun Activity.setForcedDarkStatusBarIcons(isLight: Boolean) = WindowCompat.getInsetsController(window, window.decorView).apply {
+    isAppearanceLightStatusBars = isLight
+}
+
 private fun Context.isSystemInDarkTheme(): Boolean {
     return resources.configuration.uiMode and
             Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES

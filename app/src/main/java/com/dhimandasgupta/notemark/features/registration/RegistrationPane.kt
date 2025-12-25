@@ -25,10 +25,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.common.extensions.setDarkStatusBarIcons
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.EmailEntered
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.PasswordEntered
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.PasswordFiledInFocus
@@ -57,12 +57,7 @@ import com.dhimandasgupta.notemark.features.registration.RegistrationAction.Repe
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameEntered
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledInFocus
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledLostFocus
-import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
-import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
-import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
-import com.dhimandasgupta.notemark.ui.TabletExpandedPortraitPreview
-import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
-import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
+import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.alignToSafeDrawing
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
@@ -71,12 +66,6 @@ import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkPasswordTextField
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTextField
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
-import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
-import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
-import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
-import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
-import com.dhimandasgupta.notemark.ui.phoneLandscape
-import com.dhimandasgupta.notemark.ui.phonePortrait
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -84,11 +73,13 @@ import kotlinx.coroutines.flow.debounce
 @Composable
 fun RegistrationPane(
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass,
     registrationUiModel: () -> RegistrationUiModel,
     navigateToLogin: () -> Unit = {},
     registrationAction: (RegistrationAction) -> Unit = {}
 ) {
+    val context = LocalActivity.current
+    SideEffect { context?.setDarkStatusBarIcons(false) }
+
     val updatedRegistrationUiModel by rememberUpdatedState(newValue = registrationUiModel)
 
     Box(
@@ -96,7 +87,7 @@ fun RegistrationPane(
             .background(color = colorResource(id = R.color.splash_blue))
             .fillMaxSize()
     ) {
-        val layoutType = getDeviceLayoutType(windowSizeClass)
+        val layoutType = getDeviceLayoutType()
 
         when (layoutType) {
             DeviceLayoutType.PHONE_PORTRAIT -> PhonePortraitLayout(
@@ -517,79 +508,12 @@ private fun RegistrationFooterField(
     )
 }
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@PhonePortraitPreview
+@WindowSizePreviews
 @Composable
-private fun PhonePortraitPreview() {
+private fun RegistraionPanePreview() {
     NoteMarkTheme {
         RegistrationPane(
             modifier = Modifier,
-            windowSizeClass = phonePortrait,
-            registrationUiModel = { RegistrationUiModel.Empty }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@PhoneLandscapePreview
-@Composable
-private fun PhoneLandscapePreview() {
-    NoteMarkTheme {
-        RegistrationPane(
-            modifier = Modifier,
-            windowSizeClass = phoneLandscape,
-            registrationUiModel = { RegistrationUiModel.Empty }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletMediumPortraitPreview
-@Composable
-private fun TabletMediumPortraitPreview() {
-    NoteMarkTheme {
-        RegistrationPane(
-            modifier = Modifier,
-            windowSizeClass = mediumTabletPortrait,
-            registrationUiModel = { RegistrationUiModel.Empty }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletMediumLandscapePreview
-@Composable
-private fun TabletMediumLandscapePreview() {
-    NoteMarkTheme {
-        RegistrationPane(
-            modifier = Modifier,
-            windowSizeClass = mediumTabletLandscape,
-            registrationUiModel = { RegistrationUiModel.Empty }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletExpandedPortraitPreview
-@Composable
-private fun TabletExpandedPortraitPreview() {
-    NoteMarkTheme {
-        RegistrationPane(
-            modifier = Modifier,
-            windowSizeClass = extendedTabletPortrait,
-            registrationUiModel = { RegistrationUiModel.Empty }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletExpandedLandscapePreview
-@Composable
-private fun TabletExpandedLandscapePreview() {
-    NoteMarkTheme {
-        RegistrationPane(
-            modifier = Modifier,
-            windowSizeClass = extendedTabletLandscape,
             registrationUiModel = { RegistrationUiModel.Empty }
         )
     }

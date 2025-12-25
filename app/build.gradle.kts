@@ -1,4 +1,6 @@
 import java.io.FileInputStream
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Properties
 
 plugins {
@@ -21,16 +23,26 @@ if (localPropertiesFile.exists() && localPropertiesFile.isFile) {
     localProperties.load(FileInputStream(localPropertiesFile))
 }
 
+private val applicationId = "com.dhimandasgupta.notemark"
+private val versionNamePrefix = "1.0"
+
+// Function to generate the dynamic version name
+private fun generateVersionName(): String {
+    val now = LocalDateTime.now()
+    val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd.HH.mm")
+    return "$versionNamePrefix-${now.format(formatter)}"
+}
+
 android {
-    namespace = "com.dhimandasgupta.notemark"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    namespace = applicationId
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.dhimandasgupta.notemark"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = libs.versions.versionCode.get().toInt()
-        versionName = libs.versions.versionName.get()
+        applicationId = applicationId
+        minSdk = 28
+        targetSdk = 36
+        versionCode = 1
+        versionName = generateVersionName()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -161,6 +173,12 @@ dependencies {
 
     // Kotlinx collections
     implementation(libs.kotlinx.collections.immutable)
+
+    // Nav3
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.kotlinx.serialization.core)
+    implementation(libs.androidx.material3.adaptive.navigation3)
 
     // Protobuf
     implementation(libs.kotlin.protobuf)
