@@ -1,5 +1,6 @@
 package com.dhimandasgupta.notemark.features.settings
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -36,9 +37,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,18 +52,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.convertNoteTimestampToReadableFormat
+import com.dhimandasgupta.notemark.common.extensions.setDarkStatusBarIcons
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.proto.Sync
-import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
-import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
-import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
-import com.dhimandasgupta.notemark.ui.TabletExpandedPortraitPreview
-import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
-import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
+import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.coroutines.FlowPreview
@@ -79,6 +77,10 @@ fun SettingsPane(
     onBackClicked: () -> Unit = {},
     onLogoutClicked: () -> Unit = {}
 ) {
+    val context = LocalActivity.current
+    SideEffect { context?.setDarkStatusBarIcons(true) }
+
+
     val updatedSettingsUiModel by rememberUpdatedState(newValue = settingsUiModel)
     val updatedOnLogoutSuccessful by rememberUpdatedState(newValue = onLogoutSuccessful)
 
@@ -249,6 +251,14 @@ private fun SettingsBody(
                 isConnected = settingsUiModel().isConnected,
                 onLogoutClicked = onLogoutClicked
             )
+
+            // AppVersion
+            settingsUiModel().appVersionName?.let { appVersionName ->
+                AppVersion(
+                    modifier = Modifier,
+                    appVersionName = appVersionName
+                )
+            }
         }
 
         if (showSyncInterval) {
@@ -375,11 +385,20 @@ private fun SyncDataRow(
 
             val configuration = LocalConfiguration.current
             val locale by remember(key1 = configuration) {
-                mutableStateOf(configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0))
+                mutableStateOf(
+                    configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(
+                        0
+                    )
+                )
             }
 
             Text(
-                text = "Last synced: ${convertNoteTimestampToReadableFormat(locale = locale, isoOffsetDateTimeString = settingsUiModel().lastSynced)}",
+                text = "Last synced: ${
+                    convertNoteTimestampToReadableFormat(
+                        locale = locale,
+                        isoOffsetDateTimeString = settingsUiModel().lastSynced
+                    )
+                }",
                 style = typography.bodySmall,
                 color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.wrapContentSize()
@@ -460,10 +479,25 @@ private fun LogoutRow(
     }
 }
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@PhonePortraitPreview
 @Composable
-private fun PhonePortraitPreview() {
+fun AppVersion(
+    modifier: Modifier = Modifier,
+    appVersionName: String
+) {
+    Text(
+        text = "App Version - $appVersionName",
+        style = typography.titleSmall,
+        color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+        textAlign = TextAlign.Right,
+        modifier = modifier
+            .padding(all = 16.dp)
+            .fillMaxWidth()
+    )
+}
+
+@WindowSizePreviews
+@Composable
+private fun SettingsPanePreview() {
     NoteMarkTheme {
         SettingsPane(
             modifier = Modifier,
@@ -472,64 +506,4 @@ private fun PhonePortraitPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@PhoneLandscapePreview
-@Composable
-private fun PhoneLandscapePreview() {
-    NoteMarkTheme {
-        SettingsPane(
-            modifier = Modifier,
-            settingsUiModel = defaultSettingsUiModel
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletMediumPortraitPreview
-@Composable
-private fun TabletMediumPortraitPreview() {
-    NoteMarkTheme {
-        SettingsPane(
-            modifier = Modifier,
-            settingsUiModel = defaultSettingsUiModel
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletMediumLandscapePreview
-@Composable
-private fun TabletMediumLandscapePreview() {
-    NoteMarkTheme {
-        SettingsPane(
-            modifier = Modifier,
-            settingsUiModel = defaultSettingsUiModel
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletExpandedPortraitPreview
-@Composable
-private fun TabletExpandedPortraitPreview() {
-    NoteMarkTheme {
-        SettingsPane(
-            modifier = Modifier,
-            settingsUiModel = defaultSettingsUiModel
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletExpandedLandscapePreview
-@Composable
-private fun TabletExpandedLandscapePreview() {
-    NoteMarkTheme {
-        SettingsPane(
-            modifier = Modifier,
-            settingsUiModel = defaultSettingsUiModel
-        )
-    }
-}
-
-private val defaultSettingsUiModel = { SettingsUiModel.Empty }
+private val defaultSettingsUiModel = { SettingsUiModel.Empty.copy(appVersionName = "Some Version") }

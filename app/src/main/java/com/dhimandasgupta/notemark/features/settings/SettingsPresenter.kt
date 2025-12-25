@@ -35,7 +35,8 @@ data class SettingsUiModel(
     val deleteLocalNotesOnLogout: Boolean = false,
     val logoutStatus: Boolean? = null,
     val isSyncing: Boolean = false,
-    val isConnected: Boolean = false
+    val isConnected: Boolean = false,
+    val appVersionName: String? = null
 ) {
     companion object {
         val Empty = SettingsUiModel()
@@ -86,12 +87,15 @@ class SettingsPresenter(
                 return SettingsUiModel(
                     logoutStatus = null,
                     lastSynced = appState.sync?.lastUploadedTime ?: "--",
-                    selectedSyncInterval = appState.sync?.syncDuration?.toReadableString() ?: "Manual",
+                    selectedSyncInterval = appState.sync?.syncDuration?.toReadableString()
+                        ?: "Manual",
                     deleteLocalNotesOnLogout = appState.sync?.deleteLocalNotesOnLogout ?: false,
                     isSyncing = appState.sync?.syncing ?: false,
-                    isConnected = appState.connectionState == ConnectionState.Available
+                    isConnected = appState.connectionState == ConnectionState.Available,
+                    appVersionName = appState.appVersionName
                 )
             }
+
             else -> {
                 return SettingsUiModel.Empty.copy(
                     logoutStatus = true,

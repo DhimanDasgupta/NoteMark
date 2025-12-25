@@ -13,6 +13,7 @@ import androidx.work.WorkManager
 import com.dhimandasgupta.notemark.app.work.NoteSyncWorker
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
+import com.dhimandasgupta.notemark.common.extensions.getAppVersionName
 import com.dhimandasgupta.notemark.common.getDifferenceFromTimestampInMinutes
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.SyncRepository
@@ -38,6 +39,7 @@ sealed interface AppState {
         override val connectionState: ConnectionState? = ConnectionState.Unavailable,
         val user: User,
         val sync: Sync? = null,
+        val appVersionName: String
     ) : AppState
 }
 
@@ -67,7 +69,8 @@ class AppStateMachine(
                         state.override {
                             AppState.LoggedIn(
                                 connectionState = state.snapshot.connectionState,
-                                user = user
+                                user = user,
+                                appVersionName = applicationContext.getAppVersionName()
                             )
                         }
                     } ?: state.noChange()

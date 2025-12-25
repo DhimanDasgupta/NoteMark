@@ -15,13 +15,12 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
+import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 
@@ -83,8 +82,7 @@ fun NoteDeleteDialog(
     }
 }
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@PhonePortraitPreview
+@WindowSizePreviews
 @Composable
 private fun DeleteDialogPreview() {
     NoteMarkTheme {

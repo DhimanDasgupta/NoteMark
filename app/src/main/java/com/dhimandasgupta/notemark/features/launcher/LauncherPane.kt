@@ -1,5 +1,6 @@
 package com.dhimandasgupta.notemark.features.launcher
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,9 +27,9 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
@@ -42,34 +43,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
-import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
-import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
-import com.dhimandasgupta.notemark.ui.TabletExpandedPortraitPreview
-import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
-import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
+import com.dhimandasgupta.notemark.common.extensions.setForcedDarkStatusBarIcons
+import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkOutlinedButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
-import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
-import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
-import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
-import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
-import com.dhimandasgupta.notemark.ui.phoneLandscape
-import com.dhimandasgupta.notemark.ui.phonePortrait
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun LauncherPane(
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass,
     launcherUiModel: () -> LauncherUiModel,
     navigateToAfterLogin: () -> Unit = {},
     navigateToLogin: () -> Unit = {},
     navigateToList: () -> Unit = {}
 ) {
+    val context = LocalActivity.current
+    SideEffect { context?.setForcedDarkStatusBarIcons(true) }
+
     val updatedLauncherUiModel by rememberUpdatedState(newValue = launcherUiModel)
     val updatedNavigateToList by rememberUpdatedState(navigateToList)
     val updatedNavigateToLogin by rememberUpdatedState(navigateToLogin)
@@ -87,7 +80,7 @@ fun LauncherPane(
             .fillMaxSize()
             .background(color = colorResource(id = R.color.splash_blue_background))
     ) {
-        when (val layoutType = getDeviceLayoutType(windowSizeClass)) {
+        when (val layoutType = getDeviceLayoutType()) {
             DeviceLayoutType.PHONE_PORTRAIT -> {
                 LandingPanePortrait(
                     navigateToLogin = updatedNavigateToLogin,
@@ -176,7 +169,7 @@ private fun LandingPaneLandscape(
             painter = painterResource(id = R.drawable.bg_phone_landscape),
             contentDescription = null,
             contentScale = ContentScale.FillHeight,
-            modifier = modifier.fillMaxHeight()
+            modifier = modifier.fillMaxHeight(0.65f)
         )
 
         ForegroundPane(
@@ -274,6 +267,7 @@ private fun ForegroundPane(
         Text(
             text = stringResource(R.string.landing_info_one),
             style = typography.titleLarge,
+            color = colorScheme.onSurface,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
@@ -287,7 +281,7 @@ private fun ForegroundPane(
             style = typography.bodyLarge,
             color = colorScheme.onSurfaceVariant,
             modifier = Modifier
-                .wrapContentSize()
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .wrapContentSize(Alignment.Center)
         )
@@ -328,79 +322,12 @@ private fun ForegroundPane(
     }
 }
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@PhonePortraitPreview
+@WindowSizePreviews
 @Composable
-private fun PhonePortraitPreview() {
+private fun LauncherPanePreview() {
     NoteMarkTheme {
         LauncherPane(
             modifier = Modifier,
-            windowSizeClass = phonePortrait,
-            launcherUiModel = { LauncherUiModel.Empty }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@PhoneLandscapePreview
-@Composable
-private fun PhoneLandscapePreview() {
-    NoteMarkTheme {
-        LauncherPane(
-            modifier = Modifier,
-            windowSizeClass = phoneLandscape,
-            launcherUiModel = { LauncherUiModel.Empty }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletMediumPortraitPreview
-@Composable
-private fun TabletMediumPortraitPreview() {
-    NoteMarkTheme {
-        LauncherPane(
-            modifier = Modifier,
-            windowSizeClass = mediumTabletPortrait,
-            launcherUiModel = { LauncherUiModel.Empty }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletMediumLandscapePreview
-@Composable
-private fun TabletMediumLandscapePreview() {
-    NoteMarkTheme {
-        LauncherPane(
-            modifier = Modifier,
-            windowSizeClass = mediumTabletLandscape,
-            launcherUiModel = { LauncherUiModel.Empty }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletExpandedPortraitPreview
-@Composable
-private fun TabletExpandedPortraitPreview() {
-    NoteMarkTheme {
-        LauncherPane(
-            modifier = Modifier,
-            windowSizeClass = extendedTabletPortrait,
-            launcherUiModel = { LauncherUiModel.Empty }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletExpandedLandscapePreview
-@Composable
-private fun TabletExpandedLandscapePreview() {
-    NoteMarkTheme {
-        LauncherPane(
-            modifier = Modifier,
-            windowSizeClass = extendedTabletLandscape,
             launcherUiModel = { LauncherUiModel.Empty }
         )
     }

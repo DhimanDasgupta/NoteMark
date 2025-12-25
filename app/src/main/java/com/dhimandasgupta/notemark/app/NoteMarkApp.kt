@@ -4,6 +4,8 @@ import android.app.Application
 import android.os.StrictMode
 import android.util.Log.DEBUG
 import android.util.Log.ERROR
+import androidx.compose.runtime.Composer
+import androidx.compose.runtime.tooling.ComposeStackTraceMode
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.dhimandasgupta.notemark.BuildConfig
@@ -17,6 +19,9 @@ class NoteMarkApp : Application() {
         super.onCreate()
         if (BuildConfig.DEBUG) {
             enableStrictMode()
+            Composer.setDiagnosticStackTraceMode(ComposeStackTraceMode.SourceInformation)
+        } else {
+            Composer.setDiagnosticStackTraceMode(ComposeStackTraceMode.Auto)
         }
 
         val config = Configuration.Builder()

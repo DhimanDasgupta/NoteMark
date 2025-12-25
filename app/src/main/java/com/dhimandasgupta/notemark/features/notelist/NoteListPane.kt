@@ -1,5 +1,6 @@
 package com.dhimandasgupta.notemark.features.notelist
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
@@ -43,8 +44,8 @@ import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,13 +67,9 @@ import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.convertIsoToRelativeYearFormat
 import com.dhimandasgupta.notemark.common.extensions.formatUserName
+import com.dhimandasgupta.notemark.common.extensions.setDarkStatusBarIcons
 import com.dhimandasgupta.notemark.database.NoteEntity
-import com.dhimandasgupta.notemark.ui.PhoneLandscapePreview
-import com.dhimandasgupta.notemark.ui.PhonePortraitPreview
-import com.dhimandasgupta.notemark.ui.TabletExpandedLandscapePreview
-import com.dhimandasgupta.notemark.ui.TabletExpandedPortraitPreview
-import com.dhimandasgupta.notemark.ui.TabletMediumLandscapePreview
-import com.dhimandasgupta.notemark.ui.TabletMediumPortraitPreview
+import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.designsystem.LimitedText
@@ -81,19 +78,12 @@ import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkToolbarButton
 import com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton
 import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
-import com.dhimandasgupta.notemark.ui.extendedTabletLandscape
-import com.dhimandasgupta.notemark.ui.extendedTabletPortrait
-import com.dhimandasgupta.notemark.ui.mediumTabletLandscape
-import com.dhimandasgupta.notemark.ui.mediumTabletPortrait
-import com.dhimandasgupta.notemark.ui.phoneLandscape
-import com.dhimandasgupta.notemark.ui.phonePortrait
 import kotlinx.collections.immutable.toPersistentList
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun NoteListPane(
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass,
     noteListUiModel: () -> NoteListUiModel,
     noteListAction: (NoteListAction) -> Unit = {},
     onNoteClicked: (String) -> Unit = {},
@@ -101,6 +91,9 @@ fun NoteListPane(
     onSettingsClicked: () -> Unit = {},
     onProfileClicked: () -> Unit = {},
 ) {
+    val context = LocalActivity.current
+    SideEffect { context?.setDarkStatusBarIcons(true) }
+
     val updateNoteListUiModel by rememberUpdatedState(newValue = noteListUiModel)
     var noteDeleteId by remember { mutableStateOf<String?>(value = null) }
 
@@ -112,7 +105,6 @@ fun NoteListPane(
     ) {
         NoteListValidPane(
             modifier = Modifier,
-            windowSizeClass = windowSizeClass,
             userName = noteListUiModel().userName?.formatUserName() ?: "",
             noteListUiModel = updateNoteListUiModel,
             onNoteClicked = onNoteClicked,
@@ -147,7 +139,6 @@ fun NoteListPane(
 @Composable
 private fun NoteListValidPane(
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass,
     userName: String,
     noteListUiModel: () -> NoteListUiModel,
     onNoteClicked: (String) -> Unit = {},
@@ -169,7 +160,6 @@ private fun NoteListValidPane(
 
         else -> NoteListWithNotes(
             modifier = Modifier,
-            windowSizeClass = windowSizeClass,
             userName = userName,
             noteListState = noteListUiModel,
             onNoteClicked = onNoteClicked,
@@ -205,7 +195,6 @@ private fun NoteListWithEmptyNotes(
 @Composable
 private fun NoteListWithNotes(
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass,
     userName: String,
     noteListState: () -> NoteListUiModel,
     onNoteClicked: (String) -> Unit = {},
@@ -214,7 +203,7 @@ private fun NoteListWithNotes(
     onSettingsClicked: () -> Unit = {},
     onProfileClicked: () -> Unit = {},
 ) {
-    val layoutType = getDeviceLayoutType(windowSizeClass)
+    val layoutType = getDeviceLayoutType()
     val columnCount = remember(key1 = layoutType) {
         when (layoutType) {
             DeviceLayoutType.PHONE_PORTRAIT -> 2
@@ -561,79 +550,12 @@ private fun NoteItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@PhonePortraitPreview
+@WindowSizePreviews
 @Composable
-private fun PhonePortraitPreview() {
+private fun NoteListPanePreview() {
     NoteMarkTheme {
         NoteListPane(
             modifier = Modifier,
-            windowSizeClass = phonePortrait,
-            noteListUiModel = { noteListUiModel }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@PhoneLandscapePreview
-@Composable
-private fun PhoneLandscapePreview() {
-    NoteMarkTheme {
-        NoteListPane(
-            modifier = Modifier,
-            windowSizeClass = phoneLandscape,
-            noteListUiModel = { noteListUiModel }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletMediumPortraitPreview
-@Composable
-private fun TabletMediumPortraitPreview() {
-    NoteMarkTheme {
-        NoteListPane(
-            modifier = Modifier,
-            windowSizeClass = mediumTabletPortrait,
-            noteListUiModel = { noteListUiModel }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletMediumLandscapePreview
-@Composable
-private fun TabletMediumLandscapePreview() {
-    NoteMarkTheme {
-        NoteListPane(
-            modifier = Modifier,
-            windowSizeClass = mediumTabletLandscape,
-            noteListUiModel = { noteListUiModel }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletExpandedPortraitPreview
-@Composable
-private fun TabletExpandedPortraitPreview() {
-    NoteMarkTheme {
-        NoteListPane(
-            modifier = Modifier,
-            windowSizeClass = extendedTabletPortrait,
-            noteListUiModel = { noteListUiModel }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@TabletExpandedLandscapePreview
-@Composable
-private fun TabletExpandedLandscapePreview() {
-    NoteMarkTheme {
-        NoteListPane(
-            modifier = Modifier,
-            windowSizeClass = extendedTabletLandscape,
             noteListUiModel = { noteListUiModel }
         )
     }
