@@ -9,8 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.navigation.compose.rememberNavController
-import com.dhimandasgupta.notemark.app.nav.NoteMarkRoot
+import com.dhimandasgupta.notemark.app.nav.NoteMarkNavigationRoot
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,12 +18,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val navController = rememberNavController()
-
             NoteMarkTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NoteMarkRoot(
-                        navController = navController,
+                    NoteMarkNavigationRoot(
                         modifier = Modifier.consumeWindowInsets(paddingValues = innerPadding)
                     )
                 }

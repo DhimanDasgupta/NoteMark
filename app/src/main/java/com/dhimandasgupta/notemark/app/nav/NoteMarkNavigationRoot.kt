@@ -1,10 +1,7 @@
 package com.dhimandasgupta.notemark.app.nav
 
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
-import androidx.compose.animation.slideIn
-import androidx.compose.animation.slideOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,14 +11,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.LifecycleStartEffect
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.navigation
-import androidx.navigation.toRoute
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.features.addnote.AddNotePane
@@ -51,89 +44,117 @@ import kotlinx.coroutines.isActive
 import kotlinx.serialization.Serializable
 import org.koin.java.KoinJavaComponent.get
 
+@Serializable
+data object LauncherScene: PreLoginNavKey
+
+@Serializable
+data object LoginScene: PreLoginNavKey
+
+@Serializable
+data object RegistrationScene: PreLoginNavKey
+
+@Serializable
+data object NoteListScene: PostLoginNavKey
+
+@Serializable
+data object NoteCreateScene: PostLoginNavKey
+
+@Serializable
+data class NoteEditScene(
+    val noteId: String
+): PostLoginNavKey
+
+@Serializable
+data object SettingsScene: PostLoginNavKey
+
 @Composable
-fun NoteMarkRoot(
-    navController: NavHostController,
-    modifier: Modifier = Modifier
+fun NoteMarkNavigationRoot(
+    modifier: Modifier
 ) {
-    NavHost(
+    val backStack = rememberNavBackStack(LauncherScene)
+
+    NavDisplay(
         modifier = modifier,
-        navController = navController,
-        startDestination = NoteMarkDestination.RootPane,
-        enterTransition = { slideIn { IntOffset(x = it.width, y = 0) } },
-        exitTransition = { slideOut { IntOffset(x = -it.width / 3, y = 0) } },
-        popEnterTransition = { slideIn { IntOffset(x = -it.width, y = 0) } },
-        popExitTransition = { slideOut { IntOffset(x = it.width, y = 0) } }
-    ) {
-        noteMarkGraph(navController = navController)
-    }
-}
-
-private fun NavGraphBuilder.noteMarkGraph(
-    navController: NavHostController
-) {
-    navigation<NoteMarkDestination.RootPane>(
-        startDestination = NoteMarkDestination.LauncherPane
-    ) {
-        composable<NoteMarkDestination.LauncherPane> {
-            LauncherPane(
-                modifier = Modifier,
-                navigateAfterLogin = navController::navigateAfterLogin,
-                navigateToLogin = navController::navigateToLogin
-            )
+        backStack = backStack,
+        onBack = { backStack.removeLastOrNull() },
+        entryProvider = entryProvider {
+            entry<LauncherScene> {
+                LauncherPane(
+                    modifier = modifier,
+                    navigateAfterLogin = {
+                        backStack.clearPreLoginKeys()
+                        backStack.add(NoteListScene)
+                    },
+                    navigateToLogin = {
+                        backStack.add(LoginScene)
+                    }
+                )
+            }
+            entry<LoginScene> {
+                LoginPane(
+                    modifier = modifier,
+                    navigateToRegistration = {
+                        backStack.add(RegistrationScene)
+                    },
+                    navigateToAfterLogin = {
+                        backStack.clearPreLoginKeys()
+                        backStack.add(NoteListScene)
+                    }
+                )
+            }
+            entry<RegistrationScene> {
+                RegistrationPane(
+                    modifier = modifier,
+                    navigateToLoginFromRegistration = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<NoteListScene> {
+                NoteListPane(
+                    modifier = modifier,
+                    navigateToAdd = {
+                        backStack.add(NoteCreateScene)
+                    },
+                    navigateToEdit = { uuid ->
+                        backStack.add(NoteEditScene(uuid))
+                    },
+                    navigateToSettings = {
+                        backStack.add(SettingsScene)
+                    }
+                )
+            }
+            entry<NoteCreateScene> {
+                NoteCreatePane(
+                    modifier = modifier,
+                    navigateUp = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<NoteEditScene> {
+                NoteEditPane(
+                    modifier = modifier,
+                    argument = it.noteId,
+                    navigateUp = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<SettingsScene> {
+                SettingsPane(
+                    modifier = modifier,
+                    navigateToLauncherAfterLogout = {
+                        backStack.clearPostLoginNavKeys()
+                        backStack.add(LauncherScene)
+                    },
+                    navigateUp = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
         }
-
-        composable<NoteMarkDestination.LoginPane> {
-            LoginPane(
-                modifier = Modifier,
-                navigateToRegistration = navController::navigateToRegistration,
-                navigateToAfterLogin = navController::navigateToAfterLogin,
-                navigateUp = navController::navigateAppUp
-            )
-        }
-
-        composable<NoteMarkDestination.RegistrationPane> {
-            RegistrationPane(
-                modifier = Modifier,
-                navigateToLoginFromRegistration = navController::navigateToLoginFromRegistration,
-                navigateUp = navController::navigateAppUp
-            )
-        }
-
-        composable<NoteMarkDestination.NoteListPane> {
-            NoteListPane(
-                modifier = Modifier,
-                navigateToAdd = navController::navigateToAdd,
-                navigateToEdit = navController::navigateToEdit,
-                navigateToSettings = navController::navigateToSettings
-            )
-        }
-
-        composable<NoteMarkDestination.NoteCreatePane> {
-            NoteCreatePane(
-                modifier = Modifier,
-                navigateUp = navController::navigateAppUp
-            )
-        }
-
-        composable<NoteMarkDestination.NoteEditPane> { backStackEntry ->
-            val arguments: NoteMarkDestination.NoteEditPane = backStackEntry.toRoute()
-
-            NoteEditPane(
-                modifier = Modifier,
-                arguments = arguments,
-                navigateUp = navController::navigateAppUp
-            )
-        }
-
-        composable<NoteMarkDestination.SettingsPane> {
-            SettingsPane(
-                modifier = Modifier,
-                navigateUp = navController::navigateAppUp,
-                navigateToLauncherAfterLogout = navController::navigateToLauncherAfterLogout
-            )
-        }
-    }
+    )
 }
 
 @Composable
@@ -159,18 +180,16 @@ private fun LauncherPane(
         }
     }
 
-    BackHandler(
-        enabled = launcherUiModel.loggedInUser == null
-    ) {
-        context?.finish()
-    }
-
     LauncherPane(
         modifier = modifier,
         launcherUiModel = { launcherUiModel },
         navigateToAfterLogin = {
             if (launcherUiModel.loggedInUser == null) {
-                Toast.makeText(context, "Oops!!! Please login first to get started", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    "Oops!!! Please login first to get started",
+                    Toast.LENGTH_LONG
+                ).show()
                 return@LauncherPane
             }
             navigateAfterLogin()
@@ -184,8 +203,7 @@ private fun LauncherPane(
 private fun LoginPane(
     modifier: Modifier = Modifier,
     navigateToRegistration: () -> Unit,
-    navigateToAfterLogin: () -> Unit,
-    navigateUp: () -> Unit
+    navigateToAfterLogin: () -> Unit
 ) {
     val loginPresenter: LoginPresenter = retain { get(clazz = LoginPresenter::class.java) }
     var loginUiModel by remember { mutableStateOf(value = LoginUiModel.Empty) }
@@ -203,16 +221,6 @@ private fun LoginPane(
         }
     }
 
-    /**
-     * To make sure the collection from AppState machine is canceled
-     * Otherwise FlowRedux will throw an exception
-     * */
-    BackHandler(
-        enabled = true,
-    ) {
-        navigateUp()
-    }
-
     LoginPane(
         modifier = modifier,
         loginUiModel = { loginUiModel },
@@ -225,8 +233,7 @@ private fun LoginPane(
 @Composable
 private fun RegistrationPane(
     modifier: Modifier = Modifier,
-    navigateToLoginFromRegistration: () -> Unit,
-    navigateUp: () -> Unit
+    navigateToLoginFromRegistration: () -> Unit
 ) {
     val registrationPresenter: RegistrationPresenter = retain { get(clazz = RegistrationPresenter::class.java) }
     var registrationUiModel by remember { mutableStateOf(value = RegistrationUiModel.Empty) }
@@ -244,16 +251,6 @@ private fun RegistrationPane(
         }
     }
 
-    /**
-     * To make sure the collection from AppState machine is canceled
-     * Otherwise FlowRedux will throw an exception
-     * */
-    BackHandler(
-        enabled = true,
-    ) {
-        navigateUp()
-    }
-
     RegistrationPane(
         modifier = modifier,
         registrationUiModel = { registrationUiModel },
@@ -269,8 +266,6 @@ private fun NoteListPane(
     navigateToEdit: (String) -> Unit,
     navigateToSettings: () -> Unit
 ) {
-    val context = LocalActivity.current
-
     val noteListPresenter: NoteListPresenter = retain { get(clazz = NoteListPresenter::class.java) }
     var noteListUiModel by remember { mutableStateOf(value = NoteListUiModel.Empty) }
     val noteListAction by rememberUpdatedState(newValue = noteListPresenter::processEvent)
@@ -285,16 +280,6 @@ private fun NoteListPane(
         onStopOrDispose {
             scope.cancel()
         }
-    }
-
-    /**
-     * To make sure the collection from AppState machine is canceled
-     * Otherwise FlowRedux will throw an exception
-     * */
-    BackHandler(
-        enabled = true,
-    ) {
-        context?.finish()
     }
 
     NoteListPane(
@@ -330,16 +315,6 @@ private fun NoteCreatePane(
         }
     }
 
-    /**
-     * To make sure the collection from AppState machine is canceled
-     * Otherwise FlowRedux will throw an exception
-     * */
-    BackHandler(
-        enabled = true,
-    ) {
-        navigateUp()
-    }
-
     AddNotePane(
         modifier = modifier,
         addNoteUiModel = { addNoteUiModel },
@@ -351,7 +326,7 @@ private fun NoteCreatePane(
 @Composable
 private fun NoteEditPane(
     modifier: Modifier = Modifier,
-    arguments: NoteMarkDestination.NoteEditPane,
+    argument: String,
     navigateUp: () -> Unit
 ) {
     val editNotePresenter: EditNotePresenter = retain { get(clazz = EditNotePresenter::class.java) }
@@ -360,7 +335,7 @@ private fun NoteEditPane(
 
     val scope = rememberCoroutineScope()
 
-    LifecycleStartEffect(key1 = arguments.noteId) {
+    LifecycleStartEffect(key1 = argument) {
         if (scope.isActive) {
             scope.launchMolecule(mode = RecompositionMode.Immediate) {
                 editNoteUiModel = editNotePresenter.uiModel()
@@ -371,19 +346,9 @@ private fun NoteEditPane(
         }
     }
 
-    /**
-     * To make sure the collection from AppState machine is canceled
-     * Otherwise FlowRedux will throw an exception
-     * */
-    BackHandler(
-        enabled = true,
-    ) {
-        navigateUp()
-    }
-
     EditNotePane(
         modifier = modifier,
-        noteId = arguments.noteId,
+        noteId = argument,
         editNoteUiModel = { editNoteUiModel },
         editNoteAction = { event -> editNoteAction(event) },
         onCloseClicked = { navigateUp() }
@@ -393,8 +358,8 @@ private fun NoteEditPane(
 @Composable
 private fun SettingsPane(
     modifier: Modifier = Modifier,
-    navigateUp: () -> Unit,
-    navigateToLauncherAfterLogout: () -> Unit
+    navigateToLauncherAfterLogout: () -> Unit,
+    navigateUp: () -> Unit
 ) {
     val settingsPresenter: SettingsPresenter = retain { get(clazz = SettingsPresenter::class.java) }
     var settingsUiModel by remember { mutableStateOf(value =  SettingsUiModel.Empty) }
@@ -412,16 +377,6 @@ private fun SettingsPane(
         }
     }
 
-    /**
-     * To make sure the collection from AppState machine is canceled
-     * Otherwise FlowRedux will throw an exception
-     * */
-    BackHandler(
-        enabled = true,
-    ) {
-        navigateUp()
-    }
-
     SettingsPane(
         modifier = modifier,
         settingsUiModel = { settingsUiModel },
@@ -436,87 +391,3 @@ private fun SettingsPane(
         }
     )
 }
-
-private fun NavHostController.navigateToLogin() = navigate(route = NoteMarkDestination.LoginPane) {
-    popUpTo(route = NoteMarkDestination.LauncherPane) {
-        inclusive = true
-    }
-}
-
-private fun NavHostController.navigateAfterLogin() = navigate(route = NoteMarkDestination.NoteListPane) {
-    popUpTo(route = NoteMarkDestination.LauncherPane) {
-        inclusive = true
-    }
-}
-
-/**
- * Start of Navigation routes
- * */
-private object NoteMarkDestination {
-    @Serializable
-    data object RootPane
-
-    @Serializable
-    data object LauncherPane
-
-    @Serializable
-    data object LoginPane
-
-    @Serializable
-    data object RegistrationPane
-
-    @Serializable
-    data object NoteListPane
-
-    @Serializable
-    data object NoteCreatePane
-
-    @Serializable
-    data class NoteEditPane(
-        val noteId: String
-    )
-
-    @Serializable
-    data object SettingsPane
-}
-/**
- * End of Navigation routes
- * */
-
-/**
- * Start of all navigation functions
- * */
-private fun NavHostController.navigateToRegistration() = navigate(route = NoteMarkDestination.RegistrationPane) {
-    popUpTo(route = NoteMarkDestination.LoginPane) {
-        inclusive = true
-    }
-}
-
-private fun NavHostController.navigateToAfterLogin() = navigate(route = NoteMarkDestination.NoteListPane) {
-    popUpTo(route = NoteMarkDestination.LoginPane) {
-        inclusive = true
-    }
-}
-
-private fun NavHostController.navigateToLoginFromRegistration() = navigate(route = NoteMarkDestination.LoginPane) {
-    popUpTo(route = NoteMarkDestination.RegistrationPane) {
-        inclusive = true
-    }
-}
-
-private fun NavHostController.navigateToAdd() = navigate(route = NoteMarkDestination.NoteCreatePane)
-
-private fun NavHostController.navigateToEdit(uuid: String) {
-    navigate(route = NoteMarkDestination.NoteEditPane(noteId = uuid))
-}
-
-private fun NavHostController.navigateToSettings() = navigate(route = NoteMarkDestination.SettingsPane)
-
-private fun NavHostController.navigateToLauncherAfterLogout() = navigate(route = NoteMarkDestination.LauncherPane) {
-    launchSingleTop = true
-}
-
-private fun NavHostController.navigateAppUp() = navigateUp()
-/**
- * End of all navigation functions
- * */
