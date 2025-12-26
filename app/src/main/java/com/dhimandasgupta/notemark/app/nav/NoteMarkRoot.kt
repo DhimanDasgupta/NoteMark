@@ -2,6 +2,10 @@ package com.dhimandasgupta.notemark.app.nav
 
 import android.widget.Toast
 import androidx.activity.compose.LocalActivity
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
@@ -45,64 +50,86 @@ import kotlinx.serialization.Serializable
 import org.koin.java.KoinJavaComponent.get
 
 @Serializable
-data object LauncherScene: PreLoginNavKey
+data object LauncherNavKey: PreLoginNavKey
 
 @Serializable
-data object LoginScene: PreLoginNavKey
+data object LoginNavKey: PreLoginNavKey
 
 @Serializable
-data object RegistrationScene: PreLoginNavKey
+data object RegistrationNavKey: PreLoginNavKey
 
 @Serializable
-data object NoteListScene: PostLoginNavKey
+data object NoteListNavKey: PostLoginNavKey
 
 @Serializable
-data object NoteCreateScene: PostLoginNavKey
+data object NoteCreateNavKey: PostLoginNavKey
 
 @Serializable
-data class NoteEditScene(
+data class NoteEditNavKey(
     val noteId: String
 ): PostLoginNavKey
 
 @Serializable
-data object SettingsScene: PostLoginNavKey
+data object SettingsNavKey: PostLoginNavKey
 
 @Composable
 fun NoteMarkRoot(
     modifier: Modifier
 ) {
-    val backStack = rememberNavBackStack(LauncherScene)
+    val backStack = rememberNavBackStack(LauncherNavKey)
 
     NavDisplay(
         modifier = modifier,
         backStack = backStack,
+        sceneStrategy = SinglePaneSceneStrategy(),
         onBack = { backStack.removeLastOrNull() },
+        transitionSpec = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+            ) { initialOffSet -> initialOffSet } togetherWith slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
+            ) { initialOffSet -> -initialOffSet }
+        },
+        popTransitionSpec = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+            ) { initialOffSet -> -initialOffSet } togetherWith slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
+            ) { initialOffSet -> initialOffSet }
+        },
+        predictivePopTransitionSpec = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+            ) { initialOffSet -> -initialOffSet } + fadeIn() togetherWith slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
+            ) { initialOffSet -> initialOffSet } + fadeOut()
+        },
         entryProvider = entryProvider {
-            entry<LauncherScene> {
+            entry<LauncherNavKey> {
                 LauncherPane(
                     modifier = modifier,
                     navigateAfterLogin = {
                         backStack.clearPreLoginKeys()
-                        backStack.add(NoteListScene)
+                        backStack.add(NoteListNavKey)
                     },
                     navigateToLogin = {
-                        backStack.add(LoginScene)
+                        backStack.add(LoginNavKey)
                     }
                 )
             }
-            entry<LoginScene> {
+            entry<LoginNavKey> {
                 LoginPane(
                     modifier = modifier,
                     navigateToRegistration = {
-                        backStack.add(RegistrationScene)
+                        backStack.add(RegistrationNavKey)
                     },
                     navigateToAfterLogin = {
                         backStack.clearPreLoginKeys()
-                        backStack.add(NoteListScene)
+                        backStack.add(NoteListNavKey)
                     }
                 )
             }
-            entry<RegistrationScene> {
+            entry<RegistrationNavKey> {
                 RegistrationPane(
                     modifier = modifier,
                     navigateToLoginFromRegistration = {
@@ -110,21 +137,21 @@ fun NoteMarkRoot(
                     }
                 )
             }
-            entry<NoteListScene> {
+            entry<NoteListNavKey> {
                 NoteListPane(
                     modifier = modifier,
                     navigateToAdd = {
-                        backStack.add(NoteCreateScene)
+                        backStack.add(NoteCreateNavKey)
                     },
                     navigateToEdit = { uuid ->
-                        backStack.add(NoteEditScene(uuid))
+                        backStack.add(NoteEditNavKey(uuid))
                     },
                     navigateToSettings = {
-                        backStack.add(SettingsScene)
+                        backStack.add(SettingsNavKey)
                     }
                 )
             }
-            entry<NoteCreateScene> {
+            entry<NoteCreateNavKey> {
                 NoteCreatePane(
                     modifier = modifier,
                     navigateUp = {
@@ -132,7 +159,7 @@ fun NoteMarkRoot(
                     }
                 )
             }
-            entry<NoteEditScene> {
+            entry<NoteEditNavKey> {
                 NoteEditPane(
                     modifier = modifier,
                     argument = it.noteId,
@@ -141,12 +168,12 @@ fun NoteMarkRoot(
                     }
                 )
             }
-            entry<SettingsScene> {
+            entry<SettingsNavKey> {
                 SettingsPane(
                     modifier = modifier,
                     navigateToLauncherAfterLogout = {
                         backStack.clearPostLoginNavKeys()
-                        backStack.add(LauncherScene)
+                        backStack.add(LauncherNavKey)
                     },
                     navigateUp = {
                         backStack.removeLastOrNull()
