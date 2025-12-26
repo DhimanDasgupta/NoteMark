@@ -68,7 +68,7 @@ data class NoteEditScene(
 data object SettingsScene: PostLoginNavKey
 
 @Composable
-fun NoteMarkNavigationRoot(
+fun NoteMarkRoot(
     modifier: Modifier
 ) {
     val backStack = rememberNavBackStack(LauncherScene)
