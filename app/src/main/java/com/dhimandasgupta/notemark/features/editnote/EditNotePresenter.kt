@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import org.koin.core.parameter.parametersOf
+import org.koin.java.KoinJavaComponent.get
 
 @Immutable
 data class EditNoteUiModel(
@@ -39,7 +41,8 @@ data class EditNoteUiModel(
 }
 
 class EditNotePresenter(
-    private val editNoteStateMachine: EditNoteStateMachine
+    private val noteId: String,
+    private val editNoteStateMachine: EditNoteStateMachine = get(clazz = EditNoteStateMachine::class.java) { parametersOf(noteId) }
 ) {
     private val events = MutableSharedFlow<EditNoteAction>(extraBufferCapacity = 10)
 
