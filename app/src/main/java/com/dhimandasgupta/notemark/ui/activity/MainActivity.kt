@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.dhimandasgupta.notemark.app.nav.NoteMarkNavigationRoot
+import com.dhimandasgupta.notemark.app.nav.NoteMarkRoot
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             NoteMarkTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NoteMarkNavigationRoot(
+                    NoteMarkRoot(
                         modifier = Modifier.consumeWindowInsets(paddingValues = innerPadding)
                     )
                 }
