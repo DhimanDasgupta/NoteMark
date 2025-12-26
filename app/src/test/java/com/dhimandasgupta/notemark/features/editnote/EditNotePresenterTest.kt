@@ -15,8 +15,10 @@ class EditNotePresenterTest {
         turbineScope {
             // Setup Presenter
             val presenter = EditNotePresenter(
+                noteId = "",
                 editNoteStateMachine = EditNoteStateMachine(
-                    noteMarkRepository = FakeSuccessfulNoteRepository()
+                    noteMarkRepository = FakeSuccessfulNoteRepository(),
+                    noteId = ""
                 )
             )
 

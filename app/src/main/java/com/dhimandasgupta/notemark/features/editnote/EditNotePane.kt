@@ -83,7 +83,6 @@ import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
@@ -91,7 +90,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditNotePane(
     modifier: Modifier = Modifier,
-    noteId: String,
     editNoteUiModel: () -> EditNoteUiModel,
     editNoteAction: (EditNoteAction) -> Unit = {},
     onCloseClicked: () -> Unit = {}
@@ -109,13 +107,6 @@ fun EditNotePane(
             focusManager.clearFocus()
             keyboardController?.hide()
             onCloseClicked()
-        }
-    }
-
-    LaunchedEffect(key1 = noteId) {
-        if (noteId.isNotEmpty()) {
-            delay(timeMillis = 50)
-            editNoteAction(EditNoteAction.LoadNote(uuid = noteId))
         }
     }
 
@@ -561,7 +552,6 @@ private fun EditNotePanePreview() {
         EditNotePane(
             modifier = Modifier,
             editNoteUiModel = { defaultEditNoteUiModel },
-            noteId = "1",
         )
     }
 }

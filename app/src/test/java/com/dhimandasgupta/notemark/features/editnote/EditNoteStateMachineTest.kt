@@ -15,7 +15,8 @@ class EditNoteStateMachineTest {
         turbineScope {
             // Setup state machine
             val stateMachine = EditNoteStateMachine(
-                noteMarkRepository = FakeSuccessfulNoteRepository()
+                noteMarkRepository = FakeFailureNoteRepository(),
+                noteId = ""
             )
 
             // Setup state flow from state machine
@@ -34,7 +35,8 @@ class EditNoteStateMachineTest {
         turbineScope {
             // Setup state machine
             val stateMachine = EditNoteStateMachine(
-                noteMarkRepository = FakeSuccessfulNoteRepository()
+                noteMarkRepository = FakeSuccessfulNoteRepository(),
+                noteId = "1"
             )
 
             // Setup state flow from state machine
@@ -44,7 +46,6 @@ class EditNoteStateMachineTest {
             flow.test {
                 val currentState = awaitItem()
                 assertEquals(EditNoteStateMachine.defaultEditNoteState, currentState)
-                stateMachine.dispatch(EditNoteAction.LoadNote("1"))
                 assertEquals(
                     currentState.copy(
                         title = "title",
@@ -73,7 +74,8 @@ class EditNoteStateMachineTest {
         turbineScope {
             // Setup state machine
             val stateMachine = EditNoteStateMachine(
-                noteMarkRepository = FakeSuccessfulNoteRepository()
+                noteMarkRepository = FakeFailureNoteRepository(),
+                noteId = "1"
             )
 
             // Setup state flow from state machine
@@ -125,7 +127,8 @@ class EditNoteStateMachineTest {
         turbineScope {
             // Setup state machine
             val stateMachine = EditNoteStateMachine(
-                noteMarkRepository = FakeSuccessfulNoteRepository()
+                noteMarkRepository = FakeFailureNoteRepository(),
+                noteId = ""
             )
 
             // Setup state flow from state machine
@@ -155,7 +158,8 @@ class EditNoteStateMachineTest {
         turbineScope {
             // Setup state machine
             val stateMachine = EditNoteStateMachine(
-                noteMarkRepository = FakeSuccessfulNoteRepository()
+                noteMarkRepository = FakeFailureNoteRepository(),
+                noteId = ""
             )
 
             // Setup state flow from state machine
@@ -185,7 +189,8 @@ class EditNoteStateMachineTest {
         turbineScope {
             // Setup state machine
             val stateMachine = EditNoteStateMachine(
-                noteMarkRepository = FakeFailureNoteRepository()
+                noteMarkRepository = FakeFailureNoteRepository(),
+                noteId = "1"
             )
 
             // Setup state flow from state machine
@@ -195,7 +200,6 @@ class EditNoteStateMachineTest {
             flow.test {
                 val currentState = awaitItem()
                 assertEquals(EditNoteStateMachine.defaultEditNoteState, currentState)
-                stateMachine.dispatch(EditNoteAction.LoadNote("1"))
                 expectNoEvents()
             }
         }

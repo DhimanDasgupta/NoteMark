@@ -6,6 +6,9 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
+import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,9 +19,9 @@ import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
@@ -47,6 +50,7 @@ import com.dhimandasgupta.notemark.features.settings.SettingsUiModel
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
 import kotlinx.serialization.Serializable
+import org.koin.core.parameter.parametersOf
 import org.koin.java.KoinJavaComponent.get
 
 @Serializable
@@ -72,16 +76,18 @@ data class NoteEditNavKey(
 @Serializable
 data object SettingsNavKey: PostLoginNavKey
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun NoteMarkRoot(
     modifier: Modifier
 ) {
     val backStack = rememberNavBackStack(LauncherNavKey)
+    val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
 
     NavDisplay(
         modifier = modifier,
         backStack = backStack,
-        sceneStrategy = SinglePaneSceneStrategy(),
+        sceneStrategy = sceneStrategy,
         onBack = { backStack.removeLastOrNull() },
         transitionSpec = {
             slideIntoContainer(
@@ -137,7 +143,9 @@ fun NoteMarkRoot(
                     }
                 )
             }
-            entry<NoteListNavKey> {
+            entry<NoteListNavKey>(
+                metadata = ListDetailSceneStrategy.listPane()
+            ) {
                 NoteListPane(
                     modifier = modifier,
                     navigateToAdd = {
@@ -151,7 +159,9 @@ fun NoteMarkRoot(
                     }
                 )
             }
-            entry<NoteCreateNavKey> {
+            entry<NoteCreateNavKey>(
+                metadata = ListDetailSceneStrategy.detailPane()
+            ) {
                 NoteCreatePane(
                     modifier = modifier,
                     navigateUp = {
@@ -159,7 +169,9 @@ fun NoteMarkRoot(
                     }
                 )
             }
-            entry<NoteEditNavKey> {
+            entry<NoteEditNavKey>(
+                metadata = ListDetailSceneStrategy.detailPane()
+            ) {
                 NoteEditPane(
                     modifier = modifier,
                     argument = it.noteId,
@@ -168,7 +180,9 @@ fun NoteMarkRoot(
                     }
                 )
             }
-            entry<SettingsNavKey> {
+            entry<SettingsNavKey>(
+                metadata = ListDetailSceneStrategy.extraPane()
+            ) {
                 SettingsPane(
                     modifier = modifier,
                     navigateToLauncherAfterLogout = {
@@ -356,7 +370,12 @@ private fun NoteEditPane(
     argument: String,
     navigateUp: () -> Unit
 ) {
-    val editNotePresenter: EditNotePresenter = retain { get(clazz = EditNotePresenter::class.java) }
+    val editNotePresenter: EditNotePresenter = retain {
+        get(
+            clazz = EditNotePresenter::class.java,
+            parameters = { parametersOf(argument) }
+        )
+    }
     var editNoteUiModel by remember { mutableStateOf(value = EditNoteUiModel.Empty) }
     val editNoteAction by rememberUpdatedState(newValue = editNotePresenter::processEvent)
 
@@ -375,7 +394,6 @@ private fun NoteEditPane(
 
     EditNotePane(
         modifier = modifier,
-        noteId = argument,
         editNoteUiModel = { editNoteUiModel },
         editNoteAction = { event -> editNoteAction(event) },
         onCloseClicked = { navigateUp() }

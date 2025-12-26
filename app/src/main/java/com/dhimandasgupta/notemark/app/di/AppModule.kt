@@ -241,8 +241,15 @@ val appModule = module {
     factory { AddNoteStateMachine(noteMarkRepository = get()) }
     factoryOf(constructor = ::AddNotePresenter)
 
-    factory { EditNoteStateMachine(noteMarkRepository = get()) }
-    factoryOf(constructor = ::EditNotePresenter)
+    factory { params ->
+        EditNoteStateMachine(
+            noteMarkRepository = get(),
+            noteId = params[0]
+        )
+    }
+    factory { params ->
+        EditNotePresenter(noteId = params[0])
+    }
 
     factoryOf(constructor = ::SettingsPresenter)
 
