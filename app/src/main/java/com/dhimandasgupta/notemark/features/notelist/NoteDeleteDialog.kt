@@ -1,6 +1,7 @@
 package com.dhimandasgupta.notemark.features.notelist
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,10 +17,13 @@ import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.SecureFlagPolicy
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
@@ -32,25 +36,39 @@ fun NoteDeleteDialog(
     onDismiss: () -> Unit = {}
 ) {
     Dialog(
-        onDismissRequest = { onDismiss() }
+        onDismissRequest = { onDismiss() },
+        properties = DialogProperties(
+            usePlatformDefaultWidth = true,
+            securePolicy = SecureFlagPolicy.SecureOn
+        )
     ) {
         Column(
             modifier = modifier
-                .clip(shape = shapes.medium)
+                .padding(all = 16.dp)
                 .wrapContentSize()
+                .clip(shape = shapes.medium)
+                .border(
+                    width = 0.5.dp,
+                    color = colorScheme.onSurfaceVariant,
+                    shape = shapes.medium
+                )
                 .background(color = colorScheme.surfaceContainerLowest)
-                .padding(all = 32.dp)
+                .padding(all = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = "Are you sure you want to delete this note?",
-                style = typography.titleMedium
+                style = typography.titleMedium,
+                color = colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(height = 16.dp))
 
             Text(
                 text = "Click Discard to delete your note, else click Cancel to keep editing.",
-                style = typography.bodyLarge
+                style = typography.bodyLarge,
+                color = colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(height = 32.dp))

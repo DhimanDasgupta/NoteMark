@@ -112,7 +112,7 @@ fun NoteMarkRoot(
         },
         entryProvider = entryProvider {
             entry<LauncherNavKey> {
-                LauncherPane(
+                LauncherEntry(
                     modifier = modifier,
                     navigateAfterLogin = {
                         backStack.clearPreLoginKeys()
@@ -124,7 +124,7 @@ fun NoteMarkRoot(
                 )
             }
             entry<LoginNavKey> {
-                LoginPane(
+                LoginEntry(
                     modifier = modifier,
                     navigateToRegistration = {
                         backStack.add(RegistrationNavKey)
@@ -136,7 +136,7 @@ fun NoteMarkRoot(
                 )
             }
             entry<RegistrationNavKey> {
-                RegistrationPane(
+                RegistrationEntry(
                     modifier = modifier,
                     navigateToLoginFromRegistration = {
                         backStack.removeLastOrNull()
@@ -146,7 +146,7 @@ fun NoteMarkRoot(
             entry<NoteListNavKey>(
                 metadata = ListDetailSceneStrategy.listPane()
             ) {
-                NoteListPane(
+                NoteListEntry(
                     modifier = modifier,
                     navigateToAdd = {
                         backStack.add(NoteCreateNavKey)
@@ -162,7 +162,7 @@ fun NoteMarkRoot(
             entry<NoteCreateNavKey>(
                 metadata = ListDetailSceneStrategy.detailPane()
             ) {
-                NoteCreatePane(
+                NoteCreateEntry(
                     modifier = modifier,
                     navigateUp = {
                         backStack.removeLastOrNull()
@@ -172,7 +172,7 @@ fun NoteMarkRoot(
             entry<NoteEditNavKey>(
                 metadata = ListDetailSceneStrategy.detailPane()
             ) {
-                NoteEditPane(
+                NoteEditEntry(
                     modifier = modifier,
                     argument = it.noteId,
                     navigateUp = {
@@ -183,7 +183,7 @@ fun NoteMarkRoot(
             entry<SettingsNavKey>(
                 metadata = ListDetailSceneStrategy.extraPane()
             ) {
-                SettingsPane(
+                SettingsEntry(
                     modifier = modifier,
                     navigateToLauncherAfterLogout = {
                         backStack.clearPostLoginNavKeys()
@@ -199,7 +199,7 @@ fun NoteMarkRoot(
 }
 
 @Composable
-private fun LauncherPane(
+private fun LauncherEntry(
     modifier: Modifier = Modifier,
     navigateAfterLogin: () -> Unit,
     navigateToLogin: () -> Unit
@@ -241,7 +241,7 @@ private fun LauncherPane(
 }
 
 @Composable
-private fun LoginPane(
+private fun LoginEntry(
     modifier: Modifier = Modifier,
     navigateToRegistration: () -> Unit,
     navigateToAfterLogin: () -> Unit
@@ -272,7 +272,7 @@ private fun LoginPane(
 }
 
 @Composable
-private fun RegistrationPane(
+private fun RegistrationEntry(
     modifier: Modifier = Modifier,
     navigateToLoginFromRegistration: () -> Unit
 ) {
@@ -301,7 +301,7 @@ private fun RegistrationPane(
 }
 
 @Composable
-private fun NoteListPane(
+private fun NoteListEntry(
     modifier: Modifier = Modifier,
     navigateToAdd: () -> Unit,
     navigateToEdit: (String) -> Unit,
@@ -335,7 +335,7 @@ private fun NoteListPane(
 }
 
 @Composable
-private fun NoteCreatePane(
+private fun NoteCreateEntry(
     modifier: Modifier = Modifier,
     navigateUp: () -> Unit
 ) {
@@ -365,7 +365,7 @@ private fun NoteCreatePane(
 }
 
 @Composable
-private fun NoteEditPane(
+private fun NoteEditEntry(
     modifier: Modifier = Modifier,
     argument: String,
     navigateUp: () -> Unit
@@ -401,7 +401,7 @@ private fun NoteEditPane(
 }
 
 @Composable
-private fun SettingsPane(
+private fun SettingsEntry(
     modifier: Modifier = Modifier,
     navigateToLauncherAfterLogout: () -> Unit,
     navigateUp: () -> Unit
