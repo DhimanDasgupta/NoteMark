@@ -95,6 +95,7 @@ sqldelight {
     databases {
         create("NoteMarkDatabase") {
             packageName.set("com.dhimandasgupta.notemark.database")
+            generateAsync.set(true)
         }
     }
 }
@@ -147,6 +148,7 @@ dependencies {
     // Flow Redux
     implementation(libs.flow.redux.jvm)
     implementation(libs.flow.redux.compose)
+    implementation(libs.flow.redux)
 
     // Molecule
     implementation(libs.molecule)
@@ -179,6 +181,8 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.androidx.material3.adaptive.navigation3)
+
+    implementation(libs.timber)
 
     // Protobuf
     implementation(libs.kotlin.protobuf)

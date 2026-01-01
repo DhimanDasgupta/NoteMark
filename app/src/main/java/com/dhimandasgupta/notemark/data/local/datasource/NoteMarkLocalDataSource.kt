@@ -77,7 +77,7 @@ class NoteMarkLocalDataSourceImpl(
             uuid = uuid,
         )
 
-        return@withContext (if (result.value == 1L) {
+        return@withContext (if (result == 1L) {
             queries.getNoteByUUID(uuid).executeAsOne()
         } else {
             null
@@ -95,7 +95,7 @@ class NoteMarkLocalDataSourceImpl(
                 synced = false
             )
 
-            return@withContext (if (result.value == 1L) {
+            return@withContext (if (result == 1L) {
                 noteEntity
             } else {
                 null
@@ -139,19 +139,19 @@ class NoteMarkLocalDataSourceImpl(
     override suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean =
         withContext(context = Dispatchers.IO + NonCancellable) {
             val result = queries.markNoteAsDeletedByUUID(uuid = noteEntity.uuid)
-            return@withContext result.value == 1L
+            return@withContext result == 1L
         }
 
     override suspend fun deleteNote(noteEntity: NoteEntity) =
         withContext(context = Dispatchers.IO + NonCancellable) {
             val result = queries.deleteNoteByUUID(uuid = noteEntity.uuid)
-            return@withContext result.value == 1L
+            return@withContext result == 1L
         }
 
     override suspend fun deleteAllNotes() = withContext(context = Dispatchers.IO + NonCancellable) {
         val result = queries.transactionWithResult {
             queries.deleteAll()
         }
-        return@withContext result.value == 1L
+        return@withContext result == 1L
     }
 }

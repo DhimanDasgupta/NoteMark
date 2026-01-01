@@ -5,6 +5,8 @@ package com.dhimandasgupta.notemark.app.di
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.dataStoreFile
+import androidx.sqlite.db.SupportSQLiteDatabase
+import app.cash.sqldelight.async.coroutines.synchronous
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.dhimandasgupta.notemark.BuildConfig
@@ -79,6 +81,7 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import timber.log.Timber
 
 // Define unique names for your DataStores
 private enum class DataStoreType {
@@ -204,9 +207,48 @@ val appModule = module {
     }
     single {
         AndroidSqliteDriver(
-            NoteMarkDatabase.Schema,
+            schema = NoteMarkDatabase.Schema.synchronous(),
             context = androidContext(),
-            name = "app.db"
+            name = "app.db",
+            callback = object : AndroidSqliteDriver.Callback(NoteMarkDatabase.Schema.synchronous()) {
+                override fun onCreate(db: SupportSQLiteDatabase) {
+                    super.onCreate(db)
+                    Timber.d("Database created: onCreate, $db")
+                }
+
+                override fun onConfigure(db: SupportSQLiteDatabase) {
+                    super.onConfigure(db)
+                    Timber.d("Database configured: onConfigure, $db")
+                }
+
+                override fun onCorruption(db: SupportSQLiteDatabase) {
+                    super.onCorruption(db)
+                    Timber.d("Database corrupted: onCorruption, $db")
+                }
+
+                override fun onDowngrade(
+                    db: SupportSQLiteDatabase,
+                    oldVersion: Int,
+                    newVersion: Int
+                ) {
+                    super.onDowngrade(db, oldVersion, newVersion)
+                    Timber.d("Database downgraded: onDowngrade, $db, oldVersion: $oldVersion, newVersion: $newVersion")
+                }
+
+                override fun onOpen(db: SupportSQLiteDatabase) {
+                    super.onOpen(db)
+                    Timber.d("Database opened: onOpen, $db")
+                }
+
+                override fun onUpgrade(
+                    db: SupportSQLiteDatabase,
+                    oldVersion: Int,
+                    newVersion: Int
+                ) {
+                    super.onUpgrade(db, oldVersion, newVersion)
+                    Timber.d("Database upgraded: onUpgrade, $db, oldVersion: $oldVersion, newVersion: $newVersion")
+                }
+            }
         )
     } bind SqlDriver::class
     single { NoteMarkDatabase(driver = get()) }
