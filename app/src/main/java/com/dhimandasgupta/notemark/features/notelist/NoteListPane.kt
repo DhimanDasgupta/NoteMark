@@ -47,6 +47,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -56,7 +57,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -68,8 +71,6 @@ import com.dhimandasgupta.notemark.common.convertIsoToRelativeYearFormat
 import com.dhimandasgupta.notemark.common.extensions.formatUserName
 import com.dhimandasgupta.notemark.common.extensions.setDarkStatusBarIcons
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
-import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
-import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.designsystem.LimitedText
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkFAB
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
@@ -200,22 +201,10 @@ private fun NoteListWithNotes(
     onSettingsClicked: () -> Unit = {},
     onProfileClicked: () -> Unit = {},
 ) {
-    val layoutType = getDeviceLayoutType()
-    val columnCount = remember(key1 = layoutType) {
-        when (layoutType) {
-            DeviceLayoutType.PHONE_PORTRAIT -> 2
-            DeviceLayoutType.PHONE_LANDSCAPE -> 3
-            DeviceLayoutType.TABLET_LAYOUT -> 4
-        }
-    }
+    var columnCount by remember { mutableIntStateOf(value = 2) }
+    var maxLength by remember { mutableIntStateOf(value = 150) }
 
-    val maxLength = remember(key1 = layoutType) {
-        when (layoutType) {
-            DeviceLayoutType.PHONE_PORTRAIT -> 150
-            DeviceLayoutType.PHONE_LANDSCAPE -> 200
-            DeviceLayoutType.TABLET_LAYOUT -> 250
-        }
-    }
+    val density = LocalDensity.current
 
     val scrollState = rememberLazyStaggeredGridState()
     val shouldShowFAB by remember {
@@ -225,7 +214,23 @@ private fun NoteListWithNotes(
     }
 
     Column(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .onSizeChanged { intSize ->
+                val widthInDp = with(density) { intSize.width.toDp() }
+
+                columnCount = when {
+                    widthInDp < 600.dp -> 2
+                    widthInDp < 840.dp -> 3
+                    else -> 4
+                }
+
+                maxLength = when {
+                    widthInDp < 600.dp -> 150
+                    widthInDp < 840.dp -> 250
+                    else -> 300
+                }
+            }
     ) {
         NoteListPaneToolbar(
             modifier = Modifier,
