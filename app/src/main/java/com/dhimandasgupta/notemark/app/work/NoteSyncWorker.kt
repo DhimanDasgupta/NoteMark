@@ -63,7 +63,6 @@ class NoteSyncWorker(
     }
 
     private suspend fun executeSuccess(noteResponse: NoteResponse) = supervisorScope {
-        val allRemoteNotes = noteResponse
 
         // Delete all Remote notes waiting to be deleted.
         val deleteNotesDeferred = async {
@@ -75,7 +74,7 @@ class NoteSyncWorker(
         val updateOrUploadNotesDeferred = async {
             val toBeSyncedNotes = noteMarkRepository.getAllNonSyncedNotes()
             updateOrUploadNotes(
-                remoteNotes = allRemoteNotes.notes,
+                remoteNotes = noteResponse.notes,
                 notes = toBeSyncedNotes
             )
         }

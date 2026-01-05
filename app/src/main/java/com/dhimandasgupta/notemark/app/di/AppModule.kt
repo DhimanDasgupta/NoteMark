@@ -1,5 +1,3 @@
-@file:Suppress("UNCHECKED_CAST")
-
 package com.dhimandasgupta.notemark.app.di
 
 import androidx.datastore.core.DataStore
@@ -99,7 +97,7 @@ val appModule = module {
     ) {
         CoroutineScope(
             context = Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { context, throwable ->
-                println(throwable.message ?: "CoroutineExceptionHandler got $throwable in ${context.job} and ${Thread.currentThread()}")
+                Timber.e(message = "CoroutineExceptionHandler got $throwable in ${context.job} and ${Thread.currentThread()}")
             }
         )
     }
