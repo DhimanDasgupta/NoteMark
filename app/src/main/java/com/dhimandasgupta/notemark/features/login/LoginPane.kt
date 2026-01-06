@@ -135,7 +135,7 @@ private fun PhoneLandscapeLayout(
     Row(
         modifier = modifier
             .padding(
-                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding() + 8.dp,
             )
             .clip(
                 shape = RoundedCornerShape(
@@ -188,7 +188,7 @@ private fun TabletLayout(
     Column(
         modifier = modifier
             .padding(
-                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding() + 8.dp,
                 start = WindowInsets.systemBars.asPaddingValues()
                     .calculateLeftPadding(LayoutDirection.Ltr),
                 end = WindowInsets.systemBars.asPaddingValues()
@@ -230,7 +230,7 @@ private fun PhonePortraitLayout(
     Column(
         modifier = modifier
             .padding(
-                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding() + 8.dp,
                 start = WindowInsets.systemBars.asPaddingValues()
                     .calculateLeftPadding(LayoutDirection.Ltr),
                 end = WindowInsets.systemBars.asPaddingValues()

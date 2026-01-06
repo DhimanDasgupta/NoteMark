@@ -214,7 +214,7 @@ private fun PhonePortraitLayout(
     Column(
         modifier = modifier
             .padding(
-                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding() + 8.dp,
                 start = WindowInsets.systemBars.asPaddingValues()
                     .calculateLeftPadding(LayoutDirection.Ltr),
                 end = WindowInsets.systemBars.asPaddingValues()
@@ -243,7 +243,9 @@ private fun PhonePortraitLayout(
 }
 
 @Composable
-private fun LeftPane(modifier: Modifier = Modifier) {
+private fun LeftPane(
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(space = 8.dp)
