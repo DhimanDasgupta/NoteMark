@@ -61,6 +61,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -77,6 +78,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
+import com.dhimandasgupta.notemark.ui.common.trackRecompositions
 import kotlinx.coroutines.delay
 
 @Composable
@@ -490,7 +492,9 @@ fun ThreeBouncingDots(
     dotStartDelayMillis: Int = 150 // Staggered delay for each dot
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .testTag(tag = ThreeBouncingDotsTag.threeBouncingDots)
+            .trackRecompositions(),
         verticalAlignment = Alignment.Bottom, // Align to bottom so they bounce from the same baseline
         horizontalArrangement = Arrangement.spacedBy(space = spaceBetweenDots)
     ) {
@@ -516,6 +520,10 @@ fun ThreeBouncingDots(
             delayMillis = dotStartDelayMillis * 2 // Third dot is further delayed
         )
     }
+}
+
+object ThreeBouncingDotsTag {
+    const val threeBouncingDots = "ThreeBouncingDots"
 }
 
 @Composable
