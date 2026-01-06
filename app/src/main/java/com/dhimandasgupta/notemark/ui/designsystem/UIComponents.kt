@@ -493,7 +493,7 @@ fun ThreeBouncingDots(
 ) {
     Row(
         modifier = modifier
-            .testTag(tag = ThreeBouncingDotsTag.ThreeBouncingDots)
+            .testTag(tag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS)
             .trackRecompositions(),
         verticalAlignment = Alignment.Bottom, // Align to bottom so they bounce from the same baseline
         horizontalArrangement = Arrangement.spacedBy(space = spaceBetweenDots)
@@ -523,7 +523,7 @@ fun ThreeBouncingDots(
 }
 
 object ThreeBouncingDotsTag {
-    const val ThreeBouncingDots = "ThreeBouncingDots"
+    const val THREE_BOUNCING_DOTS = "ThreeBouncingDots"
 }
 
 @Composable

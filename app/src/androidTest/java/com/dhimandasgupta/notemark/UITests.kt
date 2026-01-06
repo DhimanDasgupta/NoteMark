@@ -20,8 +20,8 @@ class UITests {
             ThreeBouncingDots()
         }
         composeTestRule.mainClock.advanceTimeBy(2_000)
-        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.ThreeBouncingDots).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.ThreeBouncingDots).assertRecompositionCount(1)
+        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS).assertRecompositionCount(1)
     }
 
     @Test
@@ -31,8 +31,8 @@ class UITests {
             ThreeBouncingDots()
         }
         composeTestRule.mainClock.advanceTimeBy(6_000)
-        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.ThreeBouncingDots).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.ThreeBouncingDots).assertRecompositionCount(1)
+        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS).assertRecompositionCount(1)
     }
 
     @Test
@@ -42,7 +42,7 @@ class UITests {
             ThreeBouncingDots()
         }
         composeTestRule.mainClock.advanceTimeBy(10_000)
-        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.ThreeBouncingDots).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.ThreeBouncingDots).assertRecompositionCount(1)
+        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS).assertRecompositionCount(1)
     }
 }
