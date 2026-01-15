@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -54,16 +56,18 @@ class EditNotePresenter(
         LaunchedEffect(key1 = Unit) {
             editNoteStateMachine.state
                 .onStart { emit(value = EditNoteStateMachine.defaultEditNoteState) }
-                .map { editNoteState -> mapToEditNoteUiModel(editNoteState) }
+                .filter { editNoteState -> editNoteState.noteEntity != null && editNoteState.title.isNotEmpty() && editNoteState.content.isNotEmpty() }
+                .map { editNoteState ->
+                    editNoteUiModel = mapToEditNoteUiModel(editNoteState)
+                }
                 .flowOn(context = Dispatchers.Default)
                 .cancellable()
+                .distinctUntilChanged()
                 .catch { throwable ->
                     if (throwable is CancellationException) throw throwable
                     // else can can be something like page level error etc.
                 }
-                .collectLatest { uiModel ->
-                    editNoteUiModel = uiModel
-                }
+                .collectLatest {}
         }
 
         // Send the Events to the State Machine through Actions

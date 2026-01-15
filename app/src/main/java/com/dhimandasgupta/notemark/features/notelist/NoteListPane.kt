@@ -3,7 +3,7 @@ package com.dhimandasgupta.notemark.features.notelist
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.keyframesWithSpline
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -458,10 +458,13 @@ private fun NoteGrid(
                         dampingRatio = Spring.DampingRatioLowBouncy
                     ),
                     placementSpec =
-                        spring(
-                            stiffness = Spring.StiffnessVeryLow,
-                            visibilityThreshold = IntOffset.VisibilityThreshold,
-                        ),
+                        keyframesWithSpline {
+                            IntOffset(0, 200) at 0
+                            IntOffset(0, 100) at 75
+                            IntOffset(0, 50) at 225
+                            IntOffset(0, 0) at 375
+                            durationMillis = 375
+                        },
                     fadeOutSpec = spring(
                         stiffness = Spring.StiffnessVeryLow,
                         dampingRatio = Spring.DampingRatioLowBouncy

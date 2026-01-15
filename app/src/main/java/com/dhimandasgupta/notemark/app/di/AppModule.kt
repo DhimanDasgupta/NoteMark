@@ -282,12 +282,14 @@ val appModule = module {
     factoryOf(constructor = ::AddNotePresenter)
 
     factory { params ->
+        if (params.isEmpty()) throw IllegalArgumentException("NoteId is required")
         EditNoteStateMachine(
             noteMarkRepository = get(),
             noteId = params[0]
         )
     }
     factory { params ->
+        require(params.isNotEmpty()) { "NoteId is required" }
         EditNotePresenter(noteId = params[0])
     }
 
