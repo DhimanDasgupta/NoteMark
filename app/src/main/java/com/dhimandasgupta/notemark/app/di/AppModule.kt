@@ -289,7 +289,7 @@ val appModule = module {
         )
     }
     factory { params ->
-        require(params.isEmpty()) { "NoteId is required" }
+        require(params.isNotEmpty()) { "NoteId is required" }
         EditNotePresenter(noteId = params[0])
     }
 
