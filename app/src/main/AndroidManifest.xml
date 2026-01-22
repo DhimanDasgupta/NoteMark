@@ -16,6 +16,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NoteMark.Splash">
 
+        <profileable android:shell="true" tools:targetApi="29" />
+
         <activity
             android:name=".ui.activity.MainActivity"
             android:exported="true"

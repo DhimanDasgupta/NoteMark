@@ -60,6 +60,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -134,7 +138,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.bundles.compose)
     debugImplementation(libs.bundles.compose.debug)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.performance.tracing)
     androidTestImplementation(libs.androidx.ui.test.junit4)
 
     // Koin

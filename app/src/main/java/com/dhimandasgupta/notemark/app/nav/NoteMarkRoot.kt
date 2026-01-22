@@ -49,32 +49,8 @@ import com.dhimandasgupta.notemark.features.settings.SettingsPresenter
 import com.dhimandasgupta.notemark.features.settings.SettingsUiModel
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
-import kotlinx.serialization.Serializable
 import org.koin.core.parameter.parametersOf
 import org.koin.java.KoinJavaComponent.get
-
-@Serializable
-data object LauncherNavKey: PreLoginNavKey
-
-@Serializable
-data object LoginNavKey: PreLoginNavKey
-
-@Serializable
-data object RegistrationNavKey: PreLoginNavKey
-
-@Serializable
-data object NoteListNavKey: PostLoginNavKey
-
-@Serializable
-data object NoteCreateNavKey: PostLoginNavKey
-
-@Serializable
-data class NoteEditNavKey(
-    val noteId: String
-): PostLoginNavKey
-
-@Serializable
-data object SettingsNavKey: PostLoginNavKey
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
