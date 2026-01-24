@@ -154,6 +154,7 @@ dependencies {
 
     // Flow Redux
     implementation(libs.flow.redux)
+    implementation(libs.flow.redux.extension.jvm)
 
     // Molecule
     implementation(libs.molecule)

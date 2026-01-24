@@ -74,6 +74,7 @@ koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", versi
 koin-androidx-compose-navigation = { module = "io.insert-koin:koin-androidx-compose-navigation", version.ref = "koinBom" }
 
 flow-redux = { module = "com.freeletics.flowredux2:flowredux", version.ref = "flowRedux2" }
+flow-redux-extension-jvm = { module = "com.freeletics.flowredux2:extensions-jvm", version.ref = "flowRedux2" }
 
 molecule = { group = "app.cash.molecule", name = "molecule-runtime", version.ref = "molecule-runtime" }
 
