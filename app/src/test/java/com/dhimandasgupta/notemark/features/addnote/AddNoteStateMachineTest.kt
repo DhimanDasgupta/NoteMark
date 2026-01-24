@@ -18,7 +18,8 @@ class AddNoteStateMachineTest {
             )
 
             // Setup state flow from state machine
-            val flow = stateMachine.state
+            val stateMachineInstance = stateMachine.launchIn(backgroundScope)
+            val flow = stateMachineInstance.state
 
             // Start flow validation
             flow.test {
@@ -37,14 +38,15 @@ class AddNoteStateMachineTest {
             )
 
             // Setup state flow from state machine
-            val flow = stateMachine.state
+            val stateMachineInstance = stateMachine.launchIn(backgroundScope)
+            val flow = stateMachineInstance.state
 
             // Start flow validation
             flow.test {
                 val currentState = awaitItem()
-                stateMachine.dispatch(AddNoteAction.UpdateTitle("Title"))
+                stateMachineInstance.dispatch(AddNoteAction.UpdateTitle("Title"))
                 assertEquals(currentState.copy(title = "Title"), awaitItem())
-                stateMachine.dispatch(AddNoteAction.UpdateContent("Content"))
+                stateMachineInstance.dispatch(AddNoteAction.UpdateContent("Content"))
                 assertEquals(currentState.copy(title = "Title", content = "Content"), awaitItem())
             }
         }
@@ -59,16 +61,17 @@ class AddNoteStateMachineTest {
             )
 
             // Setup state flow from state machine
-            val flow = stateMachine.state
+            val stateMachineInstance = stateMachine.launchIn(backgroundScope)
+            val flow = stateMachineInstance.state
 
             // Start flow validation
             flow.test {
                 val currentState = awaitItem()
-                stateMachine.dispatch(AddNoteAction.UpdateTitle("Title"))
+                stateMachineInstance.dispatch(AddNoteAction.UpdateTitle("Title"))
                 assertEquals(currentState.copy(title = "Title"), awaitItem())
-                stateMachine.dispatch(AddNoteAction.UpdateContent("Content"))
+                stateMachineInstance.dispatch(AddNoteAction.UpdateContent("Content"))
                 assertEquals(currentState.copy(title = "Title", content = "Content"), awaitItem())
-                stateMachine.dispatch(AddNoteAction.Save)
+                stateMachineInstance.dispatch(AddNoteAction.Save)
                 assertEquals(currentState.copy(title = "Title", content = "Content", saved = true), awaitItem())
             }
         }
@@ -83,16 +86,17 @@ class AddNoteStateMachineTest {
             )
 
             // Setup state flow from state machine
-            val flow = stateMachine.state
+            val stateMachineInstance = stateMachine.launchIn(backgroundScope)
+            val flow = stateMachineInstance.state
 
             // Start flow validation
             flow.test {
                 val currentState = awaitItem()
-                stateMachine.dispatch(AddNoteAction.UpdateTitle("Title"))
+                stateMachineInstance.dispatch(AddNoteAction.UpdateTitle("Title"))
                 assertEquals(currentState.copy(title = "Title"), awaitItem())
-                stateMachine.dispatch(AddNoteAction.UpdateContent("Content"))
+                stateMachineInstance.dispatch(AddNoteAction.UpdateContent("Content"))
                 assertEquals(currentState.copy(title = "Title", content = "Content"), awaitItem())
-                stateMachine.dispatch(AddNoteAction.Save)
+                stateMachineInstance.dispatch(AddNoteAction.Save)
                 // Since on Failed Save, the state doesn't change hence no new items are emitted in the flow.
                 expectNoEvents()
             }

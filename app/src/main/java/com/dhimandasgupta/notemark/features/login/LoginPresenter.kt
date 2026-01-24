@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 
 @Immutable
 data class LoginUiModel(
@@ -40,30 +41,34 @@ class LoginPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            loginStateMachine.state
-                .flowOn(context = Dispatchers.Default)
-                .onStart { emit(value = LoginStateMachine.defaultLoginState) }
-                .cancellable()
-                .catch { throwable ->
-                    if (throwable is CancellationException) throw throwable
-                    // else can can be something like page level error etc.
-                }
-                .collect { loginState ->
-                    loginUiModel = LoginUiModel(
-                        email = loginState.email,
-                        password = loginState.password,
-                        emailError = loginState.emailError,
-                        passwordError = loginState.passwordError,
-                        loginEnabled = loginState.loginEnabled,
-                        loginSuccess = loginState.loginSuccess
-                    )
-                }
-        }
+            val loginSM = loginStateMachine.launchIn(this)
 
-        // Send the Events to the State Machine through Actions
-        LaunchedEffect(key1 = Unit) {
-            events.collect { loginAction ->
-                loginStateMachine.dispatch(loginAction)
+            launch {
+                loginSM.state
+                    //.flowOn(context = Dispatchers.Default)
+                    .onStart { emit(value = LoginStateMachine.defaultLoginState) }
+                    .cancellable()
+                    .catch { throwable ->
+                        if (throwable is CancellationException) throw throwable
+                        // else can can be something like page level error etc.
+                    }
+                    .collect { loginState ->
+                        loginUiModel = LoginUiModel(
+                            email = loginState.email,
+                            password = loginState.password,
+                            emailError = loginState.emailError,
+                            passwordError = loginState.passwordError,
+                            loginEnabled = loginState.loginEnabled,
+                            loginSuccess = loginState.loginSuccess
+                        )
+                    }
+            }
+
+            // Send the Events to the State Machine through Actions
+            launch {
+                events.collect { loginAction ->
+                    loginSM.dispatch(loginAction)
+                }
             }
         }
 

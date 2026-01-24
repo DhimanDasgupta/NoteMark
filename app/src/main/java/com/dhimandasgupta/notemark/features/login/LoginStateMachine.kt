@@ -7,8 +7,9 @@ import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
 import com.dhimandasgupta.notemark.data.remote.model.LoginRequest
 import com.dhimandasgupta.notemark.features.login.LoginAction.EmailEntered
 import com.dhimandasgupta.notemark.features.login.LoginAction.PasswordEntered
+import com.freeletics.flowredux2.FlowReduxStateMachineFactory
+import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 
 @Immutable
 data class LoginState(
@@ -31,42 +32,40 @@ sealed interface LoginAction {
 @OptIn(ExperimentalCoroutinesApi::class)
 class LoginStateMachine(
     val noteMarkApi: NoteMarkApi
-) : StateMachine<LoginState, LoginAction>(initialState = defaultLoginState) {
+) : FlowReduxStateMachineFactory<LoginState, LoginAction>() {
     init {
         spec {
+            initializeWith { defaultLoginState }
             inState<LoginState> {
-                on<EmailEntered> { action, state ->
-                    val modifiedState = state.snapshot.copy(email = action.email)
-                    state.mutate { modifiedState.validateNonEmptyInputs() }
+                on<EmailEntered> { action ->
+                    mutate { copy(email = action.email).validateNonEmptyInputs() }
                 }
-                on<PasswordEntered> { action, state ->
-                    val modifiedState = state.snapshot.copy(password = action.password)
-                    state.mutate { modifiedState.validateNonEmptyInputs() }
+                on<PasswordEntered> { action ->
+                    mutate { copy(password = action.password).validateNonEmptyInputs() }
                 }
-                on<LoginAction.HideLoginButton> { _, state ->
-                    val modifiedState = state.snapshot.copy(loginEnabled = false)
-                    state.mutate { modifiedState }
+                on<LoginAction.HideLoginButton> { _ ->
+                    mutate { copy(loginEnabled = false) }
                 }
-                on<LoginAction.LoginClicked> { _, state ->
-                    val modifiedState = state.snapshot.validateInputs()
+                on<LoginAction.LoginClicked> { _ ->
+                    val modifiedState = snapshot.validateInputs()
 
                     if (modifiedState.emailError?.isNotEmpty() == true && modifiedState.passwordError?.isNotEmpty() == true) {
-                        return@on state.mutate { modifiedState }
+                        return@on mutate { modifiedState }
                     }
 
                     noteMarkApi.login(
                         request = LoginRequest(
-                            email = state.snapshot.email,
-                            password = state.snapshot.password
+                            email = snapshot.email,
+                            password = snapshot.password
                         )
                     ).fold(onSuccess = {
-                        state.mutate { state.snapshot.copy(loginSuccess = true, loginEnabled = true) }
+                        mutate { copy(loginSuccess = true, loginEnabled = true) }
                     }, onFailure = {
-                        state.mutate { state.snapshot.copy(loginSuccess = false, loginEnabled = true) }
+                        mutate { copy(loginSuccess = false, loginEnabled = true) }
                     })
                 }
-                on<LoginAction.LoginChangeConsumed> { _, state ->
-                    state.mutate { state.snapshot.copy(loginSuccess = null) }
+                on<LoginAction.LoginChangeConsumed> { _ ->
+                    mutate { copy(loginSuccess = null) }
                 }
             }
         }

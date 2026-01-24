@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 
 @Immutable
 data class RegistrationUiModel(
@@ -48,24 +49,28 @@ class RegistrationPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            registrationStateMachine.state
-                .onStart { emit(value = RegistrationStateMachine.defaultRegistrationState) }
-                .map { registrationState -> mapToRegistrationModel(registrationState) }
-                .flowOn(context = Dispatchers.Default)
-                .cancellable()
-                .catch { throwable ->
-                    if (throwable is CancellationException) throw throwable
-                    // else can can be something like page level error etc.
-                }
-                .collectLatest { mappedUiModel ->
-                    registrationUiModel = mappedUiModel
-                }
-        }
+            val registrationSM = registrationStateMachine.launchIn(this)
 
-        // Send the Events to the State Machine through Actions
-        LaunchedEffect(key1 = Unit) {
-            events.collect { loginAction ->
-                registrationStateMachine.dispatch(loginAction)
+            launch {
+                registrationSM.state
+                    .onStart { emit(value = RegistrationStateMachine.defaultRegistrationState) }
+                    .map { registrationState -> mapToRegistrationModel(registrationState) }
+                    .flowOn(context = Dispatchers.Default)
+                    .cancellable()
+                    .catch { throwable ->
+                        if (throwable is CancellationException) throw throwable
+                        // else can can be something like page level error etc.
+                    }
+                    .collectLatest { mappedUiModel ->
+                        registrationUiModel = mappedUiModel
+                    }
+            }
+
+            // Send the Events to the State Machine through Actions
+            launch {
+                events.collect { loginAction ->
+                    registrationSM.dispatch(loginAction)
+                }
             }
         }
 

@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 
 @Immutable
 data class AddNoteUiModel(
@@ -41,27 +42,30 @@ class AddNotePresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            addNoteStateMachine.state
-                .flowOn(context = Dispatchers.Default)
-                .onStart { emit(value = AddNoteStateMachine.defaultAddNoteState) }
-                .cancellable()
-                .catch { throwable ->
-                    if (throwable is CancellationException) throw throwable
-                    // else can can be something like page level error etc.
-                }
-                .collect { addNoteState ->
-                    addNoteUiModel = addNoteUiModel.copy(
-                        title = addNoteState.title,
-                        content = addNoteState.content,
-                        saved = addNoteState.saved
-                    )
-                }
-        }
+            val addNoteSM = addNoteStateMachine.launchIn(this)
 
-        // Send the Events to the State Machine through Actions
-        LaunchedEffect(key1 = Unit) {
-            events.collect { editNoteAction ->
-                addNoteStateMachine.dispatch(editNoteAction)
+            launch {
+                addNoteSM.state
+                    .onStart { emit(value = AddNoteStateMachine.defaultAddNoteState) }
+                    .cancellable()
+                    .catch { throwable ->
+                        if (throwable is CancellationException) throw throwable
+                        // else can can be something like page level error etc.
+                    }
+                    .collect { addNoteState ->
+                        addNoteUiModel = addNoteUiModel.copy(
+                            title = addNoteState.title,
+                            content = addNoteState.content,
+                            saved = addNoteState.saved
+                        )
+                    }
+            }
+
+            // Send the Events to the State Machine through Actions
+            launch {
+                events.collect { editNoteAction ->
+                    addNoteSM.dispatch(editNoteAction)
+                }
             }
         }
 

@@ -6,8 +6,9 @@ import com.dhimandasgupta.notemark.data.UserRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.features.notelist.NoteListState.NoteListStateWithNoNotes
 import com.dhimandasgupta.notemark.features.notelist.NoteListState.NoteListStateWithNotes
+import com.freeletics.flowredux2.FlowReduxStateMachineFactory
+import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 
 @Immutable
 sealed interface NoteListState {
@@ -32,24 +33,26 @@ sealed interface NoteListAction {
 class NoteListStateMachine(
     private val userRepository: UserRepository,
     private val noteMarkRepository: NoteMarkRepository
-) : StateMachine<NoteListState, NoteListAction>(initialState = defaultNoteListState) {
+) : FlowReduxStateMachineFactory<NoteListState, NoteListAction>() {
     init {
         spec {
+            initializeWith { defaultNoteListState }
+
             inState<NoteListStateWithNoNotes> {
-                collectWhileInState(flow = noteMarkRepository.getAllNotes()) { notes, state ->
+                collectWhileInState(flow = noteMarkRepository.getAllNotes()) { notes ->
                     if (notes.isEmpty()) {
-                        state.noChange()
+                        noChange()
                     } else {
-                        state.override {
+                        override {
                             NoteListStateWithNotes(
-                                userName = state.snapshot.userName,
+                                userName = userName,
                                 notes = notes.sortedByDescending { it.lastEditedAt }
                             )
                         }
                     }
                 }
-                collectWhileInState(flow = userRepository.getUser()) { user, state ->
-                    state.mutate {
+                collectWhileInState(flow = userRepository.getUser()) { user ->
+                    mutate {
                         copy(
                             userName = user?.userName ?: ""
                         )
@@ -58,36 +61,36 @@ class NoteListStateMachine(
             }
 
             inState<NoteListStateWithNotes> {
-                collectWhileInState(flow = noteMarkRepository.getAllNotes()) { notes, state ->
+                collectWhileInState(flow = noteMarkRepository.getAllNotes()) { notes ->
                     if (notes.isNotEmpty()) {
-                        state.mutate {
+                        mutate {
                             NoteListStateWithNotes(
-                                userName = state.snapshot.userName,
+                                userName = userName,
                                 notes = notes.sortedByDescending { it.lastEditedAt }
                             )
                         }
                     } else {
-                        state.override {
+                        override {
                             NoteListStateWithNoNotes(
-                                userName = state.snapshot.userName
+                                userName = userName
                             )
                         }
                     }
                 }
-                collectWhileInState(flow = userRepository.getUser()) { user, state ->
-                    state.mutate {
+                collectWhileInState(flow = userRepository.getUser()) { user ->
+                    mutate {
                         copy(
                             userName = user?.userName ?: ""
                         )
                     }
                 }
-                on<NoteListAction.NoteDelete> { action, state ->
+                on<NoteListAction.NoteDelete> { action ->
                     noteMarkRepository.getNoteByUUID(uuid = action.uuid)?.let { noteEntity ->
                         if (noteMarkRepository.markAsDeleted(noteEntity)) {
-                            return@on state.override { state.snapshot.copy(notes = state.snapshot.notes.filter { it.uuid != action.uuid }) }
+                            return@on override { copy(notes = notes.filter { it.uuid != action.uuid }) }
                         }
                     }
-                    state.noChange()
+                    noChange()
                 }
             }
         }

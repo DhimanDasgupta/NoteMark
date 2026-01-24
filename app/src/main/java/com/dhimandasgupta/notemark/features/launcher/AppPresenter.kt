@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 
 class AppPresenter(
     private val appStateMachine: AppStateMachine
@@ -25,23 +26,26 @@ class AppPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            appStateMachine.state
-                .flowOn(context = Dispatchers.Default)
-                .onStart { emit(value = AppStateMachine.defaultAppState) }
-                .cancellable()
-                .catch { throwable ->
-                    if (throwable is CancellationException) throw throwable
-                    // else can can be something like page level error etc.
-                }
-                .collect { appState ->
-                    applicationState = appState
-                }
-        }
+            val appSM = appStateMachine.launchIn(this)
 
-        // Send the Events to the State Machine through Actions
-        LaunchedEffect(key1 = Unit) {
-            events.collect { event ->
-                appStateMachine.dispatch(event)
+            launch {
+                appSM.state
+                    .onStart { emit(value = AppStateMachine.defaultAppState) }
+                    .cancellable()
+                    .catch { throwable ->
+                        if (throwable is CancellationException) throw throwable
+                        // else can can be something like page level error etc.
+                    }
+                    .collect { appState ->
+                        applicationState = appState
+                    }
+            }
+
+            // Send the Events to the State Machine through Actions
+            launch {
+                events.collect { event ->
+                    appSM.dispatch(event)
+                }
             }
         }
 

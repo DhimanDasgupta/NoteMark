@@ -17,7 +17,7 @@ class LoginStateMachineTest {
             )
 
             // Setup state flow from state machine
-            val flow = stateMachine.state
+            val flow = stateMachine.launchIn(backgroundScope).state
 
             // Start flow validation
             flow.test {

@@ -4,9 +4,10 @@ import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.getCurrentIso8601Timestamp
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
+import com.freeletics.flowredux2.FlowReduxStateMachineFactory
+import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.uuid.ExperimentalUuidApi
-import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 import kotlin.uuid.Uuid
 
 @Immutable
@@ -25,22 +26,24 @@ sealed interface AddNoteAction {
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
 class AddNoteStateMachine(
     val noteMarkRepository: NoteMarkRepository
-) : StateMachine<AddNoteState, AddNoteAction>(initialState = defaultAddNoteState) {
+) : FlowReduxStateMachineFactory<AddNoteState, AddNoteAction>() {
     init {
         spec {
+            initializeWith { defaultAddNoteState }
+
             inState<AddNoteState> {
-                on<AddNoteAction.UpdateTitle> { action, state ->
-                    state.mutate { copy(title = action.title) }
+                on<AddNoteAction.UpdateTitle> { action ->
+                    mutate { copy(title = action.title) }
                 }
-                on<AddNoteAction.UpdateContent> { action, state ->
-                    state.mutate { copy(content = action.content) }
+                on<AddNoteAction.UpdateContent> { action ->
+                    mutate { copy(content = action.content) }
                 }
-                on<AddNoteAction.Save> { _, state ->
+                on<AddNoteAction.Save> { _ ->
                     val inserted = noteMarkRepository.createNote(
                         NoteEntity(
                             id = System.currentTimeMillis(),
-                            title = state.snapshot.title.trim(),
-                            content = state.snapshot.content.trim(),
+                            title = snapshot.title.trim(),
+                            content = snapshot.content.trim(),
                             createdAt = getCurrentIso8601Timestamp(),
                             lastEditedAt = getCurrentIso8601Timestamp(),
                             uuid = Uuid.random().toHexDashString(),
@@ -50,10 +53,10 @@ class AddNoteStateMachine(
                     )
 
                     inserted?.let {
-                        return@on state.mutate { copy(saved = true) }
+                        return@on mutate { copy(saved = true) }
                     }
 
-                    state.noChange()
+                    noChange()
                 }
             }
         }

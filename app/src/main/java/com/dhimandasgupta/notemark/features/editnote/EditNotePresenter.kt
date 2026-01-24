@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
 import org.koin.java.KoinJavaComponent.get
 
@@ -54,26 +55,30 @@ class EditNotePresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            editNoteStateMachine.state
-                .onStart { emit(value = EditNoteStateMachine.defaultEditNoteState) }
-                .filter { editNoteState -> editNoteState.noteEntity != null && editNoteState.title.isNotEmpty() && editNoteState.content.isNotEmpty() }
-                .map { editNoteState ->
-                    editNoteUiModel = mapToEditNoteUiModel(editNoteState)
-                }
-                .flowOn(context = Dispatchers.Default)
-                .cancellable()
-                .distinctUntilChanged()
-                .catch { throwable ->
-                    if (throwable is CancellationException) throw throwable
-                    // else can can be something like page level error etc.
-                }
-                .collectLatest {}
-        }
+            val editNoteSM = editNoteStateMachine.launchIn(this)
 
-        // Send the Events to the State Machine through Actions
-        LaunchedEffect(key1 = Unit) {
-            events.collect { editNoteAction ->
-                editNoteStateMachine.dispatch(editNoteAction)
+            launch {
+                editNoteSM.state
+                    .onStart { emit(value = EditNoteStateMachine.defaultEditNoteState) }
+                    .filter { editNoteState -> editNoteState.noteEntity != null && editNoteState.title.isNotEmpty() && editNoteState.content.isNotEmpty() }
+                    .map { editNoteState ->
+                        editNoteUiModel = mapToEditNoteUiModel(editNoteState)
+                    }
+                    .flowOn(context = Dispatchers.Default)
+                    .cancellable()
+                    .distinctUntilChanged()
+                    .catch { throwable ->
+                        if (throwable is CancellationException) throw throwable
+                        // else can can be something like page level error etc.
+                    }
+                    .collectLatest {}
+            }
+
+            // Send the Events to the State Machine through Actions
+            launch {
+                events.collect { editNoteAction ->
+                    editNoteSM.dispatch(editNoteAction)
+                }
             }
         }
 

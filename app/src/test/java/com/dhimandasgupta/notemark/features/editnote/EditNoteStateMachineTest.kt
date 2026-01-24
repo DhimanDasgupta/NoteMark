@@ -20,7 +20,7 @@ class EditNoteStateMachineTest {
             )
 
             // Setup state flow from state machine
-            val flow = stateMachine.state
+            val flow = stateMachine.launchIn(backgroundScope).state
 
             // Start flow validation
             flow.test {
@@ -40,7 +40,8 @@ class EditNoteStateMachineTest {
             )
 
             // Setup state flow from state machine
-            val flow = stateMachine.state
+            val stateMachineInstance = stateMachine.launchIn(backgroundScope)
+            val flow = stateMachineInstance.state
 
             // Start flow validation
             flow.test {
@@ -79,13 +80,14 @@ class EditNoteStateMachineTest {
             )
 
             // Setup state flow from state machine
-            val flow = stateMachine.state
+            val stateMachineInstance = stateMachine.launchIn(backgroundScope)
+            val flow = stateMachineInstance.state
 
             // Start flow validation
             flow.test {
                 val currentState = awaitItem()
                 assertEquals(EditNoteStateMachine.defaultEditNoteState, currentState)
-                stateMachine.dispatch(
+                stateMachineInstance.dispatch(
                     EditNoteAction.UpdateNote(
                         noteEntity = NoteEntity(
                             id = 1,
@@ -132,13 +134,14 @@ class EditNoteStateMachineTest {
             )
 
             // Setup state flow from state machine
-            val flow = stateMachine.state
+            val stateMachineInstance = stateMachine.launchIn(backgroundScope)
+            val flow = stateMachineInstance.state
 
             // Start flow validation
             flow.test {
                 val currentState = awaitItem()
                 assertEquals(EditNoteStateMachine.defaultEditNoteState, currentState)
-                stateMachine.dispatch(EditNoteAction.UpdateTitle("some title"))
+                stateMachineInstance.dispatch(EditNoteAction.UpdateTitle("some title"))
                 assertEquals(
                     currentState.copy(
                         title = "some title",
@@ -163,13 +166,14 @@ class EditNoteStateMachineTest {
             )
 
             // Setup state flow from state machine
-            val flow = stateMachine.state
+            val stateMachineInstance = stateMachine.launchIn(backgroundScope)
+            val flow = stateMachineInstance.state
 
             // Start flow validation
             flow.test {
                 val currentState = awaitItem()
                 assertEquals(EditNoteStateMachine.defaultEditNoteState, currentState)
-                stateMachine.dispatch(EditNoteAction.UpdateContent("some content"))
+                stateMachineInstance.dispatch(EditNoteAction.UpdateContent("some content"))
                 assertEquals(
                     currentState.copy(
                         title = "",
@@ -194,7 +198,8 @@ class EditNoteStateMachineTest {
             )
 
             // Setup state flow from state machine
-            val flow = stateMachine.state
+            val stateMachineInstance = stateMachine.launchIn(backgroundScope)
+            val flow = stateMachineInstance.state
 
             // Start flow validation
             flow.test {

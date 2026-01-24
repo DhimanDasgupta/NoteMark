@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
 
 @Immutable
 data class NoteListUiModel(
@@ -62,34 +63,38 @@ class NoteListPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            combine(
-                flow = appStateMachine.state.filter { appState -> appState is AppState.LoggedIn },
-                flow2 = noteListStateMachine.state
-            ) {
-                appState, noteListState -> mapToNoteListUiModel(
+            val appSM = appStateMachine.launchIn(this)
+            val noteListSM = noteListStateMachine.launchIn(this)
+
+            launch {
+                combine(
+                    flow = appSM.state.filter { appState -> appState is AppState.LoggedIn },
+                    flow2 = noteListSM.state
+                ) {
+                        appState, noteListState -> mapToNoteListUiModel(
                     loggedIn = appState as AppState.LoggedIn,
                     noteListState = noteListState
                 )
+                }
+                    .flowOn(context = Dispatchers.Default)
+                    /*.onStart { emit(value = NoteListUiModel.Empty) } // Do not emit the default state as data will come from State Machine */
+                    .cancellable()
+                    .catch {} // Do something with error if required
+                    .collect { mappedNoteListUiModel ->
+                        noteListUiModel = mappedNoteListUiModel
+                    }
             }
-            .flowOn(context = Dispatchers.Default)
-            /*.onStart { emit(value = NoteListUiModel.Empty) } // Do not emit the default state as data will come from State Machine */
-            .cancellable()
-            .catch {} // Do something with error if required
-            .collect { mappedNoteListUiModel ->
-                noteListUiModel = mappedNoteListUiModel
-            }
-        }
 
-        LaunchedEffect(key1 = Unit) {
-            appActionEvents.collect { appAction ->
-                appStateMachine.dispatch(appAction)
+            launch {
+                appActionEvents.collect { appAction ->
+                    appSM.dispatch(appAction)
+                }
             }
-        }
 
-        // Send the Events to the State Machine through Actions
-        LaunchedEffect(key1 = Unit) {
-            events.collect { noteListAction ->
-                noteListStateMachine.dispatch(noteListAction)
+            launch {
+                events.collect { noteListAction ->
+                    noteListSM.dispatch(noteListAction)
+                }
             }
         }
 

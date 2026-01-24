@@ -4,9 +4,10 @@ import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.getCurrentIso8601Timestamp
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
+import com.freeletics.flowredux2.FlowReduxStateMachineFactory
+import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.uuid.ExperimentalUuidApi
-import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 
 @Immutable
 data class EditNoteState(
@@ -36,48 +37,50 @@ sealed interface EditNoteAction {
 class EditNoteStateMachine(
     val noteMarkRepository: NoteMarkRepository,
     val noteId: String
-) : StateMachine<EditNoteState, EditNoteAction>(initialState = defaultEditNoteState) {
+) : FlowReduxStateMachineFactory<EditNoteState, EditNoteAction>() {
     init {
         spec {
+            initializeWith { defaultEditNoteState }
+
             inState<EditNoteState> {
-                onEnter { state ->
+                onEnter {
                     noteMarkRepository.getNoteByUUID(uuid = noteId)?.let { noteEntity ->
-                        state.mutate {
+                        mutate {
                             copy(
                                 title = noteEntity.title,
                                 content = noteEntity.content,
                                 noteEntity = noteEntity
                             )
                         }
-                    } ?: state.noChange()
+                    } ?: noChange()
                 }
-                on<EditNoteAction.UpdateNote> { action, state ->
-                    state.mutate { copy(noteEntity = action.noteEntity) }
+                on<EditNoteAction.UpdateNote> { action ->
+                    mutate { copy(noteEntity = action.noteEntity) }
                 }
-                on<EditNoteAction.UpdateTitle> { action, state ->
-                    state.mutate { copy(title = action.title) }
+                on<EditNoteAction.UpdateTitle> { action ->
+                    mutate { copy(title = action.title) }
                 }
-                on<EditNoteAction.UpdateContent> { action, state ->
-                    state.mutate { copy(content = action.content) }
+                on<EditNoteAction.UpdateContent> { action ->
+                    mutate { copy(content = action.content) }
                 }
-                on<EditNoteAction.Save> { _, state ->
-                    state.snapshot.noteEntity?.let { noteEntity ->
+                on<EditNoteAction.Save> { _ ->
+                    snapshot.noteEntity?.let { noteEntity ->
                         val updatedNote = noteMarkRepository.updateLocalNote(
-                            title = state.snapshot.title.trim(),
-                            content = state.snapshot.content.trim(),
+                            title = snapshot.title.trim(),
+                            content = snapshot.content.trim(),
                             lastEditedAt = getCurrentIso8601Timestamp(),
                             noteEntity = noteEntity
                         )
 
                         updatedNote?.let {
-                            return@on state.mutate { copy(saved = true) }
+                            return@on mutate { copy(saved = true) }
                         }
                     }
 
-                    state.noChange()
+                    noChange()
                 }
-                on<EditNoteAction.ModeChange> { action, state ->
-                    state.mutate { copy(mode = action.mode) }
+                on<EditNoteAction.ModeChange> { action ->
+                    mutate { copy(mode = action.mode) }
                 }
             }
         }

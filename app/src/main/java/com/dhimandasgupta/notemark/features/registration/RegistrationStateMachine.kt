@@ -14,8 +14,9 @@ import com.dhimandasgupta.notemark.features.registration.RegistrationAction.Repe
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameEntered
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledInFocus
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledLostFocus
+import com.freeletics.flowredux2.FlowReduxStateMachineFactory
+import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 
 @Immutable
 data class RegistrationState(
@@ -48,114 +49,115 @@ sealed interface RegistrationAction {
 @OptIn(ExperimentalCoroutinesApi::class)
 class RegistrationStateMachine(
     val noteMarkApi: NoteMarkApi
-) : StateMachine<RegistrationState, RegistrationAction>(initialState = defaultRegistrationState) {
+) : FlowReduxStateMachineFactory<RegistrationState, RegistrationAction>() {
     init {
         spec {
+            initializeWith { defaultRegistrationState }
             inState<RegistrationState> {
-                on<UserNameFiledInFocus> { action, state ->
+                on<UserNameFiledInFocus> { action ->
                     val modifiedState = if (action.userName.isEmpty()) {
-                        state.snapshot.copy(
+                        snapshot.copy(
                             userNameExplanation = "Use between 3 and 20 characters for your username",
                             userNameError = null
                         )
                     } else {
-                        state.snapshot.copy(
+                        snapshot.copy(
                             userNameExplanation = null,
                             userNameError = null
                         )
                     }
-                    state.mutate { modifiedState }
+                    mutate { modifiedState }
                 }
-                on<UserNameFiledLostFocus> { action, state ->
+                on<UserNameFiledLostFocus> { action ->
                     val modifiedState = if (action.userName.isUsernameValid()) {
-                        state.snapshot.copy(
+                        snapshot.copy(
                             userNameExplanation = null,
                             userNameError = null
                         )
                     } else {
-                        state.snapshot.copy(
+                        snapshot.copy(
                             userNameExplanation = null,
                             userNameError = "Username must be at least 3 characters"
                         )
                     }
-                    state.mutate { modifiedState }
+                    mutate { modifiedState }
                 }
-                on<UserNameEntered> { action, state ->
-                    val modifiedState = state.snapshot.copy(
+                on<UserNameEntered> { action ->
+                    val modifiedState = snapshot.copy(
                         userName = action.userName,
                         userNameExplanation = if (action.userName.isEmpty())
                             "Use between 3 and 20 characters for your username"
                         else
                             null
                     )
-                    state.mutate { modifiedState.validateNonEmptyInputs() }
+                    mutate { modifiedState.validateNonEmptyInputs() }
                 }
-                on<EmailEntered> { action, state ->
-                    val modifiedState = state.snapshot.copy(email = action.email)
-                    state.mutate { modifiedState.validateNonEmptyInputs() }
+                on<EmailEntered> { action ->
+                    val modifiedState = snapshot.copy(email = action.email)
+                    mutate { modifiedState.validateNonEmptyInputs() }
                 }
-                on<PasswordFiledInFocus> { action, state ->
-                    val modifiedState = state.snapshot.copy(
+                on<PasswordFiledInFocus> { action ->
+                    val modifiedState = snapshot.copy(
                         passwordExplanation = if (action.password.isEmpty())
                             "Use 8+ characters with a number or symbol for better security"
                         else
                             null,
                         passwordError = null
                     )
-                    state.mutate { modifiedState }
+                    mutate { modifiedState }
                 }
-                on<PasswordEntered> { action, state ->
-                    val modifiedState = state.snapshot.copy(
+                on<PasswordEntered> { action ->
+                    val modifiedState = snapshot.copy(
                         password = action.password,
                         passwordExplanation = if (action.password.isEmpty())
                             "Use 8+ characters with a number or symbol for better security"
                         else
                             null,
-                        repeatPasswordError = if (action.password != state.snapshot.repeatPassword)
+                        repeatPasswordError = if (action.password != snapshot.repeatPassword)
                             "Passwords do not match"
                         else
                             null
                     )
-                    state.mutate { modifiedState.validateNonEmptyInputs() }
+                    mutate { modifiedState.validateNonEmptyInputs() }
                 }
-                on<RepeatPasswordEntered> { action, state ->
-                    var modifiedState = state.snapshot.copy(repeatPassword = action.repeatPassword)
+                on<RepeatPasswordEntered> { action ->
+                    var modifiedState = snapshot.copy(repeatPassword = action.repeatPassword)
                     modifiedState = modifiedState.copy(
-                        repeatPasswordError = if (action.repeatPassword != state.snapshot.password)
+                        repeatPasswordError = if (action.repeatPassword != snapshot.password)
                             "Passwords do not match"
                         else
                             null
                     )
-                    state.mutate { modifiedState.validateNonEmptyInputs() }
+                    mutate { modifiedState.validateNonEmptyInputs() }
                 }
-                on<RegisterClicked> { _, state ->
-                    val modifiedState = state.snapshot.validateInputs()
+                on<RegisterClicked> { _ ->
+                    val modifiedState = snapshot.validateInputs()
 
                     if (modifiedState.userNameError != null) {
-                        return@on state.mutate { modifiedState }
+                        return@on mutate { modifiedState }
                     }
 
                     if (modifiedState.emailError?.isNotEmpty() == true
                         && modifiedState.passwordError?.isNotEmpty() == true
                         && modifiedState.repeatPasswordError?.isNotEmpty() == true
                     ) {
-                        return@on state.mutate { modifiedState }
+                        return@on mutate { modifiedState }
                     }
 
                     noteMarkApi.register(
                         request = RegisterRequest(
-                            username = state.snapshot.userName,
-                            email = state.snapshot.email,
-                            password = state.snapshot.password
+                            username = snapshot.userName,
+                            email = snapshot.email,
+                            password = snapshot.password
                         )
                     ).fold(onSuccess = {
-                        state.mutate { state.snapshot.copy(registrationSuccess = true) }
+                        mutate { copy(registrationSuccess = true) }
                     }, onFailure = {
-                        state.mutate { state.snapshot.copy(registrationSuccess = false) }
+                        mutate { copy(registrationSuccess = false) }
                     })
                 }
-                on<RegistrationAction.RegistrationChangeStatusConsumed> { _, state ->
-                    state.mutate { state.snapshot.copy(registrationSuccess = null) }
+                on<RegistrationAction.RegistrationChangeStatusConsumed> { _ ->
+                    mutate { copy(registrationSuccess = null) }
                 }
             }
         }

@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 @Immutable
 data class SettingsUiModel(
@@ -54,23 +55,26 @@ class SettingsPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            appStateMachine.state
-                .filter { appState -> (appState is AppState.LoggedIn && appState.sync != null) || appState is AppState.NotLoggedIn }
-                .map { appState -> mapToSettingsUiModel(appState = appState) }
-                .flowOn(context = Dispatchers.Default)
-                /*.onStart { emit(value = AppStateMachine.defaultAppState) } // Do not emit the default state as data will come from State Machine */
-                .cancellable()
-                .catch {} // Do something with error if required
-                .collect { mappedUiModel ->
-                    settingsUiModel = mappedUiModel
+            val appSM = appStateMachine.launchIn(this)
+
+            launch {
+                appSM.state
+                    .filter { appState -> (appState is AppState.LoggedIn && appState.sync != null) || appState is AppState.NotLoggedIn }
+                    .map { appState -> mapToSettingsUiModel(appState = appState) }
+                    .flowOn(context = Dispatchers.Default)
+                    /*.onStart { emit(value = AppStateMachine.defaultAppState) } // Do not emit the default state as data will come from State Machine */
+                    .cancellable()
+                    .catch {} // Do something with error if required
+                    .collect { mappedUiModel ->
+                        settingsUiModel = mappedUiModel
+                    }
+            }
+
+            // Send the Events to the State Machine through Actions
+            launch {
+                events.collect { loginAction ->
+                    appSM.dispatch(loginAction)
                 }
-
-        }
-
-        // Send the Events to the State Machine through Actions
-        LaunchedEffect(key1 = Unit) {
-            events.collect { loginAction ->
-                appStateMachine.dispatch(loginAction)
             }
         }
 

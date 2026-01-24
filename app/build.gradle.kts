@@ -133,7 +133,10 @@ dependencies {
     implementation(libs.androidx.splash.screen)
 
     // Jetpack Compose
-    implementation(platform(libs.androidx.compose.bom))
+    val composeBom = platform(libs.androidx.compose.bom)
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
+    debugImplementation(composeBom)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.bundles.compose)
@@ -150,8 +153,6 @@ dependencies {
     implementation(libs.koin.androidx.compose.navigation)
 
     // Flow Redux
-    implementation(libs.flow.redux.jvm)
-    implementation(libs.flow.redux.compose)
     implementation(libs.flow.redux)
 
     // Molecule

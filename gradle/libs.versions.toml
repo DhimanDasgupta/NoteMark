@@ -15,7 +15,6 @@ kotlinxSerializationJson = "1.10.0"
 coroutines = "1.10.2"
 material3WindowSizeClassAndroid = "1.4.0"
 workRuntimeKtx = "2.11.0"
-flowRedux = "1.2.2"
 flowRedux2 = "2.0.1"
 molecule-runtime = "2.2.0"
 ktor = "3.4.0"
@@ -74,8 +73,6 @@ koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinBom"
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinBom" }
 koin-androidx-compose-navigation = { module = "io.insert-koin:koin-androidx-compose-navigation", version.ref = "koinBom" }
 
-flow-redux-jvm = { module = "com.freeletics.flowredux:flowredux-jvm", version.ref = "flowRedux" }
-flow-redux-compose = { module = "com.freeletics.flowredux:compose", version.ref = "flowRedux" }
 flow-redux = { module = "com.freeletics.flowredux2:flowredux", version.ref = "flowRedux2" }
 
 molecule = { group = "app.cash.molecule", name = "molecule-runtime", version.ref = "molecule-runtime" }

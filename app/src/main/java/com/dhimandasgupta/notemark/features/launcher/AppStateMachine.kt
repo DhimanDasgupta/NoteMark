@@ -21,11 +21,13 @@ import com.dhimandasgupta.notemark.data.UserRepository
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.proto.User
+import com.dhimandasgupta.notemark.proto.sync
+import com.freeletics.flowredux2.FlowReduxStateMachineFactory
+import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import java.time.Duration
-import com.freeletics.flowredux.dsl.FlowReduxStateMachine as StateMachine
 
 @Immutable
 sealed interface AppState {
@@ -56,57 +58,59 @@ class AppStateMachine(
     private val userRepository: UserRepository,
     private val syncRepository: SyncRepository,
     private val noteMarkRepository: NoteMarkRepository
-) : StateMachine<AppState, AppAction>(initialState = defaultAppState) {
+) : FlowReduxStateMachineFactory<AppState, AppAction>() {
     private var lastKnownConnectionState: ConnectionState? = null
 
     init {
         if (applicationContext is Activity) throw IllegalStateException("Context cannot be an Activity")
 
         spec {
+            initializeWith { defaultAppState }
+
             inState<AppState.NotLoggedIn> {
-                collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user, state ->
+                collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user ->
                     user?.let {
-                        state.override {
+                        override {
                             AppState.LoggedIn(
-                                connectionState = state.snapshot.connectionState,
+                                connectionState = connectionState,
                                 user = user,
                                 appVersionName = applicationContext.getAppVersionName()
                             )
                         }
-                    } ?: state.noChange()
+                    } ?: noChange()
                 }
-                collectWhileInState(flow = applicationContext.observeConnectivityAsFlow()) { connected, state ->
+                collectWhileInState(flow = applicationContext.observeConnectivityAsFlow()) { connected ->
                     lastKnownConnectionState = connected
-                    state.mutate { state.snapshot.copy(connectionState = connected) }
+                    mutate { copy(connectionState = connected) }
                 }
             }
 
             inState<AppState.LoggedIn> {
                 onEnterEffect { syncOnEnter() }
-                collectWhileInState(flow = applicationContext.observeConnectivityAsFlow()) { connected, state ->
+                collectWhileInState(flow = applicationContext.observeConnectivityAsFlow()) { connected ->
                     lastKnownConnectionState = connected
-                    state.mutate { state.snapshot.copy(connectionState = connected) }
+                    mutate { copy(connectionState = connected) }
                 }
-                collectWhileInState(flow = syncRepository.getSync()) { sync, state ->
-                    state.mutate { state.snapshot.copy(sync = sync) }
+                collectWhileInState(flow = syncRepository.getSync()) { sync ->
+                    mutate { copy(sync = sync) }
                 }
-                collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user, state ->
+                collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user ->
                     if (user == null) {
-                        state.override {
+                        override {
                             AppState.NotLoggedIn(
-                                connectionState = state.snapshot.connectionState
+                                connectionState = connectionState
                             )
                         }
                     } else {
-                        state.noChange()
+                        noChange()
                     }
                 }
 
                 // All the actions valid for app state should be handled here
-                on<AppAction.ConnectionStateConsumed> { _, state ->
-                    state.mutate { state.snapshot.copy(connectionState = null) }
+                on<AppAction.ConnectionStateConsumed> { _ ->
+                    mutate { copy(connectionState = null) }
                 }
-                on<AppAction.UpdateSync> { action, state ->
+                on<AppAction.UpdateSync> { action ->
                     val duration = when (action.syncDuration) {
                         Sync.SyncDuration.SYNC_DURATION_FIFTEEN_MINUTES -> Duration.ofMinutes(15)
                         Sync.SyncDuration.SYNC_DURATION_THIRTY_MINUTES -> Duration.ofMinutes(30)
@@ -116,15 +120,15 @@ class AppStateMachine(
 
                     applicationContext.cancelPreviousAndTriggerNewWork(duration = duration)
 
-                    val updatedSync = state.snapshot.sync?.toBuilder()?.setSyncDuration(action.syncDuration)?.build()
+                    val updatedSync = sync{}.toBuilder()?.setSyncDuration(action.syncDuration)?.build()
                     syncRepository.saveSyncDuration(syncDuration = action.syncDuration)
-                    state.mutate { state.snapshot.copy(sync = updatedSync) }
+                    mutate { copy(sync = updatedSync) }
                 }
-                onActionEffect<AppAction.DeleteLocalNotesOnLogout> { action, _ ->
+                onActionEffect<AppAction.DeleteLocalNotesOnLogout> { action ->
                     syncRepository.saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout = action.deleteOnLogout)
                 }
-                on<AppAction.AppLogout> { _, state ->
-                    if (lastKnownConnectionState == ConnectionState.Unavailable) return@on state.noChange()
+                on<AppAction.AppLogout> { _ ->
+                    if (lastKnownConnectionState == ConnectionState.Unavailable) return@on noChange()
 
                     noteMarkRepository.logout(
                         request = RefreshRequest(
@@ -132,12 +136,12 @@ class AppStateMachine(
                         )
                     ).getOrNull()?.let {
                         onLogoutSuccessful(deleteLocalNotesOnLogout = syncRepository.getSync().first().deleteLocalNotesOnLogout)
-                        state.override {
+                        override {
                             AppState.NotLoggedIn(
-                                connectionState = state.snapshot.connectionState
+                                connectionState = connectionState
                             )
                         }
-                    } ?: state.noChange()
+                    } ?: noChange()
                 }
             }
         }

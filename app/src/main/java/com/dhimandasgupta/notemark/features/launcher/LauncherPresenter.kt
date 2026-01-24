@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 
 @Immutable
 data class LauncherUiModel(
@@ -38,8 +39,9 @@ class LauncherPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            appStateMachine.state
-                .flowOn(context = Dispatchers.Default)
+            val appSM = appStateMachine.launchIn(this)
+
+            appSM.state
                 .onStart { emit(value = AppStateMachine.defaultAppState) }
                 .cancellable()
                 .catch { throwable ->
@@ -55,12 +57,12 @@ class LauncherPresenter(
                         }
                     )
                 }
-        }
 
-        // Send the Events to the State Machine through Actions
-        LaunchedEffect(key1 = Unit) {
-            events.collect { event ->
-                appStateMachine.dispatch(action = event)
+            // Send the Events to the State Machine through Actions
+            launch {
+                events.collect { event ->
+                    appSM.dispatch(action = event)
+                }
             }
         }
 
