@@ -10,7 +10,7 @@ import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppState
-import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
+import com.dhimandasgupta.notemark.features.launcher.AppStateMachineFactory
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -18,9 +18,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 @Immutable
@@ -51,8 +53,8 @@ data class NoteEntityUiModel(
 private val defaultNoteListUiModel = NoteListUiModel(noteEntities = persistentListOf())
 
 class NoteListPresenter(
-    private val appStateMachine: AppStateMachine,
-    private val noteListStateMachine: NoteListStateMachine
+    private val appStateMachineFactory: AppStateMachineFactory,
+    private val noteListStateMachineFactory: NoteListStateMachineFactory
 ) {
     private val appActionEvents = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
     private val events = MutableSharedFlow<NoteListAction>(extraBufferCapacity = 10)
@@ -63,37 +65,37 @@ class NoteListPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            val appSM = appStateMachine.launchIn(this)
-            val noteListSM = noteListStateMachine.launchIn(this)
+            val appStateMachine = appStateMachineFactory.launchIn(this)
+            val noteListStateMachine = noteListStateMachineFactory.launchIn(this)
 
             launch {
                 combine(
-                    flow = appSM.state.filter { appState -> appState is AppState.LoggedIn },
-                    flow2 = noteListSM.state
-                ) {
-                        appState, noteListState -> mapToNoteListUiModel(
-                    loggedIn = appState as AppState.LoggedIn,
-                    noteListState = noteListState
-                )
+                    flow = appStateMachine.state.filter { appState -> appState is AppState.LoggedIn },
+                    flow2 = noteListStateMachine.state
+                ) { appState, noteListState ->
+                    mapToNoteListUiModel(
+                        loggedIn = appState as AppState.LoggedIn,
+                        noteListState = noteListState
+                    )
                 }
-                    .flowOn(context = Dispatchers.Default)
-                    /*.onStart { emit(value = NoteListUiModel.Empty) } // Do not emit the default state as data will come from State Machine */
+                    .onStart { emit(value = NoteListUiModel.Empty) }
                     .cancellable()
                     .catch {} // Do something with error if required
-                    .collect { mappedNoteListUiModel ->
+                    .flowOn(context = Dispatchers.Default)
+                    .collectLatest { mappedNoteListUiModel ->
                         noteListUiModel = mappedNoteListUiModel
                     }
             }
 
             launch {
                 appActionEvents.collect { appAction ->
-                    appSM.dispatch(appAction)
+                    appStateMachine.dispatch(appAction)
                 }
             }
 
             launch {
                 events.collect { noteListAction ->
-                    noteListSM.dispatch(noteListAction)
+                    noteListStateMachine.dispatch(noteListAction)
                 }
             }
         }

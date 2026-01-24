@@ -6,7 +6,7 @@ import com.dhimandasgupta.notemark.data.UserRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.features.notelist.NoteListState.NoteListStateWithNoNotes
 import com.dhimandasgupta.notemark.features.notelist.NoteListState.NoteListStateWithNotes
-import com.freeletics.flowredux2.FlowReduxStateMachineFactory
+import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -30,10 +30,10 @@ sealed interface NoteListAction {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class NoteListStateMachine(
+class NoteListStateMachineFactory(
     private val userRepository: UserRepository,
     private val noteMarkRepository: NoteMarkRepository
-) : FlowReduxStateMachineFactory<NoteListState, NoteListAction>() {
+) : StateMachineFactory<NoteListState, NoteListAction>() {
     init {
         spec {
             initializeWith { defaultNoteListState }
@@ -96,7 +96,7 @@ class NoteListStateMachine(
         }
     }
 
-    companion object {
+    companion object Companion {
         val defaultNoteListState = NoteListStateWithNoNotes(
             userName = null
         )

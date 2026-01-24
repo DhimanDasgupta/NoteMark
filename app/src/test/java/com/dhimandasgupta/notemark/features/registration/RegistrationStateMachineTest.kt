@@ -12,17 +12,18 @@ class RegistrationStateMachineTest {
     fun `test RegistrationStateMachine with default state`() = runTest {
         turbineScope {
             // Setup state machine
-            val stateMachine = RegistrationStateMachine(
+            val stateMachineFactory = RegistrationStateMachineFactory(
                 noteMarkApi = FakeSuccessfulNoteMarkApi()
             )
 
             // Setup state flow from state machine
-            val flow = stateMachine.launchIn(backgroundScope).state
+            val stateMachine = stateMachineFactory.launchIn(backgroundScope)
+            val flow = stateMachine.state
 
             // Start flow validation
             flow.test {
                 val initialState = awaitItem()
-                assertEquals(RegistrationStateMachine.defaultRegistrationState, initialState)
+                assertEquals(RegistrationStateMachineFactory.defaultRegistrationState, initialState)
             }
         }
     }

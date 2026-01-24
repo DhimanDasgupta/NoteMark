@@ -10,7 +10,7 @@ import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppState
-import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
+import com.dhimandasgupta.notemark.features.launcher.AppStateMachineFactory
 import com.dhimandasgupta.notemark.proto.Sync
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 @Immutable
@@ -45,7 +46,7 @@ data class SettingsUiModel(
 }
 
 class SettingsPresenter(
-    private val appStateMachine: AppStateMachine
+    private val appStateMachineFactory: AppStateMachineFactory
 ) {
     private val events = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
 
@@ -55,16 +56,16 @@ class SettingsPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            val appSM = appStateMachine.launchIn(this)
+            val appStateMachine = appStateMachineFactory.launchIn(this)
 
             launch {
-                appSM.state
+                appStateMachine.state
+                    .onStart { emit(value = AppStateMachineFactory.defaultAppState) } // Do not emit the default state as data will come from State Machine
                     .filter { appState -> (appState is AppState.LoggedIn && appState.sync != null) || appState is AppState.NotLoggedIn }
                     .map { appState -> mapToSettingsUiModel(appState = appState) }
-                    .flowOn(context = Dispatchers.Default)
-                    /*.onStart { emit(value = AppStateMachine.defaultAppState) } // Do not emit the default state as data will come from State Machine */
                     .cancellable()
                     .catch {} // Do something with error if required
+                    .flowOn(context = Dispatchers.Default)
                     .collect { mappedUiModel ->
                         settingsUiModel = mappedUiModel
                     }
@@ -73,7 +74,7 @@ class SettingsPresenter(
             // Send the Events to the State Machine through Actions
             launch {
                 events.collect { loginAction ->
-                    appSM.dispatch(loginAction)
+                    appStateMachine.dispatch(loginAction)
                 }
             }
         }

@@ -16,7 +16,7 @@ class AddNotePresenterTest {
         turbineScope {
             // Setup Presenter
             val presenter = AddNotePresenter(
-                addNoteStateMachine = AddNoteStateMachine(
+                addNoteStateMachineFactory = AddNoteStateMachineFactory(
                     noteMarkRepository = FakeSuccessfulNoteRepository()
                 )
             )
@@ -39,7 +39,7 @@ class AddNotePresenterTest {
         turbineScope {
             // Setup Presenter
             val presenter = AddNotePresenter(
-                addNoteStateMachine = AddNoteStateMachine(
+                addNoteStateMachineFactory = AddNoteStateMachineFactory(
                     noteMarkRepository = FakeSuccessfulNoteRepository()
                 )
             )
@@ -62,7 +62,7 @@ class AddNotePresenterTest {
         turbineScope {
             // Setup Presenter
             val presenter = AddNotePresenter(
-                addNoteStateMachine = AddNoteStateMachine(
+                addNoteStateMachineFactory = AddNoteStateMachineFactory(
                     noteMarkRepository = FakeSuccessfulNoteRepository()
                 )
             )
@@ -87,7 +87,7 @@ class AddNotePresenterTest {
         turbineScope {
             // Setup Presenter
             val presenter = AddNotePresenter(
-                addNoteStateMachine = AddNoteStateMachine(
+                addNoteStateMachineFactory = AddNoteStateMachineFactory(
                     noteMarkRepository = FakeSuccessfulNoteRepository()
                 )
             )
@@ -114,7 +114,7 @@ class AddNotePresenterTest {
         turbineScope {
             // Setup Presenter
             val presenter = AddNotePresenter(
-                addNoteStateMachine = AddNoteStateMachine(
+                addNoteStateMachineFactory = AddNoteStateMachineFactory(
                     noteMarkRepository = FakeFailureNoteRepository()
                 )
             )

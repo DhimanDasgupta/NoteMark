@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.getCurrentIso8601Timestamp
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
-import com.freeletics.flowredux2.FlowReduxStateMachineFactory
+import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.uuid.ExperimentalUuidApi
@@ -24,9 +24,9 @@ sealed interface AddNoteAction {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
-class AddNoteStateMachine(
+class AddNoteStateMachineFactory(
     val noteMarkRepository: NoteMarkRepository
-) : FlowReduxStateMachineFactory<AddNoteState, AddNoteAction>() {
+) : StateMachineFactory<AddNoteState, AddNoteAction>() {
     init {
         spec {
             initializeWith { defaultAddNoteState }
@@ -62,7 +62,7 @@ class AddNoteStateMachine(
         }
     }
 
-    companion object {
+    companion object Companion {
         val defaultAddNoteState = AddNoteState(
             title = "",
             content = "",

@@ -7,7 +7,7 @@ import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
 import com.dhimandasgupta.notemark.data.remote.model.LoginRequest
 import com.dhimandasgupta.notemark.features.login.LoginAction.EmailEntered
 import com.dhimandasgupta.notemark.features.login.LoginAction.PasswordEntered
-import com.freeletics.flowredux2.FlowReduxStateMachineFactory
+import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -30,12 +30,13 @@ sealed interface LoginAction {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LoginStateMachine(
+class LoginStateMachineFactory(
     val noteMarkApi: NoteMarkApi
-) : FlowReduxStateMachineFactory<LoginState, LoginAction>() {
+) : StateMachineFactory<LoginState, LoginAction>() {
     init {
         spec {
             initializeWith { defaultLoginState }
+
             inState<LoginState> {
                 on<EmailEntered> { action ->
                     mutate { copy(email = action.email).validateNonEmptyInputs() }
@@ -71,7 +72,7 @@ class LoginStateMachine(
         }
     }
 
-    companion object {
+    companion object Companion {
         val defaultLoginState = LoginState()
     }
 }

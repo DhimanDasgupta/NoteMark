@@ -22,7 +22,7 @@ import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.proto.User
 import com.dhimandasgupta.notemark.proto.sync
-import com.freeletics.flowredux2.FlowReduxStateMachineFactory
+import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -53,12 +53,12 @@ sealed interface AppAction {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class AppStateMachine(
+class AppStateMachineFactory(
     private val applicationContext: Context,
     private val userRepository: UserRepository,
     private val syncRepository: SyncRepository,
     private val noteMarkRepository: NoteMarkRepository
-) : FlowReduxStateMachineFactory<AppState, AppAction>() {
+) : StateMachineFactory<AppState, AppAction>() {
     private var lastKnownConnectionState: ConnectionState? = null
 
     init {
@@ -147,7 +147,7 @@ class AppStateMachine(
         }
     }
 
-    companion object {
+    companion object Companion {
         val defaultAppState = AppState.NotLoggedIn()
     }
 

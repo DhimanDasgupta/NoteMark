@@ -12,7 +12,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -32,7 +34,7 @@ data class AddNoteUiModel(
 }
 
 class AddNotePresenter(
-    private val addNoteStateMachine: AddNoteStateMachine
+    private val addNoteStateMachineFactory: AddNoteStateMachineFactory
 ) {
     private val events = MutableSharedFlow<AddNoteAction>(extraBufferCapacity = 10)
 
@@ -42,29 +44,33 @@ class AddNotePresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            val addNoteSM = addNoteStateMachine.launchIn(this)
+            val addNoteStateMachine = addNoteStateMachineFactory.launchIn(this)
 
             launch {
-                addNoteSM.state
-                    .onStart { emit(value = AddNoteStateMachine.defaultAddNoteState) }
+                addNoteStateMachine.state
+                    .onStart { emit(value = AddNoteStateMachineFactory.defaultAddNoteState) }
+                    .map { addNoteState ->
+                        addNoteUiModel.copy(
+                            title = addNoteState.title,
+                            content = addNoteState.content,
+                            saved = addNoteState.saved
+                        )
+                    }
                     .cancellable()
                     .catch { throwable ->
                         if (throwable is CancellationException) throw throwable
                         // else can can be something like page level error etc.
                     }
-                    .collect { addNoteState ->
-                        addNoteUiModel = addNoteUiModel.copy(
-                            title = addNoteState.title,
-                            content = addNoteState.content,
-                            saved = addNoteState.saved
-                        )
+                    .flowOn(context = Dispatchers.Default)
+                    .collectLatest { uiModel ->
+                        addNoteUiModel = uiModel
                     }
             }
 
             // Send the Events to the State Machine through Actions
             launch {
                 events.collect { editNoteAction ->
-                    addNoteSM.dispatch(editNoteAction)
+                    addNoteStateMachine.dispatch(editNoteAction)
                 }
             }
         }

@@ -13,18 +13,18 @@ class AddNoteStateMachineTest {
     fun `test AddNoteStateMachine with default state`() = runTest {
         turbineScope {
             // Setup state machine
-            val stateMachine = AddNoteStateMachine(
+            val stateMachineFactory = AddNoteStateMachineFactory(
                 noteMarkRepository = FakeSuccessfulNoteRepository()
             )
 
             // Setup state flow from state machine
-            val stateMachineInstance = stateMachine.launchIn(backgroundScope)
-            val flow = stateMachineInstance.state
+            val stateMachine = stateMachineFactory.launchIn(backgroundScope)
+            val flow = stateMachine.state
 
             // Start flow validation
             flow.test {
                 val initialState = awaitItem()
-                assertEquals(AddNoteStateMachine.defaultAddNoteState, initialState)
+                assertEquals(AddNoteStateMachineFactory.defaultAddNoteState, initialState)
             }
         }
     }
@@ -33,20 +33,20 @@ class AddNoteStateMachineTest {
     fun `test AddNoteStateMachine with title and content`() = runTest {
         turbineScope {
             // Setup state machine
-            val stateMachine = AddNoteStateMachine(
+            val stateMachineFactory = AddNoteStateMachineFactory(
                 noteMarkRepository = FakeSuccessfulNoteRepository()
             )
 
             // Setup state flow from state machine
-            val stateMachineInstance = stateMachine.launchIn(backgroundScope)
-            val flow = stateMachineInstance.state
+            val stateMachine = stateMachineFactory.launchIn(backgroundScope)
+            val flow = stateMachine.state
 
             // Start flow validation
             flow.test {
                 val currentState = awaitItem()
-                stateMachineInstance.dispatch(AddNoteAction.UpdateTitle("Title"))
+                stateMachine.dispatch(AddNoteAction.UpdateTitle("Title"))
                 assertEquals(currentState.copy(title = "Title"), awaitItem())
-                stateMachineInstance.dispatch(AddNoteAction.UpdateContent("Content"))
+                stateMachine.dispatch(AddNoteAction.UpdateContent("Content"))
                 assertEquals(currentState.copy(title = "Title", content = "Content"), awaitItem())
             }
         }
@@ -56,22 +56,22 @@ class AddNoteStateMachineTest {
     fun `test AddNoteStateMachine when create note is successful`() = runTest {
         turbineScope {
             // Setup state machine
-            val stateMachine = AddNoteStateMachine(
+            val stateMachineFactory = AddNoteStateMachineFactory(
                 noteMarkRepository = FakeSuccessfulNoteRepository()
             )
 
             // Setup state flow from state machine
-            val stateMachineInstance = stateMachine.launchIn(backgroundScope)
-            val flow = stateMachineInstance.state
+            val stateMachine = stateMachineFactory.launchIn(backgroundScope)
+            val flow = stateMachine.state
 
             // Start flow validation
             flow.test {
                 val currentState = awaitItem()
-                stateMachineInstance.dispatch(AddNoteAction.UpdateTitle("Title"))
+                stateMachine.dispatch(AddNoteAction.UpdateTitle("Title"))
                 assertEquals(currentState.copy(title = "Title"), awaitItem())
-                stateMachineInstance.dispatch(AddNoteAction.UpdateContent("Content"))
+                stateMachine.dispatch(AddNoteAction.UpdateContent("Content"))
                 assertEquals(currentState.copy(title = "Title", content = "Content"), awaitItem())
-                stateMachineInstance.dispatch(AddNoteAction.Save)
+                stateMachine.dispatch(AddNoteAction.Save)
                 assertEquals(currentState.copy(title = "Title", content = "Content", saved = true), awaitItem())
             }
         }
@@ -81,22 +81,22 @@ class AddNoteStateMachineTest {
     fun `test AddNoteStateMachine when create note is failed`() = runTest {
         turbineScope {
             // Setup state machine
-            val stateMachine = AddNoteStateMachine(
+            val stateMachineFactory = AddNoteStateMachineFactory(
                 noteMarkRepository = FakeFailureNoteRepository()
             )
 
             // Setup state flow from state machine
-            val stateMachineInstance = stateMachine.launchIn(backgroundScope)
-            val flow = stateMachineInstance.state
+            val stateMachine = stateMachineFactory.launchIn(backgroundScope)
+            val flow = stateMachine.state
 
             // Start flow validation
             flow.test {
                 val currentState = awaitItem()
-                stateMachineInstance.dispatch(AddNoteAction.UpdateTitle("Title"))
+                stateMachine.dispatch(AddNoteAction.UpdateTitle("Title"))
                 assertEquals(currentState.copy(title = "Title"), awaitItem())
-                stateMachineInstance.dispatch(AddNoteAction.UpdateContent("Content"))
+                stateMachine.dispatch(AddNoteAction.UpdateContent("Content"))
                 assertEquals(currentState.copy(title = "Title", content = "Content"), awaitItem())
-                stateMachineInstance.dispatch(AddNoteAction.Save)
+                stateMachine.dispatch(AddNoteAction.Save)
                 // Since on Failed Save, the state doesn't change hence no new items are emitted in the flow.
                 expectNoEvents()
             }

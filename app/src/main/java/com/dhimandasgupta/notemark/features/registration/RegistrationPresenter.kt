@@ -39,7 +39,7 @@ data class RegistrationUiModel(
 }
 
 class RegistrationPresenter(
-    private val registrationStateMachine: RegistrationStateMachine
+    private val registrationStateMachine: RegistrationStateMachineFactory
 ) {
     private val events = MutableSharedFlow<RegistrationAction>(extraBufferCapacity = 10)
 
@@ -49,18 +49,18 @@ class RegistrationPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            val registrationSM = registrationStateMachine.launchIn(this)
+            val registrationStateMachine = this@RegistrationPresenter.registrationStateMachine.launchIn(this)
 
             launch {
-                registrationSM.state
-                    .onStart { emit(value = RegistrationStateMachine.defaultRegistrationState) }
+                registrationStateMachine.state
+                    .onStart { emit(value = RegistrationStateMachineFactory.defaultRegistrationState) }
                     .map { registrationState -> mapToRegistrationModel(registrationState) }
-                    .flowOn(context = Dispatchers.Default)
                     .cancellable()
                     .catch { throwable ->
                         if (throwable is CancellationException) throw throwable
                         // else can can be something like page level error etc.
                     }
+                    .flowOn(context = Dispatchers.Default)
                     .collectLatest { mappedUiModel ->
                         registrationUiModel = mappedUiModel
                     }
@@ -69,7 +69,7 @@ class RegistrationPresenter(
             // Send the Events to the State Machine through Actions
             launch {
                 events.collect { loginAction ->
-                    registrationSM.dispatch(loginAction)
+                    registrationStateMachine.dispatch(loginAction)
                 }
             }
         }

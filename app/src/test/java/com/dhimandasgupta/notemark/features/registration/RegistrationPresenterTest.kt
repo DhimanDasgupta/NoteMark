@@ -15,7 +15,7 @@ class RegistrationPresenterTest {
         turbineScope {
             // Setup Presenter
             val presenter = RegistrationPresenter(
-                registrationStateMachine = RegistrationStateMachine(
+                registrationStateMachine = RegistrationStateMachineFactory(
                     noteMarkApi = FakeSuccessfulNoteMarkApi()
                 )
             )

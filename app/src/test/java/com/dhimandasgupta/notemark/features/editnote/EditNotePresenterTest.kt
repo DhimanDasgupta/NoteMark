@@ -16,7 +16,7 @@ class EditNotePresenterTest {
             // Setup Presenter
             val presenter = EditNotePresenter(
                 noteId = "",
-                editNoteStateMachine = EditNoteStateMachine(
+                editNoteStateMachineFactory = EditNoteStateMachineFactory(
                     noteMarkRepository = FakeSuccessfulNoteRepository(),
                     noteId = ""
                 )

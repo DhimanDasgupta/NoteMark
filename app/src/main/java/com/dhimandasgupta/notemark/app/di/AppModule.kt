@@ -31,17 +31,17 @@ import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.data.remote.model.RefreshResponse
 import com.dhimandasgupta.notemark.database.NoteMarkDatabase
 import com.dhimandasgupta.notemark.features.addnote.AddNotePresenter
-import com.dhimandasgupta.notemark.features.addnote.AddNoteStateMachine
+import com.dhimandasgupta.notemark.features.addnote.AddNoteStateMachineFactory
 import com.dhimandasgupta.notemark.features.editnote.EditNotePresenter
-import com.dhimandasgupta.notemark.features.editnote.EditNoteStateMachine
-import com.dhimandasgupta.notemark.features.launcher.AppStateMachine
+import com.dhimandasgupta.notemark.features.editnote.EditNoteStateMachineFactory
+import com.dhimandasgupta.notemark.features.launcher.AppStateMachineFactory
 import com.dhimandasgupta.notemark.features.launcher.LauncherPresenter
 import com.dhimandasgupta.notemark.features.login.LoginPresenter
-import com.dhimandasgupta.notemark.features.login.LoginStateMachine
+import com.dhimandasgupta.notemark.features.login.LoginStateMachineFactory
 import com.dhimandasgupta.notemark.features.notelist.NoteListPresenter
-import com.dhimandasgupta.notemark.features.notelist.NoteListStateMachine
+import com.dhimandasgupta.notemark.features.notelist.NoteListStateMachineFactory
 import com.dhimandasgupta.notemark.features.registration.RegistrationPresenter
-import com.dhimandasgupta.notemark.features.registration.RegistrationStateMachine
+import com.dhimandasgupta.notemark.features.registration.RegistrationStateMachineFactory
 import com.dhimandasgupta.notemark.features.settings.SettingsPresenter
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.proto.User
@@ -260,7 +260,7 @@ val appModule = module {
         )
     } bind NoteMarkRepository::class
     factory {
-        AppStateMachine(
+        AppStateMachineFactory(
             applicationContext = androidContext(),
             userRepository = get(),
             syncRepository = get(),
@@ -269,21 +269,21 @@ val appModule = module {
     }
     factoryOf(constructor = ::LauncherPresenter)
 
-    factory { LoginStateMachine(noteMarkApi = get()) }
+    factory { LoginStateMachineFactory(noteMarkApi = get()) }
     factoryOf(constructor = ::LoginPresenter)
 
-    factory { RegistrationStateMachine(noteMarkApi = get()) }
+    factory { RegistrationStateMachineFactory(noteMarkApi = get()) }
     factoryOf(constructor = ::RegistrationPresenter)
 
-    factory { NoteListStateMachine(userRepository = get(), noteMarkRepository = get()) }
+    factory { NoteListStateMachineFactory(userRepository = get(), noteMarkRepository = get()) }
     factoryOf(constructor = ::NoteListPresenter)
 
-    factory { AddNoteStateMachine(noteMarkRepository = get()) }
+    factory { AddNoteStateMachineFactory(noteMarkRepository = get()) }
     factoryOf(constructor = ::AddNotePresenter)
 
     factory { params ->
-        require(params.isNotEmpty()) { "NoteId is required for ${EditNoteStateMachine::class.java} to instantiate." }
-        EditNoteStateMachine(
+        require(params.isNotEmpty()) { "NoteId is required for ${EditNoteStateMachineFactory::class.java} to instantiate." }
+        EditNoteStateMachineFactory(
             noteMarkRepository = get(),
             noteId = params[0]
         )

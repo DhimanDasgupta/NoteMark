@@ -45,7 +45,7 @@ data class EditNoteUiModel(
 
 class EditNotePresenter(
     private val noteId: String,
-    private val editNoteStateMachine: EditNoteStateMachine = get(clazz = EditNoteStateMachine::class.java) { parametersOf(noteId) }
+    private val editNoteStateMachineFactory: EditNoteStateMachineFactory = get(clazz = EditNoteStateMachineFactory::class.java) { parametersOf(noteId) }
 ) {
     private val events = MutableSharedFlow<EditNoteAction>(extraBufferCapacity = 10)
 
@@ -55,29 +55,29 @@ class EditNotePresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            val editNoteSM = editNoteStateMachine.launchIn(this)
+            val editNoteStateMachine = editNoteStateMachineFactory.launchIn(this)
 
             launch {
-                editNoteSM.state
-                    .onStart { emit(value = EditNoteStateMachine.defaultEditNoteState) }
+                editNoteStateMachine.state
+                    .onStart { emit(value = EditNoteStateMachineFactory.defaultEditNoteState) }
                     .filter { editNoteState -> editNoteState.noteEntity != null && editNoteState.title.isNotEmpty() && editNoteState.content.isNotEmpty() }
-                    .map { editNoteState ->
-                        editNoteUiModel = mapToEditNoteUiModel(editNoteState)
-                    }
-                    .flowOn(context = Dispatchers.Default)
+                    .map { editNoteState -> mapToEditNoteUiModel(editNoteState) }
                     .cancellable()
                     .distinctUntilChanged()
                     .catch { throwable ->
                         if (throwable is CancellationException) throw throwable
                         // else can can be something like page level error etc.
                     }
-                    .collectLatest {}
+                    .flowOn(context = Dispatchers.Default)
+                    .collectLatest { uiMoel ->
+                        editNoteUiModel = uiMoel
+                    }
             }
 
             // Send the Events to the State Machine through Actions
             launch {
                 events.collect { editNoteAction ->
-                    editNoteSM.dispatch(editNoteAction)
+                    editNoteStateMachine.dispatch(editNoteAction)
                 }
             }
         }

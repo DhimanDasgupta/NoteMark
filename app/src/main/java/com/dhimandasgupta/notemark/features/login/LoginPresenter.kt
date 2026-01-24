@@ -12,7 +12,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -31,7 +33,7 @@ data class LoginUiModel(
 }
 
 class LoginPresenter(
-    private val loginStateMachine: LoginStateMachine
+    private val loginStateMachineFactory: LoginStateMachineFactory
 ) {
     private val events = MutableSharedFlow<LoginAction>(extraBufferCapacity = 10)
 
@@ -41,19 +43,13 @@ class LoginPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            val loginSM = loginStateMachine.launchIn(this)
+            val loginStateMachine = loginStateMachineFactory.launchIn(this)
 
             launch {
-                loginSM.state
-                    //.flowOn(context = Dispatchers.Default)
-                    .onStart { emit(value = LoginStateMachine.defaultLoginState) }
-                    .cancellable()
-                    .catch { throwable ->
-                        if (throwable is CancellationException) throw throwable
-                        // else can can be something like page level error etc.
-                    }
-                    .collect { loginState ->
-                        loginUiModel = LoginUiModel(
+                loginStateMachine.state
+                    .onStart { emit(value = LoginStateMachineFactory.defaultLoginState) }
+                    .map { loginState ->
+                        LoginUiModel(
                             email = loginState.email,
                             password = loginState.password,
                             emailError = loginState.emailError,
@@ -62,12 +58,21 @@ class LoginPresenter(
                             loginSuccess = loginState.loginSuccess
                         )
                     }
+                    .cancellable()
+                    .catch { throwable ->
+                        if (throwable is CancellationException) throw throwable
+                        // else can can be something like page level error etc.
+                    }
+                    .flowOn(context = Dispatchers.Default)
+                    .collectLatest { uiModel ->
+                        loginUiModel = uiModel
+                    }
             }
 
             // Send the Events to the State Machine through Actions
             launch {
                 events.collect { loginAction ->
-                    loginSM.dispatch(loginAction)
+                    loginStateMachine.dispatch(loginAction)
                 }
             }
         }

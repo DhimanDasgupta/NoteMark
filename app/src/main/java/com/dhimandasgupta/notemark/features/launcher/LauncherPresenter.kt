@@ -14,7 +14,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -29,7 +31,7 @@ data class LauncherUiModel(
 }
 
 class LauncherPresenter(
-    private val appStateMachine: AppStateMachine
+    private val appStateMachineFactory: AppStateMachineFactory
 ) {
     private val events = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
 
@@ -39,29 +41,33 @@ class LauncherPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            val appSM = appStateMachine.launchIn(this)
+            val appStateMachine = appStateMachineFactory.launchIn(this)
 
-            appSM.state
-                .onStart { emit(value = AppStateMachine.defaultAppState) }
-                .cancellable()
-                .catch { throwable ->
-                    if (throwable is CancellationException) throw throwable
-                    // else can can be something like page level error etc.
-                }
-                .collect { appState ->
-                    launcherUiModel = launcherUiModel.copy(
-                        connectionState = appState.connectionState,
-                        loggedInUser = when (appState) {
-                            is AppState.NotLoggedIn -> null
-                            is AppState.LoggedIn -> appState.user
-                        }
-                    )
-                }
+            launch {
+                appStateMachine.state
+                    .onStart { emit(value = AppStateMachineFactory.defaultAppState) }
+                    .map { appState ->
+                        launcherUiModel = launcherUiModel.copy(
+                            connectionState = appState.connectionState,
+                            loggedInUser = when (appState) {
+                                is AppState.NotLoggedIn -> null
+                                is AppState.LoggedIn -> appState.user
+                            }
+                        )
+                    }
+                    .cancellable()
+                    .catch { throwable ->
+                        if (throwable is CancellationException) throw throwable
+                        // else can can be something like page level error etc.
+                    }
+                    .flowOn(context = Dispatchers.Default)
+                    .collectLatest {}
+            }
 
             // Send the Events to the State Machine through Actions
             launch {
                 events.collect { event ->
-                    appSM.dispatch(action = event)
+                    appStateMachine.dispatch(action = event)
                 }
             }
         }

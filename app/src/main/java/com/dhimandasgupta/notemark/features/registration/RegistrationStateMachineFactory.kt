@@ -14,7 +14,7 @@ import com.dhimandasgupta.notemark.features.registration.RegistrationAction.Repe
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameEntered
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledInFocus
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledLostFocus
-import com.freeletics.flowredux2.FlowReduxStateMachineFactory
+import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -47,12 +47,13 @@ sealed interface RegistrationAction {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class RegistrationStateMachine(
+class RegistrationStateMachineFactory(
     val noteMarkApi: NoteMarkApi
-) : FlowReduxStateMachineFactory<RegistrationState, RegistrationAction>() {
+) : StateMachineFactory<RegistrationState, RegistrationAction>() {
     init {
         spec {
             initializeWith { defaultRegistrationState }
+
             inState<RegistrationState> {
                 on<UserNameFiledInFocus> { action ->
                     val modifiedState = if (action.userName.isEmpty()) {
@@ -163,7 +164,7 @@ class RegistrationStateMachine(
         }
     }
 
-    companion object {
+    companion object Companion {
         val defaultRegistrationState = RegistrationState()
     }
 }
