@@ -182,9 +182,11 @@ private fun LauncherEntry(
 ) {
     val context = LocalActivity.current
 
+    // Setup Presenter
     val launcherPresenter: LauncherPresenter = retain { get(clazz = LauncherPresenter::class.java) }
     var launcherUiModel by remember { mutableStateOf(value = LauncherUiModel.Empty) }
 
+    // Setup scope and Lifecycle
     val scope = rememberCoroutineScope()
     LifecycleStartEffect(key1 = Unit) {
         if (scope.isActive) {
@@ -197,6 +199,7 @@ private fun LauncherEntry(
         }
     }
 
+    // UI data, actions, navigation and events passing to UI
     LauncherPane(
         modifier = modifier,
         launcherUiModel = { launcherUiModel },
@@ -222,10 +225,12 @@ private fun LoginEntry(
     navigateToRegistration: () -> Unit,
     navigateToAfterLogin: () -> Unit
 ) {
+    // Setup Presenter
     val loginPresenter: LoginPresenter = retain { get(clazz = LoginPresenter::class.java) }
     var loginUiModel by remember { mutableStateOf(value = LoginUiModel.Empty) }
     val loginEvents by rememberUpdatedState(newValue = loginPresenter::processEvent)
 
+    // Setup scope and Lifecycle
     val scope = rememberCoroutineScope()
     LifecycleStartEffect(key1 = Unit) {
         if (scope.isActive) {
@@ -238,6 +243,7 @@ private fun LoginEntry(
         }
     }
 
+    // UI data, actions, navigation and events passing to UI
     LoginPane(
         modifier = modifier,
         loginUiModel = { loginUiModel },
@@ -252,10 +258,12 @@ private fun RegistrationEntry(
     modifier: Modifier = Modifier,
     navigateToLoginFromRegistration: () -> Unit
 ) {
+    // Setup Presenter
     val registrationPresenter: RegistrationPresenter = retain { get(clazz = RegistrationPresenter::class.java) }
     var registrationUiModel by remember { mutableStateOf(value = RegistrationUiModel.Empty) }
     val registrationAction by rememberUpdatedState(newValue = registrationPresenter::processEvent)
 
+    // Setup scope and Lifecycle
     val scope = rememberCoroutineScope()
     LifecycleStartEffect(key1 = Unit) {
         if (scope.isActive) {
@@ -268,6 +276,7 @@ private fun RegistrationEntry(
         }
     }
 
+    // UI data, actions, navigation and events passing to UI
     RegistrationPane(
         modifier = modifier,
         registrationUiModel = { registrationUiModel },
@@ -283,10 +292,12 @@ private fun NoteListEntry(
     navigateToEdit: (String) -> Unit,
     navigateToSettings: () -> Unit
 ) {
+    // Setup Presenter
     val noteListPresenter: NoteListPresenter = retain { get(clazz = NoteListPresenter::class.java) }
     var noteListUiModel by remember { mutableStateOf(value = NoteListUiModel.Empty) }
     val noteListAction by rememberUpdatedState(newValue = noteListPresenter::processEvent)
 
+    // Setup scope and Lifecycle
     val scope = rememberCoroutineScope()
     LifecycleStartEffect(key1 = Unit) {
         if (scope.isActive) {
@@ -299,6 +310,7 @@ private fun NoteListEntry(
         }
     }
 
+    // UI data, actions, navigation and events passing to UI
     NoteListPane(
         modifier = modifier,
         noteListUiModel = { noteListUiModel },
@@ -315,12 +327,13 @@ private fun NoteCreateEntry(
     modifier: Modifier = Modifier,
     navigateUp: () -> Unit
 ) {
+    // Setup Presenter
     val addNotePresenter:AddNotePresenter = retain { get(clazz = AddNotePresenter::class.java) }
     var addNoteUiModel by remember { mutableStateOf(value = AddNoteUiModel.Empty) }
     val addNoteAction by rememberUpdatedState(newValue = addNotePresenter::processEvent)
 
+    // Setup scope and Lifecycle
     val scope = rememberCoroutineScope()
-
     LifecycleStartEffect(key1 = Unit) {
         if (scope.isActive) {
             scope.launchMolecule(mode = RecompositionMode.Immediate) {
@@ -332,6 +345,7 @@ private fun NoteCreateEntry(
         }
     }
 
+    // UI data, actions, navigation and events passing to UI
     AddNotePane(
         modifier = modifier,
         addNoteUiModel = { addNoteUiModel },
@@ -346,6 +360,7 @@ private fun NoteEditEntry(
     argument: String,
     navigateUp: () -> Unit
 ) {
+    // Setup Presenter
     val editNotePresenter: EditNotePresenter = retain {
         get(
             clazz = EditNotePresenter::class.java,
@@ -355,8 +370,8 @@ private fun NoteEditEntry(
     var editNoteUiModel by remember { mutableStateOf(value = EditNoteUiModel.Empty) }
     val editNoteAction by rememberUpdatedState(newValue = editNotePresenter::processEvent)
 
+    // Setup scope and Lifecycle
     val scope = rememberCoroutineScope()
-
     LifecycleStartEffect(key1 = argument) {
         if (scope.isActive) {
             scope.launchMolecule(mode = RecompositionMode.Immediate) {
@@ -368,6 +383,7 @@ private fun NoteEditEntry(
         }
     }
 
+    // UI data, actions, navigation and events passing to UI
     EditNotePane(
         modifier = modifier,
         editNoteUiModel = { editNoteUiModel },
@@ -382,10 +398,12 @@ private fun SettingsEntry(
     navigateToLauncherAfterLogout: () -> Unit,
     navigateUp: () -> Unit
 ) {
+    // Setup Presenter
     val settingsPresenter: SettingsPresenter = retain { get(clazz = SettingsPresenter::class.java) }
     var settingsUiModel by remember { mutableStateOf(value =  SettingsUiModel.Empty) }
     val settingsAction by rememberUpdatedState(newValue = settingsPresenter::processEvent)
 
+    // Setup scope and Lifecycle
     val scope = rememberCoroutineScope()
     LifecycleStartEffect(key1 = Unit) {
         if (scope.isActive) {
@@ -398,6 +416,7 @@ private fun SettingsEntry(
         }
     }
 
+    // UI data, actions, navigation and events passing to UI
     SettingsPane(
         modifier = modifier,
         settingsUiModel = { settingsUiModel },
