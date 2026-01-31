@@ -103,11 +103,11 @@ class NoteListPresenter(
         return noteListUiModel
     }
 
-    fun processEvent(event: NoteListAction) {
+    fun dispatchAction(event: NoteListAction) {
         events.tryEmit(event)
     }
 
-    fun processAppActionEvent(event: AppAction) {
+    fun dispatchAppAction(event: AppAction) {
         appActionEvents.tryEmit(event)
     }
 

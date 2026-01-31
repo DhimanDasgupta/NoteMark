@@ -25,7 +25,7 @@ fun LoginEntry(
     // Setup Presenter
     val loginPresenter: LoginPresenter = retain { get(clazz = LoginPresenter::class.java) }
     var loginUiModel by remember { mutableStateOf(value = LoginUiModel.Empty) }
-    val loginEvents by rememberUpdatedState(newValue = loginPresenter::processEvent)
+    val loginEvents by rememberUpdatedState(newValue = loginPresenter::dispatchAction)
 
     // Setup scope and Lifecycle
     val scope = rememberCoroutineScope()

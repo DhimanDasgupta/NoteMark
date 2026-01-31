@@ -85,6 +85,10 @@ class EditNotePresenter(
         return editNoteUiModel
     }
 
+    fun dispatchAction(event: EditNoteAction) {
+        events.tryEmit(value = event)
+    }
+
     private fun mapToEditNoteUiModel(
         editNoteState: EditNoteState
     ): EditNoteUiModel {
@@ -99,10 +103,5 @@ class EditNotePresenter(
             editEnable = editNoteState.mode == Mode.EditMode,
             isReaderMode = editNoteState.mode == Mode.ReaderMode
         )
-    }
-
-
-    fun processEvent(event: EditNoteAction) {
-        events.tryEmit(value = event)
     }
 }

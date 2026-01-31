@@ -24,7 +24,7 @@ fun AddNoteEntry(
     // Setup Presenter
     val addNotePresenter:AddNotePresenter = retain { get(clazz = AddNotePresenter::class.java) }
     var addNoteUiModel by remember { mutableStateOf(value = AddNoteUiModel.Empty) }
-    val addNoteAction by rememberUpdatedState(newValue = addNotePresenter::processEvent)
+    val addNoteAction by rememberUpdatedState(newValue = addNotePresenter::dispatchAction)
 
     // Setup scope and Lifecycle
     val scope = rememberCoroutineScope()

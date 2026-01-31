@@ -78,7 +78,7 @@ class AddNotePresenter(
         return addNoteUiModel
     }
 
-    fun processEvent(event: AddNoteAction) {
+    fun dispatchAction(event: AddNoteAction) {
         events.tryEmit(value = event)
     }
 }

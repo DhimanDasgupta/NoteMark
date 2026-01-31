@@ -77,6 +77,10 @@ class RegistrationPresenter(
         return registrationUiModel
     }
 
+    fun dispatchAction(event: RegistrationAction) {
+        events.tryEmit(value = event)
+    }
+
     private fun mapToRegistrationModel(registrationState: RegistrationState): RegistrationUiModel {
         return RegistrationUiModel(
             userName = registrationState.userName,
@@ -92,9 +96,5 @@ class RegistrationPresenter(
             registrationEnabled = registrationState.registrationEnabled,
             registrationSuccess = registrationState.registrationSuccess
         )
-    }
-
-    fun processEvent(event: RegistrationAction) {
-        events.tryEmit(value = event)
     }
 }

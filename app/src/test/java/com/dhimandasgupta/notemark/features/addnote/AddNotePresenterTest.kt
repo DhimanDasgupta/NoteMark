@@ -51,7 +51,7 @@ class AddNotePresenterTest {
             flow.test {
                 val addUiModel = awaitItem()
                 assertEquals(AddNoteUiModel.Empty, addUiModel)
-                presenter.processEvent(AddNoteAction.UpdateTitle("Some title"))
+                presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
                 assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
             }
         }
@@ -74,9 +74,9 @@ class AddNotePresenterTest {
             flow.test {
                 val addUiModel = awaitItem()
                 assertEquals(AddNoteUiModel.Empty, addUiModel)
-                presenter.processEvent(AddNoteAction.UpdateTitle("Some title"))
+                presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
                 assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
-                presenter.processEvent(AddNoteAction.UpdateContent("Some content"))
+                presenter.dispatchAction(AddNoteAction.UpdateContent("Some content"))
                 assertEquals(addUiModel.copy(title = "Some title", content = "Some content"), awaitItem())
             }
         }
@@ -99,11 +99,11 @@ class AddNotePresenterTest {
             flow.test {
                 val addUiModel = awaitItem()
                 assertEquals(AddNoteUiModel.Empty, addUiModel)
-                presenter.processEvent(AddNoteAction.UpdateTitle("Some title"))
+                presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
                 assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
-                presenter.processEvent(AddNoteAction.UpdateContent("Some content"))
+                presenter.dispatchAction(AddNoteAction.UpdateContent("Some content"))
                 assertEquals(addUiModel.copy(title = "Some title", content = "Some content"), awaitItem())
-                presenter.processEvent(AddNoteAction.Save)
+                presenter.dispatchAction(AddNoteAction.Save)
                 assertEquals(addUiModel.copy(title = "Some title", content = "Some content", saved = true), awaitItem())
             }
         }
@@ -126,11 +126,11 @@ class AddNotePresenterTest {
             flow.test {
                 val addUiModel = awaitItem()
                 assertEquals(AddNoteUiModel.Empty, addUiModel)
-                presenter.processEvent(AddNoteAction.UpdateTitle("Some title"))
+                presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
                 assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
-                presenter.processEvent(AddNoteAction.UpdateContent("Some content"))
+                presenter.dispatchAction(AddNoteAction.UpdateContent("Some content"))
                 assertEquals(addUiModel.copy(title = "Some title", content = "Some content"), awaitItem())
-                presenter.processEvent(AddNoteAction.Save)
+                presenter.dispatchAction(AddNoteAction.Save)
                 expectNoEvents()
             }
         }

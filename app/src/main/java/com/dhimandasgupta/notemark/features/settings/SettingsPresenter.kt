@@ -82,7 +82,7 @@ class SettingsPresenter(
         return settingsUiModel
     }
 
-    fun processEvent(event: AppAction) {
+    fun dispatchAction(event: AppAction) {
         events.tryEmit(value = event)
     }
 

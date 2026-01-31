@@ -31,7 +31,7 @@ fun EditNoteEntry(
         )
     }
     var editNoteUiModel by remember { mutableStateOf(value = EditNoteUiModel.Empty) }
-    val editNoteAction by rememberUpdatedState(newValue = editNotePresenter::processEvent)
+    val editNoteAction by rememberUpdatedState(newValue = editNotePresenter::dispatchAction)
 
     // Setup scope and Lifecycle
     val scope = rememberCoroutineScope()
