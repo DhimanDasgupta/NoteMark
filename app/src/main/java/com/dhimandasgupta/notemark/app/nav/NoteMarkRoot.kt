@@ -1,7 +1,5 @@
 package com.dhimandasgupta.notemark.app.nav
 
-import android.widget.Toast
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -10,47 +8,18 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.retain.retain
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import app.cash.molecule.RecompositionMode
-import app.cash.molecule.launchMolecule
-import com.dhimandasgupta.notemark.features.addnote.AddNotePane
-import com.dhimandasgupta.notemark.features.addnote.AddNotePresenter
-import com.dhimandasgupta.notemark.features.addnote.AddNoteUiModel
-import com.dhimandasgupta.notemark.features.editnote.EditNotePane
-import com.dhimandasgupta.notemark.features.editnote.EditNotePresenter
-import com.dhimandasgupta.notemark.features.editnote.EditNoteUiModel
-import com.dhimandasgupta.notemark.features.launcher.AppAction
-import com.dhimandasgupta.notemark.features.launcher.LauncherPane
-import com.dhimandasgupta.notemark.features.launcher.LauncherPresenter
-import com.dhimandasgupta.notemark.features.launcher.LauncherUiModel
-import com.dhimandasgupta.notemark.features.login.LoginPane
-import com.dhimandasgupta.notemark.features.login.LoginPresenter
-import com.dhimandasgupta.notemark.features.login.LoginUiModel
-import com.dhimandasgupta.notemark.features.notelist.NoteListPane
-import com.dhimandasgupta.notemark.features.notelist.NoteListPresenter
-import com.dhimandasgupta.notemark.features.notelist.NoteListUiModel
-import com.dhimandasgupta.notemark.features.registration.RegistrationPane
-import com.dhimandasgupta.notemark.features.registration.RegistrationPresenter
-import com.dhimandasgupta.notemark.features.registration.RegistrationUiModel
-import com.dhimandasgupta.notemark.features.settings.SettingsPane
-import com.dhimandasgupta.notemark.features.settings.SettingsPresenter
-import com.dhimandasgupta.notemark.features.settings.SettingsUiModel
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.isActive
-import org.koin.core.parameter.parametersOf
-import org.koin.java.KoinJavaComponent.get
+import com.dhimandasgupta.notemark.features.addnote.AddNoteEntry
+import com.dhimandasgupta.notemark.features.editnote.EditNoteEntry
+import com.dhimandasgupta.notemark.features.launcher.LauncherEntry
+import com.dhimandasgupta.notemark.features.login.LoginEntry
+import com.dhimandasgupta.notemark.features.notelist.NoteListEntry
+import com.dhimandasgupta.notemark.features.registration.RegistrationEntry
+import com.dhimandasgupta.notemark.features.settings.SettingsEntry
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -138,7 +107,7 @@ fun NoteMarkRoot(
             entry<NoteCreateNavKey>(
                 metadata = ListDetailSceneStrategy.detailPane()
             ) {
-                NoteCreateEntry(
+                AddNoteEntry(
                     modifier = modifier,
                     navigateUp = {
                         backStack.removeLastOrNull()
@@ -148,7 +117,7 @@ fun NoteMarkRoot(
             entry<NoteEditNavKey>(
                 metadata = ListDetailSceneStrategy.detailPane()
             ) {
-                NoteEditEntry(
+                EditNoteEntry(
                     modifier = modifier,
                     argument = it.noteId,
                     navigateUp = {
@@ -170,264 +139,6 @@ fun NoteMarkRoot(
                     }
                 )
             }
-        }
-    )
-}
-
-@Composable
-private fun LauncherEntry(
-    modifier: Modifier = Modifier,
-    navigateAfterLogin: () -> Unit,
-    navigateToLogin: () -> Unit
-) {
-    val context = LocalActivity.current
-
-    // Setup Presenter
-    val launcherPresenter: LauncherPresenter = retain { get(clazz = LauncherPresenter::class.java) }
-    var launcherUiModel by remember { mutableStateOf(value = LauncherUiModel.Empty) }
-
-    // Setup scope and Lifecycle
-    val scope = rememberCoroutineScope()
-    LifecycleStartEffect(key1 = Unit) {
-        if (scope.isActive) {
-            scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                launcherUiModel = launcherPresenter.uiModel()
-            }
-        }
-        onStopOrDispose {
-            scope.cancel()
-        }
-    }
-
-    // UI data, actions, navigation and events passing to UI
-    LauncherPane(
-        modifier = modifier,
-        launcherUiModel = { launcherUiModel },
-        navigateToAfterLogin = {
-            if (launcherUiModel.loggedInUser == null) {
-                Toast.makeText(
-                    context,
-                    "Oops!!! Please login first to get started",
-                    Toast.LENGTH_LONG
-                ).show()
-                return@LauncherPane
-            }
-            navigateAfterLogin()
-        },
-        navigateToLogin = { navigateToLogin() },
-        navigateToList = { navigateAfterLogin() }
-    )
-}
-
-@Composable
-private fun LoginEntry(
-    modifier: Modifier = Modifier,
-    navigateToRegistration: () -> Unit,
-    navigateToAfterLogin: () -> Unit
-) {
-    // Setup Presenter
-    val loginPresenter: LoginPresenter = retain { get(clazz = LoginPresenter::class.java) }
-    var loginUiModel by remember { mutableStateOf(value = LoginUiModel.Empty) }
-    val loginEvents by rememberUpdatedState(newValue = loginPresenter::processEvent)
-
-    // Setup scope and Lifecycle
-    val scope = rememberCoroutineScope()
-    LifecycleStartEffect(key1 = Unit) {
-        if (scope.isActive) {
-            scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                loginUiModel = loginPresenter.uiModel()
-            }
-        }
-        onStopOrDispose {
-            scope.cancel()
-        }
-    }
-
-    // UI data, actions, navigation and events passing to UI
-    LoginPane(
-        modifier = modifier,
-        loginUiModel = { loginUiModel },
-        loginAction = { event -> loginEvents(event) },
-        navigateToRegistration = { navigateToRegistration() },
-        navigateToAfterLogin = { navigateToAfterLogin() },
-    )
-}
-
-@Composable
-private fun RegistrationEntry(
-    modifier: Modifier = Modifier,
-    navigateToLoginFromRegistration: () -> Unit
-) {
-    // Setup Presenter
-    val registrationPresenter: RegistrationPresenter = retain { get(clazz = RegistrationPresenter::class.java) }
-    var registrationUiModel by remember { mutableStateOf(value = RegistrationUiModel.Empty) }
-    val registrationAction by rememberUpdatedState(newValue = registrationPresenter::processEvent)
-
-    // Setup scope and Lifecycle
-    val scope = rememberCoroutineScope()
-    LifecycleStartEffect(key1 = Unit) {
-        if (scope.isActive) {
-            scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                registrationUiModel = registrationPresenter.uiModel()
-            }
-        }
-        onStopOrDispose {
-            scope.cancel()
-        }
-    }
-
-    // UI data, actions, navigation and events passing to UI
-    RegistrationPane(
-        modifier = modifier,
-        registrationUiModel = { registrationUiModel },
-        navigateToLogin = { navigateToLoginFromRegistration() },
-        registrationAction = { event -> registrationAction(event) },
-    )
-}
-
-@Composable
-private fun NoteListEntry(
-    modifier: Modifier = Modifier,
-    navigateToAdd: () -> Unit,
-    navigateToEdit: (String) -> Unit,
-    navigateToSettings: () -> Unit
-) {
-    // Setup Presenter
-    val noteListPresenter: NoteListPresenter = retain { get(clazz = NoteListPresenter::class.java) }
-    var noteListUiModel by remember { mutableStateOf(value = NoteListUiModel.Empty) }
-    val noteListAction by rememberUpdatedState(newValue = noteListPresenter::processEvent)
-
-    // Setup scope and Lifecycle
-    val scope = rememberCoroutineScope()
-    LifecycleStartEffect(key1 = Unit) {
-        if (scope.isActive) {
-            scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                noteListUiModel = noteListPresenter.uiModel()
-            }
-        }
-        onStopOrDispose {
-            scope.cancel()
-        }
-    }
-
-    // UI data, actions, navigation and events passing to UI
-    NoteListPane(
-        modifier = modifier,
-        noteListUiModel = { noteListUiModel },
-        noteListAction = { event -> noteListAction(event) },
-        onNoteClicked = { uuid -> navigateToEdit(uuid) },
-        onFabClicked = { navigateToAdd() },
-        onSettingsClicked = { navigateToSettings() },
-        onProfileClicked = {}
-    )
-}
-
-@Composable
-private fun NoteCreateEntry(
-    modifier: Modifier = Modifier,
-    navigateUp: () -> Unit
-) {
-    // Setup Presenter
-    val addNotePresenter:AddNotePresenter = retain { get(clazz = AddNotePresenter::class.java) }
-    var addNoteUiModel by remember { mutableStateOf(value = AddNoteUiModel.Empty) }
-    val addNoteAction by rememberUpdatedState(newValue = addNotePresenter::processEvent)
-
-    // Setup scope and Lifecycle
-    val scope = rememberCoroutineScope()
-    LifecycleStartEffect(key1 = Unit) {
-        if (scope.isActive) {
-            scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                addNoteUiModel = addNotePresenter.uiModel()
-            }
-        }
-        onStopOrDispose {
-            scope.cancel()
-        }
-    }
-
-    // UI data, actions, navigation and events passing to UI
-    AddNotePane(
-        modifier = modifier,
-        addNoteUiModel = { addNoteUiModel },
-        addNoteAction = { event -> addNoteAction(event) },
-        onBackClicked = { navigateUp() }
-    )
-}
-
-@Composable
-private fun NoteEditEntry(
-    modifier: Modifier = Modifier,
-    argument: String,
-    navigateUp: () -> Unit
-) {
-    // Setup Presenter
-    val editNotePresenter: EditNotePresenter = retain {
-        get(
-            clazz = EditNotePresenter::class.java,
-            parameters = { parametersOf(argument) }
-        )
-    }
-    var editNoteUiModel by remember { mutableStateOf(value = EditNoteUiModel.Empty) }
-    val editNoteAction by rememberUpdatedState(newValue = editNotePresenter::processEvent)
-
-    // Setup scope and Lifecycle
-    val scope = rememberCoroutineScope()
-    LifecycleStartEffect(key1 = argument) {
-        if (scope.isActive) {
-            scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                editNoteUiModel = editNotePresenter.uiModel()
-            }
-        }
-        onStopOrDispose {
-            scope.cancel()
-        }
-    }
-
-    // UI data, actions, navigation and events passing to UI
-    EditNotePane(
-        modifier = modifier,
-        editNoteUiModel = { editNoteUiModel },
-        editNoteAction = { event -> editNoteAction(event) },
-        onCloseClicked = { navigateUp() }
-    )
-}
-
-@Composable
-private fun SettingsEntry(
-    modifier: Modifier = Modifier,
-    navigateToLauncherAfterLogout: () -> Unit,
-    navigateUp: () -> Unit
-) {
-    // Setup Presenter
-    val settingsPresenter: SettingsPresenter = retain { get(clazz = SettingsPresenter::class.java) }
-    var settingsUiModel by remember { mutableStateOf(value =  SettingsUiModel.Empty) }
-    val settingsAction by rememberUpdatedState(newValue = settingsPresenter::processEvent)
-
-    // Setup scope and Lifecycle
-    val scope = rememberCoroutineScope()
-    LifecycleStartEffect(key1 = Unit) {
-        if (scope.isActive) {
-            scope.launchMolecule(mode = RecompositionMode.Immediate) {
-                settingsUiModel = settingsPresenter.uiModel()
-            }
-        }
-        onStopOrDispose {
-            scope.cancel()
-        }
-    }
-
-    // UI data, actions, navigation and events passing to UI
-    SettingsPane(
-        modifier = modifier,
-        settingsUiModel = { settingsUiModel },
-        settingsAction = { event -> settingsAction(event) },
-        onBackClicked = { navigateUp() },
-        onLogoutSuccessful = { navigateToLauncherAfterLogout() },
-        onDeleteNoteCheckChanged = {
-            settingsAction(AppAction.DeleteLocalNotesOnLogout(deleteOnLogout = !settingsUiModel.deleteLocalNotesOnLogout))
-        },
-        onLogoutClicked = {
-            settingsAction(AppAction.AppLogout)
         }
     )
 }
