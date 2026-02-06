@@ -65,7 +65,7 @@ class NoteListPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            val appStateMachine = appStateMachineFactory.launchIn(this)
+            val appStateMachine = appStateMachineFactory.shareIn(this)
             val noteListStateMachine = noteListStateMachineFactory.launchIn(this)
 
             launch {

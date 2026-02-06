@@ -41,7 +41,7 @@ class LauncherPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            val appStateMachine = appStateMachineFactory.launchIn(this)
+            val appStateMachine = appStateMachineFactory.shareIn(this)
 
             launch {
                 appStateMachine.state

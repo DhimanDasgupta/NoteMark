@@ -17,6 +17,7 @@ import com.dhimandasgupta.notemark.features.addnote.AddNoteEntry
 import com.dhimandasgupta.notemark.features.editnote.EditNoteEntry
 import com.dhimandasgupta.notemark.features.launcher.LauncherEntry
 import com.dhimandasgupta.notemark.features.login.LoginEntry
+import com.dhimandasgupta.notemark.features.notelist.NoNoteSelectedPane
 import com.dhimandasgupta.notemark.features.notelist.NoteListEntry
 import com.dhimandasgupta.notemark.features.registration.RegistrationEntry
 import com.dhimandasgupta.notemark.features.settings.SettingsEntry
@@ -89,7 +90,9 @@ fun NoteMarkRoot(
                 )
             }
             entry<NoteListNavKey>(
-                metadata = ListDetailSceneStrategy.listPane()
+                metadata = ListDetailSceneStrategy.listPane {
+                    NoNoteSelectedPane()
+                }
             ) {
                 NoteListEntry(
                     modifier = modifier,
@@ -100,7 +103,9 @@ fun NoteMarkRoot(
                         backStack.add(NoteEditNavKey(uuid))
                     },
                     navigateToSettings = {
-                        backStack.add(SettingsNavKey)
+                        if (!backStack.isSettingsOpen()) {
+                            backStack.add(SettingsNavKey)
+                        }
                     }
                 )
             }
@@ -116,10 +121,10 @@ fun NoteMarkRoot(
             }
             entry<NoteEditNavKey>(
                 metadata = ListDetailSceneStrategy.detailPane()
-            ) {
+            ) { noteEditNavKey ->
                 EditNoteEntry(
                     modifier = modifier,
-                    argument = it.noteId,
+                    argument = noteEditNavKey.noteId,
                     navigateUp = {
                         backStack.removeLastOrNull()
                     }
