@@ -22,12 +22,12 @@ import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.proto.User
 import com.dhimandasgupta.notemark.proto.sync
-import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import java.time.Duration
+import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 
 @Immutable
 sealed interface AppState {
@@ -46,7 +46,6 @@ sealed interface AppState {
 }
 
 sealed interface AppAction {
-    object ConnectionStateConsumed: AppAction
     data class UpdateSync(val syncDuration: Sync.SyncDuration) : AppAction
     object AppLogout : AppAction
     data class DeleteLocalNotesOnLogout(val deleteOnLogout: Boolean) : AppAction
@@ -59,8 +58,6 @@ class AppStateMachineFactory(
     private val syncRepository: SyncRepository,
     private val noteMarkRepository: NoteMarkRepository
 ) : StateMachineFactory<AppState, AppAction>() {
-    private var lastKnownConnectionState: ConnectionState? = null
-
     init {
         if (applicationContext is Activity) throw IllegalStateException("Context cannot be an Activity")
 
@@ -79,16 +76,14 @@ class AppStateMachineFactory(
                         }
                     } ?: noChange()
                 }
-                collectWhileInState(flow = applicationContext.observeConnectivityAsFlow()) { connected ->
-                    lastKnownConnectionState = connected
+                collectWhileInState(flow = applicationContext.observeConnectivityAsFlow().distinctUntilChanged()) { connected ->
                     mutate { copy(connectionState = connected) }
                 }
             }
 
             inState<AppState.LoggedIn> {
                 onEnterEffect { syncOnEnter() }
-                collectWhileInState(flow = applicationContext.observeConnectivityAsFlow()) { connected ->
-                    lastKnownConnectionState = connected
+                collectWhileInState(flow = applicationContext.observeConnectivityAsFlow().distinctUntilChanged()) { connected ->
                     mutate { copy(connectionState = connected) }
                 }
                 collectWhileInState(flow = syncRepository.getSync()) { sync ->
@@ -107,9 +102,6 @@ class AppStateMachineFactory(
                 }
 
                 // All the actions valid for app state should be handled here
-                on<AppAction.ConnectionStateConsumed> { _ ->
-                    mutate { copy(connectionState = null) }
-                }
                 on<AppAction.UpdateSync> { action ->
                     val duration = when (action.syncDuration) {
                         Sync.SyncDuration.SYNC_DURATION_FIFTEEN_MINUTES -> Duration.ofMinutes(15)
@@ -128,7 +120,7 @@ class AppStateMachineFactory(
                     syncRepository.saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout = action.deleteOnLogout)
                 }
                 on<AppAction.AppLogout> { _ ->
-                    if (lastKnownConnectionState == ConnectionState.Unavailable) return@on noChange()
+                    if (snapshot.connectionState == ConnectionState.Unavailable) return@on noChange()
 
                     noteMarkRepository.logout(
                         request = RefreshRequest(

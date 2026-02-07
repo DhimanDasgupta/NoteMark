@@ -61,8 +61,10 @@ fun NoteMarkRoot(
                 LauncherEntry(
                     modifier = modifier,
                     navigateAfterLogin = {
-                        backStack.clearPreLoginKeys()
-                        backStack.add(NoteListNavKey)
+                        backStack.apply {
+                            clearPreLoginKeys()
+                            add(NoteListNavKey)
+                        }
                     },
                     navigateToLogin = {
                         backStack.add(LoginNavKey)
@@ -76,8 +78,10 @@ fun NoteMarkRoot(
                         backStack.add(RegistrationNavKey)
                     },
                     navigateToAfterLogin = {
-                        backStack.clearPreLoginKeys()
-                        backStack.add(NoteListNavKey)
+                        backStack.apply {
+                            clearPreLoginKeys()
+                            add(NoteListNavKey)
+                        }
                     }
                 )
             }
@@ -136,8 +140,10 @@ fun NoteMarkRoot(
                 SettingsEntry(
                     modifier = modifier,
                     navigateToLauncherAfterLogout = {
-                        backStack.clearPostLoginNavKeys()
-                        backStack.add(LauncherNavKey)
+                        backStack.apply {
+                            clearPostLoginNavKeys()
+                            add(LauncherNavKey)
+                        }
                     },
                     navigateUp = {
                         backStack.removeLastOrNull()

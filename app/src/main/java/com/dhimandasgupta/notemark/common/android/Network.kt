@@ -11,6 +11,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 sealed interface ConnectionState {
     data object Available : ConnectionState
@@ -48,6 +49,8 @@ fun Context.observeConnectivityAsFlow() = callbackFlow {
     val networkRequest = NetworkRequest.Builder()
         .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
         .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+        .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
         .build()
 
     connectivityManager.registerNetworkCallback(networkRequest, callback)
@@ -61,7 +64,7 @@ fun Context.observeConnectivityAsFlow() = callbackFlow {
         // Remove listeners
         connectivityManager.unregisterNetworkCallback(callback)
     }
-}
+}.distinctUntilChanged()
 
 private fun networkCallback(
     callback: (ConnectionState) -> Unit
@@ -80,7 +83,10 @@ private fun networkCallback(
             networkCapabilities: NetworkCapabilities
         ) {
             super.onCapabilitiesChanged(network, networkCapabilities)
-            val connected = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            val hasInternetCapability = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            val isConnected = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+
+            val connected = hasInternetCapability && isConnected
             callback(if (connected) ConnectionState.Available else ConnectionState.Unavailable)
         }
     }
