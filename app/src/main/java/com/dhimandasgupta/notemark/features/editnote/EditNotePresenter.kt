@@ -45,7 +45,11 @@ data class EditNoteUiModel(
 
 class EditNotePresenter(
     private val noteId: String,
-    private val editNoteStateMachineFactory: EditNoteStateMachineFactory = get(clazz = EditNoteStateMachineFactory::class.java) { parametersOf(noteId) }
+    private val editNoteStateMachineFactory: EditNoteStateMachineFactory = get(clazz = EditNoteStateMachineFactory::class.java) {
+        parametersOf(
+            noteId
+        )
+    }
 ) {
     private val events = MutableSharedFlow<EditNoteAction>(extraBufferCapacity = 10)
 
