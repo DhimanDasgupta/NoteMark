@@ -516,7 +516,7 @@ private fun RegistraionPanePreview() {
     NoteMarkTheme {
         RegistrationPane(
             modifier = Modifier,
-            registrationUiModel = { RegistrationUiModel.Empty }
+            registrationUiModel = { RegistrationUiModel.defaultOrEmpty }
         )
     }
 }

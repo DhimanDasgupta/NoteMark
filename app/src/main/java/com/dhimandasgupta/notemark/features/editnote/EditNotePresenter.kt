@@ -33,7 +33,7 @@ data class EditNoteUiModel(
     val isReaderMode: Boolean = false
 ) {
     companion object {
-        val Empty = EditNoteUiModel(
+        val defaultOrEmpty = EditNoteUiModel(
             title = "",
             content = "",
             noteEntity = null,
@@ -51,7 +51,7 @@ class EditNotePresenter(
 
     @Composable
     fun uiModel(): EditNoteUiModel {
-        var editNoteUiModel by remember(key1 = Unit) { mutableStateOf(value = EditNoteUiModel.Empty) }
+        var editNoteUiModel by remember(key1 = Unit) { mutableStateOf(value = EditNoteUiModel.defaultOrEmpty) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {

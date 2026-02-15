@@ -28,7 +28,7 @@ class RegistrationPresenterTest {
             // Start flow validation
             flow.test {
                 val registrationUiModel = awaitItem()
-                assertEquals(RegistrationUiModel.Empty, registrationUiModel)
+                assertEquals(RegistrationUiModel.defaultOrEmpty, registrationUiModel)
             }
         }
     }

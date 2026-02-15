@@ -29,7 +29,7 @@ class AddNotePresenterTest {
             // Start flow validation
             flow.test {
                 val addUiModel = awaitItem()
-                assertEquals(AddNoteUiModel.Empty, addUiModel)
+                assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
             }
         }
     }
@@ -50,7 +50,7 @@ class AddNotePresenterTest {
             // Start flow validation
             flow.test {
                 val addUiModel = awaitItem()
-                assertEquals(AddNoteUiModel.Empty, addUiModel)
+                assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
                 presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
                 assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
             }
@@ -73,7 +73,7 @@ class AddNotePresenterTest {
             // Start flow validation
             flow.test {
                 val addUiModel = awaitItem()
-                assertEquals(AddNoteUiModel.Empty, addUiModel)
+                assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
                 presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
                 assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
                 presenter.dispatchAction(AddNoteAction.UpdateContent("Some content"))
@@ -98,7 +98,7 @@ class AddNotePresenterTest {
             // Start flow validation
             flow.test {
                 val addUiModel = awaitItem()
-                assertEquals(AddNoteUiModel.Empty, addUiModel)
+                assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
                 presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
                 assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
                 presenter.dispatchAction(AddNoteAction.UpdateContent("Some content"))
@@ -125,7 +125,7 @@ class AddNotePresenterTest {
             // Start flow validation
             flow.test {
                 val addUiModel = awaitItem()
-                assertEquals(AddNoteUiModel.Empty, addUiModel)
+                assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
                 presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
                 assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
                 presenter.dispatchAction(AddNoteAction.UpdateContent("Some content"))

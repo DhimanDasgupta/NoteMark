@@ -26,7 +26,7 @@ data class LauncherUiModel(
     val loggedInUser: User? = null
 ) {
     companion object {
-        val Empty = LauncherUiModel()
+        val defaultOrEmpty = LauncherUiModel()
     }
 }
 
@@ -37,7 +37,7 @@ class LauncherPresenter(
 
     @Composable
     fun uiModel(): LauncherUiModel {
-        var launcherUiModel by remember(key1 = Unit) { mutableStateOf(value = LauncherUiModel.Empty) }
+        var launcherUiModel by remember(key1 = Unit) { mutableStateOf(value = LauncherUiModel.defaultOrEmpty) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {

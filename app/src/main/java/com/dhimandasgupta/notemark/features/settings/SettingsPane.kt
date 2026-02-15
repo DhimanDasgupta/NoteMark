@@ -497,4 +497,4 @@ private fun SettingsPanePreview() {
     }
 }
 
-private val defaultSettingsUiModel = { SettingsUiModel.Empty.copy(appVersionName = "Some Version") }
+private val defaultSettingsUiModel = { SettingsUiModel.defaultOrEmpty.copy(appVersionName = "Some Version") }

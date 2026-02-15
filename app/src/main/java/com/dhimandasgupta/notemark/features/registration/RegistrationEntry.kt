@@ -23,7 +23,7 @@ fun RegistrationEntry(
 ) {
     // Setup Presenter
     val registrationPresenter: RegistrationPresenter = retain { get(clazz = RegistrationPresenter::class.java) }
-    var registrationUiModel by remember { mutableStateOf(value = RegistrationUiModel.Empty) }
+    var registrationUiModel by remember { mutableStateOf(value = RegistrationUiModel.defaultOrEmpty) }
     val registrationAction by rememberUpdatedState(newValue = registrationPresenter::dispatchAction)
 
     // Setup scope and Lifecycle

@@ -34,7 +34,7 @@ data class RegistrationUiModel(
     val registrationSuccess: Boolean? = null
 ) {
     companion object {
-        val Empty = RegistrationUiModel()
+        val defaultOrEmpty = RegistrationUiModel()
     }
 }
 
@@ -45,7 +45,7 @@ class RegistrationPresenter(
 
     @Composable
     fun uiModel(): RegistrationUiModel {
-        var registrationUiModel by remember(key1 = Unit) { mutableStateOf(value = RegistrationUiModel.Empty) }
+        var registrationUiModel by remember(key1 = Unit) { mutableStateOf(value = RegistrationUiModel.defaultOrEmpty) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {

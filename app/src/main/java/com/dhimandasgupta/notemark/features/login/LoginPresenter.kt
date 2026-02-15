@@ -28,7 +28,7 @@ data class LoginUiModel(
     val loginSuccess: Boolean? = null
 ) {
     companion object {
-        val Empty = LoginUiModel()
+        val defaultOrEmpty = LoginUiModel()
     }
 }
 
@@ -39,7 +39,7 @@ class LoginPresenter(
 
     @Composable
     fun uiModel(): LoginUiModel {
-        var loginUiModel by remember(key1 = Unit) { mutableStateOf(value = LoginUiModel.Empty) }
+        var loginUiModel by remember(key1 = Unit) { mutableStateOf(value = LoginUiModel.defaultOrEmpty) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {

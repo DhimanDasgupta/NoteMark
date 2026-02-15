@@ -326,7 +326,7 @@ private fun LauncherPanePreview() {
     NoteMarkTheme {
         LauncherPane(
             modifier = Modifier,
-            launcherUiModel = { LauncherUiModel.Empty }
+            launcherUiModel = { LauncherUiModel.defaultOrEmpty }
         )
     }
 }

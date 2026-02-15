@@ -41,7 +41,7 @@ data class SettingsUiModel(
     val appVersionName: String? = null
 ) {
     companion object {
-        val Empty = SettingsUiModel()
+        val defaultOrEmpty = SettingsUiModel()
     }
 }
 
@@ -52,7 +52,7 @@ class SettingsPresenter(
 
     @Composable
     fun uiModel(): SettingsUiModel {
-        var settingsUiModel by remember { mutableStateOf(value = SettingsUiModel.Empty) }
+        var settingsUiModel by remember { mutableStateOf(value = SettingsUiModel.defaultOrEmpty) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
@@ -102,7 +102,7 @@ class SettingsPresenter(
             }
 
             else -> {
-                return SettingsUiModel.Empty.copy(
+                return SettingsUiModel.defaultOrEmpty.copy(
                     logoutStatus = true,
                 )
             }

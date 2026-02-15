@@ -34,7 +34,7 @@ data class NoteListUiModel(
     val isConnected: Boolean = false
 ) {
     companion object {
-        val Empty = defaultNoteListUiModel
+        val defaultOrEmpty = defaultNoteListUiModel
     }
 }
 
@@ -78,7 +78,7 @@ class NoteListPresenter(
                         noteListState = noteListState
                     )
                 }
-                    .onStart { emit(value = NoteListUiModel.Empty) }
+                    .onStart { emit(value = NoteListUiModel.defaultOrEmpty) }
                     .cancellable()
                     .catch {} // Do something with error if required
                     .flowOn(context = Dispatchers.Default)

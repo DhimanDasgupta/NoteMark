@@ -443,7 +443,7 @@ private fun LoginPanePreview() {
     NoteMarkTheme {
         LoginPane(
             modifier = Modifier,
-            loginUiModel = { LoginUiModel.Empty }
+            loginUiModel = { LoginUiModel.defaultOrEmpty }
         )
     }
 }

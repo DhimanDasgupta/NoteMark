@@ -25,7 +25,7 @@ fun NoteListEntry(
 ) {
     // Setup Presenter
     val noteListPresenter: NoteListPresenter = retain { get(clazz = NoteListPresenter::class.java) }
-    var noteListUiModel by remember { mutableStateOf(value = NoteListUiModel.Empty) }
+    var noteListUiModel by remember { mutableStateOf(value = NoteListUiModel.defaultOrEmpty) }
     val noteListAction by rememberUpdatedState(newValue = noteListPresenter::dispatchAction)
 
     // Setup scope and Lifecycle

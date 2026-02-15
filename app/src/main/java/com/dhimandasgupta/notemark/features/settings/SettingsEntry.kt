@@ -25,7 +25,7 @@ fun SettingsEntry(
 ) {
     // Setup Presenter
     val settingsPresenter: SettingsPresenter = retain { get(clazz = SettingsPresenter::class.java) }
-    var settingsUiModel by remember { mutableStateOf(value =  SettingsUiModel.Empty) }
+    var settingsUiModel by remember { mutableStateOf(value =  SettingsUiModel.defaultOrEmpty) }
     val settingsAction by rememberUpdatedState(newValue = settingsPresenter::dispatchAction)
 
     // Setup scope and Lifecycle

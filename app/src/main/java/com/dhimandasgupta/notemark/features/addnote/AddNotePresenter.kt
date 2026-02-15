@@ -25,7 +25,7 @@ data class AddNoteUiModel(
     val saved: Boolean? = null
 ) {
     companion object {
-        val Empty = AddNoteUiModel(
+        val defaultOrEmpty = AddNoteUiModel(
             title = "",
             content = "",
             saved = null
@@ -40,7 +40,7 @@ class AddNotePresenter(
 
     @Composable
     fun uiModel(): AddNoteUiModel {
-        var addNoteUiModel by remember(key1 = Unit) { mutableStateOf(value = AddNoteUiModel.Empty) }
+        var addNoteUiModel by remember(key1 = Unit) { mutableStateOf(value = AddNoteUiModel.defaultOrEmpty) }
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {

@@ -27,7 +27,7 @@ fun LauncherEntry(
 
     // Setup Presenter
     val launcherPresenter: LauncherPresenter = retain { get(clazz = LauncherPresenter::class.java) }
-    var launcherUiModel by remember { mutableStateOf(value = LauncherUiModel.Empty) }
+    var launcherUiModel by remember { mutableStateOf(value = LauncherUiModel.defaultOrEmpty) }
 
     // Setup scope and Lifecycle
     val scope = rememberCoroutineScope()

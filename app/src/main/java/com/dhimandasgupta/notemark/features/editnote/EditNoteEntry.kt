@@ -30,7 +30,7 @@ fun EditNoteEntry(
             parameters = { parametersOf(argument) }
         )
     }
-    var editNoteUiModel by remember { mutableStateOf(value = EditNoteUiModel.Empty) }
+    var editNoteUiModel by remember { mutableStateOf(value = EditNoteUiModel.defaultOrEmpty) }
     val editNoteAction by rememberUpdatedState(newValue = editNotePresenter::dispatchAction)
 
     // Setup scope and Lifecycle

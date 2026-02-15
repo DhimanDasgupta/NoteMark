@@ -30,7 +30,7 @@ class EditNotePresenterTest {
             // Start flow validation
             flow.test {
                 val editNoteUiModel = awaitItem()
-                assertEquals(EditNoteUiModel.Empty, editNoteUiModel)
+                assertEquals(EditNoteUiModel.defaultOrEmpty, editNoteUiModel)
             }
         }
     }
