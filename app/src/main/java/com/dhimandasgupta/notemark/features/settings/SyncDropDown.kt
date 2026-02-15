@@ -2,7 +2,9 @@ package com.dhimandasgupta.notemark.features.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
@@ -21,7 +23,10 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.dhimandasgupta.notemark.ui.WindowSizePreviews
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun SyncDropDown(
@@ -47,7 +52,7 @@ fun SyncDropDown(
             offset = DpOffset(x = 0.dp, y = 0.dp),
             onDismissRequest = toggleDropDownVisibility,
         ) {
-            syncIntervals.forEach { label ->
+            syncIntervals.forEachIndexed { index, label ->
                 DropdownMenuItem(
                     text = {
                         Text(
@@ -73,7 +78,29 @@ fun SyncDropDown(
                         testTag = "DropDown_$label"
                     }
                 )
+
+                if (index != syncIntervals.lastIndex) {
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(height = 1.dp)
+                            .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
+                    )
+                }
             }
         }
+    }
+}
+
+@WindowSizePreviews
+@Composable
+private fun SyncDropDownPreview() {
+    NoteMarkTheme {
+        SyncDropDown(
+            selectedSyncInterval = "15 minutes",
+            syncIntervals = persistentListOf("Manual", "15 minutes", "30 minutes", "1 hour"),
+            toggleDropDownVisibility = {},
+            onDropDownItemSelected = {}
+        )
     }
 }

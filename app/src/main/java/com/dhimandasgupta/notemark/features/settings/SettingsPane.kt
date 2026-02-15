@@ -65,6 +65,7 @@ import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 
 @OptIn(FlowPreview::class)
 @Composable
@@ -80,7 +81,6 @@ fun SettingsPane(
     val context = LocalActivity.current
     SideEffect { context?.setDarkStatusBarIcons(true) }
 
-
     val updatedSettingsUiModel by rememberUpdatedState(newValue = settingsUiModel)
     val updatedOnLogoutSuccessful by rememberUpdatedState(newValue = onLogoutSuccessful)
 
@@ -89,10 +89,9 @@ fun SettingsPane(
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { updatedSettingsUiModel().logoutStatus }
             .debounce(timeoutMillis = 100)
-            .collect { status ->
-                if (status == true) {
-                    updatedOnLogoutSuccessful()
-                }
+            .filter { status -> status == true }
+            .collect { _ ->
+                updatedOnLogoutSuccessful()
             }
     }
 
@@ -211,12 +210,7 @@ private fun SettingsBody(
                 toggleSyncIntervalVisibility = toggleSyncIntervalVisibility
             )
 
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(height = 1.dp)
-                    .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
-            )
+            Divider()
 
             // Sync Data
             SyncDataRow(
@@ -224,12 +218,7 @@ private fun SettingsBody(
                 settingsUiModel = settingsUiModel
             )
 
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(height = 1.dp)
-                    .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
-            )
+            Divider()
 
             // Delete Local Data
             DeleteLocalDataRow(
@@ -238,12 +227,7 @@ private fun SettingsBody(
                 onCheckChange = onDeleteNoteCheckChanged
             )
 
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(height = 1.dp)
-                    .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
-            )
+            Divider()
 
             // Logout
             LogoutRow(
@@ -365,12 +349,8 @@ private fun SyncDataRow(
                 .padding(horizontal = 8.dp)
                 .requiredSize(size = 24.dp)
                 .then(
-                    other = if (settingsUiModel().isSyncing) {
-                        Modifier.graphicsLayer {
-                            rotationZ = rotationAngle
-                        }
-                    } else Modifier.graphicsLayer {
-                        rotationZ = 0f
+                    other = Modifier.graphicsLayer {
+                        rotationZ = if (settingsUiModel().isSyncing) rotationAngle else 0f
                     }
                 )
         )
@@ -386,9 +366,8 @@ private fun SyncDataRow(
             val configuration = LocalConfiguration.current
             val locale by remember(key1 = configuration) {
                 mutableStateOf(
-                    configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(
-                        0
-                    )
+                    configuration.locales.getFirstMatch(arrayOf("en"))
+                        ?: configuration.locales.get(0)
                 )
             }
 
@@ -480,7 +459,7 @@ private fun LogoutRow(
 }
 
 @Composable
-fun AppVersion(
+private fun AppVersion(
     modifier: Modifier = Modifier,
     appVersionName: String
 ) {
@@ -492,6 +471,18 @@ fun AppVersion(
         modifier = modifier
             .padding(all = 16.dp)
             .fillMaxWidth()
+    )
+}
+
+@Composable
+private fun Divider(
+    modifier: Modifier = Modifier
+) {
+    Spacer(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height = 1.dp)
+            .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
     )
 }
 
