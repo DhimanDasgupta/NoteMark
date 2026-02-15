@@ -85,23 +85,20 @@ class EditNotePresenter(
         return editNoteUiModel
     }
 
-    fun dispatchAction(event: EditNoteAction) {
+    fun dispatchAction(event: EditNoteAction) =
         events.tryEmit(value = event)
-    }
-
-    private fun mapToEditNoteUiModel(
-        editNoteState: EditNoteState
-    ): EditNoteUiModel {
-        return EditNoteUiModel(
-            title = editNoteState.title,
-            content = editNoteState.content,
-            noteEntity = editNoteState.noteEntity?.copy(
-                createdAt = editNoteState.noteEntity.createdAt,
-                lastEditedAt = editNoteState.noteEntity.lastEditedAt
-            ),
-            saved = editNoteState.saved,
-            editEnable = editNoteState.mode == Mode.EditMode,
-            isReaderMode = editNoteState.mode == Mode.ReaderMode
-        )
-    }
 }
+
+private fun mapToEditNoteUiModel(
+    editNoteState: EditNoteState
+) = EditNoteUiModel(
+    title = editNoteState.title,
+    content = editNoteState.content,
+    noteEntity = editNoteState.noteEntity?.copy(
+        createdAt = editNoteState.noteEntity.createdAt,
+        lastEditedAt = editNoteState.noteEntity.lastEditedAt
+    ),
+    saved = editNoteState.saved,
+    editEnable = editNoteState.mode == Mode.EditMode,
+    isReaderMode = editNoteState.mode == Mode.ReaderMode
+)

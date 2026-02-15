@@ -75,7 +75,6 @@ class LauncherPresenter(
         return launcherUiModel
     }
 
-    fun dispatchAction(event: AppAction) {
+    fun dispatchAction(event: AppAction) =
         events.tryEmit(value = event)
-    }
 }

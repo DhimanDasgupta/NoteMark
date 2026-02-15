@@ -80,7 +80,6 @@ class LoginPresenter(
         return loginUiModel
     }
 
-    fun dispatchAction(event: LoginAction) {
+    fun dispatchAction(event: LoginAction) =
         events.tryEmit(value = event)
-    }
 }

@@ -77,24 +77,23 @@ class RegistrationPresenter(
         return registrationUiModel
     }
 
-    fun dispatchAction(event: RegistrationAction) {
+    fun dispatchAction(event: RegistrationAction) =
         events.tryEmit(value = event)
-    }
 
-    private fun mapToRegistrationModel(registrationState: RegistrationState): RegistrationUiModel {
-        return RegistrationUiModel(
-            userName = registrationState.userName,
-            email = registrationState.email,
-            password = registrationState.password,
-            repeatPassword = registrationState.repeatPassword,
-            userNameExplanation = registrationState.userNameExplanation,
-            userNameError = registrationState.userNameError,
-            emailError = registrationState.emailError,
-            passwordError = registrationState.passwordError,
-            repeatPasswordError = registrationState.repeatPasswordError,
-            passwordExplanation = registrationState.passwordExplanation,
-            registrationEnabled = registrationState.registrationEnabled,
-            registrationSuccess = registrationState.registrationSuccess
-        )
-    }
+    private fun mapToRegistrationModel(
+        registrationState: RegistrationState
+    ) = RegistrationUiModel(
+        userName = registrationState.userName,
+        email = registrationState.email,
+        password = registrationState.password,
+        repeatPassword = registrationState.repeatPassword,
+        userNameExplanation = registrationState.userNameExplanation,
+        userNameError = registrationState.userNameError,
+        emailError = registrationState.emailError,
+        passwordError = registrationState.passwordError,
+        repeatPasswordError = registrationState.repeatPasswordError,
+        passwordExplanation = registrationState.passwordExplanation,
+        registrationEnabled = registrationState.registrationEnabled,
+        registrationSuccess = registrationState.registrationSuccess
+    )
 }

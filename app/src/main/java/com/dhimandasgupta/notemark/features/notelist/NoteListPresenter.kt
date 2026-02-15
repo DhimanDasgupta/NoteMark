@@ -9,7 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.features.launcher.AppAction
-import com.dhimandasgupta.notemark.features.launcher.AppState
+import com.dhimandasgupta.notemark.features.launcher.AppState.LoggedIn
 import com.dhimandasgupta.notemark.features.launcher.AppStateMachineFactory
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -70,11 +70,11 @@ class NoteListPresenter(
 
             launch {
                 combine(
-                    flow = appStateMachine.state.filter { appState -> appState is AppState.LoggedIn },
+                    flow = appStateMachine.state.filter { appState -> appState is LoggedIn },
                     flow2 = noteListStateMachine.state
                 ) { appState, noteListState ->
                     mapToNoteListUiModel(
-                        loggedIn = appState as AppState.LoggedIn,
+                        loggedIn = appState as LoggedIn,
                         noteListState = noteListState
                     )
                 }
@@ -103,43 +103,42 @@ class NoteListPresenter(
         return noteListUiModel
     }
 
-    fun dispatchAction(event: NoteListAction) {
+    fun dispatchAction(event: NoteListAction) =
         events.tryEmit(event)
-    }
 
-    fun dispatchAppAction(event: AppAction) {
+    fun dispatchAppAction(event: AppAction) =
         appActionEvents.tryEmit(event)
-    }
-
-    private fun mapToNoteListUiModel(loggedIn: AppState.LoggedIn, noteListState: NoteListState): NoteListUiModel {
-        return NoteListUiModel(
-            userName = loggedIn.user.userName,
-            noteEntities = if (noteListState is NoteListState.NoteListStateWithNotes) {
-                noteListState
-                    .notes
-                    .map { note ->
-                        NoteEntityUiModel(
-                            id = note.id,
-                            title = note.title,
-                            content = note.content,
-                            createdAt = note.createdAt,
-                            lastEditedAt = note.lastEditedAt,
-                            uuid = note.uuid,
-                            synced = note.synced,
-                            markAsDeleted = note.markAsDeleted
-                        )
-                    }
-                    .toPersistentList()
-            } else {
-                persistentListOf()
-            },
-            noteLongClickedUuid = if (noteListState is NoteListState.NoteListStateWithNotes) {
-                noteListState.longClickedNoteUuid
-            } else {
-                ""
-            },
-            showSyncProgress = loggedIn.sync?.syncing ?: false,
-            isConnected = loggedIn.connectionState == ConnectionState.Available
-        )
-    }
 }
+
+private fun mapToNoteListUiModel(
+    loggedIn: LoggedIn,
+    noteListState: NoteListState
+) = NoteListUiModel(
+    userName = loggedIn.user.userName,
+    noteEntities = if (noteListState is NoteListState.NoteListStateWithNotes) {
+        noteListState
+            .notes
+            .map { note ->
+                NoteEntityUiModel(
+                    id = note.id,
+                    title = note.title,
+                    content = note.content,
+                    createdAt = note.createdAt,
+                    lastEditedAt = note.lastEditedAt,
+                    uuid = note.uuid,
+                    synced = note.synced,
+                    markAsDeleted = note.markAsDeleted
+                )
+            }
+            .toPersistentList()
+    } else {
+        persistentListOf()
+    },
+    noteLongClickedUuid = if (noteListState is NoteListState.NoteListStateWithNotes) {
+        noteListState.longClickedNoteUuid
+    } else {
+        ""
+    },
+    showSyncProgress = loggedIn.sync?.syncing ?: false,
+    isConnected = loggedIn.connectionState == ConnectionState.Available
+)
