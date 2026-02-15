@@ -49,7 +49,7 @@ class RegistrationPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            val registrationStateMachine = this@RegistrationPresenter.registrationStateMachine.launchIn(this)
+            val registrationStateMachine = registrationStateMachine.launchIn(this)
 
             launch {
                 registrationStateMachine.state
