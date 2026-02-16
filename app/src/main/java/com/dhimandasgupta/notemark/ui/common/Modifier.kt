@@ -28,7 +28,7 @@ import kotlin.math.roundToInt
  * 1. The Composable's lifecycle is at least in the RESUMED state (configurable).
  * 2. Enough time (debounceIntervalMs) has passed since the last processed click.
  *
- * @param activeState The minimum Lifecycle.State required for the click to be processed. Defaults to RESUMED.
+ * @param activeState The minimum Lifecycle.State required for the click to be processed. Defaults to RESUME.
  * @param interactionSource The [MutableInteractionSource] for this clickable.
  * @param enabled Global enabled state for the clickable. Overrides lifecycle check if false.
  * @param onClickLabel Semantic / accessibility label for the onClick action.
