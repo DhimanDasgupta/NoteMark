@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -13,14 +12,13 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.dhimandasgupta.notemark.features.addnote.AddNoteEntry
-import com.dhimandasgupta.notemark.features.editnote.EditNoteEntry
-import com.dhimandasgupta.notemark.features.launcher.LauncherEntry
-import com.dhimandasgupta.notemark.features.login.LoginEntry
-import com.dhimandasgupta.notemark.features.notelist.NoNoteSelectedPane
-import com.dhimandasgupta.notemark.features.notelist.NoteListEntry
-import com.dhimandasgupta.notemark.features.registration.RegistrationEntry
-import com.dhimandasgupta.notemark.features.settings.SettingsEntry
+import com.dhimandasgupta.notemark.features.addnote.NoteCreateEntryBuilder
+import com.dhimandasgupta.notemark.features.editnote.NoteEditEntryBuilder
+import com.dhimandasgupta.notemark.features.launcher.LauncherEntryBuilder
+import com.dhimandasgupta.notemark.features.login.LoginEntryBuilder
+import com.dhimandasgupta.notemark.features.notelist.NoteListEntryBuilder
+import com.dhimandasgupta.notemark.features.registration.RegistrationEntryBuilder
+import com.dhimandasgupta.notemark.features.settings.SettingsEntryBuilder
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -57,99 +55,77 @@ fun NoteMarkRoot(
             ) { initialOffSet -> initialOffSet } + fadeOut()
         },
         entryProvider = entryProvider {
-            entry<LauncherNavKey> {
-                LauncherEntry(
-                    modifier = modifier,
-                    navigateAfterLogin = {
-                        backStack.apply {
-                            clearPreLoginKeys()
-                            add(NoteListNavKey)
-                        }
-                    },
-                    navigateToLogin = {
-                        backStack.add(LoginNavKey)
+            LauncherEntryBuilder(
+                modifier = modifier,
+                navigateAfterLogin = {
+                    backStack.apply {
+                        clearPreLoginKeys()
+                        add(NoteListNavKey)
                     }
-                )
-            }
-            entry<LoginNavKey> {
-                LoginEntry(
-                    modifier = modifier,
-                    navigateToRegistration = {
-                        backStack.add(RegistrationNavKey)
-                    },
-                    navigateToAfterLogin = {
-                        backStack.apply {
-                            clearPreLoginKeys()
-                            add(NoteListNavKey)
-                        }
-                    }
-                )
-            }
-            entry<RegistrationNavKey> {
-                RegistrationEntry(
-                    modifier = modifier,
-                    navigateToLoginFromRegistration = {
-                        backStack.removeLastOrNull()
-                    }
-                )
-            }
-            entry<NoteListNavKey>(
-                metadata = ListDetailSceneStrategy.listPane {
-                    NoNoteSelectedPane()
+                },
+                navigateToLogin = {
+                    backStack.add(LoginNavKey)
                 }
-            ) {
-                NoteListEntry(
-                    modifier = modifier,
-                    navigateToAdd = {
-                        backStack.add(NoteCreateNavKey)
-                    },
-                    navigateToEdit = { uuid ->
-                        backStack.add(NoteEditNavKey(uuid))
-                    },
-                    navigateToSettings = {
-                        if (!backStack.isSettingsOpen()) {
-                            backStack.add(SettingsNavKey)
-                        }
+            )
+            LoginEntryBuilder(
+                modifier = modifier,
+                navigateToRegistration = {
+                    backStack.add(RegistrationNavKey)
+                },
+                navigateToAfterLogin = {
+                    backStack.apply {
+                        clearPreLoginKeys()
+                        add(NoteListNavKey)
                     }
-                )
-            }
-            entry<NoteCreateNavKey>(
-                metadata = ListDetailSceneStrategy.detailPane()
-            ) {
-                AddNoteEntry(
-                    modifier = modifier,
-                    navigateUp = {
-                        backStack.removeLastOrNull()
+                }
+            )
+            RegistrationEntryBuilder(
+                modifier = modifier,
+                navigateToLoginFromRegistration = {
+                    backStack.removeLastOrNull()
+                }
+            )
+            NoteListEntryBuilder(
+                modifier = modifier,
+                navigateToAdd = {
+                    backStack.add(NoteCreateNavKey)
+                },
+                navigateToEdit = { uuid ->
+                    backStack.apply {
+                        clearNoteEditNavKeys()
+                        add(NoteEditNavKey(uuid))
                     }
-                )
-            }
-            entry<NoteEditNavKey>(
-                metadata = ListDetailSceneStrategy.detailPane()
-            ) { noteEditNavKey ->
-                EditNoteEntry(
-                    modifier = modifier,
-                    argument = noteEditNavKey.noteId,
-                    navigateUp = {
-                        backStack.removeLastOrNull()
+                },
+                navigateToSettings = {
+                    if (!backStack.isSettingsOpen()) {
+                        backStack.add(SettingsNavKey)
                     }
-                )
-            }
-            entry<SettingsNavKey>(
-                metadata = ListDetailSceneStrategy.extraPane()
-            ) {
-                SettingsEntry(
-                    modifier = modifier,
-                    navigateToLauncherAfterLogout = {
-                        backStack.apply {
-                            clearPostLoginNavKeys()
-                            add(LauncherNavKey)
-                        }
-                    },
-                    navigateUp = {
-                        backStack.removeLastOrNull()
+                }
+            )
+            NoteCreateEntryBuilder(
+                modifier = modifier,
+                navigateUp = {
+                    backStack.removeLastOrNull()
+                }
+            )
+            NoteEditEntryBuilder(
+                modifier = modifier,
+                navigateUp = {
+                    backStack.removeLastOrNull()
+                }
+            )
+            SettingsEntryBuilder(
+                modifier = modifier,
+                navigateToLauncherAfterLogout = {
+                    backStack.apply {
+                        clearPostLoginNavKeys()
+                        add(LauncherNavKey)
                     }
-                )
-            }
+                },
+                navigateUp = {
+                    backStack.removeLastOrNull()
+                }
+            )
         }
     )
 }

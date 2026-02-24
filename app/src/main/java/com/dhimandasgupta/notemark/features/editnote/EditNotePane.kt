@@ -5,6 +5,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -30,6 +32,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -61,6 +64,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -82,6 +86,7 @@ import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton
+import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -144,27 +149,61 @@ fun EditNotePane(
                 editNoteAction(EditNoteAction.Save)
             }
         )
+        
+        val showLoading by remember(updatedEditNoteUiModel()) {
+            mutableStateOf(value = updatedEditNoteUiModel().content.isEmpty() && updatedEditNoteUiModel().title.isEmpty())
+        }
 
-        EditNoteBody(
-            modifier = Modifier
-                .fillMaxWidth(
-                    fraction = when (layoutType) {
-                        DeviceLayoutType.PHONE_PORTRAIT -> 1f
-                        DeviceLayoutType.PHONE_LANDSCAPE -> 0.9f
-                        else -> 0.85f
-                    }
+        AnimatedVisibility(
+            visible = showLoading,
+            enter = scaleIn() + fadeIn(),
+            exit = scaleOut() + fadeOut(),
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                ThreeBouncingDots(
+                    modifier = Modifier
+                        .padding(all = 16.dp)
+                        .wrapContentSize(),
+                    dotColor1 = colorResource(id = R.color.splash_blue).copy(alpha = 0.5f),
+                    dotColor2 = colorResource(id = R.color.splash_blue).copy(alpha = 0.75f),
+                    dotColor3 = colorResource(id = R.color.splash_blue).copy(alpha = 1.0f)
                 )
-                .fillMaxHeight(fraction = 1f)
-                .lifecycleAwareDebouncedClickable(
-                    onClick = {
-                        if (updatedEditNoteUiModel().isReaderMode) {
-                            editNoteAction(EditNoteAction.ModeChange(Mode.ViewMode))
+            }
+        }
+
+        AnimatedVisibility(
+            visible = !showLoading,
+            enter = fadeIn() + slideInVertically(
+                initialOffsetY = { it / 2 }
+            ),
+            exit = fadeOut() + slideOutVertically(
+                targetOffsetY = { it / 2 }
+            ),
+        ) {
+            EditNoteBody(
+                modifier = Modifier
+                    .fillMaxWidth(
+                        fraction = when (layoutType) {
+                            DeviceLayoutType.PHONE_PORTRAIT -> 1f
+                            DeviceLayoutType.PHONE_LANDSCAPE -> 0.9f
+                            else -> 0.85f
                         }
-                    }
-                ),
-            editNoteUiModel = updatedEditNoteUiModel,
-            editNoteAction = editNoteAction
-        )
+                    )
+                    .fillMaxHeight(fraction = 1f)
+                    .lifecycleAwareDebouncedClickable(
+                        onClick = {
+                            if (updatedEditNoteUiModel().isReaderMode) {
+                                editNoteAction(EditNoteAction.ModeChange(Mode.ViewMode))
+                            }
+                        }
+                    ),
+                editNoteUiModel = updatedEditNoteUiModel,
+                editNoteAction = editNoteAction
+            )
+        }
     }
 }
 

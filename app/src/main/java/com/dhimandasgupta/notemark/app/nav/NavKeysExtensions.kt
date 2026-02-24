@@ -9,5 +9,8 @@ fun NavBackStack<NavKey>.clearPreLoginKeys(): Boolean =
 fun NavBackStack<NavKey>.clearPostLoginNavKeys(): Boolean =
     removeAll { it is PostLoginNavKey }
 
+fun NavBackStack<NavKey>.clearNoteEditNavKeys(): Boolean =
+    removeAll { it is NoteEditNavKey }
+
 fun NavBackStack<NavKey>.isSettingsOpen(): Boolean =
     last() == SettingsNavKey

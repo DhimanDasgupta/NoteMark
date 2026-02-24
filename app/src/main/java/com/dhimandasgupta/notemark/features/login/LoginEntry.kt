@@ -10,14 +10,32 @@ import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
+import com.dhimandasgupta.notemark.app.nav.LoginNavKey
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
 import org.koin.java.KoinJavaComponent.get
 
 @Composable
-fun LoginEntry(
+fun EntryProviderScope<NavKey>.LoginEntryBuilder(
+    modifier: Modifier,
+    navigateToRegistration: () -> Unit,
+    navigateToAfterLogin: () -> Unit
+) {
+    entry<LoginNavKey> {
+        LoginEntry(
+            modifier = modifier,
+            navigateToRegistration = navigateToRegistration,
+            navigateToAfterLogin = navigateToAfterLogin
+        )
+    }
+}
+
+@Composable
+private fun LoginEntry(
     modifier: Modifier = Modifier,
     navigateToRegistration: () -> Unit,
     navigateToAfterLogin: () -> Unit
