@@ -136,7 +136,8 @@ fun EditNotePane(
         modifier = modifier
             .background(color = colorScheme.surfaceContainerLowest)
             .fillMaxWidth()
-            .wrapContentHeight(align = Alignment.Top),
+            .wrapContentHeight(align = Alignment.Top)
+            .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         EditNoteToolbar(
