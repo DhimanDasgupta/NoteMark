@@ -3,6 +3,7 @@ package com.dhimandasgupta.notemark.features.notelist
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +53,7 @@ data class NoteEntityUiModel(
 
 private val defaultNoteListUiModel = NoteListUiModel(noteEntities = persistentListOf())
 
+@Stable
 class NoteListPresenter(
     private val appStateMachineFactory: AppStateMachineFactory,
     private val noteListStateMachineFactory: NoteListStateMachineFactory

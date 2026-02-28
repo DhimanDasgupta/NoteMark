@@ -9,6 +9,7 @@ import com.dhimandasgupta.notemark.features.notelist.NoteListState.NoteListState
 import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Immutable
 sealed interface NoteListState {
@@ -39,7 +40,7 @@ class NoteListStateMachineFactory(
             initializeWith { defaultNoteListState }
 
             inState<NoteListStateWithNoNotes> {
-                collectWhileInState(flow = noteMarkRepository.getAllNotes()) { notes ->
+                collectWhileInState(flow = noteMarkRepository.getAllNotes().distinctUntilChanged()) { notes ->
                     if (notes.isEmpty()) {
                         noChange()
                     } else {
@@ -51,7 +52,7 @@ class NoteListStateMachineFactory(
                         }
                     }
                 }
-                collectWhileInState(flow = userRepository.getUser()) { user ->
+                collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user ->
                     mutate {
                         copy(
                             userName = user?.userName ?: ""
@@ -61,7 +62,7 @@ class NoteListStateMachineFactory(
             }
 
             inState<NoteListStateWithNotes> {
-                collectWhileInState(flow = noteMarkRepository.getAllNotes()) { notes ->
+                collectWhileInState(flow = noteMarkRepository.getAllNotes().distinctUntilChanged()) { notes ->
                     if (notes.isNotEmpty()) {
                         mutate {
                             NoteListStateWithNotes(
@@ -77,7 +78,7 @@ class NoteListStateMachineFactory(
                         }
                     }
                 }
-                collectWhileInState(flow = userRepository.getUser()) { user ->
+                collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user ->
                     mutate {
                         copy(
                             userName = user?.userName ?: ""

@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleStartEffect
@@ -40,10 +39,9 @@ fun EntryProviderScope<NavKey>.NoteCreateEntryBuilder(
 @Composable
 private fun AddNoteEntry(
     modifier: Modifier = Modifier,
+    addNotePresenter: AddNotePresenter = get(clazz = AddNotePresenter::class.java),
     navigateUp: () -> Unit
 ) {
-    // Setup Presenter
-    val addNotePresenter:AddNotePresenter = retain { get(clazz = AddNotePresenter::class.java) }
     var addNoteUiModel by remember { mutableStateOf(value = AddNoteUiModel.defaultOrEmpty) }
     val addNoteAction by rememberUpdatedState(newValue = addNotePresenter::dispatchAction)
 

@@ -3,6 +3,7 @@ package com.dhimandasgupta.notemark.features.addnote
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,7 @@ data class AddNoteUiModel(
     }
 }
 
+@Stable
 class AddNotePresenter(
     private val addNoteStateMachineFactory: AddNoteStateMachineFactory
 ) {

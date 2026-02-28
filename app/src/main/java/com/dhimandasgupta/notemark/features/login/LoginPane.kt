@@ -109,12 +109,14 @@ fun LoginPane(
                 loginAction = loginAction,
                 navigateToRegistration = navigateToRegistration
             )
+
             DeviceLayoutType.PHONE_LANDSCAPE -> PhoneLandscapeLayout(
                 modifier = Modifier,
                 loginUiModel = updatedLoginUiModel,
                 loginAction = loginAction,
                 navigateToRegistration = navigateToRegistration
             )
+
             else -> TabletLayout(
                 modifier = Modifier,
                 loginUiModel = updatedLoginUiModel,
@@ -315,6 +317,11 @@ private fun RightPane(
             loginUiModel = loginUiModel,
             loginAction = loginAction,
             keyboardController = keyboardController
+        )
+
+        Spacer(
+            modifier = Modifier
+                .height(height = 16.dp)
         )
 
         LoginFooterField(

@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleStartEffect
@@ -43,12 +42,11 @@ fun EntryProviderScope<NavKey>.SettingsEntryBuilder(
 @Composable
 private fun SettingsEntry(
     modifier: Modifier = Modifier,
+    settingsPresenter: SettingsPresenter = get(clazz = SettingsPresenter::class.java),
     navigateToLauncherAfterLogout: () -> Unit,
     navigateUp: () -> Unit
 ) {
-    // Setup Presenter
-    val settingsPresenter: SettingsPresenter = retain { get(clazz = SettingsPresenter::class.java) }
-    var settingsUiModel by remember { mutableStateOf(value =  SettingsUiModel.defaultOrEmpty) }
+    var settingsUiModel by remember { mutableStateOf(value = SettingsUiModel.defaultOrEmpty) }
     val settingsAction by rememberUpdatedState(newValue = settingsPresenter::dispatchAction)
 
     // Setup scope and Lifecycle

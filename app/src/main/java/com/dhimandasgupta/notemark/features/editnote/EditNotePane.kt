@@ -47,6 +47,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -59,7 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -320,6 +321,13 @@ private fun EditNoteBody(
     var body by remember { mutableStateOf(editNoteUiModel().content) }
     var bodyBottomPadding by remember { mutableIntStateOf(value = 0) }
 
+    val isMaxScrollReached by remember {
+        derivedStateOf {
+            // value reaches maxValue at the very bottom
+            !scrollState.isScrollInProgress && scrollState.value >= scrollState.maxValue * 0.85f /*&& scrollState.maxValue >= 0*/
+        }
+    }
+
     LaunchedEffect(key1 = editNoteUiModel().title, key2 = editNoteUiModel().content) {
         if (title != editNoteUiModel().title) {
             title = editNoteUiModel().title
@@ -466,10 +474,10 @@ private fun EditNoteBody(
             contentAlignment = Alignment.BottomCenter
         ) {
             AnimatedVisibility(
-                modifier = Modifier.onGloballyPositioned { layoutCoordinates ->
-                    bodyBottomPadding = layoutCoordinates.size.height
+                modifier = Modifier.onSizeChanged { intSize ->
+                    bodyBottomPadding = intSize.height
                 },
-                visible = !editNoteUiModel().isReaderMode,
+                visible = isMaxScrollReached,
                 enter = fadeIn() + slideInVertically(
                     initialOffsetY = { it / 2 }
                 ),

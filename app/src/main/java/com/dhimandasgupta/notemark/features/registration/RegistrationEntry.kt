@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleStartEffect
@@ -35,10 +34,9 @@ fun EntryProviderScope<NavKey>.RegistrationEntryBuilder(
 @Composable
 private fun RegistrationEntry(
     modifier: Modifier = Modifier,
+    registrationPresenter: RegistrationPresenter = get(clazz = RegistrationPresenter::class.java),
     navigateToLoginFromRegistration: () -> Unit
 ) {
-    // Setup Presenter
-    val registrationPresenter: RegistrationPresenter = retain { get(clazz = RegistrationPresenter::class.java) }
     var registrationUiModel by remember { mutableStateOf(value = RegistrationUiModel.defaultOrEmpty) }
     val registrationAction by rememberUpdatedState(newValue = registrationPresenter::dispatchAction)
 

@@ -7,7 +7,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleStartEffect
@@ -22,7 +21,7 @@ import org.koin.java.KoinJavaComponent.get
 
 @Composable
 fun EntryProviderScope<NavKey>.LauncherEntryBuilder(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     navigateAfterLogin: () -> Unit,
     navigateToLogin: () -> Unit
 ) {
@@ -38,13 +37,12 @@ fun EntryProviderScope<NavKey>.LauncherEntryBuilder(
 @Composable
 private fun LauncherEntry(
     modifier: Modifier = Modifier,
+    launcherPresenter: LauncherPresenter = get(clazz = LauncherPresenter::class.java),
     navigateAfterLogin: () -> Unit,
     navigateToLogin: () -> Unit
 ) {
     val context = LocalActivity.current
 
-    // Setup Presenter
-    val launcherPresenter: LauncherPresenter = retain { get(clazz = LauncherPresenter::class.java) }
     var launcherUiModel by remember { mutableStateOf(value = LauncherUiModel.defaultOrEmpty) }
 
     // Setup scope and Lifecycle

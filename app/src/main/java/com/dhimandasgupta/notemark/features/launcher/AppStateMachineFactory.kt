@@ -153,7 +153,7 @@ class AppStateMachineFactory(
 
     private suspend fun syncOnEnter() {
         val sync = syncRepository.getSync().first()
-        val neverSynced = sync.lastUploadedTime == ""
+        val neverSynced = sync.lastUploadedTime == "0" && sync.lastDownloadedTime == "0"
         val lastSyncTimeIsMoreThan5Minutes = getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString = sync.lastUploadedTime) > 5L
         // Start sync if never synced or last sync time is more than 5 mins and not syncing.
         if (neverSynced || (lastSyncTimeIsMoreThan5Minutes && !sync.syncing)) {

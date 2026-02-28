@@ -70,6 +70,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.job
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
@@ -150,48 +151,52 @@ val appModule = module {
             install(plugin = Auth) {
                 bearer {
                     loadTokens {
-                        val user = get<UserRepository>().getUser().first()
-                        if (user?.accessToken != null && user.refreshToken != null) {
-                            BearerTokens(
-                                accessToken = user.accessToken,
-                                refreshToken = user.refreshToken
-                            )
-                        }
-                        null
-                    }
-                    refreshTokens {
-                        val user = get<UserRepository>().getUser().first()
-                        val currentTokens =
+                        withContext(Dispatchers.IO) {
+                            val user = get<UserRepository>().getUser().first()
                             if (user?.accessToken != null && user.refreshToken != null) {
                                 BearerTokens(
                                     accessToken = user.accessToken,
                                     refreshToken = user.refreshToken
                                 )
-                            } else {
-                                return@refreshTokens null
                             }
-
-                        try {
-                            val response = client.post {
-                                url(urlString = "/api/auth/refresh")
-                                markAsRefreshTokenRequest()
-                                contentType(type = Application.Json)
-                                setBody(
-                                    RefreshRequest(
-                                        refreshToken = currentTokens.refreshToken ?: ""
-                                    )
-                                )
-                            }.body<RefreshResponse>()
-
-                            val newTokens = BearerTokens(
-                                accessToken = response.accessToken,
-                                refreshToken = response.refreshToken
-                            )
-                            get<UserRepository>().saveBearToken(token = newTokens)
-                            newTokens
-                        } catch (_: Exception) {
-                            get<UserRepository>().deleteUser()
                             null
+                        }
+                    }
+                    refreshTokens {
+                        withContext(Dispatchers.IO) {
+                            val user = get<UserRepository>().getUser().first()
+                            val currentTokens =
+                                if (user?.accessToken != null && user.refreshToken != null) {
+                                    BearerTokens(
+                                        accessToken = user.accessToken,
+                                        refreshToken = user.refreshToken
+                                    )
+                                } else {
+                                    return@withContext null
+                                }
+
+                            try {
+                                val response = client.post {
+                                    url(urlString = "/api/auth/refresh")
+                                    markAsRefreshTokenRequest()
+                                    contentType(type = Application.Json)
+                                    setBody(
+                                        RefreshRequest(
+                                            refreshToken = currentTokens.refreshToken ?: ""
+                                        )
+                                    )
+                                }.body<RefreshResponse>()
+
+                                val newTokens = BearerTokens(
+                                    accessToken = response.accessToken,
+                                    refreshToken = response.refreshToken
+                                )
+                                get<UserRepository>().saveBearToken(token = newTokens)
+                                newTokens
+                            } catch (_: Exception) {
+                                get<UserRepository>().deleteUser()
+                                null
+                            }
                         }
                     }
                 }

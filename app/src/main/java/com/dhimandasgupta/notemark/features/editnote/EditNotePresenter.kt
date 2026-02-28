@@ -3,6 +3,7 @@ package com.dhimandasgupta.notemark.features.editnote
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +44,7 @@ data class EditNoteUiModel(
     }
 }
 
+@Stable
 class EditNotePresenter(
     private val noteId: String,
     private val editNoteStateMachineFactory: EditNoteStateMachineFactory = get(clazz = EditNoteStateMachineFactory::class.java) {
