@@ -12,12 +12,13 @@ import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.proto.User
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -37,6 +38,7 @@ class LauncherPresenter(
 ) {
     private val events = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     fun uiModel(): LauncherUiModel {
         var launcherUiModel by remember(key1 = Unit) { mutableStateOf(value = LauncherUiModel.defaultOrEmpty) }
@@ -48,7 +50,7 @@ class LauncherPresenter(
             launch {
                 appStateMachine.state
                     .onStart { emit(value = AppStateMachineFactory.defaultAppState) }
-                    .map { appState ->
+                    .mapLatest { appState ->
                         launcherUiModel = launcherUiModel.copy(
                             connectionState = appState.connectionState,
                             loggedInUser = when (appState) {
@@ -63,7 +65,7 @@ class LauncherPresenter(
                         // else can can be something like page level error etc.
                     }
                     .flowOn(context = Dispatchers.Default)
-                    .collectLatest {}
+                    .collect()
             }
 
             // Send the Events to the State Machine through Actions

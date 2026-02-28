@@ -10,12 +10,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -45,6 +46,7 @@ class RegistrationPresenter(
 ) {
     private val events = MutableSharedFlow<RegistrationAction>(extraBufferCapacity = 10)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     fun uiModel(): RegistrationUiModel {
         var registrationUiModel by remember(key1 = Unit) { mutableStateOf(value = RegistrationUiModel.defaultOrEmpty) }
@@ -56,16 +58,16 @@ class RegistrationPresenter(
             launch {
                 registrationStateMachine.state
                     .onStart { emit(value = RegistrationStateMachineFactory.defaultRegistrationState) }
-                    .map { registrationState -> mapToRegistrationModel(registrationState) }
+                    .mapLatest { registrationState ->
+                        registrationUiModel = registrationUiModel.mapToRegistrationModel(registrationState)
+                    }
                     .cancellable()
                     .catch { throwable ->
                         if (throwable is CancellationException) throw throwable
                         // else can can be something like page level error etc.
                     }
                     .flowOn(context = Dispatchers.Default)
-                    .collectLatest { mappedUiModel ->
-                        registrationUiModel = mappedUiModel
-                    }
+                    .collect()
             }
 
             // Send the Events to the State Machine through Actions
@@ -81,21 +83,21 @@ class RegistrationPresenter(
 
     fun dispatchAction(event: RegistrationAction) =
         events.tryEmit(value = event)
-
-    private fun mapToRegistrationModel(
-        registrationState: RegistrationState
-    ) = RegistrationUiModel(
-        userName = registrationState.userName,
-        email = registrationState.email,
-        password = registrationState.password,
-        repeatPassword = registrationState.repeatPassword,
-        userNameExplanation = registrationState.userNameExplanation,
-        userNameError = registrationState.userNameError,
-        emailError = registrationState.emailError,
-        passwordError = registrationState.passwordError,
-        repeatPasswordError = registrationState.repeatPasswordError,
-        passwordExplanation = registrationState.passwordExplanation,
-        registrationEnabled = registrationState.registrationEnabled,
-        registrationSuccess = registrationState.registrationSuccess
-    )
 }
+
+private fun RegistrationUiModel.mapToRegistrationModel(
+    registrationState: RegistrationState
+) = this.copy(
+    userName = registrationState.userName,
+    email = registrationState.email,
+    password = registrationState.password,
+    repeatPassword = registrationState.repeatPassword,
+    userNameExplanation = registrationState.userNameExplanation,
+    userNameError = registrationState.userNameError,
+    emailError = registrationState.emailError,
+    passwordError = registrationState.passwordError,
+    repeatPasswordError = registrationState.repeatPasswordError,
+    passwordExplanation = registrationState.passwordExplanation,
+    registrationEnabled = registrationState.registrationEnabled,
+    registrationSuccess = registrationState.registrationSuccess
+)

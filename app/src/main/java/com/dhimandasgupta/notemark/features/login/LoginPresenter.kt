@@ -10,12 +10,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -39,6 +40,7 @@ class LoginPresenter(
 ) {
     private val events = MutableSharedFlow<LoginAction>(extraBufferCapacity = 10)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     fun uiModel(): LoginUiModel {
         var loginUiModel by remember(key1 = Unit) { mutableStateOf(value = LoginUiModel.defaultOrEmpty) }
@@ -50,15 +52,8 @@ class LoginPresenter(
             launch {
                 loginStateMachine.state
                     .onStart { emit(value = LoginStateMachineFactory.defaultLoginState) }
-                    .map { loginState ->
-                        LoginUiModel(
-                            email = loginState.email,
-                            password = loginState.password,
-                            emailError = loginState.emailError,
-                            passwordError = loginState.passwordError,
-                            loginEnabled = loginState.loginEnabled,
-                            loginSuccess = loginState.loginSuccess
-                        )
+                    .mapLatest { loginState ->
+                        loginUiModel = loginUiModel.mapToLoginUiModel(loginState)
                     }
                     .cancellable()
                     .catch { throwable ->
@@ -66,9 +61,7 @@ class LoginPresenter(
                         // else can can be something like page level error etc.
                     }
                     .flowOn(context = Dispatchers.Default)
-                    .collectLatest { uiModel ->
-                        loginUiModel = uiModel
-                    }
+                    .collect()
             }
 
             // Send the Events to the State Machine through Actions
@@ -85,3 +78,14 @@ class LoginPresenter(
     fun dispatchAction(event: LoginAction) =
         events.tryEmit(value = event)
 }
+
+private fun LoginUiModel.mapToLoginUiModel(
+    loginState: LoginState
+) = this.copy(
+    email = loginState.email,
+    password = loginState.password,
+    emailError = loginState.emailError,
+    passwordError = loginState.passwordError,
+    loginEnabled = loginState.loginEnabled,
+    loginSuccess = loginState.loginSuccess
+)

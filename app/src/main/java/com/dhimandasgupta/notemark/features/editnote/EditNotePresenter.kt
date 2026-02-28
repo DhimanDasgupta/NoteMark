@@ -11,14 +11,15 @@ import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.database.NoteEntity
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
@@ -55,6 +56,7 @@ class EditNotePresenter(
 ) {
     private val events = MutableSharedFlow<EditNoteAction>(extraBufferCapacity = 10)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     fun uiModel(): EditNoteUiModel {
         var editNoteUiModel by remember(key1 = Unit) { mutableStateOf(value = EditNoteUiModel.defaultOrEmpty) }
@@ -67,7 +69,9 @@ class EditNotePresenter(
                 editNoteStateMachine.state
                     .onStart { emit(value = EditNoteStateMachineFactory.defaultEditNoteState) }
                     .filter { editNoteState -> editNoteState.noteEntity != null && editNoteState.title.isNotEmpty() && editNoteState.content.isNotEmpty() }
-                    .map { editNoteState -> mapToEditNoteUiModel(editNoteState) }
+                    .mapLatest { editNoteState ->
+                        editNoteUiModel = editNoteUiModel.mapToEditNoteUiModel(editNoteState)
+                    }
                     .cancellable()
                     .distinctUntilChanged()
                     .catch { throwable ->
@@ -75,9 +79,7 @@ class EditNotePresenter(
                         // else can can be something like page level error etc.
                     }
                     .flowOn(context = Dispatchers.Default)
-                    .collectLatest { uiMoel ->
-                        editNoteUiModel = uiMoel
-                    }
+                    .collect()
             }
 
             // Send the Events to the State Machine through Actions
@@ -95,9 +97,9 @@ class EditNotePresenter(
         events.tryEmit(value = event)
 }
 
-private fun mapToEditNoteUiModel(
+private fun EditNoteUiModel.mapToEditNoteUiModel(
     editNoteState: EditNoteState
-) = EditNoteUiModel(
+) = this.copy(
     title = editNoteState.title,
     content = editNoteState.content,
     noteEntity = editNoteState.noteEntity?.copy(

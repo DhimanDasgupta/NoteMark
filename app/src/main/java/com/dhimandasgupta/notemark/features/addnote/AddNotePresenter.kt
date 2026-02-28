@@ -10,12 +10,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -40,6 +41,7 @@ class AddNotePresenter(
 ) {
     private val events = MutableSharedFlow<AddNoteAction>(extraBufferCapacity = 10)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     fun uiModel(): AddNoteUiModel {
         var addNoteUiModel by remember(key1 = Unit) { mutableStateOf(value = AddNoteUiModel.defaultOrEmpty) }
@@ -51,12 +53,8 @@ class AddNotePresenter(
             launch {
                 addNoteStateMachine.state
                     .onStart { emit(value = AddNoteStateMachineFactory.defaultAddNoteState) }
-                    .map { addNoteState ->
-                        addNoteUiModel.copy(
-                            title = addNoteState.title,
-                            content = addNoteState.content,
-                            saved = addNoteState.saved
-                        )
+                    .mapLatest { addNoteState ->
+                        addNoteUiModel = addNoteUiModel.mapToAddNoteUiModel(addNoteState)
                     }
                     .cancellable()
                     .catch { throwable ->
@@ -64,9 +62,7 @@ class AddNotePresenter(
                         // else can can be something like page level error etc.
                     }
                     .flowOn(context = Dispatchers.Default)
-                    .collectLatest { uiModel ->
-                        addNoteUiModel = uiModel
-                    }
+                    .collect()
             }
 
             // Send the Events to the State Machine through Actions
@@ -83,3 +79,9 @@ class AddNotePresenter(
     fun dispatchAction(event: AddNoteAction) =
         events.tryEmit(value = event)
 }
+
+private fun AddNoteUiModel.mapToAddNoteUiModel(addNoteState: AddNoteState) = this.copy(
+    title = addNoteState.title,
+    content = addNoteState.content,
+    saved = addNoteState.saved
+)

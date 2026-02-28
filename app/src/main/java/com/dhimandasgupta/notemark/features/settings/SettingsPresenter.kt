@@ -16,12 +16,14 @@ import com.dhimandasgupta.notemark.proto.Sync
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -52,6 +54,7 @@ class SettingsPresenter(
 ) {
     private val events = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     fun uiModel(): SettingsUiModel {
         var settingsUiModel by remember { mutableStateOf(value = SettingsUiModel.defaultOrEmpty) }
@@ -64,13 +67,13 @@ class SettingsPresenter(
                 appStateMachine.state
                     .onStart { emit(value = AppStateMachineFactory.defaultAppState) } // Do not emit the default state as data will come from State Machine
                     .filter { appState -> (appState is AppState.LoggedIn && appState.sync != null) || appState is AppState.NotLoggedIn }
-                    .map { appState -> mapToSettingsUiModel(appState = appState) }
+                    .mapLatest { appState ->
+                        settingsUiModel = settingsUiModel.mapToSettingsUiModel(appState = appState)
+                    }
                     .cancellable()
                     .catch {} // Do something with error if required
                     .flowOn(context = Dispatchers.Default)
-                    .collect { mappedUiModel ->
-                        settingsUiModel = mappedUiModel
-                    }
+                    .collect()
             }
 
             // Send the Events to the State Machine through Actions
@@ -87,37 +90,39 @@ class SettingsPresenter(
     fun dispatchAction(event: AppAction) {
         events.tryEmit(value = event)
     }
+}
 
-    private fun mapToSettingsUiModel(appState: AppState): SettingsUiModel {
-        when (appState) {
-            is AppState.LoggedIn -> {
-                return SettingsUiModel(
-                    logoutStatus = null,
-                    lastSynced = appState.sync?.lastUploadedTime ?: "--",
-                    selectedSyncInterval = appState.sync?.syncDuration?.toReadableString()
-                        ?: "Manual",
-                    deleteLocalNotesOnLogout = appState.sync?.deleteLocalNotesOnLogout ?: false,
-                    isSyncing = appState.sync?.syncing ?: false,
-                    isConnected = appState.connectionState == ConnectionState.Available,
-                    appVersionName = appState.appVersionName
-                )
-            }
+private fun SettingsUiModel.mapToSettingsUiModel(
+    appState: AppState
+): SettingsUiModel {
+    when (appState) {
+        is AppState.LoggedIn -> {
+            return this.copy(
+                logoutStatus = null,
+                lastSynced = appState.sync?.lastUploadedTime ?: "--",
+                selectedSyncInterval = appState.sync?.syncDuration?.toReadableString()
+                    ?: "Manual",
+                deleteLocalNotesOnLogout = appState.sync?.deleteLocalNotesOnLogout ?: false,
+                isSyncing = appState.sync?.syncing ?: false,
+                isConnected = appState.connectionState == ConnectionState.Available,
+                appVersionName = appState.appVersionName
+            )
+        }
 
-            else -> {
-                return SettingsUiModel.defaultOrEmpty.copy(
-                    logoutStatus = true,
-                )
-            }
+        else -> {
+            return SettingsUiModel.defaultOrEmpty.copy(
+                logoutStatus = true,
+            )
         }
     }
+}
 
-    private fun Sync.SyncDuration.toReadableString(): String {
-        return when (this) {
-            Sync.SyncDuration.SYNC_DURATION_FIFTEEN_MINUTES -> "15 Minutes"
-            Sync.SyncDuration.SYNC_DURATION_THIRTY_MINUTES -> "30 Minutes"
-            Sync.SyncDuration.SYNC_DURATION_ONE_HOUR -> "1 Hour"
-            else -> "Manual"
-        }
+private fun Sync.SyncDuration.toReadableString(): String {
+    return when (this) {
+        Sync.SyncDuration.SYNC_DURATION_FIFTEEN_MINUTES -> "15 Minutes"
+        Sync.SyncDuration.SYNC_DURATION_THIRTY_MINUTES -> "30 Minutes"
+        Sync.SyncDuration.SYNC_DURATION_ONE_HOUR -> "1 Hour"
+        else -> "Manual"
     }
 }
 
