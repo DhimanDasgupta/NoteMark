@@ -7,6 +7,8 @@ import androidx.compose.animation.core.keyframesWithSpline
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -149,6 +151,7 @@ private fun NoteListValidPane(
         true -> NoteListWithEmptyNotes(
             modifier = modifier,
             userName = userName,
+            loading = noteListUiModel().loading,
             isConnected = noteListUiModel().isConnected,
             onFabClicked = onFabClicked,
             showSyncProgress = noteListUiModel().showSyncProgress,
@@ -159,6 +162,7 @@ private fun NoteListValidPane(
         else -> NoteListWithNotes(
             modifier = Modifier,
             userName = userName,
+            loading = noteListUiModel().loading,
             noteListState = noteListUiModel,
             onNoteClicked = onNoteClicked,
             onNoteLongClicked = onNoteLongClicked,
@@ -173,6 +177,7 @@ private fun NoteListValidPane(
 private fun NoteListWithEmptyNotes(
     modifier: Modifier = Modifier,
     userName: String,
+    loading: Boolean,
     isConnected: Boolean,
     showSyncProgress: Boolean,
     onFabClicked: () -> Unit,
@@ -182,6 +187,7 @@ private fun NoteListWithEmptyNotes(
     NoNotes(
         modifier = modifier,
         userName = userName,
+        loading = loading,
         isConnected = isConnected,
         showSyncProgress = showSyncProgress,
         onFabClicked = onFabClicked,
@@ -194,6 +200,7 @@ private fun NoteListWithEmptyNotes(
 private fun NoteListWithNotes(
     modifier: Modifier = Modifier,
     userName: String,
+    loading: Boolean,
     noteListState: () -> NoteListUiModel,
     onNoteClicked: (String) -> Unit = {},
     onNoteLongClicked: (String) -> Unit = {},
@@ -201,6 +208,14 @@ private fun NoteListWithNotes(
     onSettingsClicked: () -> Unit = {},
     onProfileClicked: () -> Unit = {},
 ) {
+    if (loading) {
+        LoadingPane(
+            modifier = Modifier,
+            showLoading = true
+        )
+        return
+    }
+
     var columnCount by remember { mutableIntStateOf(value = 2) }
     var maxLength by remember { mutableIntStateOf(value = 150) }
 
@@ -289,6 +304,32 @@ private fun NoteListWithNotes(
 }
 
 @Composable
+fun LoadingPane(
+    modifier: Modifier = Modifier,
+    showLoading: Boolean
+) {
+    AnimatedVisibility(
+        visible = showLoading,
+        enter = scaleIn() + fadeIn(),
+        exit = scaleOut() + fadeOut(),
+    ) {
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            ThreeBouncingDots(
+                modifier = Modifier
+                    .padding(all = 16.dp)
+                    .wrapContentSize(),
+                dotColor1 = colorResource(id = R.color.splash_blue).copy(alpha = 0.5f),
+                dotColor2 = colorResource(id = R.color.splash_blue).copy(alpha = 0.75f),
+                dotColor3 = colorResource(id = R.color.splash_blue).copy(alpha = 1.0f)
+            )
+        }
+    }
+}
+
+@Composable
 private fun NoteListPaneToolbar(
     modifier: Modifier = Modifier,
     toolbarTitle: String,
@@ -350,6 +391,7 @@ private fun NoNotes(
     modifier: Modifier = Modifier,
     toolbarTitle: String = "NoteMark",
     userName: String = "",
+    loading: Boolean,
     isConnected: Boolean,
     showSyncProgress: Boolean,
     onSettingsClicked: () -> Unit,
@@ -368,7 +410,7 @@ private fun NoNotes(
             onProfileClicked = onProfileClicked
         )
 
-        when (showSyncProgress) {
+        when (showSyncProgress || loading) {
             true -> Box(
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -523,7 +565,9 @@ private fun NoteItem(
     ) {
         val configuration = LocalConfiguration.current
         val locale by remember(key1 = configuration) {
-            mutableStateOf(configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0))
+            mutableStateOf(
+                configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0)
+            )
         }
 
         Text(

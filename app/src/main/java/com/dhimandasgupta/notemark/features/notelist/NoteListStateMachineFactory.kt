@@ -14,13 +14,16 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @Immutable
 sealed interface NoteListState {
     val userName: String?
+    val loading: Boolean
 
     data class NoteListStateWithNoNotes(
-        override val userName: String? = null
+        override val userName: String? = null,
+        override val loading: Boolean = true
     ) : NoteListState
 
     data class NoteListStateWithNotes(
         override val userName: String?,
+        override val loading: Boolean = true,
         val notes: List<NoteEntity>,
         val longClickedNoteUuid: String = ""
     ) : NoteListState
@@ -42,11 +45,17 @@ class NoteListStateMachineFactory(
             inState<NoteListStateWithNoNotes> {
                 collectWhileInState(flow = noteMarkRepository.getAllNotes().distinctUntilChanged()) { notes ->
                     if (notes.isEmpty()) {
-                        noChange()
+                        override {
+                            NoteListStateWithNoNotes(
+                                userName = userName,
+                                loading = false
+                            )
+                        }
                     } else {
                         override {
                             NoteListStateWithNotes(
                                 userName = userName,
+                                loading = false,
                                 notes = notes.sortedByDescending { it.lastEditedAt }
                             )
                         }
@@ -67,13 +76,15 @@ class NoteListStateMachineFactory(
                         mutate {
                             NoteListStateWithNotes(
                                 userName = userName,
+                                loading = false,
                                 notes = notes.sortedByDescending { it.lastEditedAt }
                             )
                         }
                     } else {
                         override {
                             NoteListStateWithNoNotes(
-                                userName = userName
+                                userName = userName,
+                                loading = false,
                             )
                         }
                     }
@@ -99,7 +110,8 @@ class NoteListStateMachineFactory(
 
     companion object Companion {
         val defaultNoteListState = NoteListStateWithNoNotes(
-            userName = null
+            userName = null,
+            loading = true
         )
     }
 }

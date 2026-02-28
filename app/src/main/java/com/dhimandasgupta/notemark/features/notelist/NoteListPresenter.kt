@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 @Immutable
 data class NoteListUiModel(
     val userName: String? = null,
+    val loading: Boolean = true,
     val noteEntities: ImmutableList<NoteEntityUiModel>,
     val noteLongClickedUuid: String = "",
     val showSyncProgress: Boolean = false,
@@ -117,6 +118,7 @@ private fun mapToNoteListUiModel(
     noteListState: NoteListState
 ) = NoteListUiModel(
     userName = loggedIn.user.userName,
+    loading = noteListState.loading,
     noteEntities = if (noteListState is NoteListState.NoteListStateWithNotes) {
         noteListState
             .notes
