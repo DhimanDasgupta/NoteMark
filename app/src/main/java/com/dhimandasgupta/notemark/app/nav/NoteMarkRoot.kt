@@ -111,7 +111,7 @@ fun NoteMarkRoot(
             NoteEditEntryBuilder(
                 modifier = modifier,
                 navigateUp = {
-                    backStack.removeLastOrNull()
+                    backStack.clearNoteEditNavKeys()
                 }
             )
             SettingsEntryBuilder(
@@ -123,7 +123,7 @@ fun NoteMarkRoot(
                     }
                 },
                 navigateUp = {
-                    backStack.removeLastOrNull()
+                    backStack.removeSettingsKey()
                 }
             )
         }

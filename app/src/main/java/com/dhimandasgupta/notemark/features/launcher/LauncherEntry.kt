@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleStartEffect
@@ -26,8 +27,11 @@ fun EntryProviderScope<NavKey>.LauncherEntryBuilder(
     navigateToLogin: () -> Unit
 ) {
     entry<LauncherNavKey> {
+        val launcherPresenter: LauncherPresenter = retain { get(clazz = LauncherPresenter::class.java) }
+
         LauncherEntry(
             modifier = modifier,
+            launcherPresenter = launcherPresenter,
             navigateAfterLogin = navigateAfterLogin,
             navigateToLogin = navigateToLogin
         )
@@ -37,7 +41,7 @@ fun EntryProviderScope<NavKey>.LauncherEntryBuilder(
 @Composable
 private fun LauncherEntry(
     modifier: Modifier = Modifier,
-    launcherPresenter: LauncherPresenter = get(clazz = LauncherPresenter::class.java),
+    launcherPresenter: LauncherPresenter,
     navigateAfterLogin: () -> Unit,
     navigateToLogin: () -> Unit
 ) {

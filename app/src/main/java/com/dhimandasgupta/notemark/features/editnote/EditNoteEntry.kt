@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleStartEffect
@@ -30,9 +31,16 @@ fun EntryProviderScope<NavKey>.NoteEditEntryBuilder(
     entry<NoteEditNavKey>(
         metadata = ListDetailSceneStrategy.detailPane()
     ) { noteEditNavKey ->
+        val editNotePresenter: EditNotePresenter = retain {
+            get(
+                clazz = EditNotePresenter::class.java,
+                parameters = { parametersOf(noteEditNavKey.noteId) }
+            )
+        }
+
         EditNoteEntry(
             modifier = modifier,
-            argument = noteEditNavKey.noteId,
+            editNotePresenter = editNotePresenter,
             navigateUp = navigateUp
         )
     }
@@ -41,11 +49,7 @@ fun EntryProviderScope<NavKey>.NoteEditEntryBuilder(
 @Composable
 private fun EditNoteEntry(
     modifier: Modifier = Modifier,
-    argument: String,
-    editNotePresenter: EditNotePresenter = get(
-        clazz = EditNotePresenter::class.java,
-        parameters = { parametersOf(argument) }
-    ),
+    editNotePresenter: EditNotePresenter,
     navigateUp: () -> Unit
 ) {
     var editNoteUiModel by remember { mutableStateOf(value = EditNoteUiModel.defaultOrEmpty) }
@@ -53,7 +57,7 @@ private fun EditNoteEntry(
 
     // Setup scope and Lifecycle
     val scope = rememberCoroutineScope()
-    LifecycleStartEffect(key1 = argument) {
+    LifecycleStartEffect(key1 = editNotePresenter) {
         if (scope.isActive) {
             scope.launchMolecule(mode = RecompositionMode.Immediate) {
                 editNoteUiModel = editNotePresenter.uiModel()
