@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 interface NoteMarkLocalDataSource {
+    fun getNotesFromOffSetWithLimitAsList(limit: Long = 10L, offset: Long): List<NoteEntity>
+    fun getNotesFromOffSetWithLimit(limit: Long = 10L, offset: Long): Flow<List<NoteEntity>>
     fun getAllNotes(): Flow<List<NoteEntity>>
     suspend fun getAllNonSyncedNotes(): List<NoteEntity>
     suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity>
@@ -35,12 +37,22 @@ class NoteMarkLocalDataSourceImpl(
     database: NoteMarkDatabase
 ) : NoteMarkLocalDataSource {
     private val queries = database.noteMarkDatabaseQueries
+    override fun getNotesFromOffSetWithLimitAsList(
+        limit: Long,
+        offset: Long
+    ): List<NoteEntity> = queries.getNotesFromOffSetWithLimit(limit = limit, offset = offset)
+        .executeAsList()
 
-    override fun getAllNotes(): Flow<List<NoteEntity>> {
-        return queries.getAllNotes()
-            .asFlow()
-            .mapToList(context = Dispatchers.IO)
-    }
+    override fun getNotesFromOffSetWithLimit(
+        limit: Long,
+        offset: Long
+    ): Flow<List<NoteEntity>> = queries.getNotesFromOffSetWithLimit(limit = limit, offset = offset)
+        .asFlow()
+        .mapToList(context = Dispatchers.IO)
+
+    override fun getAllNotes(): Flow<List<NoteEntity>> = queries.getAllNotes()
+        .asFlow()
+        .mapToList(context = Dispatchers.IO)
 
     override suspend fun getAllNonSyncedNotes(): List<NoteEntity> =
         withContext(context = Dispatchers.IO) {

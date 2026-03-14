@@ -46,6 +46,7 @@ import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -108,6 +109,7 @@ fun NoteListPane(
             userName = noteListUiModel().userName?.formatUserName() ?: "",
             noteListUiModel = updateNoteListUiModel,
             onNoteClicked = onNoteClicked,
+            loadNotes = { noteListAction(NoteListAction.LoadNextNotes) },
             onNoteLongClicked = { id ->
                 noteDeleteId = id
             },
@@ -141,6 +143,7 @@ private fun NoteListValidPane(
     modifier: Modifier = Modifier,
     userName: String,
     noteListUiModel: () -> NoteListUiModel,
+    loadNotes: () -> Unit,
     onNoteClicked: (String) -> Unit = {},
     onNoteLongClicked: (String) -> Unit = {},
     onFabClicked: () -> Unit = {},
@@ -164,6 +167,7 @@ private fun NoteListValidPane(
             userName = userName,
             loading = noteListUiModel().loading,
             noteListState = noteListUiModel,
+            loadNotes = loadNotes,
             onNoteClicked = onNoteClicked,
             onNoteLongClicked = onNoteLongClicked,
             onFabClicked = onFabClicked,
@@ -202,6 +206,7 @@ private fun NoteListWithNotes(
     userName: String,
     loading: Boolean,
     noteListState: () -> NoteListUiModel,
+    loadNotes: () -> Unit,
     onNoteClicked: (String) -> Unit = {},
     onNoteLongClicked: (String) -> Unit = {},
     onFabClicked: () -> Unit = {},
@@ -226,6 +231,16 @@ private fun NoteListWithNotes(
         derivedStateOf {
             scrollState.firstVisibleItemIndex == 0 && !scrollState.isScrollInProgress
         }
+    }
+
+    val reachedBottom by remember {
+        derivedStateOf {
+            scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == scrollState.layoutInfo.totalItemsCount - 1
+        }
+    }
+
+    LaunchedEffect(reachedBottom) {
+        if (reachedBottom) { loadNotes() }
     }
 
     Column(

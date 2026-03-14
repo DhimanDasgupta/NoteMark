@@ -23,6 +23,18 @@ CREATE INDEX idx_NoteEntity_modifiedAt ON NoteEntity(lastEditedAt);
 -- Note Queries
 --------------------------------------------------------------------------------
 
+-- Get number of total notes
+getTotalNoteCount:
+SELECT count(*) FROM NoteEntity;
+
+-- Get pagniated Notes
+getNotesFromOffSetWithLimit:
+SELECT *
+FROM NoteEntity
+WHERE markAsDeleted = 0
+ORDER BY lastEditedAt DESC
+LIMIT :limit OFFSET :offset;
+
 -- Get all notes, ordered by modification date (newest first)
 getAllNotes:
 SELECT *

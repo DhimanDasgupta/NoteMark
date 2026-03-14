@@ -6,10 +6,10 @@ import com.dhimandasgupta.notemark.data.UserRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.features.notelist.NoteListState.NoteListStateWithNoNotes
 import com.dhimandasgupta.notemark.features.notelist.NoteListState.NoteListStateWithNotes
-import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
+import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 
 @Immutable
 sealed interface NoteListState {
@@ -30,6 +30,7 @@ sealed interface NoteListState {
 }
 
 sealed interface NoteListAction {
+    data object LoadNextNotes: NoteListAction
     data class NoteDelete(val uuid: String) : NoteListAction
 }
 
@@ -102,6 +103,10 @@ class NoteListStateMachineFactory(
                             return@on override { copy(notes = notes.filter { it.uuid != action.uuid }) }
                         }
                     }
+                    noChange()
+                }
+                on<NoteListAction.LoadNextNotes> { _ ->
+                    // TODO
                     noChange()
                 }
             }

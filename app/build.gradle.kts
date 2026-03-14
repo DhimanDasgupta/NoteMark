@@ -166,6 +166,7 @@ dependencies {
     implementation(libs.sql.delight.runtime)
     implementation(libs.sql.delight.android.driver)
     implementation(libs.sql.delight.coroutines.extensions)
+    implementation(libs.sql.delight.paging3.extensions)
 
     // Datastore
     implementation(libs.datastore.preferences)

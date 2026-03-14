@@ -10,6 +10,8 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 
 interface NoteMarkRepository {
+    fun getNotesFromOffSetWithLimitAsList(limit: Long = 10L, offset: Long): List<NoteEntity>
+    fun getNotesFromOffSetWithLimit(limit: Long = 10L, offset: Long): Flow<List<NoteEntity>>
     fun getAllNotes(): Flow<List<NoteEntity>>
     suspend fun getRemoteNotes(page: Int = -1, size: Int = 20): Result<NoteResponse>
     suspend fun getRemoteNotesAndSaveInDB(page: Int = -1, size: Int = 20): Result<NoteResponse>
@@ -45,6 +47,16 @@ class NoteMarkRepositoryImpl(
     private val localDataSource: NoteMarkLocalDataSource,
     private val remoteDataSource: NoteMarkApiDataSource
 ) : NoteMarkRepository {
+    override fun getNotesFromOffSetWithLimitAsList(
+        limit: Long,
+        offset: Long
+    ): List<NoteEntity> = localDataSource.getNotesFromOffSetWithLimitAsList(limit = limit, offset = offset)
+
+    override fun getNotesFromOffSetWithLimit(
+        limit: Long,
+        offset: Long
+    ): Flow<List<NoteEntity>> = localDataSource.getNotesFromOffSetWithLimit(limit = limit, offset = offset)
+
     override fun getAllNotes(): Flow<List<NoteEntity>> = localDataSource.getAllNotes()
 
     override suspend fun getAllNonSyncedNotes(): List<NoteEntity> =

@@ -65,6 +65,7 @@ datastore-preferences-android = { module = "androidx.datastore:datastore-prefere
 sql-delight-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelight" }
 sql-delight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqlDelight" }
 sql-delight-coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqlDelight" }
+sql-delight-paging3-extensions = { module = "app.cash.sqldelight:androidx-paging3-extensions", version.ref = "sqlDelight" }
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koinBom" }
 koin-core = { module = "io.insert-koin:koin-core" }
