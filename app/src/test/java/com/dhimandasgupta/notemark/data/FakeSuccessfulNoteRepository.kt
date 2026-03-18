@@ -8,6 +8,18 @@ import kotlinx.coroutines.flow.flowOf
 import kotlin.Long
 
 class FakeSuccessfulNoteRepository : NoteMarkRepository {
+    override fun getNotesFromOffSetWithLimitAsList(
+        limit: Long,
+        offset: Long
+    ): List<NoteEntity> = listOf(noteEntity)
+
+    override fun getNotesFromOffSetWithLimit(
+        limit: Long,
+        offset: Long
+    ): Flow<List<NoteEntity>> = flowOf(
+        value = listOf(noteEntity)
+    )
+
     override fun getAllNotes(): Flow<List<NoteEntity>> = flowOf(
         value = listOf(noteEntity)
     )
