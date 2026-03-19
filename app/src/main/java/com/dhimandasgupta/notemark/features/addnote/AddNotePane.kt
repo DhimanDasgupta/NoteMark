@@ -68,7 +68,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddNotePane(
+internal fun AddNotePane(
     modifier: Modifier = Modifier,
     addNoteUiModel: () -> AddNoteUiModel,
     addNoteAction: (AddNoteAction) -> Unit = {},

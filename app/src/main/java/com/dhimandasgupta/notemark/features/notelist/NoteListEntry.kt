@@ -16,7 +16,6 @@ import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.app.nav.NoteListNavKey
-import kotlinx.coroutines.isActive
 import org.koin.java.KoinJavaComponent.get
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -56,10 +55,8 @@ private fun NoteListEntry(
     val noteListAction by rememberUpdatedState(newValue = noteListPresenter::dispatchAction)
 
     LaunchedEffect(key1 = Unit) {
-        if (isActive) {
-            launchMolecule(mode = RecompositionMode.Immediate) {
-                noteListUiModel = noteListPresenter.uiModel()
-            }
+        launchMolecule(mode = RecompositionMode.Immediate) {
+            noteListUiModel = noteListPresenter.uiModel()
         }
     }
 

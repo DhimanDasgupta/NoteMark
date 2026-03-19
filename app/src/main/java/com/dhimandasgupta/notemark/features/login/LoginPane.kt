@@ -68,7 +68,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 
 @Composable
-fun LoginPane(
+internal fun LoginPane(
     modifier: Modifier = Modifier,
     loginUiModel: () -> LoginUiModel,
     loginAction: (LoginAction) -> Unit = {},

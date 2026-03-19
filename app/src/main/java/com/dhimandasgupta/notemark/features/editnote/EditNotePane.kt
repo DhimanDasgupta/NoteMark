@@ -94,7 +94,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 @Composable
-fun EditNotePane(
+internal fun EditNotePane(
     modifier: Modifier = Modifier,
     editNoteUiModel: () -> EditNoteUiModel,
     editNoteAction: (EditNoteAction) -> Unit = {},

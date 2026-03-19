@@ -71,7 +71,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 
 @Composable
-fun RegistrationPane(
+internal fun RegistrationPane(
     modifier: Modifier = Modifier,
     registrationUiModel: () -> RegistrationUiModel,
     navigateToLogin: () -> Unit = {},

@@ -83,7 +83,7 @@ import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
 import kotlinx.collections.immutable.toPersistentList
 
 @Composable
-fun NoteListPane(
+internal fun NoteListPane(
     modifier: Modifier = Modifier,
     noteListUiModel: () -> NoteListUiModel,
     noteListAction: (NoteListAction) -> Unit = {},

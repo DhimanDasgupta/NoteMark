@@ -16,7 +16,6 @@ import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.app.nav.NoteEditNavKey
-import kotlinx.coroutines.isActive
 import org.koin.core.parameter.parametersOf
 import org.koin.java.KoinJavaComponent.get
 
@@ -54,10 +53,8 @@ private fun EditNoteEntry(
     val editNoteAction by rememberUpdatedState(newValue = editNotePresenter::dispatchAction)
 
     LaunchedEffect(key1 = Unit) {
-        if (isActive) {
-            launchMolecule(mode = RecompositionMode.Immediate) {
-                editNoteUiModel = editNotePresenter.uiModel()
-            }
+        launchMolecule(mode = RecompositionMode.Immediate) {
+            editNoteUiModel = editNotePresenter.uiModel()
         }
     }
 

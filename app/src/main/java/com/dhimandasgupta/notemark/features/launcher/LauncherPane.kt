@@ -51,7 +51,7 @@ import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkOutlinedButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 
 @Composable
-fun LauncherPane(
+internal fun LauncherPane(
     modifier: Modifier = Modifier,
     launcherUiModel: () -> LauncherUiModel,
     navigateToAfterLogin: () -> Unit = {},

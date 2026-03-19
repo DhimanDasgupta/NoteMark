@@ -9,8 +9,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +21,7 @@ import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.systemBars
@@ -30,6 +29,7 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -69,7 +69,7 @@ import kotlinx.coroutines.flow.filter
 
 @OptIn(FlowPreview::class)
 @Composable
-fun SettingsPane(
+internal fun SettingsPane(
     modifier: Modifier = Modifier,
     settingsUiModel: () -> SettingsUiModel,
     settingsAction: (AppAction) -> Unit = {},
@@ -98,7 +98,8 @@ fun SettingsPane(
     Column(
         modifier = modifier
             .background(color = colorScheme.surfaceContainerLowest)
-            .fillMaxSize(),
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(space = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -196,10 +197,6 @@ private fun SettingsBody(
                     end = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
                         .asPaddingValues()
                         .calculateEndPadding(LayoutDirection.Ltr)
-                )
-                .scrollable(
-                    state = rememberScrollState(),
-                    orientation = Orientation.Vertical
                 )
                 .padding(horizontal = 16.dp)
         ) {
@@ -471,6 +468,12 @@ private fun AppVersion(
         modifier = modifier
             .padding(all = 16.dp)
             .fillMaxWidth()
+            .padding(
+                bottom = WindowInsets
+                    .navigationBars
+                    .asPaddingValues()
+                    .calculateBottomPadding()
+            )
     )
 }
 

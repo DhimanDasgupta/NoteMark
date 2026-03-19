@@ -15,7 +15,6 @@ import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.app.nav.LauncherNavKey
-import kotlinx.coroutines.isActive
 import org.koin.java.KoinJavaComponent.get
 
 @Composable
@@ -48,10 +47,8 @@ private fun LauncherEntry(
     var launcherUiModel by remember { mutableStateOf(value = LauncherUiModel.defaultOrEmpty) }
 
     LaunchedEffect(key1 = Unit) {
-        if (isActive) {
-            launchMolecule(mode = RecompositionMode.Immediate) {
-                launcherUiModel = launcherPresenter.uiModel()
-            }
+        launchMolecule(mode = RecompositionMode.Immediate) {
+            launcherUiModel = launcherPresenter.uiModel()
         }
     }
 

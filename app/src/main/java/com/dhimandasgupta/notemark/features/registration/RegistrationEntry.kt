@@ -14,7 +14,6 @@ import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.app.nav.RegistrationNavKey
-import kotlinx.coroutines.isActive
 import org.koin.java.KoinJavaComponent.get
 
 @Composable
@@ -43,10 +42,8 @@ private fun RegistrationEntry(
     val registrationAction by rememberUpdatedState(newValue = registrationPresenter::dispatchAction)
 
     LaunchedEffect(key1 = Unit) {
-        if (isActive) {
-            launchMolecule(mode = RecompositionMode.Immediate) {
-                registrationUiModel = registrationPresenter.uiModel()
-            }
+        launchMolecule(mode = RecompositionMode.Immediate) {
+            registrationUiModel = registrationPresenter.uiModel()
         }
     }
 

@@ -16,7 +16,6 @@ import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.app.nav.NoteCreateNavKey
-import kotlinx.coroutines.isActive
 import org.koin.java.KoinJavaComponent.get
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -48,10 +47,8 @@ private fun AddNoteEntry(
     val addNoteAction by rememberUpdatedState(newValue = addNotePresenter::dispatchAction)
 
     LaunchedEffect(key1 = Unit) {
-        if (isActive) {
-            launchMolecule(mode = RecompositionMode.Immediate) {
-                addNoteUiModel = addNotePresenter.uiModel()
-            }
+        launchMolecule(mode = RecompositionMode.Immediate) {
+            addNoteUiModel = addNotePresenter.uiModel()
         }
     }
 
