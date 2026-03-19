@@ -3,21 +3,19 @@ package com.dhimandasgupta.notemark.features.notelist
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.app.nav.NoteListNavKey
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
 import org.koin.java.KoinJavaComponent.get
 
@@ -57,16 +55,11 @@ private fun NoteListEntry(
     var noteListUiModel by remember { mutableStateOf(value = NoteListUiModel.defaultOrEmpty) }
     val noteListAction by rememberUpdatedState(newValue = noteListPresenter::dispatchAction)
 
-    // Setup scope and Lifecycle
-    val scope = rememberCoroutineScope()
-    LifecycleStartEffect(key1 = Unit) {
-        if (scope.isActive) {
-            scope.launchMolecule(mode = RecompositionMode.Immediate) {
+    LaunchedEffect(key1 = Unit) {
+        if (isActive) {
+            launchMolecule(mode = RecompositionMode.Immediate) {
                 noteListUiModel = noteListPresenter.uiModel()
             }
-        }
-        onStopOrDispose {
-            scope.cancel()
         }
     }
 
