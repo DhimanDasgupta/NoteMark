@@ -246,7 +246,7 @@ private fun SettingsBody(
             SyncDropDown(
                 modifier = Modifier,
                 selectedSyncInterval = settingsUiModel().selectedSyncInterval,
-                syncIntervals = settingsUiModel().syncIntervals,
+                syncIntervals = settingsUiModel().syncIntervals(),
                 toggleDropDownVisibility = toggleSyncIntervalVisibility,
                 onDropDownItemSelected = onSyncIntervalSelected
             )

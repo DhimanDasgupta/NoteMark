@@ -29,12 +29,6 @@ import kotlinx.coroutines.launch
 
 @Immutable
 data class SettingsUiModel(
-    val syncIntervals: ImmutableList<String> = persistentListOf(
-        "Manual",
-        "15 Minutes",
-        "30 Minutes",
-        "1 Hour"
-    ),
     val selectedSyncInterval: String = "Manual",
     val lastSynced: String = "--",
     val deleteLocalNotesOnLogout: Boolean = false,
@@ -46,6 +40,13 @@ data class SettingsUiModel(
     companion object {
         val defaultOrEmpty = SettingsUiModel()
     }
+
+    fun syncIntervals(): ImmutableList<String> = persistentListOf(
+        "Manual",
+        "15 Minutes",
+        "30 Minutes",
+        "1 Hour"
+    )
 }
 
 @Stable

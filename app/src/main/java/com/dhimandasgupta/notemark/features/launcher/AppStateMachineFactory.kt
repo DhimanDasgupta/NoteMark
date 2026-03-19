@@ -21,7 +21,6 @@ import com.dhimandasgupta.notemark.data.UserRepository
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.proto.User
-import com.dhimandasgupta.notemark.proto.sync
 import com.freeletics.flowredux2.initializeWith
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -111,10 +110,12 @@ class AppStateMachineFactory(
                     }
 
                     applicationContext.cancelPreviousAndTriggerNewWork(duration = duration)
-
-                    val updatedSync = sync{}.toBuilder()?.setSyncDuration(action.syncDuration)?.build()
                     syncRepository.saveSyncDuration(syncDuration = action.syncDuration)
-                    mutate { copy(sync = updatedSync) }
+
+                    mutate {
+                        val sync = copy().sync?.toBuilder()?.setSyncDuration(action.syncDuration)?.build()
+                        copy(sync = sync)
+                    }
                 }
                 onActionEffect<AppAction.DeleteLocalNotesOnLogout> { action ->
                     syncRepository.saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout = action.deleteOnLogout)
