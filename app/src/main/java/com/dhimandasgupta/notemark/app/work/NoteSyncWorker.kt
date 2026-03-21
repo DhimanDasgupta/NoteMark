@@ -3,7 +3,7 @@ package com.dhimandasgupta.notemark.app.work
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.dhimandasgupta.notemark.app.di.APP_BACKGROUND_SCOPE
+import com.dhimandasgupta.notemark.app.di.APP_BACKGROUND_DISPATCHER
 import com.dhimandasgupta.notemark.common.getCurrentIso8601Timestamp
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.SyncRepository
@@ -12,7 +12,7 @@ import com.dhimandasgupta.notemark.data.remote.api.AuthenticationException
 import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.database.NoteEntity
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -29,14 +29,12 @@ class NoteSyncWorker(
     context: Context,
     workerParameters: WorkerParameters
 ) : CoroutineWorker(appContext = context, params = workerParameters), KoinComponent {
-    private val applicationScope: CoroutineScope by inject(qualifier = named(name = APP_BACKGROUND_SCOPE))
+    private val applicationDispatcher: CoroutineDispatcher by inject(qualifier = named(name = APP_BACKGROUND_DISPATCHER))
     private val syncRepository: SyncRepository by inject(clazz = SyncRepository::class.java)
-    private val noteMarkRepository: NoteMarkRepository by inject(
-        clazz = NoteMarkRepository::class.java
-    )
+    private val noteMarkRepository: NoteMarkRepository by inject(clazz = NoteMarkRepository::class.java)
     private val userRepository: UserRepository by inject(clazz = UserRepository::class.java)
 
-    override suspend fun doWork(): Result = withContext(applicationScope.coroutineContext) {
+    override suspend fun doWork(): Result = withContext(applicationDispatcher) {
         try {
             syncRepository.saveSyncing(isSyncing = true)
 
@@ -50,7 +48,6 @@ class NoteSyncWorker(
                     if (throwable is AuthenticationException) {
                         userRepository.deleteUser()
                     }
-
                     Result.failure()
                 }
             )

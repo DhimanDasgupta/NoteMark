@@ -64,6 +64,7 @@ import io.ktor.client.request.url
 import io.ktor.http.ContentType.Application
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -88,16 +89,20 @@ private enum class DataStoreType {
     SYNC_PREFERENCES
 }
 
+const val APP_BACKGROUND_DISPATCHER = "app_background_dispatcher"
 const val APP_BACKGROUND_SCOPE = "app_background_scope"
 private const val USER_DATA_STORE_FILE_NAME = "user_store.pb"
 private const val SYNC_DATA_STORE_FILE_NAME = "sync_store.pb"
 
 val appModule = module {
+    single<CoroutineDispatcher>(
+        qualifier = named(name = APP_BACKGROUND_DISPATCHER)
+    ) { Dispatchers.IO }
     single<CoroutineScope>(
         qualifier = named(name = APP_BACKGROUND_SCOPE)
     ) {
         CoroutineScope(
-            context = Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { context, throwable ->
+            context = get<CoroutineDispatcher>(qualifier = named(name = APP_BACKGROUND_DISPATCHER)) + SupervisorJob() + CoroutineExceptionHandler { context, throwable ->
                 Timber.e(message = "CoroutineExceptionHandler got $throwable in ${context.job} and ${Thread.currentThread()}")
             }
         )
@@ -151,7 +156,7 @@ val appModule = module {
             install(plugin = Auth) {
                 bearer {
                     loadTokens {
-                        withContext(Dispatchers.IO) {
+                        withContext(get<CoroutineDispatcher>(qualifier = named(name = APP_BACKGROUND_DISPATCHER))) {
                             val user = get<UserRepository>().getUser().first()
                             if (user?.accessToken != null && user.refreshToken != null) {
                                 BearerTokens(
@@ -163,7 +168,7 @@ val appModule = module {
                         }
                     }
                     refreshTokens {
-                        withContext(Dispatchers.IO) {
+                        withContext(get<CoroutineDispatcher>(qualifier = named(name = APP_BACKGROUND_DISPATCHER))) {
                             val user = get<UserRepository>().getUser().first()
                             val currentTokens =
                                 if (user?.accessToken != null && user.refreshToken != null) {
@@ -257,7 +262,12 @@ val appModule = module {
     single { NoteMarkDatabase(driver = get()) }
     singleOf(constructor = ::NoteMarkApiImpl) bind NoteMarkApi::class
     singleOf(constructor = ::NoteMarkApiDataSourceImpl) bind NoteMarkApiDataSource::class
-    singleOf(constructor = ::NoteMarkLocalDataSourceImpl) bind NoteMarkLocalDataSource::class
+    single {
+        NoteMarkLocalDataSourceImpl(
+            database = get(),
+            applicationDispatcher = get(qualifier = named(name = APP_BACKGROUND_DISPATCHER))
+        )
+    } bind NoteMarkLocalDataSource::class
     single {
         NoteMarkRepositoryImpl(
             localDataSource = get(),
