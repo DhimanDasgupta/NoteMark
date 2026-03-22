@@ -62,7 +62,7 @@ class SettingsPresenter(
 
         // Receives the State from the StateMachine
         LaunchedEffect(key1 = Unit) {
-            val appStateMachine = appStateMachineFactory.shareIn(this)
+            val appStateMachine = appStateMachineFactory.launchIn(this)
 
             launch {
                 appStateMachine.state
