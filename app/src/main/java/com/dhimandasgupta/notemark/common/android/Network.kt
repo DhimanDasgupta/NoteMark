@@ -84,7 +84,7 @@ private fun networkCallback(
         ) {
             super.onCapabilitiesChanged(network, networkCapabilities)
             val hasInternetCapability = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            val isConnected = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            val isConnected = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 
             val connected = hasInternetCapability && isConnected
             callback(if (connected) ConnectionState.Available else ConnectionState.Unavailable)
