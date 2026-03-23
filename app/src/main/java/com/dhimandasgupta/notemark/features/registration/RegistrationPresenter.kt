@@ -87,7 +87,7 @@ class RegistrationPresenter(
 
 private fun RegistrationUiModel.mapToRegistrationModel(
     registrationState: RegistrationState
-) = this.copy(
+) = copy(
     userName = registrationState.userName,
     email = registrationState.email,
     password = registrationState.password,

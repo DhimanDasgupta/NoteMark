@@ -179,10 +179,10 @@ internal fun EditNotePane(
         AnimatedVisibility(
             visible = !showLoading,
             enter = fadeIn() + slideInVertically(
-                initialOffsetY = { it / 2 }
+                initialOffsetY = { value -> value / 2 }
             ),
             exit = fadeOut() + slideOutVertically(
-                targetOffsetY = { it / 2 }
+                targetOffsetY = { value -> value / 2 }
             ),
         ) {
             EditNoteBody(
@@ -480,10 +480,10 @@ private fun EditNoteBody(
                 },
                 visible = isMaxScrollReached,
                 enter = fadeIn() + slideInVertically(
-                    initialOffsetY = { it / 2 }
+                    initialOffsetY = { value -> value / 2 }
                 ),
                 exit = fadeOut() + slideOutVertically(
-                    targetOffsetY = { it / 2 }
+                    targetOffsetY = { value -> value / 2 }
                 ),
             ) {
                 EditAndViewMode(

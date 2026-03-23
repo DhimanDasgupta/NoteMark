@@ -77,12 +77,12 @@ class LoginStateMachineFactory(
     }
 }
 
-private fun LoginState.validateNonEmptyInputs(): LoginState = this.copy(
+private fun LoginState.validateNonEmptyInputs(): LoginState = copy(
     loginEnabled = email.isNotEmpty() && password.isNotEmpty()
 )
 
 private fun LoginState.validateInputs(): LoginState {
-    var updatedLoginState = this.copy(emailError = if (!email.isValidEmail()) "Invalid email provided" else null)
+    var updatedLoginState = copy(emailError = if (!email.isValidEmail()) "Invalid email provided" else null)
     updatedLoginState = updatedLoginState.copy(passwordError = if (!password.isValidPassword()) "Please enter password" else null)
     return updatedLoginState
 }

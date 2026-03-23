@@ -101,7 +101,7 @@ fun connectivityState(): State<ConnectionState> {
     return produceState(initialValue = context.currentConnectivityState) {
         // In a coroutine, can make suspend calls
         context.observeConnectivityAsFlow().collect { connectivityState ->
-            this.value = connectivityState
+            value = connectivityState
         }
     }
 }

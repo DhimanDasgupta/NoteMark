@@ -363,7 +363,7 @@ private fun RegistrationUsernameField(
         onFocusLost = { registrationAction(UserNameFiledLostFocus(userName = registrationUiModel().userName)) },
         explanationText = registrationUiModel().userNameExplanation ?: "",
         errorText = registrationUiModel().userNameError ?: "",
-        onTextChanged = { userName = it },
+        onTextChanged = { value -> userName = value },
         onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
     )
 }
@@ -392,7 +392,7 @@ private fun RegistrationEmailField(
         enteredText = email,
         hintText = "john.doe@gmail.com",
         errorText = registrationUiModel().emailError ?: "",
-        onTextChanged = { email = it },
+        onTextChanged = { value -> email = value },
         onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
     )
 }

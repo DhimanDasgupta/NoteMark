@@ -82,7 +82,7 @@ internal fun LoginPane(
 
     LaunchedEffect(key1 = Unit) {
         snapshotFlow { loginUiModel().loginSuccess }
-            .filter { it != null }
+            .filter { value -> value != null }
             .collect { isSuccess ->
                 val message = if (isSuccess == true) "Login successful" else "Login failed"
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -356,7 +356,7 @@ private fun LoginEmailField(
         label = "Email",
         enteredText = email,
         hintText = "john.doe@gmail.com",
-        onTextChanged = { email = it },
+        onTextChanged = { value -> email = value },
         onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
     )
 }
@@ -385,7 +385,7 @@ private fun LoginPasswordField(
         label = "Password",
         enteredText = password,
         hintText = "Password",
-        onTextChanged = { password = it },
+        onTextChanged = { value -> password = value },
         onDoneClicked = {
             focusManager.moveFocus(FocusDirection.Enter)
             keyboardController?.hide()

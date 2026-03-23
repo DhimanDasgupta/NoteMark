@@ -80,7 +80,7 @@ class AddNotePresenter(
         events.tryEmit(value = event)
 }
 
-private fun AddNoteUiModel.mapToAddNoteUiModel(addNoteState: AddNoteState) = this.copy(
+private fun AddNoteUiModel.mapToAddNoteUiModel(addNoteState: AddNoteState) = copy(
     title = addNoteState.title,
     content = addNoteState.content,
     saved = addNoteState.saved

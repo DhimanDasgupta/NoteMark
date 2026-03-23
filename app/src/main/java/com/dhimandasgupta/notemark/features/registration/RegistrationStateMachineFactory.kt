@@ -169,12 +169,12 @@ class RegistrationStateMachineFactory(
     }
 }
 
-private fun RegistrationState.validateNonEmptyInputs(): RegistrationState = this.copy(
+private fun RegistrationState.validateNonEmptyInputs(): RegistrationState = copy(
     registrationEnabled = userName.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && repeatPassword.isNotEmpty()
 )
 
 private fun RegistrationState.validateInputs(): RegistrationState {
-    var updatedRegistrationState = this.copy(
+    var updatedRegistrationState = copy(
         userNameError = if (!userName.isUsernameValid())
             "Username must be at least 3 characters"
         else

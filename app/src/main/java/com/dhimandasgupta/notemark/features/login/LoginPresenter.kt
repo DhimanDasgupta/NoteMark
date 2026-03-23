@@ -81,7 +81,7 @@ class LoginPresenter(
 
 private fun LoginUiModel.mapToLoginUiModel(
     loginState: LoginState
-) = this.copy(
+) = copy(
     email = loginState.email,
     password = loginState.password,
     emailError = loginState.emailError,

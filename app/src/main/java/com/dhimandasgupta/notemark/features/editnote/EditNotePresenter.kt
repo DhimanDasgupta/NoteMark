@@ -99,7 +99,7 @@ class EditNotePresenter(
 
 private fun EditNoteUiModel.mapToEditNoteUiModel(
     editNoteState: EditNoteState
-) = this.copy(
+) = copy(
     title = editNoteState.title,
     content = editNoteState.content,
     noteEntity = editNoteState.noteEntity?.copy(

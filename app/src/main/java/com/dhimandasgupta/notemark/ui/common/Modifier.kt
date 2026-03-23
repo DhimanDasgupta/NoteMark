@@ -64,7 +64,7 @@ fun Modifier.lifecycleAwareDebouncedClickable(
 
     val isClickEnabled = enabled && lifecycleAllowsClick
 
-    this.clickable(
+    clickable(
         interactionSource = interactionSource,
         indication = null,
         enabled = isClickEnabled, // Combined enabled state

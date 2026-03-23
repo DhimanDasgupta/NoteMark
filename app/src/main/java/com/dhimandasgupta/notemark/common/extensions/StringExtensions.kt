@@ -8,7 +8,7 @@ private val SPACE_REGEX = """\s+""".toRegex()
 
 fun String.isValidEmail(): Boolean {
     // The regex pattern for a practical email validation
-    return this.matches(EMAIL_REGEX)
+    return matches(EMAIL_REGEX)
 }
 
 /**
@@ -16,7 +16,7 @@ fun String.isValidEmail(): Boolean {
  * Allows alphanumeric chars, underscore, and hyphen. Length 3-20.
  */
 fun String.isUsernameValid(): Boolean {
-    return this.matches(USERNAME_REGEX)
+    return matches(USERNAME_REGEX)
 }
 
 /**
@@ -39,7 +39,7 @@ fun String.isValidPassword(): Boolean {
     // (?=.*[0-9])        # a digit must occur at least once
     // (?=.*[@$!%*?&])    # a special character must occur at least once
     // .{8,}              # anything, at least eight places long
-    return this.matches(PASSWORD_REGEX)
+    return matches(PASSWORD_REGEX)
 }
 
 
@@ -72,7 +72,7 @@ fun String.isValidPassword(): Boolean {
  *         or an empty string if the input is blank or cannot be processed.
  */
 fun String.formatUserName(): String {
-    val nameParts = this.split(SPACE_REGEX).filter { it.isNotEmpty() } // Split by whitespace and remove empty parts
+    val nameParts = split(SPACE_REGEX).filter { string -> string.isNotEmpty() } // Split by whitespace and remove empty parts
 
     return when {
         nameParts.size >= 2 -> {

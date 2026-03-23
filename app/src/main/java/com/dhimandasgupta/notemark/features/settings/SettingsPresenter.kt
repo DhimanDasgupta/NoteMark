@@ -98,7 +98,7 @@ private fun SettingsUiModel.mapToSettingsUiModel(
 ): SettingsUiModel {
     when (appState) {
         is AppState.LoggedIn -> {
-            return this.copy(
+            return copy(
                 logoutStatus = null,
                 lastSynced = appState.sync?.lastUploadedTime ?: "--",
                 selectedSyncInterval = appState.sync?.syncDuration?.toReadableString()
