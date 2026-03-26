@@ -15,11 +15,11 @@ plugins {
 }
 
 // Create a Properties object to hold our values
-val localProperties = Properties()
-val localPropertiesFile = rootProject.file("local.properties")
+private val localProperties = Properties()
+private val localPropertiesFile: File? = rootProject.file("local.properties")
 
 // Load the properties if the file exists
-if (localPropertiesFile.exists() && localPropertiesFile.isFile) {
+if (localPropertiesFile?.exists() == true && localPropertiesFile.isFile) {
     localProperties.load(FileInputStream(localPropertiesFile))
 }
 
@@ -78,7 +78,6 @@ android {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
     }
-    kotlinOptions {}
     kotlin {
         jvmToolchain(javaVersion.toString().toInt())
     }
