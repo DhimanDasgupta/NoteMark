@@ -30,14 +30,14 @@ import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFac
 
 @Immutable
 sealed interface AppState {
-    val connectionState: ConnectionState?
+    val connectionState: ConnectionState
 
     data class NotLoggedIn(
-        override val connectionState: ConnectionState? = ConnectionState.Unavailable
+        override val connectionState: ConnectionState = ConnectionState.Unavailable
     ) : AppState
 
     data class LoggedIn(
-        override val connectionState: ConnectionState? = ConnectionState.Unavailable,
+        override val connectionState: ConnectionState = ConnectionState.Unavailable,
         val user: User,
         val sync: Sync? = null,
         val appVersionName: String

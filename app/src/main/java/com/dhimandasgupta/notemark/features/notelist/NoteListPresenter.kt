@@ -83,7 +83,7 @@ class NoteListPresenter(
                 }
                     .onStart { emit(value = NoteListUiModel.defaultOrEmpty) }
                     .cancellable()
-                    .catch {} // Do something with error if required
+                    .catch {} // Do something with an error if required
                     .flowOn(context = Dispatchers.Default)
                     .collectLatest { mappedNoteListUiModel ->
                         noteListUiModel = mappedNoteListUiModel
