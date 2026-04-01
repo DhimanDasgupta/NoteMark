@@ -1,6 +1,6 @@
 package com.dhimandasgupta.notemark.features.launcher
 
-import android.app.Activity
+import android.app.Application
 import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.work.Constraints
@@ -58,7 +58,7 @@ class AppStateMachineFactory(
     private val noteMarkRepository: NoteMarkRepository
 ) : StateMachineFactory<AppState, AppAction>() {
     init {
-        if (applicationContext is Activity) throw IllegalStateException("Context cannot be an Activity")
+        require(value = applicationContext is Application) { "Context must be an Application" }
 
         spec {
             initializeWith { defaultAppState }
@@ -156,7 +156,7 @@ class AppStateMachineFactory(
         val sync = syncRepository.getSync().first()
         val neverSynced = sync.lastUploadedTime == "0" && sync.lastDownloadedTime == "0"
         val lastSyncTimeIsMoreThan5Minutes = getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString = sync.lastUploadedTime) > 5L
-        // Start sync if never synced or last sync time is more than 5 mins and not syncing.
+        // Start sync if never synced or the last sync time is more than 5 mins and not syncing.
         if (neverSynced || (lastSyncTimeIsMoreThan5Minutes && !sync.syncing)) {
             applicationContext.cancelPreviousAndTriggerNewWork()
         }
@@ -164,6 +164,9 @@ class AppStateMachineFactory(
 }
 
 private fun Context.cancelPreviousAndTriggerNewWork(duration: Duration = Duration.ZERO) {
+    require(value = applicationContext is Application) { "Context must be an Application" }
+    require(value = duration >= Duration.ZERO) { "Duration must be non-negative" }
+
     val workManager = WorkManager.getInstance(context = this)
 
     val constraints = Constraints.Builder()
