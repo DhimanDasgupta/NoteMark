@@ -16,10 +16,10 @@ plugins {
 
 // Create a Properties object to hold our values
 private val localProperties = Properties()
-private val localPropertiesFile: File? = rootProject.file("local.properties")
+private val localPropertiesFile: File = rootProject.file("local.properties")
 
 // Load the properties if the file exists
-if (localPropertiesFile?.exists() == true && localPropertiesFile.isFile) {
+if (localPropertiesFile.exists() && localPropertiesFile.isFile) {
     localProperties.load(FileInputStream(localPropertiesFile))
 }
 
@@ -33,14 +33,16 @@ private fun generateVersionName(): String {
     return "$versionNamePrefix-${now.format(formatter)}"
 }
 
+private val javaVersion = JavaVersion.VERSION_17
+
 android {
     namespace = applicationId
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = applicationId
         minSdk = 28
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = generateVersionName()
 
@@ -48,23 +50,16 @@ android {
 
         val headerValue = localProperties.getProperty("HEADER_VALUE_FOR_NOTE_MARK_API", "")
         buildConfigField("String", "HEADER_VALUE_FOR_NOTE_MARK_API", "\"$headerValue\"")
-
-        buildTypes {
-            getByName("debug") {
-                buildConfigField("boolean", "DEBUGGABLE", "true")
-            }
-            getByName("release") {
-                buildConfigField("boolean", "DEBUGGABLE", "false")
-            }
-        }
     }
 
     buildTypes {
-        debug {
+        getByName("debug") {
+            buildConfigField("Boolean", "DEBUGGABLE", "true")
             isMinifyEnabled = false
             isShrinkResources = false
         }
-        release {
+        getByName("release") {
+            buildConfigField("Boolean", "DEBUGGABLE", "false")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -73,25 +68,24 @@ android {
             )
         }
     }
-    val javaVersion = JavaVersion.VERSION_17
+
     compileOptions {
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
-    }
-    kotlin {
-        jvmToolchain(javaVersion.toString().toInt())
-    }
-    buildFeatures {
-        compose = true
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildFeatures {
+        compose = true
         buildConfig = true
     }
 
     testOptions {
         unitTests.isReturnDefaultValues = true
     }
+}
+
+kotlin {
+    jvmToolchain(javaVersion.toString().toInt())
 }
 
 sqldelight {
