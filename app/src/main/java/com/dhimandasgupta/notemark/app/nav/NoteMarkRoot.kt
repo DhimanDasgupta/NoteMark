@@ -31,7 +31,7 @@ fun NoteMarkRoot(
     NavDisplay(
         modifier = modifier,
         backStack = backStack,
-        sceneStrategy = sceneStrategy,
+        sceneStrategies = listOf(sceneStrategy),
         onBack = { backStack.removeLastOrNull() },
         transitionSpec = {
             slideIntoContainer(
