@@ -15,6 +15,7 @@ import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.app.nav.LauncherNavKey
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.java.KoinJavaComponent.get
 
 @Composable
@@ -48,7 +49,9 @@ private fun LauncherEntry(
 
     LaunchedEffect(key1 = Unit) {
         launchMolecule(mode = RecompositionMode.Immediate) {
-            launcherUiModel = launcherPresenter.uiModel()
+            launcherPresenter.uiModel()
+        }.collectLatest { model ->
+            launcherUiModel = model
         }
     }
 

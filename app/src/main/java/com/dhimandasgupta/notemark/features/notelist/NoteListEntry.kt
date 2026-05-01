@@ -16,6 +16,7 @@ import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.app.nav.NoteListNavKey
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.java.KoinJavaComponent.get
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -56,7 +57,9 @@ private fun NoteListEntry(
 
     LaunchedEffect(key1 = Unit) {
         launchMolecule(mode = RecompositionMode.Immediate) {
-            noteListUiModel = noteListPresenter.uiModel()
+            noteListPresenter.uiModel()
+        }.collectLatest { model ->
+            noteListUiModel = model
         }
     }
 

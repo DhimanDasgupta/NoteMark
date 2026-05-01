@@ -17,6 +17,7 @@ import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.app.nav.SettingsNavKey
 import com.dhimandasgupta.notemark.features.launcher.AppAction
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.java.KoinJavaComponent.get
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -52,7 +53,9 @@ private fun SettingsEntry(
 
     LaunchedEffect(key1 = Unit) {
         launchMolecule(mode = RecompositionMode.Immediate) {
-            settingsUiModel = settingsPresenter.uiModel()
+            settingsPresenter.uiModel()
+        }.collectLatest { model ->
+            settingsUiModel = model
         }
     }
 

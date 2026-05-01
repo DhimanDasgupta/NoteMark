@@ -14,6 +14,7 @@ import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.app.nav.LoginNavKey
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.java.KoinJavaComponent.get
 
 @Composable
@@ -46,7 +47,9 @@ private fun LoginEntry(
 
     LaunchedEffect(key1 = Unit) {
         launchMolecule(mode = RecompositionMode.Immediate) {
-            loginUiModel = loginPresenter.uiModel()
+            loginPresenter.uiModel()
+        }.collectLatest { model ->
+            loginUiModel = model
         }
     }
 
