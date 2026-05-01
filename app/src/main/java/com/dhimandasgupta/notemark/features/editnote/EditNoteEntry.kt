@@ -62,7 +62,7 @@ private fun EditNoteEntry(
     EditNotePane(
         modifier = modifier,
         editNoteUiModel = { editNoteUiModel },
-        editNoteAction = { event -> editNoteAction(event) },
+        editNoteAction = { action -> editNoteAction(action) },
         onCloseClicked = { navigateUp() }
     )
 }

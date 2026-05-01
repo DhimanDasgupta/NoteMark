@@ -44,7 +44,7 @@ data class RegistrationUiModel(
 class RegistrationPresenter(
     private val registrationStateMachine: RegistrationStateMachineFactory
 ) {
-    private val events = MutableSharedFlow<RegistrationAction>(extraBufferCapacity = 10)
+    private val actions = MutableSharedFlow<RegistrationAction>(extraBufferCapacity = 10)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
@@ -72,7 +72,7 @@ class RegistrationPresenter(
 
             // Send the Events to the State Machine through Actions
             launch {
-                events.collect { loginAction ->
+                actions.collect { loginAction ->
                     registrationStateMachine.dispatch(loginAction)
                 }
             }
@@ -81,8 +81,8 @@ class RegistrationPresenter(
         return registrationUiModel
     }
 
-    fun dispatchAction(event: RegistrationAction) =
-        events.tryEmit(value = event)
+    fun dispatchAction(action: RegistrationAction) =
+        actions.tryEmit(value = action)
 }
 
 private fun RegistrationUiModel.mapToRegistrationModel(

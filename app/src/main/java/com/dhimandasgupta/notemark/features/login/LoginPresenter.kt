@@ -38,7 +38,7 @@ data class LoginUiModel(
 class LoginPresenter(
     private val loginStateMachineFactory: LoginStateMachineFactory
 ) {
-    private val events = MutableSharedFlow<LoginAction>(extraBufferCapacity = 10)
+    private val actions = MutableSharedFlow<LoginAction>(extraBufferCapacity = 10)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
@@ -66,7 +66,7 @@ class LoginPresenter(
 
             // Send the Events to the State Machine through Actions
             launch {
-                events.collect { loginAction ->
+                actions.collect { loginAction ->
                     loginStateMachine.dispatch(loginAction)
                 }
             }
@@ -75,8 +75,8 @@ class LoginPresenter(
         return loginUiModel
     }
 
-    fun dispatchAction(event: LoginAction) =
-        events.tryEmit(value = event)
+    fun dispatchAction(action: LoginAction) =
+        actions.tryEmit(value = action)
 }
 
 private fun LoginUiModel.mapToLoginUiModel(

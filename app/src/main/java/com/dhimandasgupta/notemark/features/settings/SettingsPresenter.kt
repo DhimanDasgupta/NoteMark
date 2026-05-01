@@ -53,7 +53,7 @@ data class SettingsUiModel(
 class SettingsPresenter(
     private val appStateMachineFactory: AppStateMachineFactory
 ) {
-    private val events = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
+    private val actions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
@@ -79,7 +79,7 @@ class SettingsPresenter(
 
             // Send the Events to the State Machine through Actions
             launch {
-                events.collect { loginAction ->
+                actions.collect { loginAction ->
                     appStateMachine.dispatch(loginAction)
                 }
             }
@@ -88,8 +88,8 @@ class SettingsPresenter(
         return settingsUiModel
     }
 
-    fun dispatchAction(event: AppAction) {
-        events.tryEmit(value = event)
+    fun dispatchAction(action: AppAction) {
+        actions.tryEmit(value = action)
     }
 }
 

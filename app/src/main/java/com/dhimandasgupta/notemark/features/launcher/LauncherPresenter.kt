@@ -36,7 +36,7 @@ data class LauncherUiModel(
 class LauncherPresenter(
     private val appStateMachineFactory: AppStateMachineFactory
 ) {
-    private val events = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
+    private val actions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
@@ -70,7 +70,7 @@ class LauncherPresenter(
 
             // Send the Events to the State Machine through Actions
             launch {
-                events.collect { event ->
+                actions.collect { event ->
                     appStateMachine.dispatch(action = event)
                 }
             }
@@ -79,6 +79,6 @@ class LauncherPresenter(
         return launcherUiModel
     }
 
-    fun dispatchAction(event: AppAction) =
-        events.tryEmit(value = event)
+    fun dispatchAction(action: AppAction) =
+        actions.tryEmit(value = action)
 }

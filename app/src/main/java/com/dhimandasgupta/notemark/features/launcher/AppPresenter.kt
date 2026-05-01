@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 class AppPresenter(
     private val appStateMachineFactory: AppStateMachineFactory
 ) {
-    private val events = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
+    private val actions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
@@ -49,7 +49,7 @@ class AppPresenter(
 
             // Send the Events to the State Machine through Actions
             launch {
-                events.collect { event ->
+                actions.collect { event ->
                     appStateMachine.dispatch(event)
                 }
             }
@@ -58,7 +58,7 @@ class AppPresenter(
         return applicationState
     }
 
-    fun dispatchAction(event: AppAction) {
-        events.tryEmit(value = event)
+    fun dispatchAction(action: AppAction) {
+        actions.tryEmit(value = action)
     }
 }

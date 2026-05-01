@@ -64,7 +64,7 @@ private fun NoteListEntry(
     NoteListPane(
         modifier = modifier,
         noteListUiModel = { noteListUiModel },
-        noteListAction = { event -> noteListAction(event) },
+        noteListAction = { action -> noteListAction(action) },
         onNoteClicked = { uuid -> navigateToEdit(uuid) },
         onFabClicked = { navigateToAdd() },
         onSettingsClicked = { navigateToSettings() },

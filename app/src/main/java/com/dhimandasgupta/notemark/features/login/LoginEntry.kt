@@ -54,7 +54,7 @@ private fun LoginEntry(
     LoginPane(
         modifier = modifier,
         loginUiModel = { loginUiModel },
-        loginAction = { event -> loginEvents(event) },
+        loginAction = { action -> loginEvents(action) },
         navigateToRegistration = { navigateToRegistration() },
         navigateToAfterLogin = { navigateToAfterLogin() },
     )

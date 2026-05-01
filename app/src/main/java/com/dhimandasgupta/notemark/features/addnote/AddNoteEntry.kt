@@ -56,7 +56,7 @@ private fun AddNoteEntry(
     AddNotePane(
         modifier = modifier,
         addNoteUiModel = { addNoteUiModel },
-        addNoteAction = { event -> addNoteAction(event) },
+        addNoteAction = { action -> addNoteAction(action) },
         onBackClicked = { navigateUp() }
     )
 }

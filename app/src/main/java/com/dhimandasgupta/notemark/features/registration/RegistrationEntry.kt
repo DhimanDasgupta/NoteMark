@@ -52,6 +52,6 @@ private fun RegistrationEntry(
         modifier = modifier,
         registrationUiModel = { registrationUiModel },
         navigateToLogin = { navigateToLoginFromRegistration() },
-        registrationAction = { event -> registrationAction(event) },
+        registrationAction = { action -> registrationAction(action) },
     )
 }

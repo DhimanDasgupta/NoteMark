@@ -59,8 +59,8 @@ class NoteListPresenter(
     private val appStateMachineFactory: AppStateMachineFactory,
     private val noteListStateMachineFactory: NoteListStateMachineFactory
 ) {
-    private val appActionEvents = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
-    private val events = MutableSharedFlow<NoteListAction>(extraBufferCapacity = 10)
+    private val appActions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
+    private val actions = MutableSharedFlow<NoteListAction>(extraBufferCapacity = 10)
 
     @Composable
     fun uiModel(): NoteListUiModel {
@@ -91,13 +91,13 @@ class NoteListPresenter(
             }
 
             launch {
-                appActionEvents.collect { appAction ->
+                appActions.collect { appAction ->
                     appStateMachine.dispatch(appAction)
                 }
             }
 
             launch {
-                events.collect { noteListAction ->
+                actions.collect { noteListAction ->
                     noteListStateMachine.dispatch(noteListAction)
                 }
             }
@@ -106,11 +106,11 @@ class NoteListPresenter(
         return noteListUiModel
     }
 
-    fun dispatchAction(event: NoteListAction) =
-        events.tryEmit(event)
+    fun dispatchAction(action: NoteListAction) =
+        actions.tryEmit(action)
 
-    fun dispatchAppAction(event: AppAction) =
-        appActionEvents.tryEmit(event)
+    fun dispatchAppAction(action: AppAction) =
+        appActions.tryEmit(action)
 }
 
 private fun mapToNoteListUiModel(

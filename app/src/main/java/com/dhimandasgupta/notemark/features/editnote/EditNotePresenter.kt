@@ -54,7 +54,7 @@ class EditNotePresenter(
         )
     }
 ) {
-    private val events = MutableSharedFlow<EditNoteAction>(extraBufferCapacity = 10)
+    private val actions = MutableSharedFlow<EditNoteAction>(extraBufferCapacity = 10)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
@@ -84,7 +84,7 @@ class EditNotePresenter(
 
             // Send the Events to the State Machine through Actions
             launch {
-                events.collect { editNoteAction ->
+                actions.collect { editNoteAction ->
                     editNoteStateMachine.dispatch(editNoteAction)
                 }
             }
@@ -93,8 +93,8 @@ class EditNotePresenter(
         return editNoteUiModel
     }
 
-    fun dispatchAction(event: EditNoteAction) =
-        events.tryEmit(value = event)
+    fun dispatchAction(action: EditNoteAction) =
+        actions.tryEmit(value = action)
 }
 
 private fun EditNoteUiModel.mapToEditNoteUiModel(

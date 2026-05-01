@@ -39,7 +39,7 @@ data class AddNoteUiModel(
 class AddNotePresenter(
     private val addNoteStateMachineFactory: AddNoteStateMachineFactory
 ) {
-    private val events = MutableSharedFlow<AddNoteAction>(extraBufferCapacity = 10)
+    private val actions = MutableSharedFlow<AddNoteAction>(extraBufferCapacity = 10)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
@@ -67,7 +67,7 @@ class AddNotePresenter(
 
             // Send the Events to the State Machine through Actions
             launch {
-                events.collect { editNoteAction ->
+                actions.collect { editNoteAction ->
                     addNoteStateMachine.dispatch(editNoteAction)
                 }
             }
@@ -76,8 +76,8 @@ class AddNotePresenter(
         return addNoteUiModel
     }
 
-    fun dispatchAction(event: AddNoteAction) =
-        events.tryEmit(value = event)
+    fun dispatchAction(action: AddNoteAction) =
+        actions.tryEmit(value = action)
 }
 
 private fun AddNoteUiModel.mapToAddNoteUiModel(addNoteState: AddNoteState) = copy(

@@ -60,7 +60,7 @@ private fun SettingsEntry(
     SettingsPane(
         modifier = modifier,
         settingsUiModel = { settingsUiModel },
-        settingsAction = { event -> settingsAction(event) },
+        settingsAction = { action -> settingsAction(action) },
         onBackClicked = { navigateUp() },
         onLogoutSuccessful = { navigateToLauncherAfterLogout() },
         onDeleteNoteCheckChanged = {
