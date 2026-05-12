@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -58,7 +59,9 @@ fun NoteDeleteDialog(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
+                modifier = Modifier.fillMaxWidth(),
                 text = "Are you sure you want to delete this note?",
+                textAlign = TextAlign.Start,
                 style = typography.titleMedium,
                 color = colorScheme.onSurface
             )
@@ -66,7 +69,9 @@ fun NoteDeleteDialog(
             Spacer(modifier = Modifier.height(height = 16.dp))
 
             Text(
+                modifier = Modifier.fillMaxWidth(),
                 text = "Click Discard to delete your note, else click Cancel to keep editing.",
+                textAlign = TextAlign.Start,
                 style = typography.bodyLarge,
                 color = colorScheme.onSurfaceVariant
             )

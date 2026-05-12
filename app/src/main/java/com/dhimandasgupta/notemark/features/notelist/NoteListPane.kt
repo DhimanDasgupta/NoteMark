@@ -81,12 +81,14 @@ import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkToolbarButton
 import com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton
 import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.delay
 
 @Composable
 internal fun NoteListPane(
     modifier: Modifier = Modifier,
     noteListUiModel: () -> NoteListUiModel,
     noteListAction: (NoteListAction) -> Unit = {},
+    navigateToLauncherIfLoggedOut: () -> Unit = {},
     onNoteClicked: (String) -> Unit = {},
     onFabClicked: () -> Unit = {},
     onSettingsClicked: () -> Unit = {},
@@ -97,6 +99,13 @@ internal fun NoteListPane(
 
     val updateNoteListUiModel by rememberUpdatedState(newValue = noteListUiModel)
     var noteDeleteId by remember { mutableStateOf<String?>(value = null) }
+
+    LaunchedEffect(key1 = updateNoteListUiModel().userName) {
+        delay(timeMillis = 100)
+        if (noteListUiModel().userName?.isEmpty() == true) {
+            navigateToLauncherIfLoggedOut()
+        }
+    }
 
     Box(
         modifier = modifier

@@ -23,6 +23,7 @@ import org.koin.java.KoinJavaComponent.get
 @Composable
 fun EntryProviderScope<NavKey>.NoteListEntryBuilder(
     modifier: Modifier,
+    navigateToLauncherIfLoggedOut: () -> Unit,
     navigateToAdd: () -> Unit,
     navigateToEdit: (String) -> Unit,
     navigateToSettings: () -> Unit
@@ -37,6 +38,7 @@ fun EntryProviderScope<NavKey>.NoteListEntryBuilder(
         NoteListEntry(
             modifier = modifier,
             noteListPresenter = noteListPresenter,
+            navigateToLauncherIfLoggedOut = navigateToLauncherIfLoggedOut,
             navigateToAdd = navigateToAdd,
             navigateToEdit = navigateToEdit,
             navigateToSettings = navigateToSettings
@@ -48,6 +50,7 @@ fun EntryProviderScope<NavKey>.NoteListEntryBuilder(
 private fun NoteListEntry(
     modifier: Modifier = Modifier,
     noteListPresenter: NoteListPresenter,
+    navigateToLauncherIfLoggedOut: () -> Unit,
     navigateToAdd: () -> Unit,
     navigateToEdit: (String) -> Unit,
     navigateToSettings: () -> Unit
@@ -69,6 +72,7 @@ private fun NoteListEntry(
         noteListUiModel = { noteListUiModel },
         noteListAction = { action -> noteListAction(action) },
         onNoteClicked = { uuid -> navigateToEdit(uuid) },
+        navigateToLauncherIfLoggedOut = { navigateToLauncherIfLoggedOut() },
         onFabClicked = { navigateToAdd() },
         onSettingsClicked = { navigateToSettings() },
         onProfileClicked = {}

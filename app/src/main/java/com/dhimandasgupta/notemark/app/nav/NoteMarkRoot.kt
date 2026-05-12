@@ -93,6 +93,12 @@ fun NoteMarkRoot(
                 )
                 NoteListEntryBuilder(
                     modifier = modifier,
+                    navigateToLauncherIfLoggedOut = {
+                        backStack.apply {
+                            clearPostLoginNavKeys()
+                            add(LauncherNavKey)
+                        }
+                    },
                     navigateToAdd = {
                         backStack.add(NoteCreateNavKey)
                     },
