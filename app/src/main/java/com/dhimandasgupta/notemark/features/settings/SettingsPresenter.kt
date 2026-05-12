@@ -15,6 +15,7 @@ import com.dhimandasgupta.notemark.features.launcher.AppStateMachineFactory
 import com.dhimandasgupta.notemark.proto.Sync
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -72,7 +73,10 @@ class SettingsPresenter(
                         settingsUiModel = settingsUiModel.mapToSettingsUiModel(appState = appState)
                     }
                     .cancellable()
-                    .catch {} // Do something with error if required
+                    .catch { throwable ->
+                        if (throwable is CancellationException) throw throwable
+                        // else can can be something like page level error etc.
+                    }
                     .flowOn(context = Dispatchers.Default)
                     .collect()
             }

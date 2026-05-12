@@ -15,6 +15,7 @@ import com.dhimandasgupta.notemark.features.launcher.AppStateMachineFactory
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
@@ -83,7 +84,10 @@ class NoteListPresenter(
                 }
                     .onStart { emit(value = NoteListUiModel.defaultOrEmpty) }
                     .cancellable()
-                    .catch {} // Do something with an error if required
+                    .catch { throwable ->
+                        if (throwable is CancellationException) throw throwable
+                        // else can can be something like page level error etc.
+                    }
                     .flowOn(context = Dispatchers.Default)
                     .collectLatest { mappedNoteListUiModel ->
                         noteListUiModel = mappedNoteListUiModel
