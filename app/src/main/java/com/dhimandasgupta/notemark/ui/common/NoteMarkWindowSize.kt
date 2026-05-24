@@ -1,6 +1,7 @@
 package com.dhimandasgupta.notemark.ui.common
 
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
@@ -20,7 +21,7 @@ enum class DeviceLayoutType {
  */
 @Composable
 fun getDeviceLayoutType(): DeviceLayoutType {
-    val windowAdaptiveInfo = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)
+    val windowAdaptiveInfo = currentWindowAdaptiveInfoV2()
 
     return remember(key1 = windowAdaptiveInfo) {
         val isExpandedWidth = windowAdaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(widthDpBreakpoint = WIDTH_DP_EXPANDED_LOWER_BOUND)
