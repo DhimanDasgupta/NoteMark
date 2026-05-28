@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -5,7 +6,6 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.kotlinx.serialization)
@@ -33,7 +33,11 @@ private fun generateVersionName(): String {
     return "$versionNamePrefix-${now.format(formatter)}"
 }
 
-private val javaVersion = JavaVersion.VERSION_17
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+    }
+}
 
 android {
     namespace = applicationId
@@ -56,7 +60,6 @@ android {
         getByName("debug") {
             buildConfigField("Boolean", "DEBUGGABLE", "true")
             isMinifyEnabled = false
-            isShrinkResources = false
         }
         getByName("release") {
             buildConfigField("Boolean", "DEBUGGABLE", "false")
@@ -69,9 +72,10 @@ android {
         }
     }
 
+    val javaVersion = JavaVersion.VERSION_21
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
     }
 
     buildFeatures {
@@ -82,10 +86,6 @@ android {
     testOptions {
         unitTests.isReturnDefaultValues = true
     }
-}
-
-kotlin {
-    jvmToolchain(javaVersion.toString().toInt())
 }
 
 sqldelight {
