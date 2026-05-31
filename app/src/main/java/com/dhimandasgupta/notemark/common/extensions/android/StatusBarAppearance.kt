@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.common.extensions
+package com.dhimandasgupta.notemark.common.extensions.android
 
 import android.app.Activity
 import android.content.Context

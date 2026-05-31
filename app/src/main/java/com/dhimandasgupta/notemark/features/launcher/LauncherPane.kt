@@ -42,10 +42,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.common.extensions.setForcedDarkStatusBarIcons
+import com.dhimandasgupta.notemark.common.extensions.android.setForcedDarkStatusBarIcons
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
-import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
-import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
+import com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType
+import com.dhimandasgupta.notemark.common.extensions.compose.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkOutlinedButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme

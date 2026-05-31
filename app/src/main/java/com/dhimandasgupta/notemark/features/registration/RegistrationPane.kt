@@ -47,7 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.common.extensions.setDarkStatusBarIcons
+import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.EmailEntered
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.PasswordEntered
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.PasswordFiledInFocus
@@ -58,10 +58,10 @@ import com.dhimandasgupta.notemark.features.registration.RegistrationAction.User
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledInFocus
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledLostFocus
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
-import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
-import com.dhimandasgupta.notemark.ui.common.alignToSafeDrawing
-import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
-import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
+import com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType
+import com.dhimandasgupta.notemark.common.extensions.compose.alignToSafeDrawing
+import com.dhimandasgupta.notemark.common.extensions.compose.getDeviceLayoutType
+import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkPasswordTextField
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTextField

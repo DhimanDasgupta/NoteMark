@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.ui.common
+package com.dhimandasgupta.notemark.common.extensions.compose
 
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue

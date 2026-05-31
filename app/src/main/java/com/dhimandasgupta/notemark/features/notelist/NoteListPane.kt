@@ -71,8 +71,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.convertIsoToRelativeYearFormat
-import com.dhimandasgupta.notemark.common.extensions.formatUserName
-import com.dhimandasgupta.notemark.common.extensions.setDarkStatusBarIcons
+import com.dhimandasgupta.notemark.common.extensions.kotlin.formatUserName
+import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.designsystem.LimitedText
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkFAB

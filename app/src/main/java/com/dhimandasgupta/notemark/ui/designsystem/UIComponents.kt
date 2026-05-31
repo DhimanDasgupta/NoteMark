@@ -80,8 +80,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
-import com.dhimandasgupta.notemark.ui.common.trackRecompositions
+import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
+import com.dhimandasgupta.notemark.common.extensions.compose.trackRecompositions
 import kotlinx.coroutines.delay
 
 @Composable

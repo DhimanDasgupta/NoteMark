@@ -54,12 +54,12 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.common.extensions.setDarkStatusBarIcons
+import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
-import com.dhimandasgupta.notemark.ui.common.DeviceLayoutType
-import com.dhimandasgupta.notemark.ui.common.alignToSafeDrawing
-import com.dhimandasgupta.notemark.ui.common.getDeviceLayoutType
-import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
+import com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType
+import com.dhimandasgupta.notemark.common.extensions.compose.alignToSafeDrawing
+import com.dhimandasgupta.notemark.common.extensions.compose.getDeviceLayoutType
+import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest

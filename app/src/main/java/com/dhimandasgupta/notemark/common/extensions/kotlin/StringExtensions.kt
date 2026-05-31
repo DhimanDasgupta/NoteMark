@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.common.extensions
+package com.dhimandasgupta.notemark.common.extensions.kotlin
 
 // Compile regex patterns once
 private val EMAIL_REGEX = """^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$""".toRegex()
@@ -61,9 +61,9 @@ fun String.isValidPassword(): Boolean {
  *   it returns an empty string as a fallback.
  *
  * Examples:
- * - "   John Doe   " -> "JD"
+ * - "John Doe" -> "JD"
  * - "SingleName" -> "SI"
- * - "   Al   " -> "AL"
+ * - "Al" -> "AL"
  * - "Mary Anne Smith" -> "MH"
  * - "  " -> ""
  * - "X" -> "X"

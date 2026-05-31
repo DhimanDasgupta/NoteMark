@@ -13,7 +13,7 @@ import androidx.work.WorkManager
 import com.dhimandasgupta.notemark.app.work.NoteSyncWorker
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
-import com.dhimandasgupta.notemark.common.extensions.getAppVersionName
+import com.dhimandasgupta.notemark.common.extensions.android.getAppVersionName
 import com.dhimandasgupta.notemark.common.getDifferenceFromTimestampInMinutes
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.SyncRepository

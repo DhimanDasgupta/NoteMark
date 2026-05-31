@@ -1,8 +1,8 @@
 package com.dhimandasgupta.notemark.features.login
 
 import androidx.compose.runtime.Immutable
-import com.dhimandasgupta.notemark.common.extensions.isValidEmail
-import com.dhimandasgupta.notemark.common.extensions.isValidPassword
+import com.dhimandasgupta.notemark.common.extensions.kotlin.isValidEmail
+import com.dhimandasgupta.notemark.common.extensions.kotlin.isValidPassword
 import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
 import com.dhimandasgupta.notemark.data.remote.model.LoginRequest
 import com.dhimandasgupta.notemark.features.login.LoginAction.EmailEntered

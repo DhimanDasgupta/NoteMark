@@ -57,11 +57,11 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.convertNoteTimestampToReadableFormat
-import com.dhimandasgupta.notemark.common.extensions.setDarkStatusBarIcons
+import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
-import com.dhimandasgupta.notemark.ui.common.lifecycleAwareDebouncedClickable
+import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce

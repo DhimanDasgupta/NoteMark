@@ -1,9 +1,9 @@
 package com.dhimandasgupta.notemark.features.registration
 
 import androidx.compose.runtime.Immutable
-import com.dhimandasgupta.notemark.common.extensions.isUsernameValid
-import com.dhimandasgupta.notemark.common.extensions.isValidEmail
-import com.dhimandasgupta.notemark.common.extensions.isValidPassword
+import com.dhimandasgupta.notemark.common.extensions.kotlin.isUsernameValid
+import com.dhimandasgupta.notemark.common.extensions.kotlin.isValidEmail
+import com.dhimandasgupta.notemark.common.extensions.kotlin.isValidPassword
 import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
 import com.dhimandasgupta.notemark.data.remote.model.RegisterRequest
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.EmailEntered
