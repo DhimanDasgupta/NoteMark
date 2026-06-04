@@ -1,7 +1,7 @@
 package com.dhimandasgupta.notemark
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
 import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDotsTag
@@ -14,7 +14,7 @@ class UITests {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun ThreeBouncingDotsShouldRecomposeOnce() {
+    fun threeBouncingDotsShouldRecomposeOnce() {
         composeTestRule.mainClock.autoAdvance = false
         composeTestRule.setContent {
             ThreeBouncingDots()
@@ -25,7 +25,7 @@ class UITests {
     }
 
     @Test
-    fun ThreeBouncingDotsShouldRecomposeOnceAfter6Seconds() {
+    fun threeBouncingDotsShouldRecomposeOnceAfter6Seconds() {
         composeTestRule.mainClock.autoAdvance = false
         composeTestRule.setContent {
             ThreeBouncingDots()
@@ -36,7 +36,7 @@ class UITests {
     }
 
     @Test
-    fun ThreeBouncingDotsShouldRecomposeOnceAfter10Seconds() {
+    fun threeBouncingDotsShouldRecomposeOnceAfter10Seconds() {
         composeTestRule.mainClock.autoAdvance = false
         composeTestRule.setContent {
             ThreeBouncingDots()

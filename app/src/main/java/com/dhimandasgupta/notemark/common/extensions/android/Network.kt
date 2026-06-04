@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.common.android
+package com.dhimandasgupta.notemark.common.extensions.android
 
 import android.content.Context
 import android.net.ConnectivityManager

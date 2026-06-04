@@ -11,8 +11,8 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.dhimandasgupta.notemark.app.work.NoteSyncWorker
-import com.dhimandasgupta.notemark.common.android.ConnectionState
-import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
+import com.dhimandasgupta.notemark.common.extensions.android.ConnectionState
+import com.dhimandasgupta.notemark.common.extensions.android.observeConnectivityAsFlow
 import com.dhimandasgupta.notemark.common.extensions.android.getAppVersionName
 import com.dhimandasgupta.notemark.common.getDifferenceFromTimestampInMinutes
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
