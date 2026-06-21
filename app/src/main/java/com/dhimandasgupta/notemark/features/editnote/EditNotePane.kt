@@ -79,12 +79,11 @@ import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIco
 import com.dhimandasgupta.notemark.common.extensions.android.turnOffImmersiveMode
 import com.dhimandasgupta.notemark.common.extensions.android.turnOnImmersiveMode
 import com.dhimandasgupta.notemark.common.extensions.android.unlockOrientation
-import com.dhimandasgupta.notemark.database.NoteEntity
-import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType
 import com.dhimandasgupta.notemark.common.extensions.compose.alignToSafeDrawing
 import com.dhimandasgupta.notemark.common.extensions.compose.getDeviceLayoutType
 import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
+import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton
 import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
@@ -607,7 +606,7 @@ private fun EditNotePanePreview() {
 private val defaultEditNoteUiModel = EditNoteUiModel(
     title = "Hello there, this is a the title of the Note",
     content = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-    noteEntity = NoteEntity(
+    noteEntity = NoteEntityUi(
         id = 1,
         title = "Hello there, this is a the title of the Note",
         content = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",

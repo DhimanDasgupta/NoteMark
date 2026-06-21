@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.dhimandasgupta.notemark.common.ImmutableListSerializer
 import com.dhimandasgupta.notemark.common.extensions.android.ConnectionState
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppState.LoggedIn
@@ -22,15 +23,20 @@ import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 
+object NoteEntityUiModelImmutableListSerializer :
+    ImmutableListSerializer<NoteEntityUiModel>(NoteEntityUiModel.serializer())
+@Serializable
 @Immutable
 data class NoteListUiModel(
     val userName: String? = null,
     val loading: Boolean = true,
+    @Serializable(with = NoteEntityUiModelImmutableListSerializer::class)
     val noteEntities: ImmutableList<NoteEntityUiModel>,
     val noteLongClickedUuid: String = "",
     val showSyncProgress: Boolean = false,
@@ -41,6 +47,7 @@ data class NoteListUiModel(
     }
 }
 
+@Serializable
 @Immutable
 data class NoteEntityUiModel(
     val id: Long,
@@ -74,11 +81,11 @@ class NoteListPresenter(
 
             launch {
                 combine(
-                    flow = appStateMachine.state.filter { appState -> appState is LoggedIn },
+                    flow = appStateMachine.state.filterIsInstance<LoggedIn>(),
                     flow2 = noteListStateMachine.state
                 ) { appState, noteListState ->
                     mapToNoteListUiModel(
-                        loggedIn = appState as LoggedIn,
+                        loggedIn = appState,
                         noteListState = noteListState
                     )
                 }

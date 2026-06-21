@@ -65,6 +65,9 @@ class EditNoteStateMachineFactory(
                 }
                 on<EditNoteAction.Save> { _ ->
                     snapshot.noteEntity?.let { noteEntity ->
+                        if (snapshot.title.trim().isEmpty()) return@on noChange()
+                        if (snapshot.content.trim().isEmpty()) return@on noChange()
+
                         val updatedNote = noteMarkRepository.updateLocalNote(
                             title = snapshot.title.trim(),
                             content = snapshot.content.trim(),

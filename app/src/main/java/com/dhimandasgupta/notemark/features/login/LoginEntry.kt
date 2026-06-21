@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.retain.retain
+import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.EntryProviderScope
@@ -42,7 +42,7 @@ private fun LoginEntry(
     navigateToRegistration: () -> Unit,
     navigateToAfterLogin: () -> Unit
 ) {
-    var loginUiModel by remember { mutableStateOf(value = LoginUiModel.defaultOrEmpty) }
+    var loginUiModel by rememberSerializable { mutableStateOf(value = LoginUiModel.defaultOrEmpty) }
     val loginEvents by rememberUpdatedState(newValue = loginPresenter::dispatchAction)
 
     LaunchedEffect(key1 = Unit) {

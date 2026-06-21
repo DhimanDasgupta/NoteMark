@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.extensions.android.ConnectionState
-import com.dhimandasgupta.notemark.proto.User
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,16 +20,26 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Immutable
 data class LauncherUiModel(
     val connectionState: ConnectionState? = ConnectionState.Unavailable,
-    val loggedInUser: User? = null
+    val loggedInUser: UiUser? = null
 ) {
     companion object {
         val defaultOrEmpty = LauncherUiModel()
     }
 }
+
+@Serializable
+@Immutable
+data class UiUser(
+    val userName: String = "",
+    val accessToken: String = "",
+    val refreshToken: String = ""
+)
 
 @Stable
 class LauncherPresenter(
@@ -55,7 +64,11 @@ class LauncherPresenter(
                             connectionState = appState.connectionState,
                             loggedInUser = when (appState) {
                                 is AppState.NotLoggedIn -> null
-                                is AppState.LoggedIn -> appState.user
+                                is AppState.LoggedIn -> UiUser(
+                                    userName = appState.user.userName,
+                                    accessToken = appState.user.accessToken,
+                                    refreshToken = appState.user.refreshToken
+                                )
                             }
                         )
                     }

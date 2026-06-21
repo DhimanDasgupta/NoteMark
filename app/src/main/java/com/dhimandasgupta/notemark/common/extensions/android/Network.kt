@@ -12,9 +12,17 @@ import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 sealed interface ConnectionState {
+    @Serializable
+    @SerialName("available")
     data object Available : ConnectionState
+
+    @Serializable
+    @SerialName("unavailable")
     data object Unavailable : ConnectionState
 }
 

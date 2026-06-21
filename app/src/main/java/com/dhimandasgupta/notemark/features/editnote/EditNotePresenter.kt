@@ -8,7 +8,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.dhimandasgupta.notemark.database.NoteEntity
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,14 +21,16 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.koin.core.parameter.parametersOf
 import org.koin.java.KoinJavaComponent.get
 
+@Serializable
 @Immutable
 data class EditNoteUiModel(
     val title: String,
     val content: String,
-    val noteEntity: NoteEntity? = null,
+    val noteEntity: NoteEntityUi? = null,
     val saved: Boolean? = null,
     val editEnable: Boolean = false,
     val isReaderMode: Boolean = false
@@ -44,6 +45,19 @@ data class EditNoteUiModel(
         )
     }
 }
+
+@Serializable
+@Immutable
+data class NoteEntityUi(
+    val id: Long,
+    val title: String,
+    val content: String,
+    val createdAt: String,
+    val lastEditedAt: String,
+    val uuid: String,
+    val synced: Boolean,
+    val markAsDeleted: Boolean,
+)
 
 @Stable
 class EditNotePresenter(
@@ -102,9 +116,15 @@ private fun EditNoteUiModel.mapToEditNoteUiModel(
 ) = copy(
     title = editNoteState.title,
     content = editNoteState.content,
-    noteEntity = editNoteState.noteEntity?.copy(
-        createdAt = editNoteState.noteEntity.createdAt,
-        lastEditedAt = editNoteState.noteEntity.lastEditedAt
+    noteEntity = NoteEntityUi(
+        id = editNoteState.noteEntity?.id ?: 0,
+        title = editNoteState.noteEntity?.title ?: "",
+        content = editNoteState.noteEntity?.content ?: "",
+        createdAt = editNoteState.noteEntity?.createdAt ?: "",
+        lastEditedAt = editNoteState.noteEntity?.lastEditedAt ?: "",
+        uuid = editNoteState.noteEntity?.uuid ?: "",
+        synced = editNoteState.noteEntity?.synced ?: false,
+        markAsDeleted = editNoteState.noteEntity?.markAsDeleted ?: false
     ),
     saved = editNoteState.saved,
     editEnable = editNoteState.mode == Mode.EditMode,

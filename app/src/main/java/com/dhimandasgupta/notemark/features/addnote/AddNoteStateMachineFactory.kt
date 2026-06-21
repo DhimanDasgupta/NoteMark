@@ -39,6 +39,9 @@ class AddNoteStateMachineFactory(
                     mutate { copy(content = action.content) }
                 }
                 on<AddNoteAction.Save> { _ ->
+                    if (snapshot.title.trim().isEmpty()) return@on noChange()
+                    if (snapshot.content.trim().isEmpty()) return@on noChange()
+
                     val inserted = noteMarkRepository.createNote(
                         NoteEntity(
                             id = System.currentTimeMillis(),

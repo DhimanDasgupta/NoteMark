@@ -27,7 +27,9 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Immutable
 data class SettingsUiModel(
     val selectedSyncInterval: String = "Manual",

@@ -6,9 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.retain.retain
+import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.EntryProviderScope
@@ -50,7 +50,7 @@ private fun EditNoteEntry(
     editNotePresenter: EditNotePresenter,
     navigateUp: () -> Unit
 ) {
-    var editNoteUiModel by remember { mutableStateOf(value = EditNoteUiModel.defaultOrEmpty) }
+    var editNoteUiModel by rememberSerializable { mutableStateOf(value = EditNoteUiModel.defaultOrEmpty) }
     val editNoteAction by rememberUpdatedState(newValue = editNotePresenter::dispatchAction)
 
     LaunchedEffect(key1 = Unit) {

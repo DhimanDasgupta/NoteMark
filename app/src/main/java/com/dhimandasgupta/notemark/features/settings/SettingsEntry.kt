@@ -6,9 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.retain.retain
+import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.EntryProviderScope
@@ -48,7 +48,7 @@ private fun SettingsEntry(
     navigateToLauncherAfterLogout: () -> Unit,
     navigateUp: () -> Unit
 ) {
-    var settingsUiModel by remember { mutableStateOf(value = SettingsUiModel.defaultOrEmpty) }
+    var settingsUiModel by rememberSerializable { mutableStateOf(value = SettingsUiModel.defaultOrEmpty) }
     val settingsAction by rememberUpdatedState(newValue = settingsPresenter::dispatchAction)
 
     LaunchedEffect(key1 = Unit) {
