@@ -5,14 +5,13 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import com.dhimandasgupta.notemark.common.extensions.compose.RecompositionCountKey
 
-fun SemanticsNodeInteraction.assertRecompositionCount(
-    expected: Int
-): SemanticsNodeInteraction {
-    assert(
-        matcher = SemanticsMatcher.expectValue(
-            key = RecompositionCountKey,
-            expectedValue = expected
-        )
-    )
-    return this
+fun SemanticsNodeInteraction.assertRecompositionCount(expected: Int): SemanticsNodeInteraction {
+  assert(
+    matcher =
+      SemanticsMatcher.expectValue(
+        key = RecompositionCountKey,
+        expectedValue = expected,
+      )
+  )
+  return this
 }

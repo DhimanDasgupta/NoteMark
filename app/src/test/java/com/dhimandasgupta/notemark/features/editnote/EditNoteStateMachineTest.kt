@@ -10,204 +10,213 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class EditNoteStateMachineTest {
-    @Test
-    fun `test EditNoteStateMachine with default state`() = runTest {
-        turbineScope {
-            // Setup state machine
-            val stateMachineFactory = EditNoteStateMachineFactory(
-                noteMarkRepository = FakeFailureNoteRepository(),
-                noteId = ""
-            )
+  @Test
+  fun `test EditNoteStateMachine with default state`() = runTest {
+    turbineScope {
+      // Setup state machine
+      val stateMachineFactory =
+        EditNoteStateMachineFactory(
+          noteMarkRepository = FakeFailureNoteRepository(),
+          noteId = "",
+        )
 
-            // Setup state flow from state machine
-            val stateMachine = stateMachineFactory.launchIn(backgroundScope)
-            val flow = stateMachine.state
+      // Setup state flow from state machine
+      val stateMachine = stateMachineFactory.launchIn(backgroundScope)
+      val flow = stateMachine.state
 
-            // Start flow validation
-            flow.test {
-                val initialState = awaitItem()
-                assertEquals(EditNoteStateMachineFactory.defaultEditNoteState, initialState)
-            }
-        }
+      // Start flow validation
+      flow.test {
+        val initialState = awaitItem()
+        assertEquals(EditNoteStateMachineFactory.defaultEditNoteState, initialState)
+      }
     }
+  }
 
-    @Test
-    fun `test EditNoteStateMachine with LoadNote action is successful`() = runTest {
-        turbineScope {
-            // Setup state machine
-            val stateMachineFactory = EditNoteStateMachineFactory(
-                noteMarkRepository = FakeSuccessfulNoteRepository(),
-                noteId = "1"
-            )
+  @Test
+  fun `test EditNoteStateMachine with LoadNote action is successful`() = runTest {
+    turbineScope {
+      // Setup state machine
+      val stateMachineFactory =
+        EditNoteStateMachineFactory(
+          noteMarkRepository = FakeSuccessfulNoteRepository(),
+          noteId = "1",
+        )
 
-            // Setup state flow from state machine
-            val stateMachine = stateMachineFactory.launchIn(backgroundScope)
-            val flow = stateMachine.state
+      // Setup state flow from state machine
+      val stateMachine = stateMachineFactory.launchIn(backgroundScope)
+      val flow = stateMachine.state
 
-            // Start flow validation
-            flow.test {
-                val currentState = awaitItem()
-                assertEquals(EditNoteStateMachineFactory.defaultEditNoteState, currentState)
-                assertEquals(
-                    currentState.copy(
-                        title = "title",
-                        content = "content",
-                        noteEntity = NoteEntity(
-                            id = 1,
-                            uuid = "some-uuid",
-                            title = "title",
-                            content = "content",
-                            createdAt = "2025-06-29T19:18:24.369Z",
-                            lastEditedAt = "2025-06-29T19:18:24.369Z",
-                            synced = true,
-                            markAsDeleted = false,
-                        ),
-                        saved = null,
-                        mode = Mode.ViewMode
-                    ),
-                    awaitItem()
-                )
-            }
-        }
+      // Start flow validation
+      flow.test {
+        val currentState = awaitItem()
+        assertEquals(EditNoteStateMachineFactory.defaultEditNoteState, currentState)
+        assertEquals(
+          currentState.copy(
+            title = "title",
+            content = "content",
+            noteEntity =
+              NoteEntity(
+                id = 1,
+                uuid = "some-uuid",
+                title = "title",
+                content = "content",
+                createdAt = "2025-06-29T19:18:24.369Z",
+                lastEditedAt = "2025-06-29T19:18:24.369Z",
+                synced = true,
+                markAsDeleted = false,
+              ),
+            saved = null,
+            mode = Mode.ViewMode,
+          ),
+          awaitItem(),
+        )
+      }
     }
+  }
 
-    @Test
-    fun `test EditNoteStateMachine with UpdateNote action`() = runTest {
-        turbineScope {
-            // Setup state machine
-            val stateMachineFactory = EditNoteStateMachineFactory(
-                noteMarkRepository = FakeFailureNoteRepository(),
-                noteId = "1"
-            )
+  @Test
+  fun `test EditNoteStateMachine with UpdateNote action`() = runTest {
+    turbineScope {
+      // Setup state machine
+      val stateMachineFactory =
+        EditNoteStateMachineFactory(
+          noteMarkRepository = FakeFailureNoteRepository(),
+          noteId = "1",
+        )
 
-            // Setup state flow from state machine
-            val stateMachine = stateMachineFactory.launchIn(backgroundScope)
-            val flow = stateMachine.state
+      // Setup state flow from state machine
+      val stateMachine = stateMachineFactory.launchIn(backgroundScope)
+      val flow = stateMachine.state
 
-            // Start flow validation
-            flow.test {
-                val currentState = awaitItem()
-                assertEquals(EditNoteStateMachineFactory.defaultEditNoteState, currentState)
-                stateMachine.dispatch(
-                    EditNoteAction.UpdateNote(
-                        noteEntity = NoteEntity(
-                            id = 1,
-                            uuid = "some-uuid",
-                            title = "title",
-                            content = "content",
-                            createdAt = "2025-06-29T19:18:24.369Z",
-                            lastEditedAt = "2025-06-29T19:18:24.369Z",
-                            synced = true,
-                            markAsDeleted = false,
-                        )
-                    )
-                )
-                assertEquals(
-                    currentState.copy(
-                        title = "",
-                        content = "",
-                        noteEntity = NoteEntity(
-                            id = 1,
-                            uuid = "some-uuid",
-                            title = "title",
-                            content = "content",
-                            createdAt = "2025-06-29T19:18:24.369Z",
-                            lastEditedAt = "2025-06-29T19:18:24.369Z",
-                            synced = true,
-                            markAsDeleted = false,
-                        ),
-                        saved = null,
-                        mode = Mode.ViewMode
-                    ),
-                    awaitItem()
-                )
-            }
-        }
+      // Start flow validation
+      flow.test {
+        val currentState = awaitItem()
+        assertEquals(EditNoteStateMachineFactory.defaultEditNoteState, currentState)
+        stateMachine.dispatch(
+          EditNoteAction.UpdateNote(
+            noteEntity =
+              NoteEntity(
+                id = 1,
+                uuid = "some-uuid",
+                title = "title",
+                content = "content",
+                createdAt = "2025-06-29T19:18:24.369Z",
+                lastEditedAt = "2025-06-29T19:18:24.369Z",
+                synced = true,
+                markAsDeleted = false,
+              )
+          )
+        )
+        assertEquals(
+          currentState.copy(
+            title = "",
+            content = "",
+            noteEntity =
+              NoteEntity(
+                id = 1,
+                uuid = "some-uuid",
+                title = "title",
+                content = "content",
+                createdAt = "2025-06-29T19:18:24.369Z",
+                lastEditedAt = "2025-06-29T19:18:24.369Z",
+                synced = true,
+                markAsDeleted = false,
+              ),
+            saved = null,
+            mode = Mode.ViewMode,
+          ),
+          awaitItem(),
+        )
+      }
     }
+  }
 
-    @Test
-    fun `test EditNoteStateMachine with UpdateTitle action`() = runTest {
-        turbineScope {
-            // Setup state machine
-            val stateMachineFactory = EditNoteStateMachineFactory(
-                noteMarkRepository = FakeFailureNoteRepository(),
-                noteId = ""
-            )
+  @Test
+  fun `test EditNoteStateMachine with UpdateTitle action`() = runTest {
+    turbineScope {
+      // Setup state machine
+      val stateMachineFactory =
+        EditNoteStateMachineFactory(
+          noteMarkRepository = FakeFailureNoteRepository(),
+          noteId = "",
+        )
 
-            // Setup state flow from state machine
-            val stateMachine = stateMachineFactory.launchIn(backgroundScope)
-            val flow = stateMachine.state
+      // Setup state flow from state machine
+      val stateMachine = stateMachineFactory.launchIn(backgroundScope)
+      val flow = stateMachine.state
 
-            // Start flow validation
-            flow.test {
-                val currentState = awaitItem()
-                assertEquals(EditNoteStateMachineFactory.defaultEditNoteState, currentState)
-                stateMachine.dispatch(EditNoteAction.UpdateTitle("some title"))
-                assertEquals(
-                    currentState.copy(
-                        title = "some title",
-                        content = "",
-                        noteEntity = null,
-                        saved = null,
-                        mode = Mode.ViewMode
-                    ),
-                    awaitItem()
-                )
-            }
-        }
+      // Start flow validation
+      flow.test {
+        val currentState = awaitItem()
+        assertEquals(EditNoteStateMachineFactory.defaultEditNoteState, currentState)
+        stateMachine.dispatch(EditNoteAction.UpdateTitle("some title"))
+        assertEquals(
+          currentState.copy(
+            title = "some title",
+            content = "",
+            noteEntity = null,
+            saved = null,
+            mode = Mode.ViewMode,
+          ),
+          awaitItem(),
+        )
+      }
     }
+  }
 
-    @Test
-    fun `test EditNoteStateMachine with UpdateContent action`() = runTest {
-        turbineScope {
-            // Setup state machine
-            val stateMachineFactory = EditNoteStateMachineFactory(
-                noteMarkRepository = FakeFailureNoteRepository(),
-                noteId = ""
-            )
+  @Test
+  fun `test EditNoteStateMachine with UpdateContent action`() = runTest {
+    turbineScope {
+      // Setup state machine
+      val stateMachineFactory =
+        EditNoteStateMachineFactory(
+          noteMarkRepository = FakeFailureNoteRepository(),
+          noteId = "",
+        )
 
-            // Setup state flow from state machine
-            val stateMachine = stateMachineFactory.launchIn(backgroundScope)
-            val flow = stateMachine.state
+      // Setup state flow from state machine
+      val stateMachine = stateMachineFactory.launchIn(backgroundScope)
+      val flow = stateMachine.state
 
-            // Start flow validation
-            flow.test {
-                val currentState = awaitItem()
-                assertEquals(EditNoteStateMachineFactory.defaultEditNoteState, currentState)
-                stateMachine.dispatch(EditNoteAction.UpdateContent("some content"))
-                assertEquals(
-                    currentState.copy(
-                        title = "",
-                        content = "some content",
-                        noteEntity = null,
-                        saved = null,
-                        mode = Mode.ViewMode
-                    ),
-                    awaitItem()
-                )
-            }
-        }
+      // Start flow validation
+      flow.test {
+        val currentState = awaitItem()
+        assertEquals(EditNoteStateMachineFactory.defaultEditNoteState, currentState)
+        stateMachine.dispatch(EditNoteAction.UpdateContent("some content"))
+        assertEquals(
+          currentState.copy(
+            title = "",
+            content = "some content",
+            noteEntity = null,
+            saved = null,
+            mode = Mode.ViewMode,
+          ),
+          awaitItem(),
+        )
+      }
     }
+  }
 
-    @Test
-    fun `test EditNoteStateMachine with LoadNote action is failure`() = runTest {
-        turbineScope {
-            // Setup state machine
-            val stateMachineFactory = EditNoteStateMachineFactory(
-                noteMarkRepository = FakeFailureNoteRepository(),
-                noteId = "1"
-            )
+  @Test
+  fun `test EditNoteStateMachine with LoadNote action is failure`() = runTest {
+    turbineScope {
+      // Setup state machine
+      val stateMachineFactory =
+        EditNoteStateMachineFactory(
+          noteMarkRepository = FakeFailureNoteRepository(),
+          noteId = "1",
+        )
 
-            // Setup state flow from state machine
-            val stateMachine = stateMachineFactory.launchIn(backgroundScope)
-            val flow = stateMachine.state
+      // Setup state flow from state machine
+      val stateMachine = stateMachineFactory.launchIn(backgroundScope)
+      val flow = stateMachine.state
 
-            // Start flow validation
-            flow.test {
-                val currentState = awaitItem()
-                assertEquals(EditNoteStateMachineFactory.defaultEditNoteState, currentState)
-                expectNoEvents()
-            }
-        }
+      // Start flow validation
+      flow.test {
+        val currentState = awaitItem()
+        assertEquals(EditNoteStateMachineFactory.defaultEditNoteState, currentState)
+        expectNoEvents()
+      }
     }
+  }
 }

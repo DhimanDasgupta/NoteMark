@@ -16,44 +16,45 @@ import org.koin.core.context.startKoin
 import timber.log.Timber
 
 class NoteMarkApp : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        if (BuildConfig.DEBUG) {
-            Timber.plant(tree = Timber.DebugTree())
-            enableStrictMode()
-            Composer.setDiagnosticStackTraceMode(ComposeStackTraceMode.SourceInformation)
-        } else {
-            Composer.setDiagnosticStackTraceMode(ComposeStackTraceMode.Auto)
-        }
-
-        val config = Configuration.Builder()
-            .setMinimumLoggingLevel(if (BuildConfig.DEBUG) DEBUG else ERROR)
-            .build()
-
-        WorkManager.initialize(context = this, configuration = config)
-
-        startKoin {
-            androidLogger()
-            androidContext(androidContext = this@NoteMarkApp)
-            modules(modules = appModule)
-        }
+  override fun onCreate() {
+    super.onCreate()
+    if (BuildConfig.DEBUG) {
+      Timber.plant(tree = Timber.DebugTree())
+      enableStrictMode()
+      Composer.setDiagnosticStackTraceMode(ComposeStackTraceMode.SourceInformation)
+    } else {
+      Composer.setDiagnosticStackTraceMode(ComposeStackTraceMode.Auto)
     }
 
-    private fun enableStrictMode() {
-        StrictMode.setVmPolicy(
-            StrictMode.VmPolicy.Builder()
-                .detectAll()
-                .penaltyLog()
-                //.penaltyDeath() // Koin causes crash on this
-                .build()
-        )
+    val config =
+      Configuration.Builder()
+        .setMinimumLoggingLevel(if (BuildConfig.DEBUG) DEBUG else ERROR)
+        .build()
 
-        StrictMode.setThreadPolicy(
-            StrictMode.ThreadPolicy.Builder()
-                .detectAll()
-                .penaltyLog()
-                //.penaltyDeath()  // Koin causes crash on this
-                .build()
-        )
+    WorkManager.initialize(context = this, configuration = config)
+
+    startKoin {
+      androidLogger()
+      androidContext(androidContext = this@NoteMarkApp)
+      modules(modules = appModule)
     }
+  }
+
+  private fun enableStrictMode() {
+    StrictMode.setVmPolicy(
+      StrictMode.VmPolicy.Builder()
+        .detectAll()
+        .penaltyLog()
+        // .penaltyDeath() // Koin causes crash on this
+        .build()
+    )
+
+    StrictMode.setThreadPolicy(
+      StrictMode.ThreadPolicy.Builder()
+        .detectAll()
+        .penaltyLog()
+        // .penaltyDeath()  // Koin causes crash on this
+        .build()
+    )
+  }
 }

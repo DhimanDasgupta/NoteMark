@@ -13,53 +13,57 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
-val LightColorScheme = lightColorScheme(
+val LightColorScheme =
+  lightColorScheme(
     primary = Primary,
     surface = Surface,
     surfaceContainerLowest = SurfaceLowest,
     background = Background,
     onSurface = OnSurface,
     onSurfaceVariant = OnSurfaceVariant,
-    error = Error
-)
+    error = Error,
+  )
 
-private val DarkColorScheme = darkColorScheme(
+private val DarkColorScheme =
+  darkColorScheme(
     primary = PrimaryDark,
     surface = SurfaceDark,
     surfaceContainerLowest = SurfaceLowestDark,
     background = BackgroundDark,
     onSurface = OnSurfaceDark,
     onSurfaceVariant = OnSurfaceVariantDark,
-    error = ErrorDark
-)
+    error = ErrorDark,
+  )
 
-val Shapes = Shapes(
+val Shapes =
+  Shapes(
     extraSmall = RoundedCornerShape(5.dp),
-    medium = RoundedCornerShape(15.dp)
-)
+    medium = RoundedCornerShape(15.dp),
+  )
 
 @Composable
 fun NoteMarkTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
+  darkTheme: Boolean = isSystemInDarkTheme(),
+  // Dynamic color is available on Android 12+
+  dynamicColor: Boolean = true,
+  content: @Composable () -> Unit,
 ) {
-    // Ignoring colorScheme
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
+  // Ignoring colorScheme
+  val colorScheme =
+    when {
+      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        val context = LocalContext.current
+        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+      }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+      darkTheme -> DarkColorScheme
+      else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        shapes = Shapes,
-        content = content
-    )
+  MaterialTheme(
+    colorScheme = colorScheme,
+    typography = Typography,
+    shapes = Shapes,
+    content = content,
+  )
 }

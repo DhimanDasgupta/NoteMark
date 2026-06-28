@@ -13,18 +13,16 @@ import com.dhimandasgupta.notemark.app.nav.NoteMarkRoot
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            NoteMarkTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NoteMarkRoot(
-                        modifier = Modifier.consumeWindowInsets(paddingValues = innerPadding)
-                    )
-                }
-            }
+  override fun onCreate(savedInstanceState: Bundle?) {
+    installSplashScreen()
+    super.onCreate(savedInstanceState)
+    enableEdgeToEdge()
+    setContent {
+      NoteMarkTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+          NoteMarkRoot(modifier = Modifier.consumeWindowInsets(paddingValues = innerPadding))
         }
+      }
     }
+  }
 }

@@ -1,0 +1,8 @@
+# kempt configuration: https://github.com/ZacSweers/kempt
+# Run `kempt --help` to see all options.
+
+[ktfmt]
+version = "0.63"
+
+[hook]
+mode = "format"   # format | check

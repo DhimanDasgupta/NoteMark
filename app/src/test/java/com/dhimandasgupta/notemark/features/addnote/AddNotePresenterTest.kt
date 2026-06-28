@@ -11,128 +11,133 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class AddNotePresenterTest {
-    @Test
-    fun `test presenter default state`() = runTest {
-        turbineScope {
-            // Setup Presenter
-            val presenter = AddNotePresenter(
-                addNoteStateMachineFactory = AddNoteStateMachineFactory(
-                    noteMarkRepository = FakeSuccessfulNoteRepository()
-                )
-            )
+  @Test
+  fun `test presenter default state`() = runTest {
+    turbineScope {
+      // Setup Presenter
+      val presenter =
+        AddNotePresenter(
+          addNoteStateMachineFactory =
+            AddNoteStateMachineFactory(noteMarkRepository = FakeSuccessfulNoteRepository())
+        )
 
-            // Setup uiModel flow
-            val flow = moleculeFlow(mode = RecompositionMode.Immediate) {
-                presenter.uiModel()
-            }
-
-            // Start flow validation
-            flow.test {
-                val addUiModel = awaitItem()
-                assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
-            }
+      // Setup uiModel flow
+      val flow =
+        moleculeFlow(mode = RecompositionMode.Immediate) {
+          presenter.uiModel()
         }
+
+      // Start flow validation
+      flow.test {
+        val addUiModel = awaitItem()
+        assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
+      }
+    }
+  }
+
+  @Test
+  fun `test presenter state when title is entered`() = runTest {
+    turbineScope {
+      // Setup Presenter
+      val presenter =
+        AddNotePresenter(
+          addNoteStateMachineFactory =
+            AddNoteStateMachineFactory(noteMarkRepository = FakeSuccessfulNoteRepository())
+        )
+
+      // Setup uiModel flow
+      val flow = moleculeFlow(mode = RecompositionMode.Immediate) { presenter.uiModel() }
+
+      // Start flow validation
+      flow.test {
+        val addUiModel = awaitItem()
+        assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
+        presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
+        assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
+      }
+    }
+  }
+
+  @Test
+  fun `test presenter state when title and content are entered`() = runTest {
+    turbineScope {
+      // Setup Presenter
+      val presenter =
+        AddNotePresenter(
+          addNoteStateMachineFactory =
+            AddNoteStateMachineFactory(noteMarkRepository = FakeSuccessfulNoteRepository())
+        )
+
+      // Setup uiModel flow
+      val flow = moleculeFlow(mode = RecompositionMode.Immediate) { presenter.uiModel() }
+
+      // Start flow validation
+      flow.test {
+        val addUiModel = awaitItem()
+        assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
+        presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
+        assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
+        presenter.dispatchAction(AddNoteAction.UpdateContent("Some content"))
+        assertEquals(addUiModel.copy(title = "Some title", content = "Some content"), awaitItem())
+      }
+    }
+  }
+
+  @Test
+  fun `test presenter state when title and content are entered and then saved successfully`() =
+    runTest {
+      turbineScope {
+        // Setup Presenter
+        val presenter =
+          AddNotePresenter(
+            addNoteStateMachineFactory =
+              AddNoteStateMachineFactory(noteMarkRepository = FakeSuccessfulNoteRepository())
+          )
+
+        // Setup uiModel flow
+        val flow = moleculeFlow(mode = RecompositionMode.Immediate) { presenter.uiModel() }
+
+        // Start flow validation
+        flow.test {
+          val addUiModel = awaitItem()
+          assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
+          presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
+          assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
+          presenter.dispatchAction(AddNoteAction.UpdateContent("Some content"))
+          assertEquals(addUiModel.copy(title = "Some title", content = "Some content"), awaitItem())
+          presenter.dispatchAction(AddNoteAction.Save)
+          assertEquals(
+            addUiModel.copy(title = "Some title", content = "Some content", saved = true),
+            awaitItem(),
+          )
+        }
+      }
     }
 
-    @Test
-    fun `test presenter state when title is entered`() = runTest {
-        turbineScope {
-            // Setup Presenter
-            val presenter = AddNotePresenter(
-                addNoteStateMachineFactory = AddNoteStateMachineFactory(
-                    noteMarkRepository = FakeSuccessfulNoteRepository()
-                )
-            )
+  @Test
+  fun `test presenter state when title and content are entered and then save failed`() = runTest {
+    turbineScope {
+      // Setup Presenter
+      val presenter =
+        AddNotePresenter(
+          addNoteStateMachineFactory =
+            AddNoteStateMachineFactory(noteMarkRepository = FakeFailureNoteRepository())
+        )
 
-            // Setup uiModel flow
-            val flow = moleculeFlow(mode = RecompositionMode.Immediate) { presenter.uiModel() }
+      // Setup uiModel flow
+      val flow = moleculeFlow(mode = RecompositionMode.Immediate) { presenter.uiModel() }
 
-            // Start flow validation
-            flow.test {
-                val addUiModel = awaitItem()
-                assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
-                presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
-                assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
-            }
-        }
+      // Start flow validation
+      flow.test {
+        val addUiModel = awaitItem()
+        assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
+        presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
+        assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
+        presenter.dispatchAction(AddNoteAction.UpdateContent("Some content"))
+        assertEquals(addUiModel.copy(title = "Some title", content = "Some content"), awaitItem())
+        presenter.dispatchAction(AddNoteAction.Save)
+        expectNoEvents()
+      }
     }
-
-    @Test
-    fun `test presenter state when title and content are entered`() = runTest {
-        turbineScope {
-            // Setup Presenter
-            val presenter = AddNotePresenter(
-                addNoteStateMachineFactory = AddNoteStateMachineFactory(
-                    noteMarkRepository = FakeSuccessfulNoteRepository()
-                )
-            )
-
-            // Setup uiModel flow
-            val flow = moleculeFlow(mode = RecompositionMode.Immediate) { presenter.uiModel() }
-
-            // Start flow validation
-            flow.test {
-                val addUiModel = awaitItem()
-                assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
-                presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
-                assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
-                presenter.dispatchAction(AddNoteAction.UpdateContent("Some content"))
-                assertEquals(addUiModel.copy(title = "Some title", content = "Some content"), awaitItem())
-            }
-        }
-    }
-
-    @Test
-    fun `test presenter state when title and content are entered and then saved successfully`() = runTest {
-        turbineScope {
-            // Setup Presenter
-            val presenter = AddNotePresenter(
-                addNoteStateMachineFactory = AddNoteStateMachineFactory(
-                    noteMarkRepository = FakeSuccessfulNoteRepository()
-                )
-            )
-
-            // Setup uiModel flow
-            val flow = moleculeFlow(mode = RecompositionMode.Immediate) { presenter.uiModel() }
-
-            // Start flow validation
-            flow.test {
-                val addUiModel = awaitItem()
-                assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
-                presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
-                assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
-                presenter.dispatchAction(AddNoteAction.UpdateContent("Some content"))
-                assertEquals(addUiModel.copy(title = "Some title", content = "Some content"), awaitItem())
-                presenter.dispatchAction(AddNoteAction.Save)
-                assertEquals(addUiModel.copy(title = "Some title", content = "Some content", saved = true), awaitItem())
-            }
-        }
-    }
-
-    @Test
-    fun `test presenter state when title and content are entered and then save failed`() = runTest {
-        turbineScope {
-            // Setup Presenter
-            val presenter = AddNotePresenter(
-                addNoteStateMachineFactory = AddNoteStateMachineFactory(
-                    noteMarkRepository = FakeFailureNoteRepository()
-                )
-            )
-
-            // Setup uiModel flow
-            val flow = moleculeFlow(mode = RecompositionMode.Immediate) { presenter.uiModel() }
-
-            // Start flow validation
-            flow.test {
-                val addUiModel = awaitItem()
-                assertEquals(AddNoteUiModel.defaultOrEmpty, addUiModel)
-                presenter.dispatchAction(AddNoteAction.UpdateTitle("Some title"))
-                assertEquals(addUiModel.copy(title = "Some title"), awaitItem())
-                presenter.dispatchAction(AddNoteAction.UpdateContent("Some content"))
-                assertEquals(addUiModel.copy(title = "Some title", content = "Some content"), awaitItem())
-                presenter.dispatchAction(AddNoteAction.Save)
-                expectNoEvents()
-            }
-        }
-    }
+  }
 }

@@ -22,59 +22,63 @@ import org.koin.java.KoinJavaComponent.get
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun EntryProviderScope<NavKey>.NoteListEntryBuilder(
-    modifier: Modifier,
-    navigateToLauncherIfLoggedOut: () -> Unit,
-    navigateToAdd: () -> Unit,
-    navigateToEdit: (String) -> Unit,
-    navigateToSettings: () -> Unit
+  modifier: Modifier,
+  navigateToLauncherIfLoggedOut: () -> Unit,
+  navigateToAdd: () -> Unit,
+  navigateToEdit: (String) -> Unit,
+  navigateToSettings: () -> Unit,
 ) {
-    entry<NoteListNavKey>(
-        metadata = ListDetailSceneStrategy.listPane {
-            NoNoteSelectedPane()
-        }
-    ) {
-        val noteListPresenter: NoteListPresenter = retain { get(clazz = NoteListPresenter::class.java) }
+  entry<NoteListNavKey>(
+    metadata =
+      ListDetailSceneStrategy.listPane {
+        NoNoteSelectedPane()
+      }
+  ) {
+    val noteListPresenter: NoteListPresenter = retain { get(clazz = NoteListPresenter::class.java) }
 
-        NoteListEntry(
-            modifier = modifier,
-            noteListPresenter = noteListPresenter,
-            navigateToLauncherIfLoggedOut = navigateToLauncherIfLoggedOut,
-            navigateToAdd = navigateToAdd,
-            navigateToEdit = navigateToEdit,
-            navigateToSettings = navigateToSettings
-        )
-    }
+    NoteListEntry(
+      modifier = modifier,
+      noteListPresenter = noteListPresenter,
+      navigateToLauncherIfLoggedOut = navigateToLauncherIfLoggedOut,
+      navigateToAdd = navigateToAdd,
+      navigateToEdit = navigateToEdit,
+      navigateToSettings = navigateToSettings,
+    )
+  }
 }
 
 @Composable
 private fun NoteListEntry(
-    modifier: Modifier = Modifier,
-    noteListPresenter: NoteListPresenter,
-    navigateToLauncherIfLoggedOut: () -> Unit,
-    navigateToAdd: () -> Unit,
-    navigateToEdit: (String) -> Unit,
-    navigateToSettings: () -> Unit
+  modifier: Modifier = Modifier,
+  noteListPresenter: NoteListPresenter,
+  navigateToLauncherIfLoggedOut: () -> Unit,
+  navigateToAdd: () -> Unit,
+  navigateToEdit: (String) -> Unit,
+  navigateToSettings: () -> Unit,
 ) {
-    var noteListUiModel by rememberSerializable { mutableStateOf(value = NoteListUiModel.defaultOrEmpty) }
-    val noteListAction by rememberUpdatedState(newValue = noteListPresenter::dispatchAction)
+  var noteListUiModel by rememberSerializable {
+    mutableStateOf(value = NoteListUiModel.defaultOrEmpty)
+  }
+  val noteListAction by rememberUpdatedState(newValue = noteListPresenter::dispatchAction)
 
-    LaunchedEffect(key1 = Unit) {
-        launchMolecule(mode = RecompositionMode.Immediate) {
-            noteListPresenter.uiModel()
-        }.collectLatest { model ->
-            noteListUiModel = model
-        }
-    }
+  LaunchedEffect(key1 = Unit) {
+    launchMolecule(mode = RecompositionMode.Immediate) {
+        noteListPresenter.uiModel()
+      }
+      .collectLatest { model ->
+        noteListUiModel = model
+      }
+  }
 
-    // UI data, actions, navigation and events passing to UI
-    NoteListPane(
-        modifier = modifier,
-        noteListUiModel = { noteListUiModel },
-        noteListAction = { action -> noteListAction(action) },
-        onNoteClicked = { uuid -> navigateToEdit(uuid) },
-        navigateToLauncherIfLoggedOut = { navigateToLauncherIfLoggedOut() },
-        onFabClicked = { navigateToAdd() },
-        onSettingsClicked = { navigateToSettings() },
-        onProfileClicked = {}
-    )
+  // UI data, actions, navigation and events passing to UI
+  NoteListPane(
+    modifier = modifier,
+    noteListUiModel = { noteListUiModel },
+    noteListAction = { action -> noteListAction(action) },
+    onNoteClicked = { uuid -> navigateToEdit(uuid) },
+    navigateToLauncherIfLoggedOut = { navigateToLauncherIfLoggedOut() },
+    onFabClicked = { navigateToAdd() },
+    onSettingsClicked = { navigateToSettings() },
+    onProfileClicked = {},
+  )
 }

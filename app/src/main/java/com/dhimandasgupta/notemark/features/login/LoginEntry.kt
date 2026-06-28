@@ -19,46 +19,47 @@ import org.koin.java.KoinJavaComponent.get
 
 @Composable
 fun EntryProviderScope<NavKey>.LoginEntryBuilder(
-    modifier: Modifier,
-    navigateToRegistration: () -> Unit,
-    navigateToAfterLogin: () -> Unit
+  modifier: Modifier,
+  navigateToRegistration: () -> Unit,
+  navigateToAfterLogin: () -> Unit,
 ) {
-    entry<LoginNavKey> {
-        val loginPresenter: LoginPresenter = retain { get(clazz = LoginPresenter::class.java) }
+  entry<LoginNavKey> {
+    val loginPresenter: LoginPresenter = retain { get(clazz = LoginPresenter::class.java) }
 
-        LoginEntry(
-            modifier = modifier,
-            loginPresenter = loginPresenter,
-            navigateToRegistration = navigateToRegistration,
-            navigateToAfterLogin = navigateToAfterLogin
-        )
-    }
+    LoginEntry(
+      modifier = modifier,
+      loginPresenter = loginPresenter,
+      navigateToRegistration = navigateToRegistration,
+      navigateToAfterLogin = navigateToAfterLogin,
+    )
+  }
 }
 
 @Composable
 private fun LoginEntry(
-    modifier: Modifier = Modifier,
-    loginPresenter: LoginPresenter,
-    navigateToRegistration: () -> Unit,
-    navigateToAfterLogin: () -> Unit
+  modifier: Modifier = Modifier,
+  loginPresenter: LoginPresenter,
+  navigateToRegistration: () -> Unit,
+  navigateToAfterLogin: () -> Unit,
 ) {
-    var loginUiModel by rememberSerializable { mutableStateOf(value = LoginUiModel.defaultOrEmpty) }
-    val loginEvents by rememberUpdatedState(newValue = loginPresenter::dispatchAction)
+  var loginUiModel by rememberSerializable { mutableStateOf(value = LoginUiModel.defaultOrEmpty) }
+  val loginEvents by rememberUpdatedState(newValue = loginPresenter::dispatchAction)
 
-    LaunchedEffect(key1 = Unit) {
-        launchMolecule(mode = RecompositionMode.Immediate) {
-            loginPresenter.uiModel()
-        }.collectLatest { model ->
-            loginUiModel = model
-        }
-    }
+  LaunchedEffect(key1 = Unit) {
+    launchMolecule(mode = RecompositionMode.Immediate) {
+        loginPresenter.uiModel()
+      }
+      .collectLatest { model ->
+        loginUiModel = model
+      }
+  }
 
-    // UI data, actions, navigation and events passing to UI
-    LoginPane(
-        modifier = modifier,
-        loginUiModel = { loginUiModel },
-        loginAction = { action -> loginEvents(action) },
-        navigateToRegistration = { navigateToRegistration() },
-        navigateToAfterLogin = { navigateToAfterLogin() },
-    )
+  // UI data, actions, navigation and events passing to UI
+  LoginPane(
+    modifier = modifier,
+    loginUiModel = { loginUiModel },
+    loginAction = { action -> loginEvents(action) },
+    navigateToRegistration = { navigateToRegistration() },
+    navigateToAfterLogin = { navigateToAfterLogin() },
+  )
 }

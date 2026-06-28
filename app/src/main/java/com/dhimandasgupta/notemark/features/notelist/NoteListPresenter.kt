@@ -30,130 +30,131 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 object NoteEntityUiModelImmutableListSerializer :
-    ImmutableListSerializer<NoteEntityUiModel>(NoteEntityUiModel.serializer())
+  ImmutableListSerializer<NoteEntityUiModel>(NoteEntityUiModel.serializer())
+
 @Serializable
 @Immutable
 data class NoteListUiModel(
-    val userName: String? = null,
-    val loading: Boolean = true,
-    @Serializable(with = NoteEntityUiModelImmutableListSerializer::class)
-    val noteEntities: ImmutableList<NoteEntityUiModel>,
-    val noteLongClickedUuid: String = "",
-    val showSyncProgress: Boolean = false,
-    val isConnected: Boolean = false
+  val userName: String? = null,
+  val loading: Boolean = true,
+  @Serializable(with = NoteEntityUiModelImmutableListSerializer::class)
+  val noteEntities: ImmutableList<NoteEntityUiModel>,
+  val noteLongClickedUuid: String = "",
+  val showSyncProgress: Boolean = false,
+  val isConnected: Boolean = false,
 ) {
-    companion object {
-        val defaultOrEmpty = defaultNoteListUiModel
-    }
+  companion object {
+    val defaultOrEmpty = defaultNoteListUiModel
+  }
 }
 
 @Serializable
 @Immutable
 data class NoteEntityUiModel(
-    val id: Long,
-    val title: String,
-    val content: String,
-    val createdAt: String,
-    val lastEditedAt: String,
-    val uuid: String,
-    val synced: Boolean,
-    val markAsDeleted: Boolean,
+  val id: Long,
+  val title: String,
+  val content: String,
+  val createdAt: String,
+  val lastEditedAt: String,
+  val uuid: String,
+  val synced: Boolean,
+  val markAsDeleted: Boolean,
 )
 
 private val defaultNoteListUiModel = NoteListUiModel(noteEntities = persistentListOf())
 
 @Stable
 class NoteListPresenter(
-    private val appStateMachineFactory: AppStateMachineFactory,
-    private val noteListStateMachineFactory: NoteListStateMachineFactory
+  private val appStateMachineFactory: AppStateMachineFactory,
+  private val noteListStateMachineFactory: NoteListStateMachineFactory,
 ) {
-    private val appActions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
-    private val actions = MutableSharedFlow<NoteListAction>(extraBufferCapacity = 10)
+  private val appActions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
+  private val actions = MutableSharedFlow<NoteListAction>(extraBufferCapacity = 10)
 
-    @Composable
-    fun uiModel(): NoteListUiModel {
-        var noteListUiModel by remember { mutableStateOf(value = defaultNoteListUiModel) }
+  @Composable
+  fun uiModel(): NoteListUiModel {
+    var noteListUiModel by remember { mutableStateOf(value = defaultNoteListUiModel) }
 
-        // Receives the State from the StateMachine
-        LaunchedEffect(key1 = Unit) {
-            val appStateMachine = appStateMachineFactory.launchIn(this)
-            val noteListStateMachine = noteListStateMachineFactory.launchIn(this)
+    // Receives the State from the StateMachine
+    LaunchedEffect(key1 = Unit) {
+      val appStateMachine = appStateMachineFactory.launchIn(this)
+      val noteListStateMachine = noteListStateMachineFactory.launchIn(this)
 
-            launch {
-                combine(
-                    flow = appStateMachine.state.filterIsInstance<LoggedIn>(),
-                    flow2 = noteListStateMachine.state
-                ) { appState, noteListState ->
-                    mapToNoteListUiModel(
-                        loggedIn = appState,
-                        noteListState = noteListState
-                    )
-                }
-                    .onStart { emit(value = NoteListUiModel.defaultOrEmpty) }
-                    .cancellable()
-                    .catch { throwable ->
-                        if (throwable is CancellationException) throw throwable
-                        // else can can be something like page level error etc.
-                    }
-                    .flowOn(context = Dispatchers.Default)
-                    .collectLatest { mappedNoteListUiModel ->
-                        noteListUiModel = mappedNoteListUiModel
-                    }
-            }
+      launch {
+        combine(
+            flow = appStateMachine.state.filterIsInstance<LoggedIn>(),
+            flow2 = noteListStateMachine.state,
+          ) { appState, noteListState ->
+            mapToNoteListUiModel(
+              loggedIn = appState,
+              noteListState = noteListState,
+            )
+          }
+          .onStart { emit(value = NoteListUiModel.defaultOrEmpty) }
+          .cancellable()
+          .catch { throwable ->
+            if (throwable is CancellationException) throw throwable
+            // else can can be something like page level error etc.
+          }
+          .flowOn(context = Dispatchers.Default)
+          .collectLatest { mappedNoteListUiModel ->
+            noteListUiModel = mappedNoteListUiModel
+          }
+      }
 
-            launch {
-                appActions.collect { appAction ->
-                    appStateMachine.dispatch(appAction)
-                }
-            }
-
-            launch {
-                actions.collect { noteListAction ->
-                    noteListStateMachine.dispatch(noteListAction)
-                }
-            }
+      launch {
+        appActions.collect { appAction ->
+          appStateMachine.dispatch(appAction)
         }
+      }
 
-        return noteListUiModel
+      launch {
+        actions.collect { noteListAction ->
+          noteListStateMachine.dispatch(noteListAction)
+        }
+      }
     }
 
-    fun dispatchAction(action: NoteListAction) =
-        actions.tryEmit(action)
+    return noteListUiModel
+  }
 
-    fun dispatchAppAction(action: AppAction) =
-        appActions.tryEmit(action)
+  fun dispatchAction(action: NoteListAction) = actions.tryEmit(action)
+
+  fun dispatchAppAction(action: AppAction) = appActions.tryEmit(action)
 }
 
 private fun mapToNoteListUiModel(
-    loggedIn: LoggedIn,
-    noteListState: NoteListState
-) = NoteListUiModel(
+  loggedIn: LoggedIn,
+  noteListState: NoteListState,
+) =
+  NoteListUiModel(
     userName = loggedIn.user.userName,
     loading = noteListState.loading,
-    noteEntities = if (noteListState is NoteListState.NoteListStateWithNotes) {
-        noteListState
-            .notes
-            .map { note ->
-                NoteEntityUiModel(
-                    id = note.id,
-                    title = note.title,
-                    content = note.content,
-                    createdAt = note.createdAt,
-                    lastEditedAt = note.lastEditedAt,
-                    uuid = note.uuid,
-                    synced = note.synced,
-                    markAsDeleted = note.markAsDeleted
-                )
-            }
-            .toPersistentList()
-    } else {
+    noteEntities =
+      if (noteListState is NoteListState.NoteListStateWithNotes) {
+        noteListState.notes
+          .map { note ->
+            NoteEntityUiModel(
+              id = note.id,
+              title = note.title,
+              content = note.content,
+              createdAt = note.createdAt,
+              lastEditedAt = note.lastEditedAt,
+              uuid = note.uuid,
+              synced = note.synced,
+              markAsDeleted = note.markAsDeleted,
+            )
+          }
+          .toPersistentList()
+      } else {
         persistentListOf()
-    },
-    noteLongClickedUuid = if (noteListState is NoteListState.NoteListStateWithNotes) {
+      },
+    noteLongClickedUuid =
+      if (noteListState is NoteListState.NoteListStateWithNotes) {
         noteListState.longClickedNoteUuid
-    } else {
+      } else {
         ""
-    },
+      },
     showSyncProgress = loggedIn.sync?.syncing ?: false,
-    isConnected = loggedIn.connectionState == ConnectionState.Available
-)
+    isConnected = loggedIn.connectionState == ConnectionState.Available,
+  )

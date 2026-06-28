@@ -8,9 +8,9 @@ import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOW
 
 // Enum to represent the different layout types
 enum class DeviceLayoutType {
-    PHONE_PORTRAIT,
-    PHONE_LANDSCAPE,
-    TABLET_LAYOUT
+  PHONE_PORTRAIT,
+  PHONE_LANDSCAPE,
+  TABLET_LAYOUT,
 }
 
 /**
@@ -20,28 +20,39 @@ enum class DeviceLayoutType {
  */
 @Composable
 fun getDeviceLayoutType(): DeviceLayoutType {
-    val windowAdaptiveInfo = currentWindowAdaptiveInfoV2()
+  val windowAdaptiveInfo = currentWindowAdaptiveInfoV2()
 
-    return remember(key1 = windowAdaptiveInfo) {
-        val isExpandedWidth = windowAdaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(widthDpBreakpoint = WIDTH_DP_EXPANDED_LOWER_BOUND)
-        val isMediumWidth = windowAdaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(widthDpBreakpoint = WIDTH_DP_MEDIUM_LOWER_BOUND)
-        val isCompactWidth = !isMediumWidth && !isExpandedWidth
+  return remember(key1 = windowAdaptiveInfo) {
+    val isExpandedWidth =
+      windowAdaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(
+        widthDpBreakpoint = WIDTH_DP_EXPANDED_LOWER_BOUND
+      )
+    val isMediumWidth =
+      windowAdaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(
+        widthDpBreakpoint = WIDTH_DP_MEDIUM_LOWER_BOUND
+      )
+    val isCompactWidth = !isMediumWidth && !isExpandedWidth
 
-        val isExpandedHeight = windowAdaptiveInfo.windowSizeClass.isHeightAtLeastBreakpoint(heightDpBreakpoint = WIDTH_DP_EXPANDED_LOWER_BOUND)
-        val isMediumHeight = windowAdaptiveInfo.windowSizeClass.isHeightAtLeastBreakpoint(heightDpBreakpoint = WIDTH_DP_MEDIUM_LOWER_BOUND)
+    val isExpandedHeight =
+      windowAdaptiveInfo.windowSizeClass.isHeightAtLeastBreakpoint(
+        heightDpBreakpoint = WIDTH_DP_EXPANDED_LOWER_BOUND
+      )
+    val isMediumHeight =
+      windowAdaptiveInfo.windowSizeClass.isHeightAtLeastBreakpoint(
+        heightDpBreakpoint = WIDTH_DP_MEDIUM_LOWER_BOUND
+      )
 
-        when {
-            ((isMediumWidth || isExpandedWidth) &&
-                    (isMediumHeight || isExpandedHeight)) -> {
-                DeviceLayoutType.TABLET_LAYOUT
-            }
-            else -> {
-                if (isCompactWidth) {
-                    DeviceLayoutType.PHONE_PORTRAIT
-                } else {
-                    DeviceLayoutType.PHONE_LANDSCAPE
-                }
-            }
+    when {
+      ((isMediumWidth || isExpandedWidth) && (isMediumHeight || isExpandedHeight)) -> {
+        DeviceLayoutType.TABLET_LAYOUT
+      }
+      else -> {
+        if (isCompactWidth) {
+          DeviceLayoutType.PHONE_PORTRAIT
+        } else {
+          DeviceLayoutType.PHONE_LANDSCAPE
         }
+      }
     }
+  }
 }

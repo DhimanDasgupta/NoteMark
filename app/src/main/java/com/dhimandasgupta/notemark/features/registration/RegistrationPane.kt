@@ -48,6 +48,10 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
+import com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType
+import com.dhimandasgupta.notemark.common.extensions.compose.alignToSafeDrawing
+import com.dhimandasgupta.notemark.common.extensions.compose.getDeviceLayoutType
+import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.EmailEntered
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.PasswordEntered
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.PasswordFiledInFocus
@@ -58,10 +62,6 @@ import com.dhimandasgupta.notemark.features.registration.RegistrationAction.User
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledInFocus
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledLostFocus
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
-import com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType
-import com.dhimandasgupta.notemark.common.extensions.compose.alignToSafeDrawing
-import com.dhimandasgupta.notemark.common.extensions.compose.getDeviceLayoutType
-import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkPasswordTextField
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTextField
@@ -72,451 +72,449 @@ import kotlinx.coroutines.flow.debounce
 
 @Composable
 internal fun RegistrationPane(
-    modifier: Modifier = Modifier,
-    registrationUiModel: () -> RegistrationUiModel,
-    navigateToLogin: () -> Unit = {},
-    registrationAction: (RegistrationAction) -> Unit = {}
+  modifier: Modifier = Modifier,
+  registrationUiModel: () -> RegistrationUiModel,
+  navigateToLogin: () -> Unit = {},
+  registrationAction: (RegistrationAction) -> Unit = {},
 ) {
-    val context = LocalActivity.current
-    SideEffect { context?.setDarkStatusBarIcons(false) }
+  val context = LocalActivity.current
+  SideEffect { context?.setDarkStatusBarIcons(false) }
 
-    val updatedRegistrationUiModel by rememberUpdatedState(newValue = registrationUiModel)
+  val updatedRegistrationUiModel by rememberUpdatedState(newValue = registrationUiModel)
 
-    Box(
-        modifier = modifier
-            .background(color = colorResource(id = R.color.splash_blue))
-            .fillMaxSize()
-    ) {
-        val layoutType = getDeviceLayoutType()
+  Box(
+    modifier = modifier.background(color = colorResource(id = R.color.splash_blue)).fillMaxSize()
+  ) {
+    val layoutType = getDeviceLayoutType()
 
-        when (layoutType) {
-            DeviceLayoutType.PHONE_PORTRAIT -> PhonePortraitLayout(
-                modifier = Modifier,
-                registrationUiModel = updatedRegistrationUiModel,
-                registrationAction = registrationAction,
-                navigateToLogin = navigateToLogin
-            )
-            DeviceLayoutType.PHONE_LANDSCAPE -> PhoneLandscapeLayout(
-                modifier = Modifier,
-                registrationUiModel = updatedRegistrationUiModel,
-                registrationAction = registrationAction,
-                navigateToLogin = navigateToLogin
-            )
-            else -> TabletLayout(
-                modifier = Modifier,
-                registrationUiModel = updatedRegistrationUiModel,
-                registrationAction = registrationAction,
-                navigateToLogin = navigateToLogin
-            )
-        }
+    when (layoutType) {
+      DeviceLayoutType.PHONE_PORTRAIT ->
+        PhonePortraitLayout(
+          modifier = Modifier,
+          registrationUiModel = updatedRegistrationUiModel,
+          registrationAction = registrationAction,
+          navigateToLogin = navigateToLogin,
+        )
+      DeviceLayoutType.PHONE_LANDSCAPE ->
+        PhoneLandscapeLayout(
+          modifier = Modifier,
+          registrationUiModel = updatedRegistrationUiModel,
+          registrationAction = registrationAction,
+          navigateToLogin = navigateToLogin,
+        )
+      else ->
+        TabletLayout(
+          modifier = Modifier,
+          registrationUiModel = updatedRegistrationUiModel,
+          registrationAction = registrationAction,
+          navigateToLogin = navigateToLogin,
+        )
     }
+  }
 }
 
 @Composable
 private fun PhoneLandscapeLayout(
-    modifier: Modifier = Modifier,
-    registrationUiModel: () -> RegistrationUiModel,
-    registrationAction: (RegistrationAction) -> Unit = {},
-    navigateToLogin: () -> Unit = {}
+  modifier: Modifier = Modifier,
+  registrationUiModel: () -> RegistrationUiModel,
+  registrationAction: (RegistrationAction) -> Unit = {},
+  navigateToLogin: () -> Unit = {},
 ) {
-    Row(
-        modifier = modifier
-            .padding(
-                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+  Row(
+    modifier =
+      modifier
+        .padding(top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding())
+        .clip(
+          shape =
+            RoundedCornerShape(
+              topStart = 16.dp,
+              topEnd = 16.dp,
             )
-            .clip(
-                shape = RoundedCornerShape(
-                    topStart = 16.dp,
-                    topEnd = 16.dp
-                )
-            )
-            .background(color = colorScheme.surfaceContainerLowest)
-            .fillMaxSize()
-            .padding(all = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        LeftPane(
-            modifier = Modifier
-                .safeContentPadding()
-                .fillMaxSize(fraction = 0.4f)
-                .align(alignment = Alignment.CenterVertically)
         )
-        RightPane(
-            modifier = Modifier
-                .padding(
-                    top = WindowInsets.systemBars.asPaddingValues()
-                        .calculateTopPadding(),
-                    start = WindowInsets
-                        .systemBars.union(insets = WindowInsets.displayCutout)
-                        .asPaddingValues()
-                        .calculateLeftPadding(LayoutDirection.Ltr),
-                    end = WindowInsets
-                        .systemBars.union(insets = WindowInsets.displayCutout)
-                        .asPaddingValues()
-                        .calculateRightPadding(LayoutDirection.Ltr)
-                )
-                .verticalScroll(state = rememberScrollState()),
-            navigateToLogin = navigateToLogin,
-            registrationUiModel = registrationUiModel,
-            registrationAction = registrationAction
-        )
-    }
+        .background(color = colorScheme.surfaceContainerLowest)
+        .fillMaxSize()
+        .padding(all = 16.dp),
+    horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+    verticalAlignment = Alignment.Top,
+  ) {
+    LeftPane(
+      modifier =
+        Modifier.safeContentPadding()
+          .fillMaxSize(fraction = 0.4f)
+          .align(alignment = Alignment.CenterVertically)
+    )
+    RightPane(
+      modifier =
+        Modifier.padding(
+            top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+            start =
+              WindowInsets.systemBars
+                .union(insets = WindowInsets.displayCutout)
+                .asPaddingValues()
+                .calculateLeftPadding(LayoutDirection.Ltr),
+            end =
+              WindowInsets.systemBars
+                .union(insets = WindowInsets.displayCutout)
+                .asPaddingValues()
+                .calculateRightPadding(LayoutDirection.Ltr),
+          )
+          .verticalScroll(state = rememberScrollState()),
+      navigateToLogin = navigateToLogin,
+      registrationUiModel = registrationUiModel,
+      registrationAction = registrationAction,
+    )
+  }
 }
 
 @Composable
 private fun TabletLayout(
-    modifier: Modifier = Modifier,
-    registrationUiModel: () -> RegistrationUiModel,
-    registrationAction: (RegistrationAction) -> Unit = {},
-    navigateToLogin: () -> Unit = {}
+  modifier: Modifier = Modifier,
+  registrationUiModel: () -> RegistrationUiModel,
+  registrationAction: (RegistrationAction) -> Unit = {},
+  navigateToLogin: () -> Unit = {},
 ) {
-    Column(
-        modifier = modifier
-            .padding(
-                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-                start = WindowInsets.systemBars.asPaddingValues()
-                    .calculateLeftPadding(LayoutDirection.Ltr),
-                end = WindowInsets.systemBars.asPaddingValues()
-                    .calculateRightPadding(LayoutDirection.Ltr)
-            )
-            .clip(
-                shape = RoundedCornerShape(
-                    topStart = 16.dp,
-                    topEnd = 16.dp
-                )
-            )
-            .background(color = colorScheme.surfaceContainerLowest)
-            .fillMaxSize()
-            .padding(start = 128.dp, end = 128.dp, top = 128.dp)
-            .verticalScroll(state = rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(space = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        LeftPane()
-        Spacer(modifier = Modifier.height(height = 16.dp))
-        RightPane(
-            modifier = Modifier.fillMaxWidth(),
-            navigateToLogin = navigateToLogin,
-            registrationUiModel = registrationUiModel,
-            registrationAction = registrationAction
+  Column(
+    modifier =
+      modifier
+        .padding(
+          top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+          start =
+            WindowInsets.systemBars.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
+          end =
+            WindowInsets.systemBars.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
         )
-    }
+        .clip(
+          shape =
+            RoundedCornerShape(
+              topStart = 16.dp,
+              topEnd = 16.dp,
+            )
+        )
+        .background(color = colorScheme.surfaceContainerLowest)
+        .fillMaxSize()
+        .padding(start = 128.dp, end = 128.dp, top = 128.dp)
+        .verticalScroll(state = rememberScrollState()),
+    verticalArrangement = Arrangement.spacedBy(space = 8.dp),
+    horizontalAlignment = Alignment.CenterHorizontally,
+  ) {
+    LeftPane()
+    Spacer(modifier = Modifier.height(height = 16.dp))
+    RightPane(
+      modifier = Modifier.fillMaxWidth(),
+      navigateToLogin = navigateToLogin,
+      registrationUiModel = registrationUiModel,
+      registrationAction = registrationAction,
+    )
+  }
 }
 
 @Composable
 private fun PhonePortraitLayout(
-    modifier: Modifier = Modifier,
-    registrationUiModel: () -> RegistrationUiModel,
-    registrationAction: (RegistrationAction) -> Unit = {},
-    navigateToLogin: () -> Unit = {}
+  modifier: Modifier = Modifier,
+  registrationUiModel: () -> RegistrationUiModel,
+  registrationAction: (RegistrationAction) -> Unit = {},
+  navigateToLogin: () -> Unit = {},
 ) {
-    Column(
-        modifier = modifier
-            .padding(
-                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding() + 8.dp,
-                start = WindowInsets.systemBars.asPaddingValues()
-                    .calculateLeftPadding(LayoutDirection.Ltr),
-                end = WindowInsets.systemBars.asPaddingValues()
-                    .calculateRightPadding(LayoutDirection.Ltr)
-            )
-            .clip(
-                shape = RoundedCornerShape(
-                    topStart = 16.dp,
-                    topEnd = 16.dp
-                )
-            )
-            .background(color = colorScheme.surfaceContainerLowest)
-            .fillMaxSize()
-            .padding(all = 16.dp)
-            .verticalScroll(state = rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(space = 8.dp)
-    ) {
-        LeftPane()
-        Spacer(modifier = Modifier.height(height = 16.dp))
-        RightPane(
-            navigateToLogin = navigateToLogin,
-            registrationUiModel = registrationUiModel,
-            registrationAction = registrationAction
+  Column(
+    modifier =
+      modifier
+        .padding(
+          top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding() + 8.dp,
+          start =
+            WindowInsets.systemBars.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
+          end =
+            WindowInsets.systemBars.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
         )
-    }
+        .clip(
+          shape =
+            RoundedCornerShape(
+              topStart = 16.dp,
+              topEnd = 16.dp,
+            )
+        )
+        .background(color = colorScheme.surfaceContainerLowest)
+        .fillMaxSize()
+        .padding(all = 16.dp)
+        .verticalScroll(state = rememberScrollState()),
+    verticalArrangement = Arrangement.spacedBy(space = 8.dp),
+  ) {
+    LeftPane()
+    Spacer(modifier = Modifier.height(height = 16.dp))
+    RightPane(
+      navigateToLogin = navigateToLogin,
+      registrationUiModel = registrationUiModel,
+      registrationAction = registrationAction,
+    )
+  }
 }
 
 @Composable
-private fun LeftPane(
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(space = 8.dp)
-    ) {
-        Text(
-            text = "Create account",
-            style = typography.titleLarge
-        )
+private fun LeftPane(modifier: Modifier = Modifier) {
+  Column(
+    modifier = modifier,
+    verticalArrangement = Arrangement.spacedBy(space = 8.dp),
+  ) {
+    Text(
+      text = "Create account",
+      style = typography.titleLarge,
+    )
 
-        Text(
-            text = "Capture your thoughts and ideas",
-            style = typography.bodyLarge,
-            color = colorScheme.onSurfaceVariant
-        )
-    }
+    Text(
+      text = "Capture your thoughts and ideas",
+      style = typography.bodyLarge,
+      color = colorScheme.onSurfaceVariant,
+    )
+  }
 }
 
 @Composable
 private fun RightPane(
-    modifier: Modifier = Modifier,
-    navigateToLogin: () -> Unit = {},
-    registrationUiModel: () -> RegistrationUiModel,
-    registrationAction: (RegistrationAction) -> Unit
+  modifier: Modifier = Modifier,
+  navigateToLogin: () -> Unit = {},
+  registrationUiModel: () -> RegistrationUiModel,
+  registrationAction: (RegistrationAction) -> Unit,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusManager = LocalFocusManager.current
-    val context = LocalActivity.current
+  val keyboardController = LocalSoftwareKeyboardController.current
+  val focusManager = LocalFocusManager.current
+  val context = LocalActivity.current
 
-    LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
+  LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
-    LaunchedEffect(key1 = registrationUiModel().registrationSuccess) {
-        if (registrationUiModel().registrationSuccess == null) return@LaunchedEffect
-        registrationAction(RegistrationChangeStatusConsumed)
-        Toast.makeText(
-            context,
-            if (registrationUiModel().registrationSuccess == true) "Registration successful" else "Registration failed",
-            Toast.LENGTH_SHORT
-        ).show()
-        navigateToLogin()
-    }
+  LaunchedEffect(key1 = registrationUiModel().registrationSuccess) {
+    if (registrationUiModel().registrationSuccess == null) return@LaunchedEffect
+    registrationAction(RegistrationChangeStatusConsumed)
+    Toast.makeText(
+        context,
+        if (registrationUiModel().registrationSuccess == true) "Registration successful"
+        else "Registration failed",
+        Toast.LENGTH_SHORT,
+      )
+      .show()
+    navigateToLogin()
+  }
 
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(space = 16.dp)
-    ) {
-        RegistrationUsernameField(
-            modifier = Modifier,
-            registrationUiModel = registrationUiModel,
-            registrationAction = registrationAction,
-        )
+  Column(
+    modifier = modifier,
+    verticalArrangement = Arrangement.spacedBy(space = 16.dp),
+  ) {
+    RegistrationUsernameField(
+      modifier = Modifier,
+      registrationUiModel = registrationUiModel,
+      registrationAction = registrationAction,
+    )
 
-        RegistrationEmailField(
-            modifier = Modifier,
-            registrationUiModel = registrationUiModel,
-            registrationAction = registrationAction,
-        )
+    RegistrationEmailField(
+      modifier = Modifier,
+      registrationUiModel = registrationUiModel,
+      registrationAction = registrationAction,
+    )
 
-        RegistrationPasswordField(
-            modifier = Modifier,
-            registrationUiModel = registrationUiModel,
-            registrationAction = registrationAction,
-        )
+    RegistrationPasswordField(
+      modifier = Modifier,
+      registrationUiModel = registrationUiModel,
+      registrationAction = registrationAction,
+    )
 
-        RegistrationRepeatPasswordField(
-            modifier = Modifier,
-            registrationUiModel = registrationUiModel,
-            registrationAction = registrationAction,
-            keyboardController = keyboardController,
-        )
+    RegistrationRepeatPasswordField(
+      modifier = Modifier,
+      registrationUiModel = registrationUiModel,
+      registrationAction = registrationAction,
+      keyboardController = keyboardController,
+    )
 
-        RegistrationButton(
-            modifier = Modifier,
-            registrationUiModel = registrationUiModel,
-            registrationAction = registrationAction,
-            keyboardController = keyboardController,
-        )
+    RegistrationButton(
+      modifier = Modifier,
+      registrationUiModel = registrationUiModel,
+      registrationAction = registrationAction,
+      keyboardController = keyboardController,
+    )
 
-        RegistrationFooterField(
-            modifier = Modifier,
-            navigateToLogin = navigateToLogin
-        )
+    RegistrationFooterField(
+      modifier = Modifier,
+      navigateToLogin = navigateToLogin,
+    )
 
-        Spacer(
-            modifier = Modifier
-                .height(height = 32.dp)
-                .imePadding()
-        )
-    }
+    Spacer(modifier = Modifier.height(height = 32.dp).imePadding())
+  }
 }
 
 @OptIn(FlowPreview::class)
 @Composable
 private fun RegistrationUsernameField(
-    modifier: Modifier = Modifier,
-    registrationUiModel: () -> RegistrationUiModel,
-    registrationAction: (RegistrationAction) -> Unit = {},
+  modifier: Modifier = Modifier,
+  registrationUiModel: () -> RegistrationUiModel,
+  registrationAction: (RegistrationAction) -> Unit = {},
 ) {
-    val focusManager = LocalFocusManager.current
+  val focusManager = LocalFocusManager.current
 
-    var userName by remember { mutableStateOf(value = registrationUiModel().userName) }
-    LaunchedEffect(key1 = Unit) {
-        snapshotFlow { userName }
-            .debounce(timeoutMillis = 100)
-            .collectLatest { registrationAction(UserNameEntered(userName)) }
-    }
+  var userName by remember { mutableStateOf(value = registrationUiModel().userName) }
+  LaunchedEffect(key1 = Unit) {
+    snapshotFlow { userName }
+      .debounce(timeoutMillis = 100)
+      .collectLatest { registrationAction(UserNameEntered(userName)) }
+  }
 
-    NoteMarkTextField(
-        modifier = modifier
-            .fillMaxWidth()
-            .alignToSafeDrawing(),
-        label = "Username",
-        enteredText = userName,
-        hintText = "John.doe",
-        onFocusGained = { registrationAction(UserNameFiledInFocus(userName = registrationUiModel().userName)) },
-        onFocusLost = { registrationAction(UserNameFiledLostFocus(userName = registrationUiModel().userName)) },
-        explanationText = registrationUiModel().userNameExplanation ?: "",
-        errorText = registrationUiModel().userNameError ?: "",
-        onTextChanged = { value -> userName = value },
-        onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
-    )
+  NoteMarkTextField(
+    modifier = modifier.fillMaxWidth().alignToSafeDrawing(),
+    label = "Username",
+    enteredText = userName,
+    hintText = "John.doe",
+    onFocusGained = {
+      registrationAction(UserNameFiledInFocus(userName = registrationUiModel().userName))
+    },
+    onFocusLost = {
+      registrationAction(UserNameFiledLostFocus(userName = registrationUiModel().userName))
+    },
+    explanationText = registrationUiModel().userNameExplanation ?: "",
+    errorText = registrationUiModel().userNameError ?: "",
+    onTextChanged = { value -> userName = value },
+    onNextClicked = { focusManager.moveFocus(FocusDirection.Next) },
+  )
 }
 
 @OptIn(FlowPreview::class)
 @Composable
 private fun RegistrationEmailField(
-    modifier: Modifier = Modifier,
-    registrationUiModel: () -> RegistrationUiModel,
-    registrationAction: (RegistrationAction) -> Unit = {},
+  modifier: Modifier = Modifier,
+  registrationUiModel: () -> RegistrationUiModel,
+  registrationAction: (RegistrationAction) -> Unit = {},
 ) {
-    val focusManager = LocalFocusManager.current
+  val focusManager = LocalFocusManager.current
 
-    var email by remember { mutableStateOf(value = registrationUiModel().email) }
-    LaunchedEffect(key1 = Unit) {
-        snapshotFlow { email }
-            .debounce(timeoutMillis = 100)
-            .collectLatest { registrationAction(EmailEntered(email)) }
-    }
+  var email by remember { mutableStateOf(value = registrationUiModel().email) }
+  LaunchedEffect(key1 = Unit) {
+    snapshotFlow { email }
+      .debounce(timeoutMillis = 100)
+      .collectLatest { registrationAction(EmailEntered(email)) }
+  }
 
-    NoteMarkTextField(
-        modifier = modifier
-            .fillMaxWidth()
-            .alignToSafeDrawing(),
-        label = "Email",
-        enteredText = email,
-        hintText = "john.doe@gmail.com",
-        errorText = registrationUiModel().emailError ?: "",
-        onTextChanged = { value -> email = value },
-        onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
-    )
+  NoteMarkTextField(
+    modifier = modifier.fillMaxWidth().alignToSafeDrawing(),
+    label = "Email",
+    enteredText = email,
+    hintText = "john.doe@gmail.com",
+    errorText = registrationUiModel().emailError ?: "",
+    onTextChanged = { value -> email = value },
+    onNextClicked = { focusManager.moveFocus(FocusDirection.Next) },
+  )
 }
 
 @OptIn(FlowPreview::class)
 @Composable
 private fun RegistrationPasswordField(
-    modifier: Modifier = Modifier,
-    registrationUiModel: () -> RegistrationUiModel,
-    registrationAction: (RegistrationAction) -> Unit = {},
+  modifier: Modifier = Modifier,
+  registrationUiModel: () -> RegistrationUiModel,
+  registrationAction: (RegistrationAction) -> Unit = {},
 ) {
-    val focusManager = LocalFocusManager.current
+  val focusManager = LocalFocusManager.current
 
-    var password by remember { mutableStateOf(registrationUiModel().password) }
-    LaunchedEffect(key1 = Unit) {
-        snapshotFlow { password }
-            .debounce(timeoutMillis = 100)
-            .collectLatest { registrationAction(PasswordEntered(password)) }
-    }
+  var password by remember { mutableStateOf(registrationUiModel().password) }
+  LaunchedEffect(key1 = Unit) {
+    snapshotFlow { password }
+      .debounce(timeoutMillis = 100)
+      .collectLatest { registrationAction(PasswordEntered(password)) }
+  }
 
-    NoteMarkPasswordTextField(
-        modifier = modifier
-            .fillMaxWidth()
-            .alignToSafeDrawing(),
-        label = "Password",
-        enteredText = password,
-        hintText = "Password",
-        explanationText = registrationUiModel().passwordExplanation ?: "",
-        errorText = registrationUiModel().passwordError ?: "",
-        onFocusGained = { registrationAction(PasswordFiledInFocus(password = registrationUiModel().password)) },
-        onTextChanged = { password = it },
-        onNextClicked = { focusManager.moveFocus(FocusDirection.Next) }
-    )
+  NoteMarkPasswordTextField(
+    modifier = modifier.fillMaxWidth().alignToSafeDrawing(),
+    label = "Password",
+    enteredText = password,
+    hintText = "Password",
+    explanationText = registrationUiModel().passwordExplanation ?: "",
+    errorText = registrationUiModel().passwordError ?: "",
+    onFocusGained = {
+      registrationAction(PasswordFiledInFocus(password = registrationUiModel().password))
+    },
+    onTextChanged = { password = it },
+    onNextClicked = { focusManager.moveFocus(FocusDirection.Next) },
+  )
 }
 
 @OptIn(FlowPreview::class)
 @Composable
 private fun RegistrationRepeatPasswordField(
-    modifier: Modifier = Modifier,
-    registrationUiModel: () -> RegistrationUiModel,
-    registrationAction: (RegistrationAction) -> Unit = {},
-    keyboardController: SoftwareKeyboardController? = null,
+  modifier: Modifier = Modifier,
+  registrationUiModel: () -> RegistrationUiModel,
+  registrationAction: (RegistrationAction) -> Unit = {},
+  keyboardController: SoftwareKeyboardController? = null,
 ) {
-    val focusManager = LocalFocusManager.current
+  val focusManager = LocalFocusManager.current
 
-    var repeatPassword by remember { mutableStateOf(value = registrationUiModel().repeatPassword) }
-    LaunchedEffect(key1 = Unit) {
-        snapshotFlow { repeatPassword }
-            .debounce(timeoutMillis = 100)
-            .collectLatest { registrationAction(RepeatPasswordEntered(repeatPassword)) }
-    }
+  var repeatPassword by remember { mutableStateOf(value = registrationUiModel().repeatPassword) }
+  LaunchedEffect(key1 = Unit) {
+    snapshotFlow { repeatPassword }
+      .debounce(timeoutMillis = 100)
+      .collectLatest { registrationAction(RepeatPasswordEntered(repeatPassword)) }
+  }
 
-    NoteMarkPasswordTextField(
-        modifier = modifier
-            .fillMaxWidth()
-            .alignToSafeDrawing(),
-        label = "Repeat password",
-        enteredText = repeatPassword,
-        hintText = "Password",
-        errorText = registrationUiModel().repeatPasswordError ?: "",
-        onTextChanged = { repeatPassword = it },
-        onDoneClicked = {
-            if (registrationUiModel().registrationEnabled) {
-                registrationAction(RegisterClicked)
-            }
-            focusManager.moveFocus(FocusDirection.Exit)
-            keyboardController?.hide()
-            focusManager.clearFocus(force = true)
-        }
-    )
+  NoteMarkPasswordTextField(
+    modifier = modifier.fillMaxWidth().alignToSafeDrawing(),
+    label = "Repeat password",
+    enteredText = repeatPassword,
+    hintText = "Password",
+    errorText = registrationUiModel().repeatPasswordError ?: "",
+    onTextChanged = { repeatPassword = it },
+    onDoneClicked = {
+      if (registrationUiModel().registrationEnabled) {
+        registrationAction(RegisterClicked)
+      }
+      focusManager.moveFocus(FocusDirection.Exit)
+      keyboardController?.hide()
+      focusManager.clearFocus(force = true)
+    },
+  )
 }
 
 @Composable
 private fun RegistrationButton(
-    modifier: Modifier = Modifier,
-    registrationUiModel: () -> RegistrationUiModel,
-    registrationAction: (RegistrationAction) -> Unit = {},
-    keyboardController: SoftwareKeyboardController? = null,
+  modifier: Modifier = Modifier,
+  registrationUiModel: () -> RegistrationUiModel,
+  registrationAction: (RegistrationAction) -> Unit = {},
+  keyboardController: SoftwareKeyboardController? = null,
 ) {
-    val focusManager = LocalFocusManager.current
+  val focusManager = LocalFocusManager.current
 
-    NoteMarkButton(
-        onClick = {
-            keyboardController?.hide()
-            focusManager.clearFocus(force = true)
-            registrationAction(RegisterClicked)
-        },
-        modifier = modifier
-            .fillMaxWidth(),
-        enabled = registrationUiModel().registrationEnabled
-    ) {
-        Text(
-            text = "Create account",
-            style = typography.titleSmall
-        )
-    }
+  NoteMarkButton(
+    onClick = {
+      keyboardController?.hide()
+      focusManager.clearFocus(force = true)
+      registrationAction(RegisterClicked)
+    },
+    modifier = modifier.fillMaxWidth(),
+    enabled = registrationUiModel().registrationEnabled,
+  ) {
+    Text(
+      text = "Create account",
+      style = typography.titleSmall,
+    )
+  }
 }
 
 @Composable
 private fun RegistrationFooterField(
-    modifier: Modifier = Modifier,
-    navigateToLogin: () -> Unit = {}
+  modifier: Modifier = Modifier,
+  navigateToLogin: () -> Unit = {},
 ) {
-    Text(
-        text = "Already have and account?",
-        style = typography.titleSmall,
-        fontWeight = FontWeight.Normal,
-        modifier = modifier
-            .fillMaxSize()
-            .lifecycleAwareDebouncedClickable {
-                navigateToLogin()
-            },
-        textAlign = TextAlign.Center,
-        color = colorScheme.primary
-    )
+  Text(
+    text = "Already have and account?",
+    style = typography.titleSmall,
+    fontWeight = FontWeight.Normal,
+    modifier =
+      modifier.fillMaxSize().lifecycleAwareDebouncedClickable {
+        navigateToLogin()
+      },
+    textAlign = TextAlign.Center,
+    color = colorScheme.primary,
+  )
 }
 
 @WindowSizePreviews
 @Composable
 private fun RegistraionPanePreview() {
-    NoteMarkTheme {
-        RegistrationPane(
-            modifier = Modifier,
-            registrationUiModel = { RegistrationUiModel.defaultOrEmpty }
-        )
-    }
+  NoteMarkTheme {
+    RegistrationPane(
+      modifier = Modifier,
+      registrationUiModel = { RegistrationUiModel.defaultOrEmpty },
+    )
+  }
 }

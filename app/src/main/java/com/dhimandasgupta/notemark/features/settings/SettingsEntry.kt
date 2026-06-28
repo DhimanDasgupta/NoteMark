@@ -23,54 +23,59 @@ import org.koin.java.KoinJavaComponent.get
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun EntryProviderScope<NavKey>.SettingsEntryBuilder(
-    modifier: Modifier,
-    navigateToLauncherAfterLogout: () -> Unit,
-    navigateUp: () -> Unit
+  modifier: Modifier,
+  navigateToLauncherAfterLogout: () -> Unit,
+  navigateUp: () -> Unit,
 ) {
-    entry<SettingsNavKey>(
-        metadata = ListDetailSceneStrategy.extraPane()
-    ) {
-        val settingsPresenter: SettingsPresenter = retain { get(clazz = SettingsPresenter::class.java) }
+  entry<SettingsNavKey>(metadata = ListDetailSceneStrategy.extraPane()) {
+    val settingsPresenter: SettingsPresenter = retain { get(clazz = SettingsPresenter::class.java) }
 
-        SettingsEntry(
-            modifier = modifier,
-            settingsPresenter = settingsPresenter,
-            navigateToLauncherAfterLogout = navigateToLauncherAfterLogout,
-            navigateUp = navigateUp
-        )
-    }
+    SettingsEntry(
+      modifier = modifier,
+      settingsPresenter = settingsPresenter,
+      navigateToLauncherAfterLogout = navigateToLauncherAfterLogout,
+      navigateUp = navigateUp,
+    )
+  }
 }
 
 @Composable
 private fun SettingsEntry(
-    modifier: Modifier = Modifier,
-    settingsPresenter: SettingsPresenter,
-    navigateToLauncherAfterLogout: () -> Unit,
-    navigateUp: () -> Unit
+  modifier: Modifier = Modifier,
+  settingsPresenter: SettingsPresenter,
+  navigateToLauncherAfterLogout: () -> Unit,
+  navigateUp: () -> Unit,
 ) {
-    var settingsUiModel by rememberSerializable { mutableStateOf(value = SettingsUiModel.defaultOrEmpty) }
-    val settingsAction by rememberUpdatedState(newValue = settingsPresenter::dispatchAction)
+  var settingsUiModel by rememberSerializable {
+    mutableStateOf(value = SettingsUiModel.defaultOrEmpty)
+  }
+  val settingsAction by rememberUpdatedState(newValue = settingsPresenter::dispatchAction)
 
-    LaunchedEffect(key1 = Unit) {
-        launchMolecule(mode = RecompositionMode.Immediate) {
-            settingsPresenter.uiModel()
-        }.collectLatest { model ->
-            settingsUiModel = model
-        }
-    }
+  LaunchedEffect(key1 = Unit) {
+    launchMolecule(mode = RecompositionMode.Immediate) {
+        settingsPresenter.uiModel()
+      }
+      .collectLatest { model ->
+        settingsUiModel = model
+      }
+  }
 
-    // UI data, actions, navigation and events passing to UI
-    SettingsPane(
-        modifier = modifier,
-        settingsUiModel = { settingsUiModel },
-        settingsAction = { action -> settingsAction(action) },
-        onBackClicked = { navigateUp() },
-        onLogoutSuccessful = { navigateToLauncherAfterLogout() },
-        onDeleteNoteCheckChanged = {
-            settingsAction(AppAction.DeleteLocalNotesOnLogout(deleteOnLogout = !settingsUiModel.deleteLocalNotesOnLogout))
-        },
-        onLogoutClicked = {
-            settingsAction(AppAction.AppLogout)
-        }
-    )
+  // UI data, actions, navigation and events passing to UI
+  SettingsPane(
+    modifier = modifier,
+    settingsUiModel = { settingsUiModel },
+    settingsAction = { action -> settingsAction(action) },
+    onBackClicked = { navigateUp() },
+    onLogoutSuccessful = { navigateToLauncherAfterLogout() },
+    onDeleteNoteCheckChanged = {
+      settingsAction(
+        AppAction.DeleteLocalNotesOnLogout(
+          deleteOnLogout = !settingsUiModel.deleteLocalNotesOnLogout
+        )
+      )
+    },
+    onLogoutClicked = {
+      settingsAction(AppAction.AppLogout)
+    },
+  )
 }

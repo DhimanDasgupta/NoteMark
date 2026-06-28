@@ -8,23 +8,21 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class LoginStateMachineTest {
-    @Test
-    fun `test LoginStateMachine with default state`() = runTest {
-        turbineScope {
-            // Setup state machine
-            val stateMachineFactory = LoginStateMachineFactory(
-                noteMarkApi = FakeSuccessfulNoteMarkApi()
-            )
+  @Test
+  fun `test LoginStateMachine with default state`() = runTest {
+    turbineScope {
+      // Setup state machine
+      val stateMachineFactory = LoginStateMachineFactory(noteMarkApi = FakeSuccessfulNoteMarkApi())
 
-            // Setup state flow from state machine
-            val stateMachine = stateMachineFactory.launchIn(backgroundScope)
-            val flow = stateMachine.state
+      // Setup state flow from state machine
+      val stateMachine = stateMachineFactory.launchIn(backgroundScope)
+      val flow = stateMachine.state
 
-            // Start flow validation
-            flow.test {
-                val initialState = awaitItem()
-                assertEquals(LoginStateMachineFactory.defaultLoginState, initialState)
-            }
-        }
+      // Start flow validation
+      flow.test {
+        val initialState = awaitItem()
+        assertEquals(LoginStateMachineFactory.defaultLoginState, initialState)
+      }
     }
+  }
 }

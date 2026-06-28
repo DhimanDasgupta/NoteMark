@@ -25,93 +25,95 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.SecureFlagPolicy
-import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
+import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 
 @Composable
 fun NoteDeleteDialog(
-    modifier: Modifier = Modifier,
-    noteId: String,
-    onDelete: (String) -> Unit = {},
-    onDismiss: () -> Unit = {}
+  modifier: Modifier = Modifier,
+  noteId: String,
+  onDelete: (String) -> Unit = {},
+  onDismiss: () -> Unit = {},
 ) {
-    Dialog(
-        onDismissRequest = { onDismiss() },
-        properties = DialogProperties(
-            usePlatformDefaultWidth = true,
-            securePolicy = SecureFlagPolicy.SecureOn
-        )
+  Dialog(
+    onDismissRequest = { onDismiss() },
+    properties =
+      DialogProperties(
+        usePlatformDefaultWidth = true,
+        securePolicy = SecureFlagPolicy.SecureOn,
+      ),
+  ) {
+    Column(
+      modifier =
+        modifier
+          .padding(all = 16.dp)
+          .wrapContentSize()
+          .clip(shape = shapes.medium)
+          .border(
+            width = 0.5.dp,
+            color = colorScheme.onSurfaceVariant,
+            shape = shapes.medium,
+          )
+          .background(color = colorScheme.surfaceContainerLowest)
+          .padding(all = 24.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Center,
     ) {
-        Column(
-            modifier = modifier
-                .padding(all = 16.dp)
-                .wrapContentSize()
-                .clip(shape = shapes.medium)
-                .border(
-                    width = 0.5.dp,
-                    color = colorScheme.onSurfaceVariant,
-                    shape = shapes.medium
-                )
-                .background(color = colorScheme.surfaceContainerLowest)
-                .padding(all = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = "Are you sure you want to delete this note?",
-                textAlign = TextAlign.Start,
-                style = typography.titleMedium,
-                color = colorScheme.onSurface
-            )
+      Text(
+        modifier = Modifier.fillMaxWidth(),
+        text = "Are you sure you want to delete this note?",
+        textAlign = TextAlign.Start,
+        style = typography.titleMedium,
+        color = colorScheme.onSurface,
+      )
 
-            Spacer(modifier = Modifier.height(height = 16.dp))
+      Spacer(modifier = Modifier.height(height = 16.dp))
 
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = "Click Discard to delete your note, else click Cancel to keep editing.",
-                textAlign = TextAlign.Start,
-                style = typography.bodyLarge,
-                color = colorScheme.onSurfaceVariant
-            )
+      Text(
+        modifier = Modifier.fillMaxWidth(),
+        text = "Click Discard to delete your note, else click Cancel to keep editing.",
+        textAlign = TextAlign.Start,
+        style = typography.bodyLarge,
+        color = colorScheme.onSurfaceVariant,
+      )
 
-            Spacer(modifier = Modifier.height(height = 32.dp))
+      Spacer(modifier = Modifier.height(height = 32.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+      ) {
+        Text(
+          text = "Keep Editing",
+          style = typography.bodyMedium,
+          color = colorScheme.primary,
+          modifier = Modifier.lifecycleAwareDebouncedClickable { onDismiss() },
+        )
 
-                Text(
-                    text = "Keep Editing",
-                    style = typography.bodyMedium,
-                    color = colorScheme.primary,
-                    modifier = Modifier.lifecycleAwareDebouncedClickable { onDismiss() }
-                )
+        Spacer(modifier = Modifier.width(width = 32.dp))
 
-                Spacer(modifier = Modifier.width(width = 32.dp))
-
-                Text(
-                    text = "Discard",
-                    style = typography.bodyMedium,
-                    color = colorScheme.error,
-                    modifier = Modifier.lifecycleAwareDebouncedClickable {
-                        onDelete(noteId)
-                    }
-                )
-            }
-        }
+        Text(
+          text = "Discard",
+          style = typography.bodyMedium,
+          color = colorScheme.error,
+          modifier =
+            Modifier.lifecycleAwareDebouncedClickable {
+              onDelete(noteId)
+            },
+        )
+      }
     }
+  }
 }
 
 @WindowSizePreviews
 @Composable
 private fun DeleteDialogPreview() {
-    NoteMarkTheme {
-        NoteDeleteDialog(
-            modifier = Modifier.fillMaxSize(),
-            noteId = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d"
-        )
-    }
+  NoteMarkTheme {
+    NoteDeleteDialog(
+      modifier = Modifier.fillMaxSize(),
+      noteId = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+    )
+  }
 }

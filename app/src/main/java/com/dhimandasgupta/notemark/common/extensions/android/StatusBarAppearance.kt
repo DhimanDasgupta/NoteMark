@@ -5,19 +5,22 @@ import android.content.Context
 import android.content.res.Configuration
 import androidx.core.view.WindowCompat
 
-fun Activity.setDarkStatusBarIcons(isLight: Boolean) = WindowCompat.getInsetsController(window, window.decorView).apply {
-    isAppearanceLightStatusBars = if (isSystemInDarkTheme()) {
+fun Activity.setDarkStatusBarIcons(isLight: Boolean) =
+  WindowCompat.getInsetsController(window, window.decorView).apply {
+    isAppearanceLightStatusBars =
+      if (isSystemInDarkTheme()) {
         false
-    } else {
+      } else {
         isLight
-    }
-}
+      }
+  }
 
-fun Activity.setForcedDarkStatusBarIcons(isLight: Boolean) = WindowCompat.getInsetsController(window, window.decorView).apply {
+fun Activity.setForcedDarkStatusBarIcons(isLight: Boolean) =
+  WindowCompat.getInsetsController(window, window.decorView).apply {
     isAppearanceLightStatusBars = isLight
-}
+  }
 
 private fun Context.isSystemInDarkTheme(): Boolean {
-    return resources.configuration.uiMode and
-            Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+  return resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+    Configuration.UI_MODE_NIGHT_YES
 }

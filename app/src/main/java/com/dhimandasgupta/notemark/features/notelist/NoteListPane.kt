@@ -71,8 +71,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.convertIsoToRelativeYearFormat
-import com.dhimandasgupta.notemark.common.extensions.kotlin.formatUserName
 import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
+import com.dhimandasgupta.notemark.common.extensions.kotlin.formatUserName
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.designsystem.LimitedText
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkFAB
@@ -85,559 +85,562 @@ import kotlinx.coroutines.delay
 
 @Composable
 internal fun NoteListPane(
-    modifier: Modifier = Modifier,
-    noteListUiModel: () -> NoteListUiModel,
-    noteListAction: (NoteListAction) -> Unit = {},
-    navigateToLauncherIfLoggedOut: () -> Unit = {},
-    onNoteClicked: (String) -> Unit = {},
-    onFabClicked: () -> Unit = {},
-    onSettingsClicked: () -> Unit = {},
-    onProfileClicked: () -> Unit = {},
+  modifier: Modifier = Modifier,
+  noteListUiModel: () -> NoteListUiModel,
+  noteListAction: (NoteListAction) -> Unit = {},
+  navigateToLauncherIfLoggedOut: () -> Unit = {},
+  onNoteClicked: (String) -> Unit = {},
+  onFabClicked: () -> Unit = {},
+  onSettingsClicked: () -> Unit = {},
+  onProfileClicked: () -> Unit = {},
 ) {
-    val context = LocalActivity.current
-    SideEffect { context?.setDarkStatusBarIcons(true) }
+  val context = LocalActivity.current
+  SideEffect { context?.setDarkStatusBarIcons(true) }
 
-    val updateNoteListUiModel by rememberUpdatedState(newValue = noteListUiModel)
-    var noteDeleteId by remember { mutableStateOf<String?>(value = null) }
+  val updateNoteListUiModel by rememberUpdatedState(newValue = noteListUiModel)
+  var noteDeleteId by remember { mutableStateOf<String?>(value = null) }
 
-    LaunchedEffect(key1 = updateNoteListUiModel().userName) {
-        delay(timeMillis = 100)
-        if (noteListUiModel().userName?.isEmpty() == true) {
-            navigateToLauncherIfLoggedOut()
-        }
+  LaunchedEffect(key1 = updateNoteListUiModel().userName) {
+    delay(timeMillis = 100)
+    if (noteListUiModel().userName?.isEmpty() == true) {
+      navigateToLauncherIfLoggedOut()
     }
+  }
 
-    Box(
-        modifier = modifier
-            .background(color = colorScheme.surfaceContainerLow)
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        NoteListValidPane(
-            modifier = Modifier,
-            userName = noteListUiModel().userName?.formatUserName() ?: "",
-            noteListUiModel = updateNoteListUiModel,
-            onNoteClicked = onNoteClicked,
-            loadNotes = { noteListAction(NoteListAction.LoadNextNotes) },
-            onNoteLongClicked = { id ->
-                noteDeleteId = id
-            },
-            onFabClicked = onFabClicked,
-            onSettingsClicked = onSettingsClicked,
-            onProfileClicked = onProfileClicked
-        )
+  Box(
+    modifier = modifier.background(color = colorScheme.surfaceContainerLow).fillMaxSize(),
+    contentAlignment = Alignment.Center,
+  ) {
+    NoteListValidPane(
+      modifier = Modifier,
+      userName = noteListUiModel().userName?.formatUserName() ?: "",
+      noteListUiModel = updateNoteListUiModel,
+      onNoteClicked = onNoteClicked,
+      loadNotes = { noteListAction(NoteListAction.LoadNextNotes) },
+      onNoteLongClicked = { id ->
+        noteDeleteId = id
+      },
+      onFabClicked = onFabClicked,
+      onSettingsClicked = onSettingsClicked,
+      onProfileClicked = onProfileClicked,
+    )
 
-        // Dialog check
-        if (!noteDeleteId.isNullOrEmpty()) {
-            NoteDeleteDialog(
-                modifier = Modifier,
-                noteId = updateNoteListUiModel().noteLongClickedUuid,
-                onDelete = { _ ->
-                    noteDeleteId?.let { id ->
-                        noteListAction(NoteListAction.NoteDelete(uuid = id))
-                    }
-                    noteDeleteId = null
-                },
-                onDismiss = {
-                    noteDeleteId = null
-                }
-            )
-        }
-
+    // Dialog check
+    if (!noteDeleteId.isNullOrEmpty()) {
+      NoteDeleteDialog(
+        modifier = Modifier,
+        noteId = updateNoteListUiModel().noteLongClickedUuid,
+        onDelete = { _ ->
+          noteDeleteId?.let { id ->
+            noteListAction(NoteListAction.NoteDelete(uuid = id))
+          }
+          noteDeleteId = null
+        },
+        onDismiss = {
+          noteDeleteId = null
+        },
+      )
     }
+  }
 }
 
 @Composable
 private fun NoteListValidPane(
-    modifier: Modifier = Modifier,
-    userName: String,
-    noteListUiModel: () -> NoteListUiModel,
-    loadNotes: () -> Unit,
-    onNoteClicked: (String) -> Unit = {},
-    onNoteLongClicked: (String) -> Unit = {},
-    onFabClicked: () -> Unit = {},
-    onSettingsClicked: () -> Unit = {},
-    onProfileClicked: () -> Unit = {},
+  modifier: Modifier = Modifier,
+  userName: String,
+  noteListUiModel: () -> NoteListUiModel,
+  loadNotes: () -> Unit,
+  onNoteClicked: (String) -> Unit = {},
+  onNoteLongClicked: (String) -> Unit = {},
+  onFabClicked: () -> Unit = {},
+  onSettingsClicked: () -> Unit = {},
+  onProfileClicked: () -> Unit = {},
 ) {
-    when (noteListUiModel().noteEntities.isEmpty()) {
-        true -> NoteListWithEmptyNotes(
-            modifier = modifier,
-            userName = userName,
-            loading = noteListUiModel().loading,
-            isConnected = noteListUiModel().isConnected,
-            onFabClicked = onFabClicked,
-            showSyncProgress = noteListUiModel().showSyncProgress,
-            onSettingsClicked = onSettingsClicked,
-            onProfileClicked = onProfileClicked
-        )
+  when (noteListUiModel().noteEntities.isEmpty()) {
+    true ->
+      NoteListWithEmptyNotes(
+        modifier = modifier,
+        userName = userName,
+        loading = noteListUiModel().loading,
+        isConnected = noteListUiModel().isConnected,
+        onFabClicked = onFabClicked,
+        showSyncProgress = noteListUiModel().showSyncProgress,
+        onSettingsClicked = onSettingsClicked,
+        onProfileClicked = onProfileClicked,
+      )
 
-        else -> NoteListWithNotes(
-            modifier = Modifier,
-            userName = userName,
-            loading = noteListUiModel().loading,
-            noteListState = noteListUiModel,
-            loadNotes = loadNotes,
-            onNoteClicked = onNoteClicked,
-            onNoteLongClicked = onNoteLongClicked,
-            onFabClicked = onFabClicked,
-            onSettingsClicked = onSettingsClicked,
-            onProfileClicked = onProfileClicked
-        )
-    }
+    else ->
+      NoteListWithNotes(
+        modifier = Modifier,
+        userName = userName,
+        loading = noteListUiModel().loading,
+        noteListState = noteListUiModel,
+        loadNotes = loadNotes,
+        onNoteClicked = onNoteClicked,
+        onNoteLongClicked = onNoteLongClicked,
+        onFabClicked = onFabClicked,
+        onSettingsClicked = onSettingsClicked,
+        onProfileClicked = onProfileClicked,
+      )
+  }
 }
 
 @Composable
 private fun NoteListWithEmptyNotes(
-    modifier: Modifier = Modifier,
-    userName: String,
-    loading: Boolean,
-    isConnected: Boolean,
-    showSyncProgress: Boolean,
-    onFabClicked: () -> Unit,
-    onSettingsClicked: () -> Unit,
-    onProfileClicked: () -> Unit
+  modifier: Modifier = Modifier,
+  userName: String,
+  loading: Boolean,
+  isConnected: Boolean,
+  showSyncProgress: Boolean,
+  onFabClicked: () -> Unit,
+  onSettingsClicked: () -> Unit,
+  onProfileClicked: () -> Unit,
 ) {
-    NoNotes(
-        modifier = modifier,
-        userName = userName,
-        loading = loading,
-        isConnected = isConnected,
-        showSyncProgress = showSyncProgress,
-        onFabClicked = onFabClicked,
-        onSettingsClicked = onSettingsClicked,
-        onProfileClicked = onProfileClicked
-    )
+  NoNotes(
+    modifier = modifier,
+    userName = userName,
+    loading = loading,
+    isConnected = isConnected,
+    showSyncProgress = showSyncProgress,
+    onFabClicked = onFabClicked,
+    onSettingsClicked = onSettingsClicked,
+    onProfileClicked = onProfileClicked,
+  )
 }
 
 @Composable
 private fun NoteListWithNotes(
-    modifier: Modifier = Modifier,
-    userName: String,
-    loading: Boolean,
-    noteListState: () -> NoteListUiModel,
-    loadNotes: () -> Unit,
-    onNoteClicked: (String) -> Unit = {},
-    onNoteLongClicked: (String) -> Unit = {},
-    onFabClicked: () -> Unit = {},
-    onSettingsClicked: () -> Unit = {},
-    onProfileClicked: () -> Unit = {},
+  modifier: Modifier = Modifier,
+  userName: String,
+  loading: Boolean,
+  noteListState: () -> NoteListUiModel,
+  loadNotes: () -> Unit,
+  onNoteClicked: (String) -> Unit = {},
+  onNoteLongClicked: (String) -> Unit = {},
+  onFabClicked: () -> Unit = {},
+  onSettingsClicked: () -> Unit = {},
+  onProfileClicked: () -> Unit = {},
 ) {
-    if (loading) {
-        LoadingPane(
-            modifier = Modifier,
-            showLoading = true
-        )
-        return
+  if (loading) {
+    LoadingPane(
+      modifier = Modifier,
+      showLoading = true,
+    )
+    return
+  }
+
+  var columnCount by remember { mutableIntStateOf(value = 2) }
+  var maxLength by remember { mutableIntStateOf(value = 150) }
+
+  val density = LocalDensity.current
+
+  val scrollState = rememberLazyStaggeredGridState()
+  val shouldShowFAB by remember {
+    derivedStateOf {
+      scrollState.firstVisibleItemIndex == 0 && !scrollState.isScrollInProgress
     }
+  }
 
-    var columnCount by remember { mutableIntStateOf(value = 2) }
-    var maxLength by remember { mutableIntStateOf(value = 150) }
-
-    val density = LocalDensity.current
-
-    val scrollState = rememberLazyStaggeredGridState()
-    val shouldShowFAB by remember {
-        derivedStateOf {
-            scrollState.firstVisibleItemIndex == 0 && !scrollState.isScrollInProgress
-        }
+  val reachedBottom by remember {
+    derivedStateOf {
+      scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ==
+        scrollState.layoutInfo.totalItemsCount - 1
     }
+  }
 
-    val reachedBottom by remember {
-        derivedStateOf {
-            scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == scrollState.layoutInfo.totalItemsCount - 1
-        }
+  LaunchedEffect(reachedBottom) {
+    if (reachedBottom) {
+      loadNotes()
     }
+  }
 
-    LaunchedEffect(reachedBottom) {
-        if (reachedBottom) { loadNotes() }
-    }
+  Column(
+    modifier =
+      modifier.fillMaxSize().onSizeChanged { intSize ->
+        val widthInDp = with(density) { intSize.width.toDp() }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .onSizeChanged { intSize ->
-                val widthInDp = with(density) { intSize.width.toDp() }
+        columnCount =
+          when {
+            widthInDp < 600.dp -> 2
+            widthInDp < 840.dp -> 3
+            else -> 4
+          }
 
-                columnCount = when {
-                    widthInDp < 600.dp -> 2
-                    widthInDp < 840.dp -> 3
-                    else -> 4
-                }
+        maxLength =
+          when {
+            widthInDp < 600.dp -> 150
+            widthInDp < 840.dp -> 250
+            else -> 300
+          }
+      }
+  ) {
+    NoteListPaneToolbar(
+      modifier = Modifier,
+      toolbarTitle = "NoteMark",
+      userName = userName,
+      isConnected = noteListState().isConnected,
+      onSettingsClicked = onSettingsClicked,
+      onProfileClicked = onProfileClicked,
+    )
 
-                maxLength = when {
-                    widthInDp < 600.dp -> 150
-                    widthInDp < 840.dp -> 250
-                    else -> 300
-                }
-            }
+    Box(
+      modifier =
+        Modifier.fillMaxSize()
+          .padding(
+            start =
+              WindowInsets.navigationBars
+                .union(insets = WindowInsets.displayCutout)
+                .asPaddingValues()
+                .calculateLeftPadding(LayoutDirection.Ltr),
+            end =
+              WindowInsets.navigationBars
+                .union(insets = WindowInsets.displayCutout)
+                .asPaddingValues()
+                .calculateEndPadding(LayoutDirection.Ltr),
+          )
     ) {
-        NoteListPaneToolbar(
-            modifier = Modifier,
-            toolbarTitle = "NoteMark",
-            userName = userName,
-            isConnected = noteListState().isConnected,
-            onSettingsClicked = onSettingsClicked,
-            onProfileClicked = onProfileClicked
-        )
+      NoteGrid(
+        modifier = Modifier.fillMaxSize(),
+        columnCount = columnCount,
+        maxLength = maxLength,
+        state = scrollState,
+        noteListUiModel = noteListState,
+        onNoteClicked = onNoteClicked,
+        onNoteLongClicked = onNoteLongClicked,
+      )
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    start = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
-                        .asPaddingValues()
-                        .calculateLeftPadding(LayoutDirection.Ltr),
-                    end = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
-                        .asPaddingValues()
-                        .calculateEndPadding(LayoutDirection.Ltr)
-                )
+      Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.End,
+      ) {
+        AnimatedVisibility(
+          visible = shouldShowFAB,
+          enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+          exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
         ) {
-            NoteGrid(
-                modifier = Modifier.fillMaxSize(),
-                columnCount = columnCount,
-                maxLength = maxLength,
-                state = scrollState,
-                noteListUiModel = noteListState,
-                onNoteClicked = onNoteClicked,
-                onNoteLongClicked = onNoteLongClicked
-            )
-
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Bottom,
-                horizontalAlignment = Alignment.End
-            ) {
-                AnimatedVisibility(
-                    visible = shouldShowFAB,
-                    enter = fadeIn() + slideInVertically(
-                        initialOffsetY = { it / 2 }
-                    ),
-                    exit = fadeOut() + slideOutVertically(
-                        targetOffsetY = { it / 2 }
-                    ),
-                ) {
-                    NoteMarkFAB(
-                        modifier = Modifier
-                            .padding(all = 16.dp),
-                        onClick = onFabClicked,
-                    )
-                }
-            }
+          NoteMarkFAB(
+            modifier = Modifier.padding(all = 16.dp),
+            onClick = onFabClicked,
+          )
         }
+      }
     }
+  }
 }
 
 @Composable
 fun LoadingPane(
-    modifier: Modifier = Modifier,
-    showLoading: Boolean
+  modifier: Modifier = Modifier,
+  showLoading: Boolean,
 ) {
-    AnimatedVisibility(
-        visible = showLoading,
-        enter = scaleIn() + fadeIn(),
-        exit = scaleOut() + fadeOut(),
+  AnimatedVisibility(
+    visible = showLoading,
+    enter = scaleIn() + fadeIn(),
+    exit = scaleOut() + fadeOut(),
+  ) {
+    Box(
+      modifier = modifier.fillMaxSize(),
+      contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            ThreeBouncingDots(
-                modifier = Modifier
-                    .padding(all = 16.dp)
-                    .wrapContentSize(),
-                dotColor1 = colorResource(id = R.color.splash_blue).copy(alpha = 0.5f),
-                dotColor2 = colorResource(id = R.color.splash_blue).copy(alpha = 0.75f),
-                dotColor3 = colorResource(id = R.color.splash_blue).copy(alpha = 1.0f)
-            )
-        }
+      ThreeBouncingDots(
+        modifier = Modifier.padding(all = 16.dp).wrapContentSize(),
+        dotColor1 = colorResource(id = R.color.splash_blue).copy(alpha = 0.5f),
+        dotColor2 = colorResource(id = R.color.splash_blue).copy(alpha = 0.75f),
+        dotColor3 = colorResource(id = R.color.splash_blue).copy(alpha = 1.0f),
+      )
     }
+  }
 }
 
 @Composable
 private fun NoteListPaneToolbar(
-    modifier: Modifier = Modifier,
-    toolbarTitle: String,
-    userName: String,
-    isConnected: Boolean,
-    onSettingsClicked: () -> Unit,
-    onProfileClicked: () -> Unit,
+  modifier: Modifier = Modifier,
+  toolbarTitle: String,
+  userName: String,
+  isConnected: Boolean,
+  onSettingsClicked: () -> Unit,
+  onProfileClicked: () -> Unit,
 ) {
-    Row(
-        modifier = modifier
-            .background(color = colorScheme.surfaceContainerLowest)
-            .fillMaxWidth()
-            .padding(
-                start = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateLeftPadding(LayoutDirection.Ltr),
-                top = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateTopPadding(),
-                end = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateEndPadding(LayoutDirection.Ltr)
-            )
-            .padding(
-                vertical = 4.dp,
-                horizontal = 16.dp
-            ),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = toolbarTitle,
-            style = typography.titleMedium,
-            modifier = Modifier.weight(weight = 1f)
+  Row(
+    modifier =
+      modifier
+        .background(color = colorScheme.surfaceContainerLowest)
+        .fillMaxWidth()
+        .padding(
+          start =
+            WindowInsets.systemBars
+              .union(insets = WindowInsets.displayCutout)
+              .asPaddingValues()
+              .calculateLeftPadding(LayoutDirection.Ltr),
+          top =
+            WindowInsets.systemBars
+              .union(insets = WindowInsets.displayCutout)
+              .asPaddingValues()
+              .calculateTopPadding(),
+          end =
+            WindowInsets.systemBars
+              .union(insets = WindowInsets.displayCutout)
+              .asPaddingValues()
+              .calculateEndPadding(LayoutDirection.Ltr),
         )
+        .padding(
+          vertical = 4.dp,
+          horizontal = 16.dp,
+        ),
+    horizontalArrangement = Arrangement.SpaceBetween,
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Text(
+      text = toolbarTitle,
+      style = typography.titleMedium,
+      modifier = Modifier.weight(weight = 1f),
+    )
 
-        SafeIconButton(
-            onClick = onSettingsClicked
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_settings),
-                contentDescription = "Settings",
-                modifier = Modifier.requiredSize(size = 48.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.width(width = 16.dp))
-
-        NoteMarkToolbarButton(
-            title = userName,
-            isConnected = isConnected,
-            onClick = onProfileClicked
-        )
+    SafeIconButton(onClick = onSettingsClicked) {
+      Icon(
+        painter = painterResource(id = R.drawable.ic_settings),
+        contentDescription = "Settings",
+        modifier = Modifier.requiredSize(size = 48.dp),
+      )
     }
+
+    Spacer(modifier = Modifier.width(width = 16.dp))
+
+    NoteMarkToolbarButton(
+      title = userName,
+      isConnected = isConnected,
+      onClick = onProfileClicked,
+    )
+  }
 }
 
 @Composable
 private fun NoNotes(
-    modifier: Modifier = Modifier,
-    toolbarTitle: String = "NoteMark",
-    userName: String = "",
-    loading: Boolean,
-    isConnected: Boolean,
-    showSyncProgress: Boolean,
-    onSettingsClicked: () -> Unit,
-    onProfileClicked: () -> Unit,
-    onFabClicked: () -> Unit = {},
+  modifier: Modifier = Modifier,
+  toolbarTitle: String = "NoteMark",
+  userName: String = "",
+  loading: Boolean,
+  isConnected: Boolean,
+  showSyncProgress: Boolean,
+  onSettingsClicked: () -> Unit,
+  onProfileClicked: () -> Unit,
+  onFabClicked: () -> Unit = {},
 ) {
-    Box(
-        modifier = modifier.fillMaxSize()
-    ) {
-        NoteListPaneToolbar(
-            modifier = Modifier,
-            toolbarTitle = toolbarTitle,
-            userName = userName,
-            isConnected = isConnected,
-            onSettingsClicked = onSettingsClicked,
-            onProfileClicked = onProfileClicked
-        )
+  Box(modifier = modifier.fillMaxSize()) {
+    NoteListPaneToolbar(
+      modifier = Modifier,
+      toolbarTitle = toolbarTitle,
+      userName = userName,
+      isConnected = isConnected,
+      onSettingsClicked = onSettingsClicked,
+      onProfileClicked = onProfileClicked,
+    )
 
-        when (showSyncProgress || loading) {
-            true -> Box(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .wrapContentSize()
-                    .padding(all = 16.dp)
-            ) {
-                ThreeBouncingDots(
-                    modifier = Modifier
-                        .padding(all = 16.dp)
-                        .wrapContentSize(),
-                    dotColor1 = colorResource(id = R.color.splash_blue).copy(alpha = 0.5f),
-                    dotColor2 = colorResource(id = R.color.splash_blue).copy(alpha = 0.75f),
-                    dotColor3 = colorResource(id = R.color.splash_blue).copy(alpha = 1.0f)
-                )
-            }
-
-            else -> Text(
-                text = "You’ve got an empty board, \n let’s place your first note on it!",
-                style = typography.titleSmall,
-                color = colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(
-                        paddingValues = WindowInsets.displayCutout.union(insets = WindowInsets.statusBars)
-                            .union(
-                                insets = WindowInsets.navigationBars
-                            ).asPaddingValues()
-                    )
-                    .padding(vertical = 96.dp, horizontal = 32.dp)
-            )
+    when (showSyncProgress || loading) {
+      true ->
+        Box(modifier = Modifier.align(Alignment.Center).wrapContentSize().padding(all = 16.dp)) {
+          ThreeBouncingDots(
+            modifier = Modifier.padding(all = 16.dp).wrapContentSize(),
+            dotColor1 = colorResource(id = R.color.splash_blue).copy(alpha = 0.5f),
+            dotColor2 = colorResource(id = R.color.splash_blue).copy(alpha = 0.75f),
+            dotColor3 = colorResource(id = R.color.splash_blue).copy(alpha = 1.0f),
+          )
         }
 
-        NoteMarkFAB(
-            modifier = Modifier
-                .padding(all = 16.dp)
-                .align(Alignment.BottomEnd),
-            onClick = onFabClicked,
+      else ->
+        Text(
+          text = "You’ve got an empty board, \n let’s place your first note on it!",
+          style = typography.titleSmall,
+          color = colorScheme.onSurfaceVariant,
+          textAlign = TextAlign.Center,
+          modifier =
+            modifier
+              .fillMaxWidth()
+              .padding(
+                paddingValues =
+                  WindowInsets.displayCutout
+                    .union(insets = WindowInsets.statusBars)
+                    .union(insets = WindowInsets.navigationBars)
+                    .asPaddingValues()
+              )
+              .padding(vertical = 96.dp, horizontal = 32.dp),
         )
     }
+
+    NoteMarkFAB(
+      modifier = Modifier.padding(all = 16.dp).align(Alignment.BottomEnd),
+      onClick = onFabClicked,
+    )
+  }
 }
 
 @Composable
 private fun NoteGrid(
-    modifier: Modifier = Modifier,
-    columnCount: Int,
-    maxLength: Int,
-    state: LazyStaggeredGridState,
-    noteListUiModel: () -> NoteListUiModel,
-    onNoteClicked: (String) -> Unit = {},
-    onNoteLongClicked: (String) -> Unit = {}
+  modifier: Modifier = Modifier,
+  columnCount: Int,
+  maxLength: Int,
+  state: LazyStaggeredGridState,
+  noteListUiModel: () -> NoteListUiModel,
+  onNoteClicked: (String) -> Unit = {},
+  onNoteLongClicked: (String) -> Unit = {},
 ) {
-    LazyVerticalStaggeredGrid(
-        state = state,
-        columns = StaggeredGridCells.Fixed(count = columnCount),
-        contentPadding = PaddingValues(all = 8.dp),
-        verticalItemSpacing = 8.dp,
-        horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-        modifier = modifier.fillMaxSize()
-    ) {
-        if (noteListUiModel().showSyncProgress) {
-            item(
-                span = StaggeredGridItemSpan.FullLine,
-                key = "sync_progress",
-                contentType = "sync_progress"
-            ) {
-                ThreeBouncingDots(
-                    modifier = Modifier
-                        .padding(all = 16.dp)
-                        .wrapContentSize(),
-                    dotColor1 = colorResource(id = R.color.splash_blue).copy(alpha = 0.5f),
-                    dotColor2 = colorResource(id = R.color.splash_blue).copy(alpha = 0.75f),
-                    dotColor3 = colorResource(id = R.color.splash_blue).copy(alpha = 1.0f)
-                )
-            }
-        }
-
-        items(
-            items = noteListUiModel().noteEntities,
-            key = { note -> note.id },
-            contentType = { "notes" }
-        ) { noteEntity ->
-            NoteItem(
-                modifier = Modifier.animateItem(
-                    fadeInSpec = spring(
-                        stiffness = Spring.StiffnessVeryLow,
-                        dampingRatio = Spring.DampingRatioLowBouncy
-                    ),
-                    placementSpec =
-                        keyframesWithSpline {
-                            IntOffset(0, 200) at 0
-                            IntOffset(0, 100) at 75
-                            IntOffset(0, 50) at 225
-                            IntOffset(0, 0) at 375
-                            durationMillis = 375
-                        },
-                    fadeOutSpec = spring(
-                        stiffness = Spring.StiffnessVeryLow,
-                        dampingRatio = Spring.DampingRatioLowBouncy
-                    ),
-                ),
-                note = noteEntity,
-                maxLength = maxLength,
-                onNoteClicked = onNoteClicked,
-                onNoteLongClicked = onNoteLongClicked
-            )
-        }
-
-        item(
-            span = StaggeredGridItemSpan.FullLine,
-            key = "spacer",
-            contentType = "spacer"
-        ) {
-            Spacer(
-                modifier = Modifier
-                    .height(
-                        height = WindowInsets.navigationBars
-                            .asPaddingValues()
-                            .calculateBottomPadding()
-                    )
-            )
-        }
+  LazyVerticalStaggeredGrid(
+    state = state,
+    columns = StaggeredGridCells.Fixed(count = columnCount),
+    contentPadding = PaddingValues(all = 8.dp),
+    verticalItemSpacing = 8.dp,
+    horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+    modifier = modifier.fillMaxSize(),
+  ) {
+    if (noteListUiModel().showSyncProgress) {
+      item(
+        span = StaggeredGridItemSpan.FullLine,
+        key = "sync_progress",
+        contentType = "sync_progress",
+      ) {
+        ThreeBouncingDots(
+          modifier = Modifier.padding(all = 16.dp).wrapContentSize(),
+          dotColor1 = colorResource(id = R.color.splash_blue).copy(alpha = 0.5f),
+          dotColor2 = colorResource(id = R.color.splash_blue).copy(alpha = 0.75f),
+          dotColor3 = colorResource(id = R.color.splash_blue).copy(alpha = 1.0f),
+        )
+      }
     }
+
+    items(
+      items = noteListUiModel().noteEntities,
+      key = { note -> note.id },
+      contentType = { "notes" },
+    ) { noteEntity ->
+      NoteItem(
+        modifier =
+          Modifier.animateItem(
+            fadeInSpec =
+              spring(
+                stiffness = Spring.StiffnessVeryLow,
+                dampingRatio = Spring.DampingRatioLowBouncy,
+              ),
+            placementSpec =
+              keyframesWithSpline {
+                IntOffset(0, 200) at 0
+                IntOffset(0, 100) at 75
+                IntOffset(0, 50) at 225
+                IntOffset(0, 0) at 375
+                durationMillis = 375
+              },
+            fadeOutSpec =
+              spring(
+                stiffness = Spring.StiffnessVeryLow,
+                dampingRatio = Spring.DampingRatioLowBouncy,
+              ),
+          ),
+        note = noteEntity,
+        maxLength = maxLength,
+        onNoteClicked = onNoteClicked,
+        onNoteLongClicked = onNoteLongClicked,
+      )
+    }
+
+    item(
+      span = StaggeredGridItemSpan.FullLine,
+      key = "spacer",
+      contentType = "spacer",
+    ) {
+      Spacer(
+        modifier =
+          Modifier.height(
+            height = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+          )
+      )
+    }
+  }
 }
 
 @Composable
 private fun NoteItem(
-    modifier: Modifier = Modifier,
-    note: NoteEntityUiModel,
-    maxLength: Int,
-    onNoteClicked: (String) -> Unit = {},
-    onNoteLongClicked: (String) -> Unit = {}
+  modifier: Modifier = Modifier,
+  note: NoteEntityUiModel,
+  maxLength: Int,
+  onNoteClicked: (String) -> Unit = {},
+  onNoteLongClicked: (String) -> Unit = {},
 ) {
-    Column(
-        modifier = modifier
-            .clip(shape = shapes.medium)
-            .background(color = colorScheme.surfaceContainerLowest)
-            .combinedClickable(
-                onClick = { onNoteClicked(note.uuid) },
-                onLongClick = { onNoteLongClicked(note.uuid) }
-            )
-            .innerShadow(
-                shape = shapes.medium,
-                shadow = Shadow(
-                    radius = 12.dp,
-                    color = colorScheme.primary,
-                    spread = 4.dp,
-                    alpha = 0.4f
-                )
-            )
-            .padding(all = 16.dp)
-    ) {
-        val configuration = LocalConfiguration.current
-        val locale by remember(key1 = configuration) {
-            mutableStateOf(
-                configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0)
-            )
-        }
-
-        Text(
-            text = convertIsoToRelativeYearFormat(
-                locale = locale,
-                isoOffsetDateTimeString = note.lastEditedAt
+  Column(
+    modifier =
+      modifier
+        .clip(shape = shapes.medium)
+        .background(color = colorScheme.surfaceContainerLowest)
+        .combinedClickable(
+          onClick = { onNoteClicked(note.uuid) },
+          onLongClick = { onNoteLongClicked(note.uuid) },
+        )
+        .innerShadow(
+          shape = shapes.medium,
+          shadow =
+            Shadow(
+              radius = 12.dp,
+              color = colorScheme.primary,
+              spread = 4.dp,
+              alpha = 0.4f,
             ),
-            style = typography.bodyMedium,
-            color = colorScheme.primary
         )
-
-        Spacer(modifier = Modifier.height(height = 8.dp))
-
-        LimitedText(
-            fullText = note.title,
-            style = typography.titleMedium,
-            color = colorScheme.onSurface,
-            targetCharacterCount = maxLength
+        .padding(all = 16.dp)
+  ) {
+    val configuration = LocalConfiguration.current
+    val locale by
+      remember(key1 = configuration) {
+        mutableStateOf(
+          configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0)
         )
+      }
 
-        Spacer(modifier = Modifier.height(height = 4.dp))
+    Text(
+      text =
+        convertIsoToRelativeYearFormat(
+          locale = locale,
+          isoOffsetDateTimeString = note.lastEditedAt,
+        ),
+      style = typography.bodyMedium,
+      color = colorScheme.primary,
+    )
 
-        LimitedText(
-            fullText = note.content,
-            style = typography.bodySmall,
-            color = colorScheme.onSurfaceVariant,
-            targetCharacterCount = maxLength
-        )
-    }
+    Spacer(modifier = Modifier.height(height = 8.dp))
+
+    LimitedText(
+      fullText = note.title,
+      style = typography.titleMedium,
+      color = colorScheme.onSurface,
+      targetCharacterCount = maxLength,
+    )
+
+    Spacer(modifier = Modifier.height(height = 4.dp))
+
+    LimitedText(
+      fullText = note.content,
+      style = typography.bodySmall,
+      color = colorScheme.onSurfaceVariant,
+      targetCharacterCount = maxLength,
+    )
+  }
 }
 
 @WindowSizePreviews
 @Composable
 private fun NoteListPanePreview() {
-    NoteMarkTheme {
-        NoteListPane(
-            modifier = Modifier,
-            noteListUiModel = { noteListUiModel }
-        )
-    }
+  NoteMarkTheme {
+    NoteListPane(
+      modifier = Modifier,
+      noteListUiModel = { noteListUiModel },
+    )
+  }
 }
 
-private val noteListUiModel = NoteListUiModel(
+private val noteListUiModel =
+  NoteListUiModel(
     userName = "Dhiman",
-    noteEntities = listOf(
-        NoteEntityUiModel(
+    noteEntities =
+      listOf(
+          NoteEntityUiModel(
             id = 0,
             title = "This is a title for the Note\nThis is a title for the Note",
             content = "This is content For the Note\nThis is content For the Note",
@@ -645,9 +648,9 @@ private val noteListUiModel = NoteListUiModel(
             lastEditedAt = "20th Apr",
             uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
             synced = true,
-            markAsDeleted = false
-        ),
-        NoteEntityUiModel(
+            markAsDeleted = false,
+          ),
+          NoteEntityUiModel(
             id = 1,
             title = "This is a title for the Note",
             content = "This is content For the Note",
@@ -655,9 +658,9 @@ private val noteListUiModel = NoteListUiModel(
             lastEditedAt = "20th Apr",
             uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
             synced = true,
-            markAsDeleted = false
-        ),
-        NoteEntityUiModel(
+            markAsDeleted = false,
+          ),
+          NoteEntityUiModel(
             id = 2,
             title = "This is a title for the Note\nThis is a title for the Note",
             content = "This is content For the Note\nThis is content For the Note",
@@ -665,9 +668,9 @@ private val noteListUiModel = NoteListUiModel(
             lastEditedAt = "20th Apr",
             uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
             synced = true,
-            markAsDeleted = false
-        ),
-        NoteEntityUiModel(
+            markAsDeleted = false,
+          ),
+          NoteEntityUiModel(
             id = 3,
             title = "This is a title for the Note",
             content = "This is content For the Note",
@@ -675,9 +678,9 @@ private val noteListUiModel = NoteListUiModel(
             lastEditedAt = "20th Apr",
             uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
             synced = true,
-            markAsDeleted = false
-        ),
-        NoteEntityUiModel(
+            markAsDeleted = false,
+          ),
+          NoteEntityUiModel(
             id = 4,
             title = "This is a title for the Note\nThis is a title for the Note",
             content = "This is content For the Note\nThis is content For the Note",
@@ -685,9 +688,9 @@ private val noteListUiModel = NoteListUiModel(
             lastEditedAt = "20th Apr",
             uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
             synced = true,
-            markAsDeleted = false
-        ),
-        NoteEntityUiModel(
+            markAsDeleted = false,
+          ),
+          NoteEntityUiModel(
             id = 5,
             title = "This is a title for the Note",
             content = "This is content For the Note",
@@ -695,10 +698,11 @@ private val noteListUiModel = NoteListUiModel(
             lastEditedAt = "20th Apr",
             uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
             synced = true,
-            markAsDeleted = false
+            markAsDeleted = false,
+          ),
         )
-    ).toPersistentList(),
+        .toPersistentList(),
     noteLongClickedUuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
     showSyncProgress = true,
-    isConnected = true
-)
+    isConnected = true,
+  )

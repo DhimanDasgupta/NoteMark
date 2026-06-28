@@ -10,162 +10,181 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 interface NoteMarkLocalDataSource {
-    fun getNotesFromOffSetWithLimitAsList(limit: Long = 10L, offset: Long): List<NoteEntity>
-    fun getNotesFromOffSetWithLimit(limit: Long = 10L, offset: Long): Flow<List<NoteEntity>>
-    fun getAllNotes(): Flow<List<NoteEntity>>
-    suspend fun getAllNonSyncedNotes(): List<NoteEntity>
-    suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity>
-    suspend fun getNoteById(noteId: Long): NoteEntity?
-    suspend fun getNoteByUUID(uuid: String): NoteEntity?
-    suspend fun createNote(noteEntity: NoteEntity): NoteEntity?
-    suspend fun updateNote(
-        title: String,
-        content: String,
-        lastEditedAt: String,
-        uuid: String,
-        synced: Boolean
-    ): NoteEntity?
+  fun getNotesFromOffSetWithLimitAsList(limit: Long = 10L, offset: Long): List<NoteEntity>
 
-    suspend fun insertNote(noteEntity: NoteEntity): Boolean
-    suspend fun insertNotes(noteEntities: List<NoteEntity>): Boolean
-    suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean
-    suspend fun deleteNote(noteEntity: NoteEntity): Boolean
-    suspend fun deleteAllNotes(): Boolean
+  fun getNotesFromOffSetWithLimit(limit: Long = 10L, offset: Long): Flow<List<NoteEntity>>
+
+  fun getAllNotes(): Flow<List<NoteEntity>>
+
+  suspend fun getAllNonSyncedNotes(): List<NoteEntity>
+
+  suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity>
+
+  suspend fun getNoteById(noteId: Long): NoteEntity?
+
+  suspend fun getNoteByUUID(uuid: String): NoteEntity?
+
+  suspend fun createNote(noteEntity: NoteEntity): NoteEntity?
+
+  suspend fun updateNote(
+    title: String,
+    content: String,
+    lastEditedAt: String,
+    uuid: String,
+    synced: Boolean,
+  ): NoteEntity?
+
+  suspend fun insertNote(noteEntity: NoteEntity): Boolean
+
+  suspend fun insertNotes(noteEntities: List<NoteEntity>): Boolean
+
+  suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean
+
+  suspend fun deleteNote(noteEntity: NoteEntity): Boolean
+
+  suspend fun deleteAllNotes(): Boolean
 }
 
 class NoteMarkLocalDataSourceImpl(
-    database: NoteMarkDatabase,
-    private val applicationDispatcher: CoroutineDispatcher
+  database: NoteMarkDatabase,
+  private val applicationDispatcher: CoroutineDispatcher,
 ) : NoteMarkLocalDataSource {
-    private val queries = database.noteMarkDatabaseQueries
-    
-    override fun getNotesFromOffSetWithLimitAsList(
-        limit: Long,
-        offset: Long
-    ): List<NoteEntity> = queries.getNotesFromOffSetWithLimit(limit = limit, offset = offset)
-        .executeAsList()
+  private val queries = database.noteMarkDatabaseQueries
 
-    override fun getNotesFromOffSetWithLimit(
-        limit: Long,
-        offset: Long
-    ): Flow<List<NoteEntity>> = queries.getNotesFromOffSetWithLimit(limit = limit, offset = offset)
-        .asFlow()
-        .mapToList(context = applicationDispatcher)
+  override fun getNotesFromOffSetWithLimitAsList(
+    limit: Long,
+    offset: Long,
+  ): List<NoteEntity> =
+    queries.getNotesFromOffSetWithLimit(limit = limit, offset = offset).executeAsList()
 
-    override fun getAllNotes(): Flow<List<NoteEntity>> = queries.getAllNotes()
-        .asFlow()
-        .mapToList(context = applicationDispatcher)
+  override fun getNotesFromOffSetWithLimit(
+    limit: Long,
+    offset: Long,
+  ): Flow<List<NoteEntity>> =
+    queries
+      .getNotesFromOffSetWithLimit(limit = limit, offset = offset)
+      .asFlow()
+      .mapToList(context = applicationDispatcher)
 
-    override suspend fun getAllNonSyncedNotes(): List<NoteEntity> =
-        withContext(context = applicationDispatcher) {
-            return@withContext queries.getAllNonSyncedNotes().executeAsList()
-        }
+  override fun getAllNotes(): Flow<List<NoteEntity>> =
+    queries.getAllNotes().asFlow().mapToList(context = applicationDispatcher)
 
-    override suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity> =
-        withContext(context = applicationDispatcher) {
-            return@withContext queries.getAllDeletedNotes().executeAsList()
-        }
-
-    override suspend fun getNoteById(noteId: Long): NoteEntity? =
-        withContext(context = applicationDispatcher) {
-            return@withContext queries.getNoteById(noteId).executeAsOneOrNull()
-        }
-
-    override suspend fun getNoteByUUID(uuid: String): NoteEntity? =
-        withContext(context = applicationDispatcher) {
-            return@withContext queries.getNoteByUUID(uuid).executeAsOneOrNull()
-        }
-
-    override suspend fun updateNote(
-        title: String,
-        content: String,
-        lastEditedAt: String,
-        uuid: String,
-        synced: Boolean
-    ): NoteEntity = withContext(context = applicationDispatcher + NonCancellable) {
-        val result = queries.updateNote(
-            title = title,
-            content = content,
-            lastEditedAt = lastEditedAt,
-            synced = synced,
-            uuid = uuid,
-        )
-
-        return@withContext (if (result == 1L) {
-            queries.getNoteByUUID(uuid).executeAsOne()
-        } else {
-            null
-        }) as NoteEntity
+  override suspend fun getAllNonSyncedNotes(): List<NoteEntity> =
+    withContext(context = applicationDispatcher) {
+      return@withContext queries.getAllNonSyncedNotes().executeAsList()
     }
 
-    override suspend fun createNote(noteEntity: NoteEntity): NoteEntity =
-        withContext(context = applicationDispatcher + NonCancellable) {
-            val result = queries.insertNote(
-                title = noteEntity.title,
-                content = noteEntity.content,
-                createdAt = noteEntity.createdAt,
-                lastEditedAt = noteEntity.lastEditedAt,
-                uuid = noteEntity.uuid,
-                synced = false
-            )
+  override suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity> =
+    withContext(context = applicationDispatcher) {
+      return@withContext queries.getAllDeletedNotes().executeAsList()
+    }
 
-            return@withContext (if (result == 1L) {
-                noteEntity
-            } else {
-                null
-            }) as NoteEntity
-        }
+  override suspend fun getNoteById(noteId: Long): NoteEntity? =
+    withContext(context = applicationDispatcher) {
+      return@withContext queries.getNoteById(noteId).executeAsOneOrNull()
+    }
 
-    override suspend fun insertNote(noteEntity: NoteEntity): Boolean =
-        withContext(context = applicationDispatcher + NonCancellable) {
-            val result = queries.transactionWithResult {
-                queries.insertNote(
-                    title = noteEntity.title,
-                    content = noteEntity.content,
-                    createdAt = noteEntity.createdAt,
-                    lastEditedAt = noteEntity.lastEditedAt,
-                    uuid = noteEntity.uuid,
-                    synced = false
-                )
-                return@transactionWithResult true
-            }
-            return@withContext result
-        }
+  override suspend fun getNoteByUUID(uuid: String): NoteEntity? =
+    withContext(context = applicationDispatcher) {
+      return@withContext queries.getNoteByUUID(uuid).executeAsOneOrNull()
+    }
 
-    override suspend fun insertNotes(noteEntities: List<NoteEntity>) =
-        withContext(context = applicationDispatcher + NonCancellable) {
-            val result = queries.transactionWithResult {
-                noteEntities.forEach { noteEntity ->
-                    queries.insertNote(
-                        title = noteEntity.title,
-                        content = noteEntity.content,
-                        createdAt = noteEntity.createdAt,
-                        lastEditedAt = noteEntity.lastEditedAt,
-                        uuid = noteEntity.uuid,
-                        synced = false
-                    )
-                }
-                return@transactionWithResult true
-            }
-            return@withContext result
-        }
+  override suspend fun updateNote(
+    title: String,
+    content: String,
+    lastEditedAt: String,
+    uuid: String,
+    synced: Boolean,
+  ): NoteEntity =
+    withContext(context = applicationDispatcher + NonCancellable) {
+      val result =
+        queries.updateNote(
+          title = title,
+          content = content,
+          lastEditedAt = lastEditedAt,
+          synced = synced,
+          uuid = uuid,
+        )
 
-    override suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean =
-        withContext(context = applicationDispatcher + NonCancellable) {
-            val result = queries.markNoteAsDeletedByUUID(uuid = noteEntity.uuid)
-            return@withContext result == 1L
-        }
+      return@withContext (if (result == 1L) {
+        queries.getNoteByUUID(uuid).executeAsOne()
+      } else {
+        null
+      })
+        as NoteEntity
+    }
 
-    override suspend fun deleteNote(noteEntity: NoteEntity) =
-        withContext(context = applicationDispatcher + NonCancellable) {
-            val result = queries.deleteNoteByUUID(uuid = noteEntity.uuid)
-            return@withContext result == 1L
-        }
+  override suspend fun createNote(noteEntity: NoteEntity): NoteEntity =
+    withContext(context = applicationDispatcher + NonCancellable) {
+      val result =
+        queries.insertNote(
+          title = noteEntity.title,
+          content = noteEntity.content,
+          createdAt = noteEntity.createdAt,
+          lastEditedAt = noteEntity.lastEditedAt,
+          uuid = noteEntity.uuid,
+          synced = false,
+        )
 
-    override suspend fun deleteAllNotes() = withContext(context = applicationDispatcher + NonCancellable) {
-        val result = queries.transactionWithResult {
-            queries.deleteAll()
+      return@withContext (if (result == 1L) {
+        noteEntity
+      } else {
+        null
+      })
+        as NoteEntity
+    }
+
+  override suspend fun insertNote(noteEntity: NoteEntity): Boolean =
+    withContext(context = applicationDispatcher + NonCancellable) {
+      val result = queries.transactionWithResult {
+        queries.insertNote(
+          title = noteEntity.title,
+          content = noteEntity.content,
+          createdAt = noteEntity.createdAt,
+          lastEditedAt = noteEntity.lastEditedAt,
+          uuid = noteEntity.uuid,
+          synced = false,
+        )
+        return@transactionWithResult true
+      }
+      return@withContext result
+    }
+
+  override suspend fun insertNotes(noteEntities: List<NoteEntity>) =
+    withContext(context = applicationDispatcher + NonCancellable) {
+      val result = queries.transactionWithResult {
+        noteEntities.forEach { noteEntity ->
+          queries.insertNote(
+            title = noteEntity.title,
+            content = noteEntity.content,
+            createdAt = noteEntity.createdAt,
+            lastEditedAt = noteEntity.lastEditedAt,
+            uuid = noteEntity.uuid,
+            synced = false,
+          )
         }
-        return@withContext result == 1L
+        return@transactionWithResult true
+      }
+      return@withContext result
+    }
+
+  override suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean =
+    withContext(context = applicationDispatcher + NonCancellable) {
+      val result = queries.markNoteAsDeletedByUUID(uuid = noteEntity.uuid)
+      return@withContext result == 1L
+    }
+
+  override suspend fun deleteNote(noteEntity: NoteEntity) =
+    withContext(context = applicationDispatcher + NonCancellable) {
+      val result = queries.deleteNoteByUUID(uuid = noteEntity.uuid)
+      return@withContext result == 1L
+    }
+
+  override suspend fun deleteAllNotes() =
+    withContext(context = applicationDispatcher + NonCancellable) {
+      val result = queries.transactionWithResult {
+        queries.deleteAll()
+      }
+      return@withContext result == 1L
     }
 }

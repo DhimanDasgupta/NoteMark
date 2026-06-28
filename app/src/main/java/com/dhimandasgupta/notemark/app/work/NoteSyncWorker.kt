@@ -26,119 +26,125 @@ import org.koin.java.KoinJavaComponent.inject
 private const val DELAY_IN_BETWEEN_EVERY_NOTE = 10L
 
 class NoteSyncWorker(
-    context: Context,
-    workerParameters: WorkerParameters
+  context: Context,
+  workerParameters: WorkerParameters,
 ) : CoroutineWorker(appContext = context, params = workerParameters), KoinComponent {
-    private val applicationDispatcher: CoroutineDispatcher by inject(qualifier = named(name = APP_BACKGROUND_DISPATCHER))
-    private val syncRepository: SyncRepository by inject(clazz = SyncRepository::class.java)
-    private val noteMarkRepository: NoteMarkRepository by inject(clazz = NoteMarkRepository::class.java)
-    private val userRepository: UserRepository by inject(clazz = UserRepository::class.java)
+  private val applicationDispatcher: CoroutineDispatcher by
+    inject(qualifier = named(name = APP_BACKGROUND_DISPATCHER))
+  private val syncRepository: SyncRepository by inject(clazz = SyncRepository::class.java)
+  private val noteMarkRepository: NoteMarkRepository by
+    inject(clazz = NoteMarkRepository::class.java)
+  private val userRepository: UserRepository by inject(clazz = UserRepository::class.java)
 
-    override suspend fun doWork(): Result = withContext(applicationDispatcher) {
-        try {
-            syncRepository.saveSyncing(isSyncing = true)
+  override suspend fun doWork(): Result =
+    withContext(applicationDispatcher) {
+      try {
+        syncRepository.saveSyncing(isSyncing = true)
 
-            // Fetch all Remote notes.
-            noteMarkRepository.getRemoteNotes().fold(
-                onSuccess = { noteResponse ->
-                    executeSuccess(noteResponse)
-                    Result.success()
-                },
-                onFailure = { throwable ->
-                    if (throwable is AuthenticationException) {
-                        userRepository.deleteUser()
-                    }
-                    Result.failure()
-                }
-            )
-        } catch (_: Exception) {
-            coroutineContext.ensureActive()
-            Result.failure()
-        } finally {
-            syncRepository.saveSyncing(isSyncing = false)
-        }
+        // Fetch all Remote notes.
+        noteMarkRepository
+          .getRemoteNotes()
+          .fold(
+            onSuccess = { noteResponse ->
+              executeSuccess(noteResponse)
+              Result.success()
+            },
+            onFailure = { throwable ->
+              if (throwable is AuthenticationException) {
+                userRepository.deleteUser()
+              }
+              Result.failure()
+            },
+          )
+      } catch (_: Exception) {
+        coroutineContext.ensureActive()
+        Result.failure()
+      } finally {
+        syncRepository.saveSyncing(isSyncing = false)
+      }
     }
 
-    private suspend fun executeSuccess(noteResponse: NoteResponse) = supervisorScope {
+  private suspend fun executeSuccess(noteResponse: NoteResponse) = supervisorScope {
 
-        // Delete all Remote notes waiting to be deleted.
-        val deleteNotesDeferred = async {
-            val toBeDeletedNotes = noteMarkRepository.getAllMarkedAsDeletedNotes()
-            deleteNotes(toBeDeletedNotes)
-        }
-
-        // Update or Upload all Local notes.
-        val updateOrUploadNotesDeferred = async {
-            val toBeSyncedNotes = noteMarkRepository.getAllNonSyncedNotes()
-            updateOrUploadNotes(
-                remoteNotes = noteResponse.notes,
-                notes = toBeSyncedNotes
-            )
-        }
-
-        deleteNotesDeferred.await()
-        updateOrUploadNotesDeferred.await()
-
-        // Insert all Remote notes.
-        noteMarkRepository.getRemoteNotesAndSaveInDB()
-
-        syncRepository.saveLastUploadedTime(uploadedTime = getCurrentIso8601Timestamp())
-        syncRepository.saveLastDownloadedTime(downLoadedTime = getCurrentIso8601Timestamp())
+    // Delete all Remote notes waiting to be deleted.
+    val deleteNotesDeferred = async {
+      val toBeDeletedNotes = noteMarkRepository.getAllMarkedAsDeletedNotes()
+      deleteNotes(toBeDeletedNotes)
     }
 
-    private suspend fun updateOrUploadNotes(
-        remoteNotes: List<Note>,
-        notes: List<NoteEntity>
-    ) {
-        notes.forEach { note ->
-            when (remoteNotes.find { remoteNote -> remoteNote.uuid == note.uuid }) {
-                null -> uploadNote(note)
-                else -> updateNote(note)
-            }
-            delay(timeMillis = DELAY_IN_BETWEEN_EVERY_NOTE) // Just some delay for testing
-        }
+    // Update or Upload all Local notes.
+    val updateOrUploadNotesDeferred = async {
+      val toBeSyncedNotes = noteMarkRepository.getAllNonSyncedNotes()
+      updateOrUploadNotes(
+        remoteNotes = noteResponse.notes,
+        notes = toBeSyncedNotes,
+      )
     }
 
-    private suspend fun updateNote(note: NoteEntity) = supervisorScope {
-        val uploaded = noteMarkRepository.updateRemoteNote(
-            title = note.title,
-            content = note.content,
-            lastEditedAt = note.lastEditedAt,
-            noteEntity = note
-        )
-        if (uploaded) {
-            noteMarkRepository.updateLocalNote(
-                title = note.title,
-                content = note.content,
-                lastEditedAt = note.lastEditedAt,
-                noteEntity = note.copy(synced = true)
-            )
-        }
-    }
+    deleteNotesDeferred.await()
+    updateOrUploadNotesDeferred.await()
 
-    private suspend fun uploadNote(note: NoteEntity) = supervisorScope {
-        val uploaded = noteMarkRepository.createNewRemoteNote(noteEntity = note)
-        if (uploaded) {
-            noteMarkRepository.updateLocalNote(
-                title = note.title,
-                content = note.content,
-                lastEditedAt = note.lastEditedAt,
-                noteEntity = note.copy(synced = true)
-            )
-        }
-    }
+    // Insert all Remote notes.
+    noteMarkRepository.getRemoteNotesAndSaveInDB()
 
-    private suspend fun deleteNotes(notes: List<NoteEntity>) {
-        notes.forEach { note ->
-            deleteNote(note)
-            delay(timeMillis = DELAY_IN_BETWEEN_EVERY_NOTE) // Just some delay for testing
-        }
-    }
+    syncRepository.saveLastUploadedTime(uploadedTime = getCurrentIso8601Timestamp())
+    syncRepository.saveLastDownloadedTime(downLoadedTime = getCurrentIso8601Timestamp())
+  }
 
-    private suspend fun deleteNote(note: NoteEntity) = supervisorScope {
-        val deleted = noteMarkRepository.deleteRemoteNote(noteEntity = note)
-        if (deleted) {
-            noteMarkRepository.deleteLocalNote(noteEntity = note)
-        }
+  private suspend fun updateOrUploadNotes(
+    remoteNotes: List<Note>,
+    notes: List<NoteEntity>,
+  ) {
+    notes.forEach { note ->
+      when (remoteNotes.find { remoteNote -> remoteNote.uuid == note.uuid }) {
+        null -> uploadNote(note)
+        else -> updateNote(note)
+      }
+      delay(timeMillis = DELAY_IN_BETWEEN_EVERY_NOTE) // Just some delay for testing
     }
+  }
+
+  private suspend fun updateNote(note: NoteEntity) = supervisorScope {
+    val uploaded =
+      noteMarkRepository.updateRemoteNote(
+        title = note.title,
+        content = note.content,
+        lastEditedAt = note.lastEditedAt,
+        noteEntity = note,
+      )
+    if (uploaded) {
+      noteMarkRepository.updateLocalNote(
+        title = note.title,
+        content = note.content,
+        lastEditedAt = note.lastEditedAt,
+        noteEntity = note.copy(synced = true),
+      )
+    }
+  }
+
+  private suspend fun uploadNote(note: NoteEntity) = supervisorScope {
+    val uploaded = noteMarkRepository.createNewRemoteNote(noteEntity = note)
+    if (uploaded) {
+      noteMarkRepository.updateLocalNote(
+        title = note.title,
+        content = note.content,
+        lastEditedAt = note.lastEditedAt,
+        noteEntity = note.copy(synced = true),
+      )
+    }
+  }
+
+  private suspend fun deleteNotes(notes: List<NoteEntity>) {
+    notes.forEach { note ->
+      deleteNote(note)
+      delay(timeMillis = DELAY_IN_BETWEEN_EVERY_NOTE) // Just some delay for testing
+    }
+  }
+
+  private suspend fun deleteNote(note: NoteEntity) = supervisorScope {
+    val deleted = noteMarkRepository.deleteRemoteNote(noteEntity = note)
+    if (deleted) {
+      noteMarkRepository.deleteLocalNote(noteEntity = note)
+    }
+  }
 }

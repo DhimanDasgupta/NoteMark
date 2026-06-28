@@ -24,70 +24,67 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Immutable
 data class LoginUiModel(
-    val email: String = "",
-    val password: String = "",
-    val emailError: String? = null,
-    val passwordError: String? = null,
-    val loginEnabled: Boolean = false,
-    val loginSuccess: Boolean? = null
+  val email: String = "",
+  val password: String = "",
+  val emailError: String? = null,
+  val passwordError: String? = null,
+  val loginEnabled: Boolean = false,
+  val loginSuccess: Boolean? = null,
 ) {
-    companion object {
-        val defaultOrEmpty = LoginUiModel()
-    }
+  companion object {
+    val defaultOrEmpty = LoginUiModel()
+  }
 }
 
 @Stable
-class LoginPresenter(
-    private val loginStateMachineFactory: LoginStateMachineFactory
-) {
-    private val actions = MutableSharedFlow<LoginAction>(extraBufferCapacity = 10)
+class LoginPresenter(private val loginStateMachineFactory: LoginStateMachineFactory) {
+  private val actions = MutableSharedFlow<LoginAction>(extraBufferCapacity = 10)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Composable
-    fun uiModel(): LoginUiModel {
-        var loginUiModel by remember(key1 = Unit) { mutableStateOf(value = LoginUiModel.defaultOrEmpty) }
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Composable
+  fun uiModel(): LoginUiModel {
+    var loginUiModel by
+      remember(key1 = Unit) { mutableStateOf(value = LoginUiModel.defaultOrEmpty) }
 
-        // Receives the State from the StateMachine
-        LaunchedEffect(key1 = Unit) {
-            val loginStateMachine = loginStateMachineFactory.launchIn(this)
+    // Receives the State from the StateMachine
+    LaunchedEffect(key1 = Unit) {
+      val loginStateMachine = loginStateMachineFactory.launchIn(this)
 
-            launch {
-                loginStateMachine.state
-                    .onStart { emit(value = LoginStateMachineFactory.defaultLoginState) }
-                    .mapLatest { loginState ->
-                        loginUiModel = loginUiModel.mapToLoginUiModel(loginState)
-                    }
-                    .cancellable()
-                    .catch { throwable ->
-                        if (throwable is CancellationException) throw throwable
-                        // else can can be something like page level error etc.
-                    }
-                    .flowOn(context = Dispatchers.Default)
-                    .collect()
-            }
+      launch {
+        loginStateMachine.state
+          .onStart { emit(value = LoginStateMachineFactory.defaultLoginState) }
+          .mapLatest { loginState ->
+            loginUiModel = loginUiModel.mapToLoginUiModel(loginState)
+          }
+          .cancellable()
+          .catch { throwable ->
+            if (throwable is CancellationException) throw throwable
+            // else can can be something like page level error etc.
+          }
+          .flowOn(context = Dispatchers.Default)
+          .collect()
+      }
 
-            // Send the Events to the State Machine through Actions
-            launch {
-                actions.collect { loginAction ->
-                    loginStateMachine.dispatch(loginAction)
-                }
-            }
+      // Send the Events to the State Machine through Actions
+      launch {
+        actions.collect { loginAction ->
+          loginStateMachine.dispatch(loginAction)
         }
-
-        return loginUiModel
+      }
     }
 
-    fun dispatchAction(action: LoginAction) =
-        actions.tryEmit(value = action)
+    return loginUiModel
+  }
+
+  fun dispatchAction(action: LoginAction) = actions.tryEmit(value = action)
 }
 
-private fun LoginUiModel.mapToLoginUiModel(
-    loginState: LoginState
-) = copy(
+private fun LoginUiModel.mapToLoginUiModel(loginState: LoginState) =
+  copy(
     email = loginState.email,
     password = loginState.password,
     emailError = loginState.emailError,
     passwordError = loginState.passwordError,
     loginEnabled = loginState.loginEnabled,
-    loginSuccess = loginState.loginSuccess
-)
+    loginSuccess = loginState.loginSuccess,
+  )

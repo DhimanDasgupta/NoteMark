@@ -22,44 +22,45 @@ import org.koin.java.KoinJavaComponent.get
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun EntryProviderScope<NavKey>.NoteCreateEntryBuilder(
-    modifier: Modifier,
-    navigateUp: () -> Unit
+  modifier: Modifier,
+  navigateUp: () -> Unit,
 ) {
-    entry<NoteCreateNavKey>(
-        metadata = ListDetailSceneStrategy.detailPane()
-    ) {
-        val addNotePresenter: AddNotePresenter = retain { get(clazz = AddNotePresenter::class.java) }
+  entry<NoteCreateNavKey>(metadata = ListDetailSceneStrategy.detailPane()) {
+    val addNotePresenter: AddNotePresenter = retain { get(clazz = AddNotePresenter::class.java) }
 
-        AddNoteEntry(
-            modifier = modifier,
-            addNotePresenter = addNotePresenter,
-            navigateUp = navigateUp
-        )
-    }
+    AddNoteEntry(
+      modifier = modifier,
+      addNotePresenter = addNotePresenter,
+      navigateUp = navigateUp,
+    )
+  }
 }
 
 @Composable
 private fun AddNoteEntry(
-    modifier: Modifier = Modifier,
-    addNotePresenter: AddNotePresenter,
-    navigateUp: () -> Unit
+  modifier: Modifier = Modifier,
+  addNotePresenter: AddNotePresenter,
+  navigateUp: () -> Unit,
 ) {
-    var addNoteUiModel by rememberSerializable { mutableStateOf(value = AddNoteUiModel.defaultOrEmpty) }
-    val addNoteAction by rememberUpdatedState(newValue = addNotePresenter::dispatchAction)
+  var addNoteUiModel by rememberSerializable {
+    mutableStateOf(value = AddNoteUiModel.defaultOrEmpty)
+  }
+  val addNoteAction by rememberUpdatedState(newValue = addNotePresenter::dispatchAction)
 
-    LaunchedEffect(key1 = Unit) {
-        launchMolecule(mode = RecompositionMode.Immediate) {
-            addNotePresenter.uiModel()
-        }.collectLatest { model ->
-            addNoteUiModel = model
-        }
-    }
+  LaunchedEffect(key1 = Unit) {
+    launchMolecule(mode = RecompositionMode.Immediate) {
+        addNotePresenter.uiModel()
+      }
+      .collectLatest { model ->
+        addNoteUiModel = model
+      }
+  }
 
-    // UI data, actions, navigation and events passing to UI
-    AddNotePane(
-        modifier = modifier,
-        addNoteUiModel = { addNoteUiModel },
-        addNoteAction = { action -> addNoteAction(action) },
-        onBackClicked = { navigateUp() }
-    )
+  // UI data, actions, navigation and events passing to UI
+  AddNotePane(
+    modifier = modifier,
+    addNoteUiModel = { addNoteUiModel },
+    addNoteAction = { action -> addNoteAction(action) },
+    onBackClicked = { navigateUp() },
+  )
 }

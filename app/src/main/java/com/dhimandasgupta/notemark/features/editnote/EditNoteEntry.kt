@@ -23,49 +23,50 @@ import org.koin.java.KoinJavaComponent.get
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun EntryProviderScope<NavKey>.NoteEditEntryBuilder(
-    modifier: Modifier,
-    navigateUp: () -> Unit
+  modifier: Modifier,
+  navigateUp: () -> Unit,
 ) {
-    entry<NoteEditNavKey>(
-        metadata = ListDetailSceneStrategy.detailPane()
-    ) { noteEditNavKey ->
-        val editNotePresenter: EditNotePresenter = retain {
-            get(
-                clazz = EditNotePresenter::class.java,
-                parameters = { parametersOf(noteEditNavKey.noteId) }
-            )
-        }
-
-        EditNoteEntry(
-            modifier = modifier,
-            editNotePresenter = editNotePresenter,
-            navigateUp = navigateUp
-        )
+  entry<NoteEditNavKey>(metadata = ListDetailSceneStrategy.detailPane()) { noteEditNavKey ->
+    val editNotePresenter: EditNotePresenter = retain {
+      get(
+        clazz = EditNotePresenter::class.java,
+        parameters = { parametersOf(noteEditNavKey.noteId) },
+      )
     }
+
+    EditNoteEntry(
+      modifier = modifier,
+      editNotePresenter = editNotePresenter,
+      navigateUp = navigateUp,
+    )
+  }
 }
 
 @Composable
 private fun EditNoteEntry(
-    modifier: Modifier = Modifier,
-    editNotePresenter: EditNotePresenter,
-    navigateUp: () -> Unit
+  modifier: Modifier = Modifier,
+  editNotePresenter: EditNotePresenter,
+  navigateUp: () -> Unit,
 ) {
-    var editNoteUiModel by rememberSerializable { mutableStateOf(value = EditNoteUiModel.defaultOrEmpty) }
-    val editNoteAction by rememberUpdatedState(newValue = editNotePresenter::dispatchAction)
+  var editNoteUiModel by rememberSerializable {
+    mutableStateOf(value = EditNoteUiModel.defaultOrEmpty)
+  }
+  val editNoteAction by rememberUpdatedState(newValue = editNotePresenter::dispatchAction)
 
-    LaunchedEffect(key1 = Unit) {
-        launchMolecule(mode = RecompositionMode.Immediate) {
-            editNotePresenter.uiModel()
-        }.collectLatest { model ->
-            editNoteUiModel = model
-        }
-    }
+  LaunchedEffect(key1 = Unit) {
+    launchMolecule(mode = RecompositionMode.Immediate) {
+        editNotePresenter.uiModel()
+      }
+      .collectLatest { model ->
+        editNoteUiModel = model
+      }
+  }
 
-    // UI data, actions, navigation and events passing to UI
-    EditNotePane(
-        modifier = modifier,
-        editNoteUiModel = { editNoteUiModel },
-        editNoteAction = { action -> editNoteAction(action) },
-        onCloseClicked = { navigateUp() }
-    )
+  // UI data, actions, navigation and events passing to UI
+  EditNotePane(
+    modifier = modifier,
+    editNoteUiModel = { editNoteUiModel },
+    editNoteAction = { action -> editNoteAction(action) },
+    onCloseClicked = { navigateUp() },
+  )
 }

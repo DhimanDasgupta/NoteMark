@@ -55,11 +55,11 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
-import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType
 import com.dhimandasgupta.notemark.common.extensions.compose.alignToSafeDrawing
 import com.dhimandasgupta.notemark.common.extensions.compose.getDeviceLayoutType
 import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
+import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
@@ -69,262 +69,281 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun AddNotePane(
-    modifier: Modifier = Modifier,
-    addNoteUiModel: () -> AddNoteUiModel,
-    addNoteAction: (AddNoteAction) -> Unit = {},
-    onBackClicked: () -> Unit = {}
+  modifier: Modifier = Modifier,
+  addNoteUiModel: () -> AddNoteUiModel,
+  addNoteAction: (AddNoteAction) -> Unit = {},
+  onBackClicked: () -> Unit = {},
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusManager = LocalFocusManager.current
+  val keyboardController = LocalSoftwareKeyboardController.current
+  val focusManager = LocalFocusManager.current
 
-    val context = LocalActivity.current
-    SideEffect { context?.setDarkStatusBarIcons(true) }
+  val context = LocalActivity.current
+  SideEffect { context?.setDarkStatusBarIcons(true) }
 
-    val updatedAddNoteUiModel by rememberUpdatedState(newValue = addNoteUiModel)
+  val updatedAddNoteUiModel by rememberUpdatedState(newValue = addNoteUiModel)
 
-    LaunchedEffect(key1 = Unit) {
-        snapshotFlow { updatedAddNoteUiModel().saved }
-            .filter { isSaved -> isSaved == true }
-            .collect { isSaved ->
-                if (isSaved == true) {
-                    focusManager.clearFocus()
-                    keyboardController?.hide()
-                    onBackClicked()
-                }
-            }
-    }
+  LaunchedEffect(key1 = Unit) {
+    snapshotFlow { updatedAddNoteUiModel().saved }
+      .filter { isSaved -> isSaved == true }
+      .collect { isSaved ->
+        if (isSaved == true) {
+          focusManager.clearFocus()
+          keyboardController?.hide()
+          onBackClicked()
+        }
+      }
+  }
 
-    val layoutType = getDeviceLayoutType()
+  val layoutType = getDeviceLayoutType()
 
-    Column(
-        modifier = modifier
-            .background(color = colorScheme.surfaceContainerLowest)
-            .fillMaxWidth()
-            .wrapContentHeight(align = Alignment.Top),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        AddNoteToolbar(
-            modifier = Modifier.wrapContentHeight(align = Alignment.Top),
-            onBackClicked = onBackClicked,
-            onSaveClicked = {
-                focusManager.clearFocus()
-                keyboardController?.hide()
-                addNoteAction(AddNoteAction.Save)
-            }
-        )
+  Column(
+    modifier =
+      modifier
+        .background(color = colorScheme.surfaceContainerLowest)
+        .fillMaxWidth()
+        .wrapContentHeight(align = Alignment.Top),
+    horizontalAlignment = Alignment.CenterHorizontally,
+  ) {
+    AddNoteToolbar(
+      modifier = Modifier.wrapContentHeight(align = Alignment.Top),
+      onBackClicked = onBackClicked,
+      onSaveClicked = {
+        focusManager.clearFocus()
+        keyboardController?.hide()
+        addNoteAction(AddNoteAction.Save)
+      },
+    )
 
-        AddNoteBody(
-            modifier = Modifier
-                .fillMaxWidth(
-                    fraction = when (layoutType) {
-                        DeviceLayoutType.PHONE_PORTRAIT -> 1f
-                        DeviceLayoutType.PHONE_LANDSCAPE -> 0.9f
-                        else -> 0.85f
-                    }
-                )
-                .fillMaxHeight(fraction = 1f),
-            addNoteUiModel = updatedAddNoteUiModel,
-            addNoteAction = addNoteAction
-        )
-    }
+    AddNoteBody(
+      modifier =
+        Modifier.fillMaxWidth(
+            fraction =
+              when (layoutType) {
+                DeviceLayoutType.PHONE_PORTRAIT -> 1f
+                DeviceLayoutType.PHONE_LANDSCAPE -> 0.9f
+                else -> 0.85f
+              }
+          )
+          .fillMaxHeight(fraction = 1f),
+      addNoteUiModel = updatedAddNoteUiModel,
+      addNoteAction = addNoteAction,
+    )
+  }
 }
 
 @Composable
 private fun AddNoteToolbar(
-    modifier: Modifier = Modifier,
-    onBackClicked: () -> Unit = {},
-    onSaveClicked: () -> Unit = {}
+  modifier: Modifier = Modifier,
+  onBackClicked: () -> Unit = {},
+  onSaveClicked: () -> Unit = {},
 ) {
+  Row(
+    modifier =
+      modifier
+        .background(color = colorScheme.surfaceContainerLowest)
+        .fillMaxWidth()
+        .padding(
+          start =
+            WindowInsets.systemBars
+              .union(insets = WindowInsets.displayCutout)
+              .asPaddingValues()
+              .calculateLeftPadding(LayoutDirection.Ltr) + 0.dp,
+          top =
+            WindowInsets.systemBars
+              .union(insets = WindowInsets.displayCutout)
+              .asPaddingValues()
+              .calculateTopPadding(),
+          end =
+            WindowInsets.systemBars
+              .union(insets = WindowInsets.displayCutout)
+              .asPaddingValues()
+              .calculateEndPadding(LayoutDirection.Ltr) + 16.dp,
+        ),
+    horizontalArrangement = Arrangement.SpaceBetween,
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
     Row(
-        modifier = modifier
-            .background(color = colorScheme.surfaceContainerLowest)
-            .fillMaxWidth()
-            .padding(
-                start = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateLeftPadding(LayoutDirection.Ltr) + 0.dp,
-                top = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateTopPadding(),
-                end = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateEndPadding(LayoutDirection.Ltr) + 16.dp
-            ),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+      modifier = Modifier.lifecycleAwareDebouncedClickable { onBackClicked() },
+      verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            modifier = Modifier.lifecycleAwareDebouncedClickable { onBackClicked() },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_back_arrow),
-                contentDescription = "Settings",
-                tint = colorScheme.primary,
-                modifier = Modifier.requiredSize(size = 32.dp)
-            )
+      Icon(
+        painter = painterResource(id = R.drawable.ic_back_arrow),
+        contentDescription = "Settings",
+        tint = colorScheme.primary,
+        modifier = Modifier.requiredSize(size = 32.dp),
+      )
 
-            Text(
-                text = "All Notes".uppercase(),
-                style = typography.titleSmall,
-                color = colorScheme.primary
-            )
-        }
-
-        Text(
-            text = "Save Note".uppercase(),
-            style = typography.titleSmall,
-            color = colorScheme.primary,
-            modifier = Modifier.lifecycleAwareDebouncedClickable { onSaveClicked() }
-        )
+      Text(
+        text = "All Notes".uppercase(),
+        style = typography.titleSmall,
+        color = colorScheme.primary,
+      )
     }
+
+    Text(
+      text = "Save Note".uppercase(),
+      style = typography.titleSmall,
+      color = colorScheme.primary,
+      modifier = Modifier.lifecycleAwareDebouncedClickable { onSaveClicked() },
+    )
+  }
 }
 
 @OptIn(FlowPreview::class)
 @Composable
 private fun AddNoteBody(
-    modifier: Modifier = Modifier,
-    addNoteUiModel: () -> AddNoteUiModel,
-    addNoteAction: (AddNoteAction) -> Unit = {},
+  modifier: Modifier = Modifier,
+  addNoteUiModel: () -> AddNoteUiModel,
+  addNoteAction: (AddNoteAction) -> Unit = {},
 ) {
-    val focusManager = LocalFocusManager.current
-    val scrollState = rememberScrollState()
+  val focusManager = LocalFocusManager.current
+  val scrollState = rememberScrollState()
 
-    LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
+  LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
-    var title by remember { mutableStateOf(value = addNoteUiModel().title) }
-    var body by remember { mutableStateOf(value = addNoteUiModel().content) }
+  var title by remember { mutableStateOf(value = addNoteUiModel().title) }
+  var body by remember { mutableStateOf(value = addNoteUiModel().content) }
 
-    LaunchedEffect(key1 = Unit) {
-        launch {
-            snapshotFlow { title }
-                .debounce(timeoutMillis = 100)
-                .collectLatest { addNoteAction(AddNoteAction.UpdateTitle(title = title)) }
-        }
-
-        launch {
-            snapshotFlow { body }
-                .debounce(timeoutMillis = 100)
-                .collectLatest { addNoteAction(AddNoteAction.UpdateContent(content = body)) }
-        }
+  LaunchedEffect(key1 = Unit) {
+    launch {
+      snapshotFlow { title }
+        .debounce(timeoutMillis = 100)
+        .collectLatest { addNoteAction(AddNoteAction.UpdateTitle(title = title)) }
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(
-                bottom = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateBottomPadding() + 16.dp
-            ),
-        contentAlignment = Alignment.Center
+    launch {
+      snapshotFlow { body }
+        .debounce(timeoutMillis = 100)
+        .collectLatest { addNoteAction(AddNoteAction.UpdateContent(content = body)) }
+    }
+  }
+
+  Box(
+    modifier =
+      modifier
+        .fillMaxSize()
+        .padding(
+          bottom =
+            WindowInsets.navigationBars
+              .union(insets = WindowInsets.displayCutout)
+              .asPaddingValues()
+              .calculateBottomPadding() + 16.dp
+        ),
+    contentAlignment = Alignment.Center,
+  ) {
+    Column(
+      modifier =
+        modifier
+          .fillMaxWidth()
+          .verticalScroll(scrollState)
+          .padding(
+            start =
+              WindowInsets.navigationBars
+                .union(insets = WindowInsets.displayCutout)
+                .asPaddingValues()
+                .calculateLeftPadding(LayoutDirection.Ltr),
+            end =
+              WindowInsets.navigationBars
+                .union(insets = WindowInsets.displayCutout)
+                .asPaddingValues()
+                .calculateEndPadding(LayoutDirection.Ltr),
+          )
+          .windowInsetsPadding(insets = WindowInsets.ime)
+          .padding(vertical = 16.dp),
+      verticalArrangement = Arrangement.Top,
+      horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .verticalScroll(scrollState)
-                .padding(
-                    start = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
-                        .asPaddingValues()
-                        .calculateLeftPadding(LayoutDirection.Ltr),
-                    end = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
-                        .asPaddingValues()
-                        .calculateEndPadding(LayoutDirection.Ltr)
-                )
-                .windowInsetsPadding(insets = WindowInsets.ime)
-                .padding(vertical = 16.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            TextField(
-                value = title,
-                onValueChange = { value -> title = value },
-                textStyle = typography.titleLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(align = Alignment.Top)
-                    .alignToSafeDrawing(),
-                visualTransformation = VisualTransformation.None,
-                placeholder = { Text(text = "Note title", style = typography.titleLarge) },
-                colors = OutlinedTextFieldDefaults.colors().copy(
-                    focusedTextColor = colorScheme.onSurface,
-                    unfocusedTextColor = colorScheme.onSurface,
-                    focusedContainerColor = colorScheme.surfaceContainerLowest,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent,
-                ),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Unspecified,
-                    imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(
-                    onNext = { focusManager.moveFocus(FocusDirection.Next) }
-                )
-            )
+      TextField(
+        value = title,
+        onValueChange = { value -> title = value },
+        textStyle = typography.titleLarge,
+        modifier =
+          Modifier.fillMaxWidth().wrapContentHeight(align = Alignment.Top).alignToSafeDrawing(),
+        visualTransformation = VisualTransformation.None,
+        placeholder = { Text(text = "Note title", style = typography.titleLarge) },
+        colors =
+          OutlinedTextFieldDefaults.colors()
+            .copy(
+              focusedTextColor = colorScheme.onSurface,
+              unfocusedTextColor = colorScheme.onSurface,
+              focusedContainerColor = colorScheme.surfaceContainerLowest,
+              unfocusedContainerColor = Color.Transparent,
+              focusedIndicatorColor = Color.Transparent,
+              unfocusedIndicatorColor = Color.Transparent,
+              disabledIndicatorColor = Color.Transparent,
+              errorIndicatorColor = Color.Transparent,
+            ),
+        keyboardOptions =
+          KeyboardOptions(
+            keyboardType = KeyboardType.Unspecified,
+            imeAction = ImeAction.Next,
+          ),
+        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Next) }),
+      )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(height = 1.dp)
-                    .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
-            )
+      Box(
+        modifier =
+          Modifier.fillMaxWidth()
+            .height(height = 1.dp)
+            .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
+      )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(height = 1.dp)
-                    .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
-            )
+      Box(
+        modifier =
+          Modifier.fillMaxWidth()
+            .height(height = 1.dp)
+            .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
+      )
 
-            TextField(
-                value = body,
-                onValueChange = { value -> body = value },
-                textStyle = typography.bodyLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(align = Alignment.Top)
-                    .alignToSafeDrawing(),
-                visualTransformation = VisualTransformation.None,
-                placeholder = {
-                    Text(
-                        text = "Tap to enter note content",
-                        style = typography.bodyLarge
-                    )
-                },
-                colors = OutlinedTextFieldDefaults.colors().copy(
-                    focusedTextColor = colorScheme.onSurface,
-                    unfocusedTextColor = colorScheme.onSurface,
-                    focusedContainerColor = colorScheme.surfaceContainerLowest,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent,
-                ),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Unspecified,
-                    imeAction = ImeAction.Unspecified
-                )
-            )
-        }
+      TextField(
+        value = body,
+        onValueChange = { value -> body = value },
+        textStyle = typography.bodyLarge,
+        modifier =
+          Modifier.fillMaxWidth().wrapContentHeight(align = Alignment.Top).alignToSafeDrawing(),
+        visualTransformation = VisualTransformation.None,
+        placeholder = {
+          Text(
+            text = "Tap to enter note content",
+            style = typography.bodyLarge,
+          )
+        },
+        colors =
+          OutlinedTextFieldDefaults.colors()
+            .copy(
+              focusedTextColor = colorScheme.onSurface,
+              unfocusedTextColor = colorScheme.onSurface,
+              focusedContainerColor = colorScheme.surfaceContainerLowest,
+              unfocusedContainerColor = Color.Transparent,
+              focusedIndicatorColor = Color.Transparent,
+              unfocusedIndicatorColor = Color.Transparent,
+              disabledIndicatorColor = Color.Transparent,
+              errorIndicatorColor = Color.Transparent,
+            ),
+        keyboardOptions =
+          KeyboardOptions(
+            keyboardType = KeyboardType.Unspecified,
+            imeAction = ImeAction.Unspecified,
+          ),
+      )
     }
+  }
 }
 
 @WindowSizePreviews
 @Composable
 private fun AddNotePreview() {
-    NoteMarkTheme {
-        AddNotePane(
-            modifier = Modifier,
-            addNoteUiModel = { defaultAddNoteUiModel }
-        )
-    }
+  NoteMarkTheme {
+    AddNotePane(
+      modifier = Modifier,
+      addNoteUiModel = { defaultAddNoteUiModel },
+    )
+  }
 }
 
-private val defaultAddNoteUiModel = AddNoteUiModel(
+private val defaultAddNoteUiModel =
+  AddNoteUiModel(
     title = "Hello there, this is a the title of the Note",
-    content = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
-)
+    content =
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+  )

@@ -10,28 +10,31 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class EditNotePresenterTest {
-    @Test
-    fun `test presenter default state`() = runTest {
-        turbineScope {
-            // Setup Presenter
-            val presenter = EditNotePresenter(
-                noteId = "",
-                editNoteStateMachineFactory = EditNoteStateMachineFactory(
-                    noteMarkRepository = FakeSuccessfulNoteRepository(),
-                    noteId = ""
-                )
-            )
+  @Test
+  fun `test presenter default state`() = runTest {
+    turbineScope {
+      // Setup Presenter
+      val presenter =
+        EditNotePresenter(
+          noteId = "",
+          editNoteStateMachineFactory =
+            EditNoteStateMachineFactory(
+              noteMarkRepository = FakeSuccessfulNoteRepository(),
+              noteId = "",
+            ),
+        )
 
-            // Setup uiModel flow
-            val flow = moleculeFlow(mode = RecompositionMode.Immediate) {
-                presenter.uiModel()
-            }
-
-            // Start flow validation
-            flow.test {
-                val editNoteUiModel = awaitItem()
-                assertEquals(EditNoteUiModel.defaultOrEmpty, editNoteUiModel)
-            }
+      // Setup uiModel flow
+      val flow =
+        moleculeFlow(mode = RecompositionMode.Immediate) {
+          presenter.uiModel()
         }
+
+      // Start flow validation
+      flow.test {
+        val editNoteUiModel = awaitItem()
+        assertEquals(EditNoteUiModel.defaultOrEmpty, editNoteUiModel)
+      }
     }
+  }
 }

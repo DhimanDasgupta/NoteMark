@@ -25,73 +25,74 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Immutable
 data class LauncherUiModel(
-    val connectionState: ConnectionState? = ConnectionState.Unavailable,
-    val loggedInUser: UiUser? = null
+  val connectionState: ConnectionState? = ConnectionState.Unavailable,
+  val loggedInUser: UiUser? = null,
 ) {
-    companion object {
-        val defaultOrEmpty = LauncherUiModel()
-    }
+  companion object {
+    val defaultOrEmpty = LauncherUiModel()
+  }
 }
 
 @Serializable
 @Immutable
 data class UiUser(
-    val userName: String = "",
-    val accessToken: String = "",
-    val refreshToken: String = ""
+  val userName: String = "",
+  val accessToken: String = "",
+  val refreshToken: String = "",
 )
 
 @Stable
-class LauncherPresenter(
-    private val appStateMachineFactory: AppStateMachineFactory
-) {
-    private val actions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
+class LauncherPresenter(private val appStateMachineFactory: AppStateMachineFactory) {
+  private val actions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Composable
-    fun uiModel(): LauncherUiModel {
-        var launcherUiModel by remember(key1 = Unit) { mutableStateOf(value = LauncherUiModel.defaultOrEmpty) }
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Composable
+  fun uiModel(): LauncherUiModel {
+    var launcherUiModel by
+      remember(key1 = Unit) { mutableStateOf(value = LauncherUiModel.defaultOrEmpty) }
 
-        // Receives the State from the StateMachine
-        LaunchedEffect(key1 = Unit) {
-            val appStateMachine = appStateMachineFactory.launchIn(this)
+    // Receives the State from the StateMachine
+    LaunchedEffect(key1 = Unit) {
+      val appStateMachine = appStateMachineFactory.launchIn(this)
 
-            launch {
-                appStateMachine.state
-                    .onStart { emit(value = AppStateMachineFactory.defaultAppState) }
-                    .mapLatest { appState ->
-                        launcherUiModel = launcherUiModel.copy(
-                            connectionState = appState.connectionState,
-                            loggedInUser = when (appState) {
-                                is AppState.NotLoggedIn -> null
-                                is AppState.LoggedIn -> UiUser(
-                                    userName = appState.user.userName,
-                                    accessToken = appState.user.accessToken,
-                                    refreshToken = appState.user.refreshToken
-                                )
-                            }
-                        )
-                    }
-                    .cancellable()
-                    .catch { throwable ->
-                        if (throwable is CancellationException) throw throwable
-                        // else can can be something like page level error etc.
-                    }
-                    .flowOn(context = Dispatchers.Default)
-                    .collect()
-            }
+      launch {
+        appStateMachine.state
+          .onStart { emit(value = AppStateMachineFactory.defaultAppState) }
+          .mapLatest { appState ->
+            launcherUiModel =
+              launcherUiModel.copy(
+                connectionState = appState.connectionState,
+                loggedInUser =
+                  when (appState) {
+                    is AppState.NotLoggedIn -> null
+                    is AppState.LoggedIn ->
+                      UiUser(
+                        userName = appState.user.userName,
+                        accessToken = appState.user.accessToken,
+                        refreshToken = appState.user.refreshToken,
+                      )
+                  },
+              )
+          }
+          .cancellable()
+          .catch { throwable ->
+            if (throwable is CancellationException) throw throwable
+            // else can can be something like page level error etc.
+          }
+          .flowOn(context = Dispatchers.Default)
+          .collect()
+      }
 
-            // Send the Events to the State Machine through Actions
-            launch {
-                actions.collect { event ->
-                    appStateMachine.dispatch(action = event)
-                }
-            }
+      // Send the Events to the State Machine through Actions
+      launch {
+        actions.collect { event ->
+          appStateMachine.dispatch(action = event)
         }
-
-        return launcherUiModel
+      }
     }
 
-    fun dispatchAction(action: AppAction) =
-        actions.tryEmit(value = action)
+    return launcherUiModel
+  }
+
+  fun dispatchAction(action: AppAction) = actions.tryEmit(value = action)
 }

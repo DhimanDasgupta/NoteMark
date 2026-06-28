@@ -18,47 +18,46 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
-class AppPresenter(
-    private val appStateMachineFactory: AppStateMachineFactory
-) {
-    private val actions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
+class AppPresenter(private val appStateMachineFactory: AppStateMachineFactory) {
+  private val actions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Composable
-    fun uiModel(): AppState {
-        var applicationState: AppState by remember(key1 = Unit) { mutableStateOf(value = AppStateMachineFactory.defaultAppState) }
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Composable
+  fun uiModel(): AppState {
+    var applicationState: AppState by
+      remember(key1 = Unit) { mutableStateOf(value = AppStateMachineFactory.defaultAppState) }
 
-        // Receives the State from the StateMachine
-        LaunchedEffect(key1 = Unit) {
-            val appStateMachine = appStateMachineFactory.launchIn(this)
+    // Receives the State from the StateMachine
+    LaunchedEffect(key1 = Unit) {
+      val appStateMachine = appStateMachineFactory.launchIn(this)
 
-            launch {
-                appStateMachine.state
-                    .onStart { emit(value = AppStateMachineFactory.defaultAppState) }
-                    .mapLatest { appState ->
-                        applicationState = appState
-                    }
-                    .cancellable()
-                    .catch { throwable ->
-                        if (throwable is CancellationException) throw throwable
-                        // else can can be something like page level error etc.
-                    }
-                    .flowOn(context = Dispatchers.Default)
-                    .collect()
-            }
+      launch {
+        appStateMachine.state
+          .onStart { emit(value = AppStateMachineFactory.defaultAppState) }
+          .mapLatest { appState ->
+            applicationState = appState
+          }
+          .cancellable()
+          .catch { throwable ->
+            if (throwable is CancellationException) throw throwable
+            // else can can be something like page level error etc.
+          }
+          .flowOn(context = Dispatchers.Default)
+          .collect()
+      }
 
-            // Send the Events to the State Machine through Actions
-            launch {
-                actions.collect { event ->
-                    appStateMachine.dispatch(event)
-                }
-            }
+      // Send the Events to the State Machine through Actions
+      launch {
+        actions.collect { event ->
+          appStateMachine.dispatch(event)
         }
-
-        return applicationState
+      }
     }
 
-    fun dispatchAction(action: AppAction) {
-        actions.tryEmit(value = action)
-    }
+    return applicationState
+  }
+
+  fun dispatchAction(action: AppAction) {
+    actions.tryEmit(value = action)
+  }
 }

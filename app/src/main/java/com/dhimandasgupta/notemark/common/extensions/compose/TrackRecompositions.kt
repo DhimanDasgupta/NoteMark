@@ -16,11 +16,11 @@ val RecompositionCountKey = SemanticsPropertyKey<Int>(name = "RecompositionCount
 var SemanticsPropertyReceiver.recompositionCount by RecompositionCountKey
 
 fun Modifier.trackRecompositions(): Modifier = composed {
-    var recompositions by remember { mutableIntStateOf(0) }
+  var recompositions by remember { mutableIntStateOf(0) }
 
-    SideEffect { recompositions++ }
+  SideEffect { recompositions++ }
 
-    Modifier.semantics {
-        recompositionCount = recompositions
-    }
+  Modifier.semantics {
+    recompositionCount = recompositions
+  }
 }

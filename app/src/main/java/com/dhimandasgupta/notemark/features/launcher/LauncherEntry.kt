@@ -20,57 +20,61 @@ import org.koin.java.KoinJavaComponent.get
 
 @Composable
 fun EntryProviderScope<NavKey>.LauncherEntryBuilder(
-    modifier: Modifier = Modifier,
-    navigateAfterLogin: () -> Unit,
-    navigateToLogin: () -> Unit
+  modifier: Modifier = Modifier,
+  navigateAfterLogin: () -> Unit,
+  navigateToLogin: () -> Unit,
 ) {
-    entry<LauncherNavKey> {
-        val launcherPresenter: LauncherPresenter = retain { get(clazz = LauncherPresenter::class.java) }
+  entry<LauncherNavKey> {
+    val launcherPresenter: LauncherPresenter = retain { get(clazz = LauncherPresenter::class.java) }
 
-        LauncherEntry(
-            modifier = modifier,
-            launcherPresenter = launcherPresenter,
-            navigateAfterLogin = navigateAfterLogin,
-            navigateToLogin = navigateToLogin
-        )
-    }
+    LauncherEntry(
+      modifier = modifier,
+      launcherPresenter = launcherPresenter,
+      navigateAfterLogin = navigateAfterLogin,
+      navigateToLogin = navigateToLogin,
+    )
+  }
 }
 
 @Composable
 private fun LauncherEntry(
-    modifier: Modifier = Modifier,
-    launcherPresenter: LauncherPresenter,
-    navigateAfterLogin: () -> Unit,
-    navigateToLogin: () -> Unit
+  modifier: Modifier = Modifier,
+  launcherPresenter: LauncherPresenter,
+  navigateAfterLogin: () -> Unit,
+  navigateToLogin: () -> Unit,
 ) {
-    val context = LocalActivity.current
+  val context = LocalActivity.current
 
-    var launcherUiModel by rememberSerializable { mutableStateOf(value = LauncherUiModel.defaultOrEmpty) }
+  var launcherUiModel by rememberSerializable {
+    mutableStateOf(value = LauncherUiModel.defaultOrEmpty)
+  }
 
-    LaunchedEffect(key1 = Unit) {
-        launchMolecule(mode = RecompositionMode.Immediate) {
-            launcherPresenter.uiModel()
-        }.collectLatest { model ->
-            launcherUiModel = model
-        }
-    }
+  LaunchedEffect(key1 = Unit) {
+    launchMolecule(mode = RecompositionMode.Immediate) {
+        launcherPresenter.uiModel()
+      }
+      .collectLatest { model ->
+        launcherUiModel = model
+      }
+  }
 
-    // UI data, actions, navigation and events passing to UI
-    LauncherPane(
-        modifier = modifier,
-        launcherUiModel = { launcherUiModel },
-        navigateToAfterLogin = {
-            if (launcherUiModel.loggedInUser == null) {
-                Toast.makeText(
-                    context,
-                    "Oops!!! Please login first to get started",
-                    Toast.LENGTH_LONG
-                ).show()
-                return@LauncherPane
-            }
-            navigateAfterLogin()
-        },
-        navigateToLogin = { navigateToLogin() },
-        navigateToList = { navigateAfterLogin() }
-    )
+  // UI data, actions, navigation and events passing to UI
+  LauncherPane(
+    modifier = modifier,
+    launcherUiModel = { launcherUiModel },
+    navigateToAfterLogin = {
+      if (launcherUiModel.loggedInUser == null) {
+        Toast.makeText(
+            context,
+            "Oops!!! Please login first to get started",
+            Toast.LENGTH_LONG,
+          )
+          .show()
+        return@LauncherPane
+      }
+      navigateAfterLogin()
+    },
+    navigateToLogin = { navigateToLogin() },
+    navigateToList = { navigateAfterLogin() },
+  )
 }

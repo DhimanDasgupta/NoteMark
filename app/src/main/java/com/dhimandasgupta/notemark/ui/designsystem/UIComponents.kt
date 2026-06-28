@@ -86,513 +86,518 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun NoteMarkButton(
-    modifier: Modifier = Modifier,
-    enabled: Boolean = false,
-    onClick: () -> Unit = {},
-    content: @Composable RowScope.() -> Unit
+  modifier: Modifier = Modifier,
+  enabled: Boolean = false,
+  onClick: () -> Unit = {},
+  content: @Composable RowScope.() -> Unit,
 ) {
-    Button(
-        modifier = modifier,
-        onClick = onClick,
-        shape = RoundedCornerShape(size = 8.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = colorScheme.primary,
-            disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.12f)
-        ),
-        enabled = enabled
-    ) {
-        content()
-    }
+  Button(
+    modifier = modifier,
+    onClick = onClick,
+    shape = RoundedCornerShape(size = 8.dp),
+    colors =
+      ButtonDefaults.buttonColors(
+        containerColor = colorScheme.primary,
+        disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.12f),
+      ),
+    enabled = enabled,
+  ) {
+    content()
+  }
 }
 
 @Composable
 fun NoteMarkOutlinedButton(
-    modifier: Modifier = Modifier,
-    enabled: Boolean = false,
-    onClick: () -> Unit = {},
-    content: @Composable RowScope.() -> Unit
+  modifier: Modifier = Modifier,
+  enabled: Boolean = false,
+  onClick: () -> Unit = {},
+  content: @Composable RowScope.() -> Unit,
 ) {
-    OutlinedButton(
-        modifier = modifier,
-        onClick = onClick,
-        shape = RoundedCornerShape(size = 8.dp),
-        border = BorderStroke(width = 1.dp, color = colorScheme.primary),
-        enabled = enabled
-    ) {
-        content()
-    }
+  OutlinedButton(
+    modifier = modifier,
+    onClick = onClick,
+    shape = RoundedCornerShape(size = 8.dp),
+    border = BorderStroke(width = 1.dp, color = colorScheme.primary),
+    enabled = enabled,
+  ) {
+    content()
+  }
 }
 
 @Composable
 fun NoteMarkTextField(
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    label: String? = "",
-    enteredText: String = "",
-    hintText: String = "",
-    explanationText: String = "",
-    errorText: String = "",
-    onTextChanged: (String) -> Unit = {},
-    onFocusGained: () -> Unit = {},
-    onFocusLost: () -> Unit = {},
-    onNextClicked: (() -> Unit)? = null,
-    onDoneClicked: (() -> Unit)? = null
+  modifier: Modifier = Modifier,
+  enabled: Boolean = true,
+  label: String? = "",
+  enteredText: String = "",
+  hintText: String = "",
+  explanationText: String = "",
+  errorText: String = "",
+  onTextChanged: (String) -> Unit = {},
+  onFocusGained: () -> Unit = {},
+  onFocusLost: () -> Unit = {},
+  onNextClicked: (() -> Unit)? = null,
+  onDoneClicked: (() -> Unit)? = null,
 ) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(space = 4.dp),
-        horizontalAlignment = Alignment.Start
-    ) {
-        AnimatedVisibility(
-            visible = label?.isNotEmpty() == true
-        ) {
-            label?.let {
-                Text(
-                    text = label,
-                    style = typography.bodyMedium
-                )
-            }
-        }
-
-        var hasFocus by retain { mutableStateOf(value = false) }
-
-        TextField(
-            enabled = enabled,
-            value = enteredText,
-            onValueChange = onTextChanged,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(Shapes.medium)
-                .border(
-                    width = if (hasFocus) 1.dp else 0.dp,
-                    color = if (hasFocus) colorScheme.primary else colorScheme.surface,
-                    shape = Shapes.medium
-                )
-                .onFocusChanged { focusState ->
-                    hasFocus = focusState.hasFocus
-                    if (focusState.hasFocus) onFocusGained() else onFocusLost()
-                },
-            visualTransformation = VisualTransformation.None,
-            placeholder = { Text(hintText) },
-            maxLines = 1,
-            colors = OutlinedTextFieldDefaults.colors().copy(
-                focusedContainerColor = colorScheme.surfaceContainerLowest,
-                unfocusedContainerColor = colorScheme.surface,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                errorIndicatorColor = Color.Transparent,
-            ),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Unspecified,
-                imeAction = onDoneClicked?.let { ImeAction.Done } ?: ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { onNextClicked?.invoke() },
-                onDone = { onDoneClicked?.invoke() }
-            )
+  Column(
+    modifier = modifier,
+    verticalArrangement = Arrangement.spacedBy(space = 4.dp),
+    horizontalAlignment = Alignment.Start,
+  ) {
+    AnimatedVisibility(visible = label?.isNotEmpty() == true) {
+      label?.let {
+        Text(
+          text = label,
+          style = typography.bodyMedium,
         )
-
-        AnimatedVisibility(
-            visible = explanationText.isNotEmpty()
-        ) {
-            Text(
-                text = explanationText,
-                style = typography.bodySmall,
-                color = colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
-        }
-
-        AnimatedVisibility(
-            visible = errorText.isNotEmpty()
-        ) {
-            Text(
-                text = errorText,
-                style = typography.bodySmall,
-                color = colorScheme.error
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.height(height = 8.dp)
-        )
+      }
     }
+
+    var hasFocus by retain { mutableStateOf(value = false) }
+
+    TextField(
+      enabled = enabled,
+      value = enteredText,
+      onValueChange = onTextChanged,
+      modifier =
+        Modifier.fillMaxWidth()
+          .clip(Shapes.medium)
+          .border(
+            width = if (hasFocus) 1.dp else 0.dp,
+            color = if (hasFocus) colorScheme.primary else colorScheme.surface,
+            shape = Shapes.medium,
+          )
+          .onFocusChanged { focusState ->
+            hasFocus = focusState.hasFocus
+            if (focusState.hasFocus) onFocusGained() else onFocusLost()
+          },
+      visualTransformation = VisualTransformation.None,
+      placeholder = { Text(hintText) },
+      maxLines = 1,
+      colors =
+        OutlinedTextFieldDefaults.colors()
+          .copy(
+            focusedContainerColor = colorScheme.surfaceContainerLowest,
+            unfocusedContainerColor = colorScheme.surface,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            errorIndicatorColor = Color.Transparent,
+          ),
+      keyboardOptions =
+        KeyboardOptions(
+          keyboardType = KeyboardType.Unspecified,
+          imeAction = onDoneClicked?.let { ImeAction.Done } ?: ImeAction.Next,
+        ),
+      keyboardActions =
+        KeyboardActions(
+          onNext = { onNextClicked?.invoke() },
+          onDone = { onDoneClicked?.invoke() },
+        ),
+    )
+
+    AnimatedVisibility(visible = explanationText.isNotEmpty()) {
+      Text(
+        text = explanationText,
+        style = typography.bodySmall,
+        color = colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(vertical = 4.dp),
+      )
+    }
+
+    AnimatedVisibility(visible = errorText.isNotEmpty()) {
+      Text(
+        text = errorText,
+        style = typography.bodySmall,
+        color = colorScheme.error,
+      )
+    }
+
+    Spacer(modifier = Modifier.height(height = 8.dp))
+  }
 }
 
 @Composable
 fun NoteMarkPasswordTextField(
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    label: String? = "",
-    enteredText: String = "",
-    hintText: String = "",
-    explanationText: String = "",
-    errorText: String = "",
-    onTextChanged: (String) -> Unit = {},
-    onFocusGained: () -> Unit = {},
-    onFocusLost: () -> Unit = {},
-    onNextClicked: (() -> Unit)? = null,
-    onDoneClicked: (() -> Unit)? = null
+  modifier: Modifier = Modifier,
+  enabled: Boolean = true,
+  label: String? = "",
+  enteredText: String = "",
+  hintText: String = "",
+  explanationText: String = "",
+  errorText: String = "",
+  onTextChanged: (String) -> Unit = {},
+  onFocusGained: () -> Unit = {},
+  onFocusLost: () -> Unit = {},
+  onNextClicked: (() -> Unit)? = null,
+  onDoneClicked: (() -> Unit)? = null,
 ) {
-    var hasFocus by retain { mutableStateOf(value = false) }
-    var showPassword by retain { mutableStateOf(value = false) }
+  var hasFocus by retain { mutableStateOf(value = false) }
+  var showPassword by retain { mutableStateOf(value = false) }
 
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(space = 4.dp),
-        horizontalAlignment = Alignment.Start
-    ) {
-        AnimatedVisibility(
-            visible = label?.isNotEmpty() == true
-        ) {
-            label?.let {
-                Text(
-                    text = label,
-                    style = typography.bodyMedium
-                )
-            }
-        }
-
-        TextField(
-            enabled = enabled,
-            value = enteredText,
-            onValueChange = onTextChanged,
-            trailingIcon = {
-                if (showPassword) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_eye_open),
-                        modifier = Modifier
-                            .size(size = 32.dp)
-                            .padding(all = 4.dp)
-                            .lifecycleAwareDebouncedClickable {
-                                showPassword = !showPassword
-                            },
-                        contentDescription = "Hide Password",
-                        tint = colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_eye_off),
-                        modifier = Modifier
-                            .size(size = 32.dp)
-                            .padding(all = 4.dp)
-                            .lifecycleAwareDebouncedClickable {
-                                showPassword = !showPassword
-                            },
-                        contentDescription = "Show Password",
-                        tint = colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
-                    )
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(Shapes.medium)
-                .border(
-                    width = if (hasFocus) 1.dp else 0.dp,
-                    color = if (hasFocus) colorScheme.primary else colorScheme.surface,
-                    shape = Shapes.medium
-                )
-                .onFocusChanged { focusState ->
-                    hasFocus = focusState.hasFocus
-                    if (focusState.hasFocus) onFocusGained() else onFocusLost()
-                },
-            visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-            placeholder = { Text(hintText) },
-            maxLines = 1,
-            colors = OutlinedTextFieldDefaults.colors().copy(
-                focusedContainerColor = colorScheme.surfaceContainerLowest,
-                unfocusedContainerColor = colorScheme.surface,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                errorIndicatorColor = Color.Transparent,
-                unfocusedPlaceholderColor = colorScheme.onSurfaceVariant,
-                focusedPlaceholderColor = colorScheme.onSurface
-            ),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = onDoneClicked?.let { ImeAction.Done } ?: ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { onNextClicked?.invoke() },
-                onDone = { onDoneClicked?.invoke() }
-            )
+  Column(
+    modifier = modifier,
+    verticalArrangement = Arrangement.spacedBy(space = 4.dp),
+    horizontalAlignment = Alignment.Start,
+  ) {
+    AnimatedVisibility(visible = label?.isNotEmpty() == true) {
+      label?.let {
+        Text(
+          text = label,
+          style = typography.bodyMedium,
         )
-
-        AnimatedVisibility(
-            visible = explanationText.isNotEmpty()
-        ) {
-            Text(
-                text = explanationText,
-                style = typography.bodySmall,
-                color = colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
-        }
-
-        AnimatedVisibility(
-            visible = errorText.isNotEmpty()
-        ) {
-            Text(
-                text = errorText,
-                style = typography.bodySmall,
-                color = colorScheme.error
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.height(height = 8.dp)
-        )
+      }
     }
+
+    TextField(
+      enabled = enabled,
+      value = enteredText,
+      onValueChange = onTextChanged,
+      trailingIcon = {
+        if (showPassword) {
+          Icon(
+            painter = painterResource(id = R.drawable.ic_eye_open),
+            modifier =
+              Modifier.size(size = 32.dp).padding(all = 4.dp).lifecycleAwareDebouncedClickable {
+                showPassword = !showPassword
+              },
+            contentDescription = "Hide Password",
+            tint = colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+          )
+        } else {
+          Icon(
+            painter = painterResource(R.drawable.ic_eye_off),
+            modifier =
+              Modifier.size(size = 32.dp).padding(all = 4.dp).lifecycleAwareDebouncedClickable {
+                showPassword = !showPassword
+              },
+            contentDescription = "Show Password",
+            tint = colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+          )
+        }
+      },
+      modifier =
+        Modifier.fillMaxWidth()
+          .clip(Shapes.medium)
+          .border(
+            width = if (hasFocus) 1.dp else 0.dp,
+            color = if (hasFocus) colorScheme.primary else colorScheme.surface,
+            shape = Shapes.medium,
+          )
+          .onFocusChanged { focusState ->
+            hasFocus = focusState.hasFocus
+            if (focusState.hasFocus) onFocusGained() else onFocusLost()
+          },
+      visualTransformation =
+        if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+      placeholder = { Text(hintText) },
+      maxLines = 1,
+      colors =
+        OutlinedTextFieldDefaults.colors()
+          .copy(
+            focusedContainerColor = colorScheme.surfaceContainerLowest,
+            unfocusedContainerColor = colorScheme.surface,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            errorIndicatorColor = Color.Transparent,
+            unfocusedPlaceholderColor = colorScheme.onSurfaceVariant,
+            focusedPlaceholderColor = colorScheme.onSurface,
+          ),
+      keyboardOptions =
+        KeyboardOptions(
+          keyboardType = KeyboardType.Password,
+          imeAction = onDoneClicked?.let { ImeAction.Done } ?: ImeAction.Next,
+        ),
+      keyboardActions =
+        KeyboardActions(
+          onNext = { onNextClicked?.invoke() },
+          onDone = { onDoneClicked?.invoke() },
+        ),
+    )
+
+    AnimatedVisibility(visible = explanationText.isNotEmpty()) {
+      Text(
+        text = explanationText,
+        style = typography.bodySmall,
+        color = colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(vertical = 4.dp),
+      )
+    }
+
+    AnimatedVisibility(visible = errorText.isNotEmpty()) {
+      Text(
+        text = errorText,
+        style = typography.bodySmall,
+        color = colorScheme.error,
+      )
+    }
+
+    Spacer(modifier = Modifier.height(height = 8.dp))
+  }
 }
 
 @Composable
 fun NoteMarkToolbarButton(
-    modifier: Modifier = Modifier,
-    title: String,
-    isConnected: Boolean,
-    onClick: () -> Unit = {}
+  modifier: Modifier = Modifier,
+  title: String,
+  isConnected: Boolean,
+  onClick: () -> Unit = {},
 ) {
-    Box(
-        modifier = modifier
-            .clip(shape = shapes.extraSmall)
-            .background(color = if (isConnected) colorScheme.primary else colorScheme.primary.copy(alpha = 0.5f))
-            .lifecycleAwareDebouncedClickable {
-                onClick()
-            }
-    ) {
-        Text(
-            text = title.uppercase(),
-            style = typography.titleMedium,
-            color = if (isConnected) colorScheme.onPrimary else colorScheme.error,
-            modifier = modifier.padding(all = 4.dp)
+  Box(
+    modifier =
+      modifier
+        .clip(shape = shapes.extraSmall)
+        .background(
+          color = if (isConnected) colorScheme.primary else colorScheme.primary.copy(alpha = 0.5f)
         )
-    }
+        .lifecycleAwareDebouncedClickable {
+          onClick()
+        }
+  ) {
+    Text(
+      text = title.uppercase(),
+      style = typography.titleMedium,
+      color = if (isConnected) colorScheme.onPrimary else colorScheme.error,
+      modifier = modifier.padding(all = 4.dp),
+    )
+  }
 }
 
 @Composable
 fun NoteMarkFAB(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
+  modifier: Modifier = Modifier,
+  onClick: () -> Unit = {},
 ) {
-    FloatingActionButton(
-        onClick = onClick,
-        shape = shapes.medium,
-        modifier = modifier
-            .padding(
-                end = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateEndPadding(LayoutDirection.Ltr),
-                bottom = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
-                    .asPaddingValues()
-                    .calculateBottomPadding()
-            )
-            .shadow(
-                elevation = 8.dp,
-                shape = shapes.medium
-            )
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(color = 0XFF58A1F8),
-                        Color(color = 0xFF5A4CF7)
-                    )
-                ),
-                shape = shapes.medium
-            )
-            .innerShadow(
-                shape = shapes.medium,
-                shadow = Shadow(
-                    radius = 2.dp,
-                    color = colorScheme.onPrimary,
-                    spread = 2.dp,
-                    alpha = 0.5f
+  FloatingActionButton(
+    onClick = onClick,
+    shape = shapes.medium,
+    modifier =
+      modifier
+        .padding(
+          end =
+            WindowInsets.navigationBars
+              .union(insets = WindowInsets.displayCutout)
+              .asPaddingValues()
+              .calculateEndPadding(LayoutDirection.Ltr),
+          bottom =
+            WindowInsets.navigationBars
+              .union(insets = WindowInsets.displayCutout)
+              .asPaddingValues()
+              .calculateBottomPadding(),
+        )
+        .shadow(
+          elevation = 8.dp,
+          shape = shapes.medium,
+        )
+        .background(
+          brush =
+            Brush.verticalGradient(
+              colors =
+                listOf(
+                  Color(color = 0XFF58A1F8),
+                  Color(color = 0xFF5A4CF7),
                 )
             ),
-        elevation = FloatingActionButtonDefaults.elevation(
-            defaultElevation = 0.dp,
-            pressedElevation = 0.dp,
-            hoveredElevation = 0.dp,
-            focusedElevation = 0.dp
-        ),
-        contentColor = Color.Transparent,
-        containerColor = Color.Transparent
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_plus_icon),
-            contentDescription = "Add Note",
-            tint = colorScheme.onPrimary,
-            modifier = Modifier
-                .padding(all = 8.dp)
+          shape = shapes.medium,
         )
-    }
+        .innerShadow(
+          shape = shapes.medium,
+          shadow =
+            Shadow(
+              radius = 2.dp,
+              color = colorScheme.onPrimary,
+              spread = 2.dp,
+              alpha = 0.5f,
+            ),
+        ),
+    elevation =
+      FloatingActionButtonDefaults.elevation(
+        defaultElevation = 0.dp,
+        pressedElevation = 0.dp,
+        hoveredElevation = 0.dp,
+        focusedElevation = 0.dp,
+      ),
+    contentColor = Color.Transparent,
+    containerColor = Color.Transparent,
+  ) {
+    Icon(
+      painter = painterResource(id = R.drawable.ic_plus_icon),
+      contentDescription = "Add Note",
+      tint = colorScheme.onPrimary,
+      modifier = Modifier.padding(all = 8.dp),
+    )
+  }
 }
 
 @Composable
 fun LimitedText(
-    fullText: String,
-    style: TextStyle,
-    color: Color,
-    targetCharacterCount: Int = 100
+  fullText: String,
+  style: TextStyle,
+  color: Color,
+  targetCharacterCount: Int = 100,
 ) {
-    var textToDisplay by remember(key1 = fullText) { mutableStateOf(value = fullText) }
+  var textToDisplay by remember(key1 = fullText) { mutableStateOf(value = fullText) }
 
-    key(textToDisplay) {
-        Text(
-            text = textToDisplay,
-            style = style,
-            color = color,
-            onTextLayout = { textLayoutResult ->
-                if (textLayoutResult.layoutInput.text.length > targetCharacterCount) {
-                    if (textLayoutResult.isLineEllipsized(lineIndex = textLayoutResult.lineCount - 1) ||
-                        textLayoutResult.getLineEnd(
-                            lineIndex = textLayoutResult.lineCount - 1,
-                            visibleEnd = true
-                        ) < targetCharacterCount &&
-                        fullText.length > targetCharacterCount
-                    ) {
-                        if (textToDisplay.length > targetCharacterCount) { // Ensure we only shorten once
-                            textToDisplay = fullText.take(targetCharacterCount)
-                        }
-                    } else if (fullText.length > targetCharacterCount && textToDisplay.length > targetCharacterCount) {
-                        textToDisplay = fullText.take(targetCharacterCount)
-                    }
-                }
-            },
-            maxLines = 5,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
+  key(textToDisplay) {
+    Text(
+      text = textToDisplay,
+      style = style,
+      color = color,
+      onTextLayout = { textLayoutResult ->
+        if (textLayoutResult.layoutInput.text.length > targetCharacterCount) {
+          if (
+            textLayoutResult.isLineEllipsized(lineIndex = textLayoutResult.lineCount - 1) ||
+              textLayoutResult.getLineEnd(
+                lineIndex = textLayoutResult.lineCount - 1,
+                visibleEnd = true,
+              ) < targetCharacterCount && fullText.length > targetCharacterCount
+          ) {
+            if (textToDisplay.length > targetCharacterCount) { // Ensure we only shorten once
+              textToDisplay = fullText.take(targetCharacterCount)
+            }
+          } else if (
+            fullText.length > targetCharacterCount && textToDisplay.length > targetCharacterCount
+          ) {
+            textToDisplay = fullText.take(targetCharacterCount)
+          }
+        }
+      },
+      maxLines = 5,
+      overflow = TextOverflow.Ellipsis,
+    )
+  }
 }
 
 @Composable
 private fun BouncingDot(
-    modifier: Modifier = Modifier,
-    color: Color = Color.Blue,
-    size: Dp = 10.dp,
-    bounceHeight: Dp = 30.dp,
-    animationDurationMillis: Int = 500,
-    delayMillis: Int = 0 // Delay before this specific dot starts its animation
+  modifier: Modifier = Modifier,
+  color: Color = Color.Blue,
+  size: Dp = 10.dp,
+  bounceHeight: Dp = 30.dp,
+  animationDurationMillis: Int = 500,
+  delayMillis: Int = 0, // Delay before this specific dot starts its animation
 ) {
-    val offsetY = remember { Animatable(initialValue = 0f) }
+  val offsetY = remember { Animatable(initialValue = 0f) }
 
-    LaunchedEffect(key1 = Unit) {
-        delay(timeMillis = delayMillis.toLong()) // Apply initial delay
-        offsetY.animateTo(
-            targetValue = -bounceHeight.value, // Move up
-            animationSpec = infiniteRepeatable(
-                animation = keyframes {
-                    durationMillis = animationDurationMillis
-                    0f at 0 // Start at original position
-                    bounceHeight.value.times(-1) at animationDurationMillis / 2 // Peak
-                    0f at animationDurationMillis // Return to original position
-                },
-                repeatMode = RepeatMode.Restart // Could also be Reverse for a different effect
-            )
-        )
-    }
-
-    Box(
-        modifier = modifier
-            .offset { IntOffset(x = 0, y = offsetY.value.toInt()) }
-            .size(size)
-            .clip(CircleShape)
-            .background(color)
+  LaunchedEffect(key1 = Unit) {
+    delay(timeMillis = delayMillis.toLong()) // Apply initial delay
+    offsetY.animateTo(
+      targetValue = -bounceHeight.value, // Move up
+      animationSpec =
+        infiniteRepeatable(
+          animation =
+            keyframes {
+              durationMillis = animationDurationMillis
+              0f at 0 // Start at original position
+              bounceHeight.value.times(-1) at animationDurationMillis / 2 // Peak
+              0f at animationDurationMillis // Return to original position
+            },
+          repeatMode = RepeatMode.Restart, // Could also be Reverse for a different effect
+        ),
     )
+  }
+
+  Box(
+    modifier =
+      modifier
+        .offset { IntOffset(x = 0, y = offsetY.value.toInt()) }
+        .size(size)
+        .clip(CircleShape)
+        .background(color)
+  )
 }
 
 @Composable
 fun ThreeBouncingDots(
-    modifier: Modifier = Modifier,
-    dotColor1: Color = Color.Red,
-    dotColor2: Color = Color.Green,
-    dotColor3: Color = Color.Blue,
-    dotSize: Dp = 12.dp,
-    bounceHeight: Dp = 40.dp,
-    animationDurationMillis: Int = 600,
-    spaceBetweenDots: Dp = 8.dp,
-    dotStartDelayMillis: Int = 150 // Staggered delay for each dot
+  modifier: Modifier = Modifier,
+  dotColor1: Color = Color.Red,
+  dotColor2: Color = Color.Green,
+  dotColor3: Color = Color.Blue,
+  dotSize: Dp = 12.dp,
+  bounceHeight: Dp = 40.dp,
+  animationDurationMillis: Int = 600,
+  spaceBetweenDots: Dp = 8.dp,
+  dotStartDelayMillis: Int = 150, // Staggered delay for each dot
 ) {
-    Row(
-        modifier = modifier
-            .testTag(tag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS)
-            .trackRecompositions(),
-        verticalAlignment = Alignment.Bottom, // Align to bottom so they bounce from the same baseline
-        horizontalArrangement = Arrangement.spacedBy(space = spaceBetweenDots)
-    ) {
-        BouncingDot(
-            color = dotColor1,
-            size = dotSize,
-            bounceHeight = bounceHeight,
-            animationDurationMillis = animationDurationMillis,
-            delayMillis = 0 // First dot starts immediately
-        )
-        BouncingDot(
-            color = dotColor2,
-            size = dotSize,
-            bounceHeight = bounceHeight,
-            animationDurationMillis = animationDurationMillis,
-            delayMillis = dotStartDelayMillis // Second dot is delayed
-        )
-        BouncingDot(
-            color = dotColor3,
-            size = dotSize,
-            bounceHeight = bounceHeight,
-            animationDurationMillis = animationDurationMillis,
-            delayMillis = dotStartDelayMillis * 2 // Third dot is further delayed
-        )
-    }
+  Row(
+    modifier =
+      modifier.testTag(tag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS).trackRecompositions(),
+    verticalAlignment = Alignment.Bottom, // Align to bottom so they bounce from the same baseline
+    horizontalArrangement = Arrangement.spacedBy(space = spaceBetweenDots),
+  ) {
+    BouncingDot(
+      color = dotColor1,
+      size = dotSize,
+      bounceHeight = bounceHeight,
+      animationDurationMillis = animationDurationMillis,
+      delayMillis = 0, // First dot starts immediately
+    )
+    BouncingDot(
+      color = dotColor2,
+      size = dotSize,
+      bounceHeight = bounceHeight,
+      animationDurationMillis = animationDurationMillis,
+      delayMillis = dotStartDelayMillis, // Second dot is delayed
+    )
+    BouncingDot(
+      color = dotColor3,
+      size = dotSize,
+      bounceHeight = bounceHeight,
+      animationDurationMillis = animationDurationMillis,
+      delayMillis = dotStartDelayMillis * 2, // Third dot is further delayed
+    )
+  }
 }
 
 object ThreeBouncingDotsTag {
-    const val THREE_BOUNCING_DOTS = "ThreeBouncingDots"
+  const val THREE_BOUNCING_DOTS = "ThreeBouncingDots"
 }
 
 @Composable
 fun SafeIconButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
-    activeState: Lifecycle.State = Lifecycle.State.RESUMED,
-    debounceIntervalMs: Long = 1000L,
-    content: @Composable () -> Unit
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+  enabled: Boolean = true,
+  colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
+  activeState: Lifecycle.State = Lifecycle.State.RESUMED,
+  debounceIntervalMs: Long = 1000L,
+  content: @Composable () -> Unit,
 ) {
-    val owner = LocalLifecycleOwner.current
+  val owner = LocalLifecycleOwner.current
 
-    val currentOnClick by rememberUpdatedState(newValue = onClick)
-    var lastClickTime by remember { mutableLongStateOf(value = 0L) }
-    var lifecycleAllowsClick by remember {
-        mutableStateOf(value = owner.lifecycle.currentState.isAtLeast(activeState))
+  val currentOnClick by rememberUpdatedState(newValue = onClick)
+  var lastClickTime by remember { mutableLongStateOf(value = 0L) }
+  var lifecycleAllowsClick by remember {
+    mutableStateOf(value = owner.lifecycle.currentState.isAtLeast(activeState))
+  }
+
+  DisposableEffect(key1 = owner, key2 = activeState) {
+    val observer = LifecycleEventObserver { _, _ ->
+      lifecycleAllowsClick = owner.lifecycle.currentState.isAtLeast(activeState)
     }
+    owner.lifecycle.addObserver(observer)
+    onDispose {
+      owner.lifecycle.removeObserver(observer)
+    }
+  }
 
-    DisposableEffect(key1 = owner, key2 = activeState) {
-        val observer = LifecycleEventObserver { _, _ ->
-            lifecycleAllowsClick = owner.lifecycle.currentState.isAtLeast(activeState)
+  val isButtonEnabled = enabled && lifecycleAllowsClick
+
+  IconButton(
+    onClick = {
+      // Check enabled state again here, though IconButton's internal state should also prevent it
+      if (isButtonEnabled) {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastClickTime >= debounceIntervalMs) {
+          currentOnClick()
         }
-        owner.lifecycle.addObserver(observer)
-        onDispose {
-            owner.lifecycle.removeObserver(observer)
-        }
-    }
-
-    val isButtonEnabled = enabled && lifecycleAllowsClick
-
-    IconButton(
-        onClick = {
-            // Check enabled state again here, though IconButton's internal state should also prevent it
-            if (isButtonEnabled) {
-                val currentTime = System.currentTimeMillis()
-                if (currentTime - lastClickTime >= debounceIntervalMs) {
-                    currentOnClick()
-                }
-            }
-        },
-        modifier = modifier,
-        enabled = isButtonEnabled, // Pass the combined enabled state to the actual IconButton
-        colors = colors
-    ) {
-        content()
-    }
+      }
+    },
+    modifier = modifier,
+    enabled = isButtonEnabled, // Pass the combined enabled state to the actual IconButton
+    colors = colors,
+  ) {
+    content()
+  }
 }

@@ -24,66 +24,66 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Immutable
 data class AddNoteUiModel(
-    val title: String,
-    val content: String,
-    val saved: Boolean? = null
+  val title: String,
+  val content: String,
+  val saved: Boolean? = null,
 ) {
-    companion object {
-        val defaultOrEmpty = AddNoteUiModel(
-            title = "",
-            content = "",
-            saved = null
-        )
-    }
+  companion object {
+    val defaultOrEmpty =
+      AddNoteUiModel(
+        title = "",
+        content = "",
+        saved = null,
+      )
+  }
 }
 
 @Stable
-class AddNotePresenter(
-    private val addNoteStateMachineFactory: AddNoteStateMachineFactory
-) {
-    private val actions = MutableSharedFlow<AddNoteAction>(extraBufferCapacity = 10)
+class AddNotePresenter(private val addNoteStateMachineFactory: AddNoteStateMachineFactory) {
+  private val actions = MutableSharedFlow<AddNoteAction>(extraBufferCapacity = 10)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Composable
-    fun uiModel(): AddNoteUiModel {
-        var addNoteUiModel by remember(key1 = Unit) { mutableStateOf(value = AddNoteUiModel.defaultOrEmpty) }
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Composable
+  fun uiModel(): AddNoteUiModel {
+    var addNoteUiModel by
+      remember(key1 = Unit) { mutableStateOf(value = AddNoteUiModel.defaultOrEmpty) }
 
-        // Receives the State from the StateMachine
-        LaunchedEffect(key1 = Unit) {
-            val addNoteStateMachine = addNoteStateMachineFactory.launchIn(this)
+    // Receives the State from the StateMachine
+    LaunchedEffect(key1 = Unit) {
+      val addNoteStateMachine = addNoteStateMachineFactory.launchIn(this)
 
-            launch {
-                addNoteStateMachine.state
-                    .onStart { emit(value = AddNoteStateMachineFactory.defaultAddNoteState) }
-                    .mapLatest { addNoteState ->
-                        addNoteUiModel = addNoteUiModel.mapToAddNoteUiModel(addNoteState)
-                    }
-                    .cancellable()
-                    .catch { throwable ->
-                        if (throwable is CancellationException) throw throwable
-                        // else can can be something like page level error etc.
-                    }
-                    .flowOn(context = Dispatchers.Default)
-                    .collect()
-            }
+      launch {
+        addNoteStateMachine.state
+          .onStart { emit(value = AddNoteStateMachineFactory.defaultAddNoteState) }
+          .mapLatest { addNoteState ->
+            addNoteUiModel = addNoteUiModel.mapToAddNoteUiModel(addNoteState)
+          }
+          .cancellable()
+          .catch { throwable ->
+            if (throwable is CancellationException) throw throwable
+            // else can can be something like page level error etc.
+          }
+          .flowOn(context = Dispatchers.Default)
+          .collect()
+      }
 
-            // Send the Events to the State Machine through Actions
-            launch {
-                actions.collect { editNoteAction ->
-                    addNoteStateMachine.dispatch(editNoteAction)
-                }
-            }
+      // Send the Events to the State Machine through Actions
+      launch {
+        actions.collect { editNoteAction ->
+          addNoteStateMachine.dispatch(editNoteAction)
         }
-
-        return addNoteUiModel
+      }
     }
 
-    fun dispatchAction(action: AddNoteAction) =
-        actions.tryEmit(value = action)
+    return addNoteUiModel
+  }
+
+  fun dispatchAction(action: AddNoteAction) = actions.tryEmit(value = action)
 }
 
-private fun AddNoteUiModel.mapToAddNoteUiModel(addNoteState: AddNoteState) = copy(
+private fun AddNoteUiModel.mapToAddNoteUiModel(addNoteState: AddNoteState) =
+  copy(
     title = addNoteState.title,
     content = addNoteState.content,
-    saved = addNoteState.saved
-)
+    saved = addNoteState.saved,
+  )

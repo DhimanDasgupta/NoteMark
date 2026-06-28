@@ -85,8 +85,8 @@ import timber.log.Timber
 
 // Define unique names for your DataStores
 private enum class DataStoreType {
-    USER_PREFERENCES,
-    SYNC_PREFERENCES
+  USER_PREFERENCES,
+  SYNC_PREFERENCES,
 }
 
 const val APP_BACKGROUND_DISPATCHER = "app_background_dispatcher"
@@ -95,220 +95,237 @@ private const val USER_DATA_STORE_FILE_NAME = "user_store.pb"
 private const val SYNC_DATA_STORE_FILE_NAME = "sync_store.pb"
 
 val appModule = module {
-    single<CoroutineDispatcher>(
-        qualifier = named(name = APP_BACKGROUND_DISPATCHER)
-    ) { Dispatchers.IO }
-    single<CoroutineScope>(
-        qualifier = named(name = APP_BACKGROUND_SCOPE)
-    ) {
-        CoroutineScope(
-            context = get<CoroutineDispatcher>(qualifier = named(name = APP_BACKGROUND_DISPATCHER)) + SupervisorJob() + CoroutineExceptionHandler { context, throwable ->
-                Timber.e(message = "CoroutineExceptionHandler got $throwable in ${context.job} and ${Thread.currentThread()}")
-            }
+  single<CoroutineDispatcher>(qualifier = named(name = APP_BACKGROUND_DISPATCHER)) {
+    Dispatchers.IO
+  }
+  single<CoroutineScope>(qualifier = named(name = APP_BACKGROUND_SCOPE)) {
+    CoroutineScope(
+      context =
+        get<CoroutineDispatcher>(qualifier = named(name = APP_BACKGROUND_DISPATCHER)) +
+          SupervisorJob() +
+          CoroutineExceptionHandler { context, throwable ->
+            Timber.e(
+              message =
+                "CoroutineExceptionHandler got $throwable in ${context.job} and ${Thread.currentThread()}"
+            )
+          }
+    )
+  }
+  single<DataStore<User>>(qualifier = named(DataStoreType.USER_PREFERENCES)) {
+    DataStoreFactory.create(
+      serializer = UserSerializer(),
+      produceFile = { androidApplication().dataStoreFile(fileName = USER_DATA_STORE_FILE_NAME) },
+      corruptionHandler = null,
+      migrations = listOf(),
+      scope = get(qualifier = named(name = APP_BACKGROUND_SCOPE)),
+    )
+  }
+  single {
+    UserDataSourceImpl(
+      userDataStore = get(qualifier = named(enum = DataStoreType.USER_PREFERENCES))
+    )
+  } bind UserDataSource::class
+  single { UserRepositoryImpl(userDataSource = get()) } bind UserRepository::class
+  single<DataStore<Sync>>(qualifier = named(enum = DataStoreType.SYNC_PREFERENCES)) {
+    DataStoreFactory.create(
+      serializer = SyncSerializer(),
+      produceFile = { androidApplication().dataStoreFile(fileName = SYNC_DATA_STORE_FILE_NAME) },
+      corruptionHandler = null,
+      migrations = listOf(),
+      scope = get(qualifier = named(name = APP_BACKGROUND_SCOPE)),
+    )
+  }
+  single {
+    NoteSyncDataSourceImpl(
+      syncDataStore = get(qualifier = named(enum = DataStoreType.SYNC_PREFERENCES))
+    )
+  } bind NoteSyncDataSource::class
+  single { SyncRepositoryImpl(noteSyncDataSource = get()) } bind SyncRepository::class
+  single {
+    HttpClient(engineFactory = Android) {
+      install(plugin = ContentNegotiation) {
+        json(
+          Json {
+            prettyPrint = true
+            isLenient = true
+            ignoreUnknownKeys = true
+          }
         )
-    }
-    single<DataStore<User>>(qualifier = named(DataStoreType.USER_PREFERENCES)) {
-        DataStoreFactory.create(
-            serializer = UserSerializer(),
-            produceFile = { androidApplication().dataStoreFile(fileName = USER_DATA_STORE_FILE_NAME) },
-            corruptionHandler = null,
-            migrations = listOf(),
-            scope = get(qualifier = named(name = APP_BACKGROUND_SCOPE))
-        )
-    }
-    single {
-        UserDataSourceImpl(
-            userDataStore = get(qualifier = named(enum = DataStoreType.USER_PREFERENCES))
-        )
-    } bind UserDataSource::class
-    single { UserRepositoryImpl(userDataSource = get()) } bind UserRepository::class
-    single<DataStore<Sync>>(qualifier = named(enum = DataStoreType.SYNC_PREFERENCES)) {
-        DataStoreFactory.create(
-            serializer = SyncSerializer(),
-            produceFile = { androidApplication().dataStoreFile(fileName = SYNC_DATA_STORE_FILE_NAME) },
-            corruptionHandler = null,
-            migrations = listOf(),
-            scope = get(qualifier = named(name = APP_BACKGROUND_SCOPE))
-        )
-    }
-    single {
-        NoteSyncDataSourceImpl(
-            syncDataStore = get(qualifier = named(enum = DataStoreType.SYNC_PREFERENCES))
-        )
-    } bind NoteSyncDataSource::class
-    single { SyncRepositoryImpl(noteSyncDataSource = get()) } bind SyncRepository::class
-    single {
-        HttpClient(engineFactory = Android) {
-            install(plugin = ContentNegotiation) {
-                json(
-                    Json {
-                        prettyPrint = true
-                        isLenient = true
-                        ignoreUnknownKeys = true
-                    }
+      }
+      install(plugin = Logging) {
+        logger = Logger.ANDROID
+        level = if (BuildConfig.DEBUG) LogLevel.ALL else LogLevel.NONE
+      }
+
+      install(plugin = Auth) {
+        bearer {
+          loadTokens {
+            withContext(
+              get<CoroutineDispatcher>(qualifier = named(name = APP_BACKGROUND_DISPATCHER))
+            ) {
+              val user = get<UserRepository>().getUser().first()
+              if (user?.accessToken != null && user.refreshToken != null) {
+                BearerTokens(
+                  accessToken = user.accessToken,
+                  refreshToken = user.refreshToken,
                 )
+              }
+              null
             }
-            install(plugin = Logging) {
-                logger = Logger.ANDROID
-                level = if (BuildConfig.DEBUG) LogLevel.ALL else LogLevel.NONE
-            }
-
-            install(plugin = Auth) {
-                bearer {
-                    loadTokens {
-                        withContext(get<CoroutineDispatcher>(qualifier = named(name = APP_BACKGROUND_DISPATCHER))) {
-                            val user = get<UserRepository>().getUser().first()
-                            if (user?.accessToken != null && user.refreshToken != null) {
-                                BearerTokens(
-                                    accessToken = user.accessToken,
-                                    refreshToken = user.refreshToken
-                                )
-                            }
-                            null
-                        }
-                    }
-                    refreshTokens {
-                        withContext(get<CoroutineDispatcher>(qualifier = named(name = APP_BACKGROUND_DISPATCHER))) {
-                            val user = get<UserRepository>().getUser().first()
-                            val currentTokens =
-                                if (user?.accessToken != null && user.refreshToken != null) {
-                                    BearerTokens(
-                                        accessToken = user.accessToken,
-                                        refreshToken = user.refreshToken
-                                    )
-                                } else {
-                                    return@withContext null
-                                }
-
-                            try {
-                                val response = client.post {
-                                    url(urlString = "/api/auth/refresh")
-                                    markAsRefreshTokenRequest()
-                                    contentType(type = Application.Json)
-                                    setBody(
-                                        RefreshRequest(
-                                            refreshToken = currentTokens.refreshToken ?: ""
-                                        )
-                                    )
-                                }.body<RefreshResponse>()
-
-                                val newTokens = BearerTokens(
-                                    accessToken = response.accessToken,
-                                    refreshToken = response.refreshToken
-                                )
-                                get<UserRepository>().saveBearToken(token = newTokens)
-                                newTokens
-                            } catch (_: Exception) {
-                                get<UserRepository>().deleteUser()
-                                null
-                            }
-                        }
-                    }
+          }
+          refreshTokens {
+            withContext(
+              get<CoroutineDispatcher>(qualifier = named(name = APP_BACKGROUND_DISPATCHER))
+            ) {
+              val user = get<UserRepository>().getUser().first()
+              val currentTokens =
+                if (user?.accessToken != null && user.refreshToken != null) {
+                  BearerTokens(
+                    accessToken = user.accessToken,
+                    refreshToken = user.refreshToken,
+                  )
+                } else {
+                  return@withContext null
                 }
+
+              try {
+                val response =
+                  client
+                    .post {
+                      url(urlString = "/api/auth/refresh")
+                      markAsRefreshTokenRequest()
+                      contentType(type = Application.Json)
+                      setBody(RefreshRequest(refreshToken = currentTokens.refreshToken ?: ""))
+                    }
+                    .body<RefreshResponse>()
+
+                val newTokens =
+                  BearerTokens(
+                    accessToken = response.accessToken,
+                    refreshToken = response.refreshToken,
+                  )
+                get<UserRepository>().saveBearToken(token = newTokens)
+                newTokens
+              } catch (_: Exception) {
+                get<UserRepository>().deleteUser()
+                null
+              }
             }
-            defaultRequest {
-                url(urlString = "https://notemark.pl-coding.com")
-                header("X-User-Email", BuildConfig.HEADER_VALUE_FOR_NOTE_MARK_API)
-                header("Debug", if (BuildConfig.DEBUG) "true" else "false") // Only here
-            }
+          }
         }
+      }
+      defaultRequest {
+        url(urlString = "https://notemark.pl-coding.com")
+        header("X-User-Email", BuildConfig.HEADER_VALUE_FOR_NOTE_MARK_API)
+        header("Debug", if (BuildConfig.DEBUG) "true" else "false") // Only here
+      }
     }
-    single {
-        AndroidSqliteDriver(
-            schema = NoteMarkDatabase.Schema.synchronous(),
-            context = androidContext(),
-            name = "app.db",
-            callback = object : AndroidSqliteDriver.Callback(NoteMarkDatabase.Schema.synchronous()) {
-                override fun onCreate(db: SupportSQLiteDatabase) {
-                    super.onCreate(db)
-                    Timber.d("Database created: onCreate, $db")
-                }
+  }
+  single {
+    AndroidSqliteDriver(
+      schema = NoteMarkDatabase.Schema.synchronous(),
+      context = androidContext(),
+      name = "app.db",
+      callback =
+        object : AndroidSqliteDriver.Callback(NoteMarkDatabase.Schema.synchronous()) {
+          override fun onCreate(db: SupportSQLiteDatabase) {
+            super.onCreate(db)
+            Timber.d("Database created: onCreate, $db")
+          }
 
-                override fun onConfigure(db: SupportSQLiteDatabase) {
-                    super.onConfigure(db)
-                    Timber.d("Database configured: onConfigure, $db")
-                }
+          override fun onConfigure(db: SupportSQLiteDatabase) {
+            super.onConfigure(db)
+            Timber.d("Database configured: onConfigure, $db")
+          }
 
-                override fun onCorruption(db: SupportSQLiteDatabase) {
-                    super.onCorruption(db)
-                    Timber.d("Database corrupted: onCorruption, $db")
-                }
+          override fun onCorruption(db: SupportSQLiteDatabase) {
+            super.onCorruption(db)
+            Timber.d("Database corrupted: onCorruption, $db")
+          }
 
-                override fun onDowngrade(
-                    db: SupportSQLiteDatabase,
-                    oldVersion: Int,
-                    newVersion: Int
-                ) {
-                    super.onDowngrade(db, oldVersion, newVersion)
-                    Timber.d("Database downgraded: onDowngrade, $db, oldVersion: $oldVersion, newVersion: $newVersion")
-                }
+          override fun onDowngrade(
+            db: SupportSQLiteDatabase,
+            oldVersion: Int,
+            newVersion: Int,
+          ) {
+            super.onDowngrade(db, oldVersion, newVersion)
+            Timber.d(
+              "Database downgraded: onDowngrade, $db, oldVersion: $oldVersion, newVersion: $newVersion"
+            )
+          }
 
-                override fun onOpen(db: SupportSQLiteDatabase) {
-                    super.onOpen(db)
-                    Timber.d("Database opened: onOpen, $db")
-                }
+          override fun onOpen(db: SupportSQLiteDatabase) {
+            super.onOpen(db)
+            Timber.d("Database opened: onOpen, $db")
+          }
 
-                override fun onUpgrade(
-                    db: SupportSQLiteDatabase,
-                    oldVersion: Int,
-                    newVersion: Int
-                ) {
-                    super.onUpgrade(db, oldVersion, newVersion)
-                    Timber.d("Database upgraded: onUpgrade, $db, oldVersion: $oldVersion, newVersion: $newVersion")
-                }
-            }
-        )
-    } bind SqlDriver::class
-    single { NoteMarkDatabase(driver = get()) }
-    singleOf(constructor = ::NoteMarkApiImpl) bind NoteMarkApi::class
-    singleOf(constructor = ::NoteMarkApiDataSourceImpl) bind NoteMarkApiDataSource::class
-    single {
-        NoteMarkLocalDataSourceImpl(
-            database = get(),
-            applicationDispatcher = get(qualifier = named(name = APP_BACKGROUND_DISPATCHER))
-        )
-    } bind NoteMarkLocalDataSource::class
-    single {
-        NoteMarkRepositoryImpl(
-            localDataSource = get(),
-            remoteDataSource = get()
-        )
-    } bind NoteMarkRepository::class
-    single {
-        AppStateMachineFactory(
-            applicationContext = androidContext(),
-            userRepository = get(),
-            syncRepository = get(),
-            noteMarkRepository = get()
-        )
+          override fun onUpgrade(
+            db: SupportSQLiteDatabase,
+            oldVersion: Int,
+            newVersion: Int,
+          ) {
+            super.onUpgrade(db, oldVersion, newVersion)
+            Timber.d(
+              "Database upgraded: onUpgrade, $db, oldVersion: $oldVersion, newVersion: $newVersion"
+            )
+          }
+        },
+    )
+  } bind SqlDriver::class
+  single { NoteMarkDatabase(driver = get()) }
+  singleOf(constructor = ::NoteMarkApiImpl) bind NoteMarkApi::class
+  singleOf(constructor = ::NoteMarkApiDataSourceImpl) bind NoteMarkApiDataSource::class
+  single {
+    NoteMarkLocalDataSourceImpl(
+      database = get(),
+      applicationDispatcher = get(qualifier = named(name = APP_BACKGROUND_DISPATCHER)),
+    )
+  } bind NoteMarkLocalDataSource::class
+  single {
+    NoteMarkRepositoryImpl(
+      localDataSource = get(),
+      remoteDataSource = get(),
+    )
+  } bind NoteMarkRepository::class
+  single {
+    AppStateMachineFactory(
+      applicationContext = androidContext(),
+      userRepository = get(),
+      syncRepository = get(),
+      noteMarkRepository = get(),
+    )
+  }
+  factoryOf(constructor = ::LauncherPresenter)
+
+  factory { LoginStateMachineFactory(noteMarkApi = get()) }
+  factoryOf(constructor = ::LoginPresenter)
+
+  factory { RegistrationStateMachineFactory(noteMarkApi = get()) }
+  factoryOf(constructor = ::RegistrationPresenter)
+
+  factory { NoteListStateMachineFactory(userRepository = get(), noteMarkRepository = get()) }
+  factoryOf(constructor = ::NoteListPresenter)
+
+  factory { AddNoteStateMachineFactory(noteMarkRepository = get()) }
+  factoryOf(constructor = ::AddNotePresenter)
+
+  factory { params ->
+    require(params.isNotEmpty()) {
+      "NoteId is required for ${EditNoteStateMachineFactory::class.java} to instantiate."
     }
-    factoryOf(constructor = ::LauncherPresenter)
-
-    factory { LoginStateMachineFactory(noteMarkApi = get()) }
-    factoryOf(constructor = ::LoginPresenter)
-
-    factory { RegistrationStateMachineFactory(noteMarkApi = get()) }
-    factoryOf(constructor = ::RegistrationPresenter)
-
-    factory { NoteListStateMachineFactory(userRepository = get(), noteMarkRepository = get()) }
-    factoryOf(constructor = ::NoteListPresenter)
-
-    factory { AddNoteStateMachineFactory(noteMarkRepository = get()) }
-    factoryOf(constructor = ::AddNotePresenter)
-
-    factory { params ->
-        require(params.isNotEmpty()) { "NoteId is required for ${EditNoteStateMachineFactory::class.java} to instantiate." }
-        EditNoteStateMachineFactory(
-            noteMarkRepository = get(),
-            noteId = params[0]
-        )
+    EditNoteStateMachineFactory(
+      noteMarkRepository = get(),
+      noteId = params[0],
+    )
+  }
+  factory { params ->
+    require(params.isNotEmpty()) {
+      "NoteId is required for ${EditNotePresenter::class.java} to instantiate."
     }
-    factory { params ->
-        require(params.isNotEmpty()) { "NoteId is required for ${EditNotePresenter::class.java} to instantiate." }
-        EditNotePresenter(noteId = params[0])
-    }
+    EditNotePresenter(noteId = params[0])
+  }
 
-    factoryOf(constructor = ::SettingsPresenter)
+  factoryOf(constructor = ::SettingsPresenter)
 
-    worker { NoteSyncWorker(context = androidContext(), workerParameters = get()) }
+  worker { NoteSyncWorker(context = androidContext(), workerParameters = get()) }
 }

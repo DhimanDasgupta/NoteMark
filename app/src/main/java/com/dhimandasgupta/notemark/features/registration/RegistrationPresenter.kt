@@ -24,72 +24,69 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Immutable
 data class RegistrationUiModel(
-    val userName: String = "",
-    val email: String = "",
-    val password: String = "",
-    val repeatPassword: String = "",
-    val userNameExplanation: String? = null,
-    val userNameError: String? = null,
-    val emailError: String? = null,
-    val passwordError: String? = null,
-    val repeatPasswordError: String? = null,
-    val passwordExplanation: String? = null,
-    val registrationEnabled: Boolean = false,
-    val registrationSuccess: Boolean? = null
+  val userName: String = "",
+  val email: String = "",
+  val password: String = "",
+  val repeatPassword: String = "",
+  val userNameExplanation: String? = null,
+  val userNameError: String? = null,
+  val emailError: String? = null,
+  val passwordError: String? = null,
+  val repeatPasswordError: String? = null,
+  val passwordExplanation: String? = null,
+  val registrationEnabled: Boolean = false,
+  val registrationSuccess: Boolean? = null,
 ) {
-    companion object {
-        val defaultOrEmpty = RegistrationUiModel()
-    }
+  companion object {
+    val defaultOrEmpty = RegistrationUiModel()
+  }
 }
 
 @Stable
-class RegistrationPresenter(
-    private val registrationStateMachine: RegistrationStateMachineFactory
-) {
-    private val actions = MutableSharedFlow<RegistrationAction>(extraBufferCapacity = 10)
+class RegistrationPresenter(private val registrationStateMachine: RegistrationStateMachineFactory) {
+  private val actions = MutableSharedFlow<RegistrationAction>(extraBufferCapacity = 10)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Composable
-    fun uiModel(): RegistrationUiModel {
-        var registrationUiModel by remember(key1 = Unit) { mutableStateOf(value = RegistrationUiModel.defaultOrEmpty) }
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Composable
+  fun uiModel(): RegistrationUiModel {
+    var registrationUiModel by
+      remember(key1 = Unit) { mutableStateOf(value = RegistrationUiModel.defaultOrEmpty) }
 
-        // Receives the State from the StateMachine
-        LaunchedEffect(key1 = Unit) {
-            val registrationStateMachine = registrationStateMachine.launchIn(this)
+    // Receives the State from the StateMachine
+    LaunchedEffect(key1 = Unit) {
+      val registrationStateMachine = registrationStateMachine.launchIn(this)
 
-            launch {
-                registrationStateMachine.state
-                    .onStart { emit(value = RegistrationStateMachineFactory.defaultRegistrationState) }
-                    .mapLatest { registrationState ->
-                        registrationUiModel = registrationUiModel.mapToRegistrationModel(registrationState)
-                    }
-                    .cancellable()
-                    .catch { throwable ->
-                        if (throwable is CancellationException) throw throwable
-                        // else can can be something like page level error etc.
-                    }
-                    .flowOn(context = Dispatchers.Default)
-                    .collect()
-            }
+      launch {
+        registrationStateMachine.state
+          .onStart { emit(value = RegistrationStateMachineFactory.defaultRegistrationState) }
+          .mapLatest { registrationState ->
+            registrationUiModel = registrationUiModel.mapToRegistrationModel(registrationState)
+          }
+          .cancellable()
+          .catch { throwable ->
+            if (throwable is CancellationException) throw throwable
+            // else can can be something like page level error etc.
+          }
+          .flowOn(context = Dispatchers.Default)
+          .collect()
+      }
 
-            // Send the Events to the State Machine through Actions
-            launch {
-                actions.collect { loginAction ->
-                    registrationStateMachine.dispatch(loginAction)
-                }
-            }
+      // Send the Events to the State Machine through Actions
+      launch {
+        actions.collect { loginAction ->
+          registrationStateMachine.dispatch(loginAction)
         }
-
-        return registrationUiModel
+      }
     }
 
-    fun dispatchAction(action: RegistrationAction) =
-        actions.tryEmit(value = action)
+    return registrationUiModel
+  }
+
+  fun dispatchAction(action: RegistrationAction) = actions.tryEmit(value = action)
 }
 
-private fun RegistrationUiModel.mapToRegistrationModel(
-    registrationState: RegistrationState
-) = copy(
+private fun RegistrationUiModel.mapToRegistrationModel(registrationState: RegistrationState) =
+  copy(
     userName = registrationState.userName,
     email = registrationState.email,
     password = registrationState.password,
@@ -101,5 +98,5 @@ private fun RegistrationUiModel.mapToRegistrationModel(
     repeatPasswordError = registrationState.repeatPasswordError,
     passwordExplanation = registrationState.passwordExplanation,
     registrationEnabled = registrationState.registrationEnabled,
-    registrationSuccess = registrationState.registrationSuccess
-)
+    registrationSuccess = registrationState.registrationSuccess,
+  )

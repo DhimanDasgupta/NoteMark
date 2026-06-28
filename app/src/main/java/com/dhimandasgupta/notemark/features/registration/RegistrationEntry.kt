@@ -19,42 +19,47 @@ import org.koin.java.KoinJavaComponent.get
 
 @Composable
 fun EntryProviderScope<NavKey>.RegistrationEntryBuilder(
-    modifier: Modifier,
-    navigateToLoginFromRegistration: () -> Unit
+  modifier: Modifier,
+  navigateToLoginFromRegistration: () -> Unit,
 ) {
-    entry<RegistrationNavKey> {
-        val registrationPresenter: RegistrationPresenter = retain { get(clazz = RegistrationPresenter::class.java) }
-
-        RegistrationEntry(
-            modifier = modifier,
-            registrationPresenter = registrationPresenter,
-            navigateToLoginFromRegistration = navigateToLoginFromRegistration
-        )
+  entry<RegistrationNavKey> {
+    val registrationPresenter: RegistrationPresenter = retain {
+      get(clazz = RegistrationPresenter::class.java)
     }
+
+    RegistrationEntry(
+      modifier = modifier,
+      registrationPresenter = registrationPresenter,
+      navigateToLoginFromRegistration = navigateToLoginFromRegistration,
+    )
+  }
 }
 
 @Composable
 private fun RegistrationEntry(
-    modifier: Modifier = Modifier,
-    registrationPresenter: RegistrationPresenter,
-    navigateToLoginFromRegistration: () -> Unit
+  modifier: Modifier = Modifier,
+  registrationPresenter: RegistrationPresenter,
+  navigateToLoginFromRegistration: () -> Unit,
 ) {
-    var registrationUiModel by rememberSerializable { mutableStateOf(value = RegistrationUiModel.defaultOrEmpty) }
-    val registrationAction by rememberUpdatedState(newValue = registrationPresenter::dispatchAction)
+  var registrationUiModel by rememberSerializable {
+    mutableStateOf(value = RegistrationUiModel.defaultOrEmpty)
+  }
+  val registrationAction by rememberUpdatedState(newValue = registrationPresenter::dispatchAction)
 
-    LaunchedEffect(key1 = Unit) {
-        launchMolecule(mode = RecompositionMode.Immediate) {
-            registrationPresenter.uiModel()
-        }.collectLatest { model ->
-            registrationUiModel = model
-        }
-    }
+  LaunchedEffect(key1 = Unit) {
+    launchMolecule(mode = RecompositionMode.Immediate) {
+        registrationPresenter.uiModel()
+      }
+      .collectLatest { model ->
+        registrationUiModel = model
+      }
+  }
 
-    // UI data, actions, navigation and events passing to UI
-    RegistrationPane(
-        modifier = modifier,
-        registrationUiModel = { registrationUiModel },
-        navigateToLogin = { navigateToLoginFromRegistration() },
-        registrationAction = { action -> registrationAction(action) },
-    )
+  // UI data, actions, navigation and events passing to UI
+  RegistrationPane(
+    modifier = modifier,
+    registrationUiModel = { registrationUiModel },
+    navigateToLogin = { navigateToLoginFromRegistration() },
+    registrationAction = { action -> registrationAction(action) },
+  )
 }

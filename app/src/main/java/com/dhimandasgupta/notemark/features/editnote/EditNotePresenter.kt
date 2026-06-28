@@ -28,95 +28,99 @@ import org.koin.java.KoinJavaComponent.get
 @Serializable
 @Immutable
 data class EditNoteUiModel(
-    val title: String,
-    val content: String,
-    val noteEntity: NoteEntityUi? = null,
-    val saved: Boolean? = null,
-    val editEnable: Boolean = false,
-    val isReaderMode: Boolean = false
+  val title: String,
+  val content: String,
+  val noteEntity: NoteEntityUi? = null,
+  val saved: Boolean? = null,
+  val editEnable: Boolean = false,
+  val isReaderMode: Boolean = false,
 ) {
-    companion object {
-        val defaultOrEmpty = EditNoteUiModel(
-            title = "",
-            content = "",
-            noteEntity = null,
-            editEnable = false,
-            isReaderMode = false
-        )
-    }
+  companion object {
+    val defaultOrEmpty =
+      EditNoteUiModel(
+        title = "",
+        content = "",
+        noteEntity = null,
+        editEnable = false,
+        isReaderMode = false,
+      )
+  }
 }
 
 @Serializable
 @Immutable
 data class NoteEntityUi(
-    val id: Long,
-    val title: String,
-    val content: String,
-    val createdAt: String,
-    val lastEditedAt: String,
-    val uuid: String,
-    val synced: Boolean,
-    val markAsDeleted: Boolean,
+  val id: Long,
+  val title: String,
+  val content: String,
+  val createdAt: String,
+  val lastEditedAt: String,
+  val uuid: String,
+  val synced: Boolean,
+  val markAsDeleted: Boolean,
 )
 
 @Stable
 class EditNotePresenter(
-    private val noteId: String,
-    private val editNoteStateMachineFactory: EditNoteStateMachineFactory = get(clazz = EditNoteStateMachineFactory::class.java) {
-        parametersOf(
-            noteId
-        )
-    }
+  private val noteId: String,
+  private val editNoteStateMachineFactory: EditNoteStateMachineFactory =
+    get(clazz = EditNoteStateMachineFactory::class.java) {
+      parametersOf(noteId)
+    },
 ) {
-    private val actions = MutableSharedFlow<EditNoteAction>(extraBufferCapacity = 10)
+  private val actions = MutableSharedFlow<EditNoteAction>(extraBufferCapacity = 10)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Composable
-    fun uiModel(): EditNoteUiModel {
-        var editNoteUiModel by remember(key1 = Unit) { mutableStateOf(value = EditNoteUiModel.defaultOrEmpty) }
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Composable
+  fun uiModel(): EditNoteUiModel {
+    var editNoteUiModel by
+      remember(key1 = Unit) { mutableStateOf(value = EditNoteUiModel.defaultOrEmpty) }
 
-        // Receives the State from the StateMachine
-        LaunchedEffect(key1 = Unit) {
-            val editNoteStateMachine = editNoteStateMachineFactory.launchIn(this)
+    // Receives the State from the StateMachine
+    LaunchedEffect(key1 = Unit) {
+      val editNoteStateMachine = editNoteStateMachineFactory.launchIn(this)
 
-            launch {
-                editNoteStateMachine.state
-                    .onStart { emit(value = EditNoteStateMachineFactory.defaultEditNoteState) }
-                    .filter { editNoteState -> editNoteState.noteEntity != null && editNoteState.title.isNotEmpty() && editNoteState.content.isNotEmpty() }
-                    .mapLatest { editNoteState ->
-                        editNoteUiModel = editNoteUiModel.mapToEditNoteUiModel(editNoteState)
-                    }
-                    .cancellable()
-                    .distinctUntilChanged()
-                    .catch { throwable ->
-                        if (throwable is CancellationException) throw throwable
-                        // else can can be something like page level error etc.
-                    }
-                    .flowOn(context = Dispatchers.Default)
-                    .collect()
-            }
+      launch {
+        editNoteStateMachine.state
+          .onStart { emit(value = EditNoteStateMachineFactory.defaultEditNoteState) }
+          .filter { editNoteState ->
+            editNoteState.noteEntity != null &&
+              editNoteState.title.isNotEmpty() &&
+              editNoteState.content.isNotEmpty()
+          }
+          .mapLatest { editNoteState ->
+            editNoteUiModel = editNoteUiModel.mapToEditNoteUiModel(editNoteState)
+          }
+          .cancellable()
+          .distinctUntilChanged()
+          .catch { throwable ->
+            if (throwable is CancellationException) throw throwable
+            // else can can be something like page level error etc.
+          }
+          .flowOn(context = Dispatchers.Default)
+          .collect()
+      }
 
-            // Send the Events to the State Machine through Actions
-            launch {
-                actions.collect { editNoteAction ->
-                    editNoteStateMachine.dispatch(editNoteAction)
-                }
-            }
+      // Send the Events to the State Machine through Actions
+      launch {
+        actions.collect { editNoteAction ->
+          editNoteStateMachine.dispatch(editNoteAction)
         }
-
-        return editNoteUiModel
+      }
     }
 
-    fun dispatchAction(action: EditNoteAction) =
-        actions.tryEmit(value = action)
+    return editNoteUiModel
+  }
+
+  fun dispatchAction(action: EditNoteAction) = actions.tryEmit(value = action)
 }
 
-private fun EditNoteUiModel.mapToEditNoteUiModel(
-    editNoteState: EditNoteState
-) = copy(
+private fun EditNoteUiModel.mapToEditNoteUiModel(editNoteState: EditNoteState) =
+  copy(
     title = editNoteState.title,
     content = editNoteState.content,
-    noteEntity = NoteEntityUi(
+    noteEntity =
+      NoteEntityUi(
         id = editNoteState.noteEntity?.id ?: 0,
         title = editNoteState.noteEntity?.title ?: "",
         content = editNoteState.noteEntity?.content ?: "",
@@ -124,9 +128,9 @@ private fun EditNoteUiModel.mapToEditNoteUiModel(
         lastEditedAt = editNoteState.noteEntity?.lastEditedAt ?: "",
         uuid = editNoteState.noteEntity?.uuid ?: "",
         synced = editNoteState.noteEntity?.synced ?: false,
-        markAsDeleted = editNoteState.noteEntity?.markAsDeleted ?: false
-    ),
+        markAsDeleted = editNoteState.noteEntity?.markAsDeleted ?: false,
+      ),
     saved = editNoteState.saved,
     editEnable = editNoteState.mode == Mode.EditMode,
-    isReaderMode = editNoteState.mode == Mode.ReaderMode
-)
+    isReaderMode = editNoteState.mode == Mode.ReaderMode,
+  )

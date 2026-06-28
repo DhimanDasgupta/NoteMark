@@ -24,121 +24,127 @@ import com.dhimandasgupta.notemark.features.settings.SettingsEntryBuilder
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun NoteMarkRoot(
-    modifier: Modifier
-) {
-    val backStack = rememberNavBackStack(LauncherNavKey)
-    val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
+fun NoteMarkRoot(modifier: Modifier) {
+  val backStack = rememberNavBackStack(LauncherNavKey)
+  val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
 
-    SharedTransitionLayout(
-        modifier = modifier
-    ) {
-        NavDisplay(
-            modifier = Modifier.fillMaxSize(),
-            backStack = backStack,
-            sceneStrategies = listOf(sceneStrategy),
-            onBack = { backStack.removeLastOrNull() },
-            sharedTransitionScope = this,
-            transitionSpec = {
-                slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                ) { initialOffSet -> initialOffSet } togetherWith slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.End,
-                ) { initialOffSet -> -initialOffSet }
+  SharedTransitionLayout(modifier = modifier) {
+    NavDisplay(
+      modifier = Modifier.fillMaxSize(),
+      backStack = backStack,
+      sceneStrategies = listOf(sceneStrategy),
+      onBack = { backStack.removeLastOrNull() },
+      sharedTransitionScope = this,
+      transitionSpec = {
+        slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Start) {
+          initialOffSet ->
+          initialOffSet
+        } togetherWith
+          slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.End) {
+            initialOffSet ->
+            -initialOffSet
+          }
+      },
+      popTransitionSpec = {
+        slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Start) {
+          initialOffSet ->
+          -initialOffSet
+        } togetherWith
+          slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.End) {
+            initialOffSet ->
+            initialOffSet
+          }
+      },
+      predictivePopTransitionSpec = {
+        slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Start) {
+          initialOffSet ->
+          -initialOffSet
+        } + fadeIn() togetherWith
+          slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.End) {
+            initialOffSet ->
+            initialOffSet
+          } + fadeOut()
+      },
+      entryProvider =
+        entryProvider {
+          LauncherEntryBuilder(
+            modifier = modifier,
+            navigateAfterLogin = {
+              backStack.apply {
+                clearPreLoginKeys()
+                add(NoteListNavKey)
+              }
             },
-            popTransitionSpec = {
-                slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                ) { initialOffSet -> -initialOffSet } togetherWith slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.End,
-                ) { initialOffSet -> initialOffSet }
+            navigateToLogin = {
+              backStack.add(LoginNavKey)
             },
-            predictivePopTransitionSpec = {
-                slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                ) { initialOffSet -> -initialOffSet } + fadeIn() togetherWith slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.End,
-                ) { initialOffSet -> initialOffSet } + fadeOut()
+          )
+          LoginEntryBuilder(
+            modifier = modifier,
+            navigateToRegistration = {
+              backStack.add(RegistrationNavKey)
             },
-            entryProvider = entryProvider {
-                LauncherEntryBuilder(
-                    modifier = modifier,
-                    navigateAfterLogin = {
-                        backStack.apply {
-                            clearPreLoginKeys()
-                            add(NoteListNavKey)
-                        }
-                    },
-                    navigateToLogin = {
-                        backStack.add(LoginNavKey)
-                    }
-                )
-                LoginEntryBuilder(
-                    modifier = modifier,
-                    navigateToRegistration = {
-                        backStack.add(RegistrationNavKey)
-                    },
-                    navigateToAfterLogin = {
-                        backStack.apply {
-                            clearPreLoginKeys()
-                            add(NoteListNavKey)
-                        }
-                    }
-                )
-                RegistrationEntryBuilder(
-                    modifier = modifier,
-                    navigateToLoginFromRegistration = {
-                        backStack.removeLastOrNull()
-                    }
-                )
-                NoteListEntryBuilder(
-                    modifier = modifier,
-                    navigateToLauncherIfLoggedOut = {
-                        backStack.apply {
-                            clearPostLoginNavKeys()
-                            add(LauncherNavKey)
-                        }
-                    },
-                    navigateToAdd = {
-                        backStack.add(NoteCreateNavKey)
-                    },
-                    navigateToEdit = { uuid ->
-                        backStack.apply {
-                            clearNoteEditNavKeys()
-                            add(NoteEditNavKey(uuid))
-                        }
-                    },
-                    navigateToSettings = {
-                        if (!backStack.isSettingsOpen()) {
-                            backStack.add(SettingsNavKey)
-                        }
-                    }
-                )
-                NoteCreateEntryBuilder(
-                    modifier = modifier,
-                    navigateUp = {
-                        backStack.removeLastOrNull()
-                    }
-                )
-                NoteEditEntryBuilder(
-                    modifier = modifier,
-                    navigateUp = {
-                        backStack.clearNoteEditNavKeys()
-                    }
-                )
-                SettingsEntryBuilder(
-                    modifier = modifier,
-                    navigateToLauncherAfterLogout = {
-                        backStack.apply {
-                            clearPostLoginNavKeys()
-                            add(LauncherNavKey)
-                        }
-                    },
-                    navigateUp = {
-                        backStack.removeSettingsKey()
-                    }
-                )
-            }
-        )
-    }
+            navigateToAfterLogin = {
+              backStack.apply {
+                clearPreLoginKeys()
+                add(NoteListNavKey)
+              }
+            },
+          )
+          RegistrationEntryBuilder(
+            modifier = modifier,
+            navigateToLoginFromRegistration = {
+              backStack.removeLastOrNull()
+            },
+          )
+          NoteListEntryBuilder(
+            modifier = modifier,
+            navigateToLauncherIfLoggedOut = {
+              backStack.apply {
+                clearPostLoginNavKeys()
+                add(LauncherNavKey)
+              }
+            },
+            navigateToAdd = {
+              backStack.add(NoteCreateNavKey)
+            },
+            navigateToEdit = { uuid ->
+              backStack.apply {
+                clearNoteEditNavKeys()
+                add(NoteEditNavKey(uuid))
+              }
+            },
+            navigateToSettings = {
+              if (!backStack.isSettingsOpen()) {
+                backStack.add(SettingsNavKey)
+              }
+            },
+          )
+          NoteCreateEntryBuilder(
+            modifier = modifier,
+            navigateUp = {
+              backStack.removeLastOrNull()
+            },
+          )
+          NoteEditEntryBuilder(
+            modifier = modifier,
+            navigateUp = {
+              backStack.clearNoteEditNavKeys()
+            },
+          )
+          SettingsEntryBuilder(
+            modifier = modifier,
+            navigateToLauncherAfterLogout = {
+              backStack.apply {
+                clearPostLoginNavKeys()
+                add(LauncherNavKey)
+              }
+            },
+            navigateUp = {
+              backStack.removeSettingsKey()
+            },
+          )
+        },
+    )
+  }
 }

@@ -20,27 +20,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun NoNoteSelectedPane(
-    modifier: Modifier = Modifier
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize()
-    ) {
-        Text(
-            text = "Please select a note from the list..",
-            style = typography.titleSmall,
-            color = colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    paddingValues = WindowInsets.displayCutout.union(insets = WindowInsets.statusBars)
-                        .union(
-                            insets = WindowInsets.navigationBars
-                        ).asPaddingValues()
-                )
-                .padding(vertical = 96.dp, horizontal = 32.dp)
-        )
-    }
+fun NoNoteSelectedPane(modifier: Modifier = Modifier) {
+  Box(
+    contentAlignment = Alignment.Center,
+    modifier = modifier.fillMaxSize(),
+  ) {
+    Text(
+      text = "Please select a note from the list..",
+      style = typography.titleSmall,
+      color = colorScheme.onSurfaceVariant,
+      textAlign = TextAlign.Center,
+      modifier =
+        Modifier.fillMaxWidth()
+          .padding(
+            paddingValues =
+              WindowInsets.displayCutout
+                .union(insets = WindowInsets.statusBars)
+                .union(insets = WindowInsets.navigationBars)
+                .asPaddingValues()
+          )
+          .padding(vertical = 96.dp, horizontal = 32.dp),
+    )
+  }
 }

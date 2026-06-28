@@ -13,76 +13,91 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @Immutable
 data class LoginState(
-    val email: String = "",
-    val password: String = "",
-    val emailError: String? = null,
-    val passwordError: String? = null,
-    val loginEnabled: Boolean = false,
-    val loginSuccess: Boolean? = null
+  val email: String = "",
+  val password: String = "",
+  val emailError: String? = null,
+  val passwordError: String? = null,
+  val loginEnabled: Boolean = false,
+  val loginSuccess: Boolean? = null,
 )
 
 sealed interface LoginAction {
-    data class EmailEntered(val email: String) : LoginAction
-    data class PasswordEntered(val password: String) : LoginAction
-    data object LoginClicked : LoginAction
-    data object HideLoginButton : LoginAction
-    data object LoginChangeConsumed: LoginAction
+  data class EmailEntered(val email: String) : LoginAction
+
+  data class PasswordEntered(val password: String) : LoginAction
+
+  data object LoginClicked : LoginAction
+
+  data object HideLoginButton : LoginAction
+
+  data object LoginChangeConsumed : LoginAction
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LoginStateMachineFactory(
-    val noteMarkApi: NoteMarkApi
-) : StateMachineFactory<LoginState, LoginAction>() {
-    init {
-        spec {
-            initializeWith { defaultLoginState }
+class LoginStateMachineFactory(val noteMarkApi: NoteMarkApi) :
+  StateMachineFactory<LoginState, LoginAction>() {
+  init {
+    spec {
+      initializeWith { defaultLoginState }
 
-            inState<LoginState> {
-                on<EmailEntered> { action ->
-                    mutate { copy(email = action.email).validateNonEmptyInputs() }
-                }
-                on<PasswordEntered> { action ->
-                    mutate { copy(password = action.password).validateNonEmptyInputs() }
-                }
-                on<LoginAction.HideLoginButton> { _ ->
-                    mutate { copy(loginEnabled = false) }
-                }
-                on<LoginAction.LoginClicked> { _ ->
-                    val modifiedState = snapshot.validateInputs()
-
-                    if (modifiedState.emailError?.isNotEmpty() == true && modifiedState.passwordError?.isNotEmpty() == true) {
-                        return@on mutate { modifiedState }
-                    }
-
-                    noteMarkApi.login(
-                        request = LoginRequest(
-                            email = snapshot.email,
-                            password = snapshot.password
-                        )
-                    ).fold(onSuccess = {
-                        mutate { copy(loginSuccess = true, loginEnabled = true) }
-                    }, onFailure = {
-                        mutate { copy(loginSuccess = false, loginEnabled = true) }
-                    })
-                }
-                on<LoginAction.LoginChangeConsumed> { _ ->
-                    mutate { copy(loginSuccess = null) }
-                }
-            }
+      inState<LoginState> {
+        on<EmailEntered> { action ->
+          mutate { copy(email = action.email).validateNonEmptyInputs() }
         }
-    }
+        on<PasswordEntered> { action ->
+          mutate { copy(password = action.password).validateNonEmptyInputs() }
+        }
+        on<LoginAction.HideLoginButton> { _ ->
+          mutate { copy(loginEnabled = false) }
+        }
+        on<LoginAction.LoginClicked> { _ ->
+          val modifiedState = snapshot.validateInputs()
 
-    companion object Companion {
-        val defaultLoginState = LoginState()
+          if (
+            modifiedState.emailError?.isNotEmpty() == true &&
+              modifiedState.passwordError?.isNotEmpty() == true
+          ) {
+            return@on mutate { modifiedState }
+          }
+
+          noteMarkApi
+            .login(
+              request =
+                LoginRequest(
+                  email = snapshot.email,
+                  password = snapshot.password,
+                )
+            )
+            .fold(
+              onSuccess = {
+                mutate { copy(loginSuccess = true, loginEnabled = true) }
+              },
+              onFailure = {
+                mutate { copy(loginSuccess = false, loginEnabled = true) }
+              },
+            )
+        }
+        on<LoginAction.LoginChangeConsumed> { _ ->
+          mutate { copy(loginSuccess = null) }
+        }
+      }
     }
+  }
+
+  companion object Companion {
+    val defaultLoginState = LoginState()
+  }
 }
 
-private fun LoginState.validateNonEmptyInputs(): LoginState = copy(
-    loginEnabled = email.isNotEmpty() && password.isNotEmpty()
-)
+private fun LoginState.validateNonEmptyInputs(): LoginState =
+  copy(loginEnabled = email.isNotEmpty() && password.isNotEmpty())
 
 private fun LoginState.validateInputs(): LoginState {
-    var updatedLoginState = copy(emailError = if (!email.isValidEmail()) "Invalid email provided" else null)
-    updatedLoginState = updatedLoginState.copy(passwordError = if (!password.isValidPassword()) "Please enter password" else null)
-    return updatedLoginState
+  var updatedLoginState =
+    copy(emailError = if (!email.isValidEmail()) "Invalid email provided" else null)
+  updatedLoginState =
+    updatedLoginState.copy(
+      passwordError = if (!password.isValidPassword()) "Please enter password" else null
+    )
+  return updatedLoginState
 }

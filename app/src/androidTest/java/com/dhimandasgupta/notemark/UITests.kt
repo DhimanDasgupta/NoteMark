@@ -10,39 +10,50 @@ import org.junit.Rule
 import org.junit.Test
 
 class UITests {
-    @get:Rule
-    val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    @Test
-    fun threeBouncingDotsShouldRecomposeOnce() {
-        composeTestRule.mainClock.autoAdvance = false
-        composeTestRule.setContent {
-            ThreeBouncingDots()
-        }
-        composeTestRule.mainClock.advanceTimeBy(2_000)
-        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS).assertRecompositionCount(1)
+  @Test
+  fun threeBouncingDotsShouldRecomposeOnce() {
+    composeTestRule.mainClock.autoAdvance = false
+    composeTestRule.setContent {
+      ThreeBouncingDots()
     }
+    composeTestRule.mainClock.advanceTimeBy(2_000)
+    composeTestRule
+      .onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS)
+      .assertIsDisplayed()
+    composeTestRule
+      .onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS)
+      .assertRecompositionCount(1)
+  }
 
-    @Test
-    fun threeBouncingDotsShouldRecomposeOnceAfter6Seconds() {
-        composeTestRule.mainClock.autoAdvance = false
-        composeTestRule.setContent {
-            ThreeBouncingDots()
-        }
-        composeTestRule.mainClock.advanceTimeBy(6_000)
-        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS).assertRecompositionCount(1)
+  @Test
+  fun threeBouncingDotsShouldRecomposeOnceAfter6Seconds() {
+    composeTestRule.mainClock.autoAdvance = false
+    composeTestRule.setContent {
+      ThreeBouncingDots()
     }
+    composeTestRule.mainClock.advanceTimeBy(6_000)
+    composeTestRule
+      .onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS)
+      .assertIsDisplayed()
+    composeTestRule
+      .onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS)
+      .assertRecompositionCount(1)
+  }
 
-    @Test
-    fun threeBouncingDotsShouldRecomposeOnceAfter10Seconds() {
-        composeTestRule.mainClock.autoAdvance = false
-        composeTestRule.setContent {
-            ThreeBouncingDots()
-        }
-        composeTestRule.mainClock.advanceTimeBy(10_000)
-        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS).assertRecompositionCount(1)
+  @Test
+  fun threeBouncingDotsShouldRecomposeOnceAfter10Seconds() {
+    composeTestRule.mainClock.autoAdvance = false
+    composeTestRule.setContent {
+      ThreeBouncingDots()
     }
+    composeTestRule.mainClock.advanceTimeBy(10_000)
+    composeTestRule
+      .onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS)
+      .assertIsDisplayed()
+    composeTestRule
+      .onNodeWithTag(testTag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS)
+      .assertRecompositionCount(1)
+  }
 }

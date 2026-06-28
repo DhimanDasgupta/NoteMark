@@ -2,6 +2,4 @@ package com.dhimandasgupta.notemark.features.notelist
 
 import org.junit.Assert.*
 
-class NoteListPresenterTest {
-
-}
+class NoteListPresenterTest {}
