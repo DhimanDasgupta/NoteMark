@@ -79,7 +79,7 @@ class NoteListStateMachineFactory(
               NoteListStateWithNotes(
                 userName = userName,
                 loading = false,
-                notes = notes.sortedByDescending { it.lastEditedAt },
+                notes = notes.distinctBy { note -> note.id }.sortedByDescending { it.lastEditedAt },
               )
             }
           } else {
