@@ -44,6 +44,8 @@ import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
@@ -510,11 +512,19 @@ private fun RegistrationFooterField(
 
 @WindowSizePreviews
 @Composable
-private fun RegistraionPanePreview() {
+private fun RegistrationPanePreview(
+  @PreviewParameter(RegistrationUiModelPreviewProvider::class)
+  registrationUiModel: RegistrationUiModel
+) {
   NoteMarkTheme {
     RegistrationPane(
       modifier = Modifier,
-      registrationUiModel = { RegistrationUiModel.defaultOrEmpty },
+      registrationUiModel = { registrationUiModel },
     )
   }
+}
+
+private class RegistrationUiModelPreviewProvider : PreviewParameterProvider<RegistrationUiModel> {
+  override val values: Sequence<RegistrationUiModel>
+    get() = sequenceOf(element = RegistrationUiModel.defaultOrEmpty)
 }

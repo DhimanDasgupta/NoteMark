@@ -66,6 +66,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -80,7 +82,7 @@ import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkToolbarButton
 import com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton
 import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
-import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 
 @Composable
@@ -626,7 +628,9 @@ private fun NoteItem(
 
 @WindowSizePreviews
 @Composable
-private fun NoteListPanePreview() {
+private fun NoteListPanePreview(
+  @PreviewParameter(NoteListUiModelPreviewParameterProvider::class) noteListUiModel: NoteListUiModel
+) {
   NoteMarkTheme {
     NoteListPane(
       modifier = Modifier,
@@ -635,74 +639,143 @@ private fun NoteListPanePreview() {
   }
 }
 
-private val noteListUiModel =
-  NoteListUiModel(
-    userName = "Dhiman",
-    noteEntities =
-      listOf(
-          NoteEntityUiModel(
-            id = 0,
-            title = "This is a title for the Note\nThis is a title for the Note",
-            content = "This is content For the Note\nThis is content For the Note",
-            createdAt = "19th Apr",
-            lastEditedAt = "20th Apr",
-            uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
-            synced = true,
-            markAsDeleted = false,
-          ),
-          NoteEntityUiModel(
-            id = 1,
-            title = "This is a title for the Note",
-            content = "This is content For the Note",
-            createdAt = "19th Apr",
-            lastEditedAt = "20th Apr",
-            uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
-            synced = true,
-            markAsDeleted = false,
-          ),
-          NoteEntityUiModel(
-            id = 2,
-            title = "This is a title for the Note\nThis is a title for the Note",
-            content = "This is content For the Note\nThis is content For the Note",
-            createdAt = "19th Apr",
-            lastEditedAt = "20th Apr",
-            uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
-            synced = true,
-            markAsDeleted = false,
-          ),
-          NoteEntityUiModel(
-            id = 3,
-            title = "This is a title for the Note",
-            content = "This is content For the Note",
-            createdAt = "19th Apr",
-            lastEditedAt = "20th Apr",
-            uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
-            synced = true,
-            markAsDeleted = false,
-          ),
-          NoteEntityUiModel(
-            id = 4,
-            title = "This is a title for the Note\nThis is a title for the Note",
-            content = "This is content For the Note\nThis is content For the Note",
-            createdAt = "19th Apr",
-            lastEditedAt = "20th Apr",
-            uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
-            synced = true,
-            markAsDeleted = false,
-          ),
-          NoteEntityUiModel(
-            id = 5,
-            title = "This is a title for the Note",
-            content = "This is content For the Note",
-            createdAt = "19th Apr",
-            lastEditedAt = "20th Apr",
-            uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
-            synced = true,
-            markAsDeleted = false,
-          ),
-        )
-        .toPersistentList(),
-    noteLongClickedUuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
-    showSyncProgress = true,
-    isConnected = true,
-  )
+private class NoteListUiModelPreviewParameterProvider : PreviewParameterProvider<NoteListUiModel> {
+  override val values: Sequence<NoteListUiModel>
+    get() =
+      sequenceOf(
+        NoteListUiModel(
+          userName = "Dhiman",
+          loading = true,
+          noteEntities =
+            persistentListOf(
+              NoteEntityUiModel(
+                id = 0,
+                title = "This is a title for the Note\nThis is a title for the Note",
+                content = "This is content For the Note\nThis is content For the Note",
+                createdAt = "19th Apr",
+                lastEditedAt = "20th Apr",
+                uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+                synced = true,
+                markAsDeleted = false,
+              ),
+              NoteEntityUiModel(
+                id = 1,
+                title = "This is a title for the Note",
+                content = "This is content For the Note",
+                createdAt = "19th Apr",
+                lastEditedAt = "20th Apr",
+                uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+                synced = true,
+                markAsDeleted = false,
+              ),
+              NoteEntityUiModel(
+                id = 2,
+                title = "This is a title for the Note\nThis is a title for the Note",
+                content = "This is content For the Note\nThis is content For the Note",
+                createdAt = "19th Apr",
+                lastEditedAt = "20th Apr",
+                uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+                synced = true,
+                markAsDeleted = false,
+              ),
+              NoteEntityUiModel(
+                id = 3,
+                title = "This is a title for the Note",
+                content = "This is content For the Note",
+                createdAt = "19th Apr",
+                lastEditedAt = "20th Apr",
+                uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+                synced = true,
+                markAsDeleted = false,
+              ),
+              NoteEntityUiModel(
+                id = 4,
+                title = "This is a title for the Note\nThis is a title for the Note",
+                content = "This is content For the Note\nThis is content For the Note",
+                createdAt = "19th Apr",
+                lastEditedAt = "20th Apr",
+                uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+                synced = true,
+                markAsDeleted = false,
+              ),
+              NoteEntityUiModel(
+                id = 5,
+                title = "This is a title for the Note",
+                content = "This is content For the Note",
+                createdAt = "19th Apr",
+                lastEditedAt = "20th Apr",
+                uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+                synced = true,
+                markAsDeleted = false,
+              ),
+            ),
+        ),
+        NoteListUiModel(
+          userName = "Dhiman",
+          loading = false,
+          noteEntities =
+            persistentListOf(
+              NoteEntityUiModel(
+                id = 0,
+                title = "This is a title for the Note\nThis is a title for the Note",
+                content = "This is content For the Note\nThis is content For the Note",
+                createdAt = "19th Apr",
+                lastEditedAt = "20th Apr",
+                uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+                synced = true,
+                markAsDeleted = false,
+              ),
+              NoteEntityUiModel(
+                id = 1,
+                title = "This is a title for the Note",
+                content = "This is content For the Note",
+                createdAt = "19th Apr",
+                lastEditedAt = "20th Apr",
+                uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+                synced = true,
+                markAsDeleted = false,
+              ),
+              NoteEntityUiModel(
+                id = 2,
+                title = "This is a title for the Note\nThis is a title for the Note",
+                content = "This is content For the Note\nThis is content For the Note",
+                createdAt = "19th Apr",
+                lastEditedAt = "20th Apr",
+                uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+                synced = true,
+                markAsDeleted = false,
+              ),
+              NoteEntityUiModel(
+                id = 3,
+                title = "This is a title for the Note",
+                content = "This is content For the Note",
+                createdAt = "19th Apr",
+                lastEditedAt = "20th Apr",
+                uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+                synced = true,
+                markAsDeleted = false,
+              ),
+              NoteEntityUiModel(
+                id = 4,
+                title = "This is a title for the Note\nThis is a title for the Note",
+                content = "This is content For the Note\nThis is content For the Note",
+                createdAt = "19th Apr",
+                lastEditedAt = "20th Apr",
+                uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+                synced = true,
+                markAsDeleted = false,
+              ),
+              NoteEntityUiModel(
+                id = 5,
+                title = "This is a title for the Note",
+                content = "This is content For the Note",
+                createdAt = "19th Apr",
+                lastEditedAt = "20th Apr",
+                uuid = "e1ed931c-5cd1-4c87-8b13-83ab25f1307d",
+                synced = true,
+                markAsDeleted = false,
+              ),
+            ),
+        ),
+      )
+}

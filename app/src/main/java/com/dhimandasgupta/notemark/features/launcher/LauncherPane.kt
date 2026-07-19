@@ -39,6 +39,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
@@ -314,11 +316,19 @@ private fun ForegroundPane(
 
 @WindowSizePreviews
 @Composable
-private fun LauncherPanePreview() {
+private fun LauncherPanePreview(
+  @PreviewParameter(provider = LauncherUiModelPreviewProvider::class)
+  defaultLauncherUiModel: LauncherUiModel
+) {
   NoteMarkTheme {
     LauncherPane(
       modifier = Modifier,
-      launcherUiModel = { LauncherUiModel.defaultOrEmpty },
+      launcherUiModel = { defaultLauncherUiModel },
     )
   }
+}
+
+private class LauncherUiModelPreviewProvider : PreviewParameterProvider<LauncherUiModel> {
+  override val values: Sequence<LauncherUiModel>
+    get() = sequenceOf(element = LauncherUiModel.defaultOrEmpty)
 }

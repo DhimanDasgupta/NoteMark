@@ -70,6 +70,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
@@ -605,7 +607,10 @@ private fun EditAndViewMode(
 
 @WindowSizePreviews
 @Composable
-private fun EditNotePanePreview() {
+private fun EditNotePanePreview(
+  @PreviewParameter(provider = EditNoteUiModelPreviewProvider::class)
+  defaultEditNoteUiModel: EditNoteUiModel
+) {
   NoteMarkTheme {
     EditNotePane(
       modifier = Modifier,
@@ -614,21 +619,27 @@ private fun EditNotePanePreview() {
   }
 }
 
-private val defaultEditNoteUiModel =
-  EditNoteUiModel(
-    title = "Hello there, this is a the title of the Note",
-    content =
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-    noteEntity =
-      NoteEntityUi(
-        id = 1,
-        title = "Hello there, this is a the title of the Note",
-        content =
-          "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-        createdAt = "2025-06-29T19:18:24.369Z",
-        lastEditedAt = "2025-06-30T21:58:37.634Z",
-        uuid = "123e4567-e89b-12d3-a456-426614174000",
-        synced = true,
-        markAsDeleted = false,
-      ),
-  )
+private class EditNoteUiModelPreviewProvider : PreviewParameterProvider<EditNoteUiModel> {
+  override val values: Sequence<EditNoteUiModel>
+    get() =
+      sequenceOf(
+        element =
+          EditNoteUiModel(
+            title = "Hello there, this is a the title of the Note",
+            content =
+              "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+            noteEntity =
+              NoteEntityUi(
+                id = 1,
+                title = "Hello there, this is a the title of the Note",
+                content =
+                  "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+                createdAt = "2025-06-29T19:18:24.369Z",
+                lastEditedAt = "2025-06-30T21:58:37.634Z",
+                uuid = "123e4567-e89b-12d3-a456-426614174000",
+                synced = true,
+                markAsDeleted = false,
+              ),
+          )
+      )
+}

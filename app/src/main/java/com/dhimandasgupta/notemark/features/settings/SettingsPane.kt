@@ -53,6 +53,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
@@ -486,15 +488,20 @@ private fun Divider(modifier: Modifier = Modifier) {
 
 @WindowSizePreviews
 @Composable
-private fun SettingsPanePreview() {
+private fun SettingsPanePreview(
+  @PreviewParameter(provider = SettingsUiModelPreviewProvider::class)
+  defaultSettingsUiModel: SettingsUiModel
+) {
   NoteMarkTheme {
     SettingsPane(
       modifier = Modifier,
-      settingsUiModel = defaultSettingsUiModel,
+      settingsUiModel = { defaultSettingsUiModel },
     )
   }
 }
 
-private val defaultSettingsUiModel = {
-  SettingsUiModel.defaultOrEmpty.copy(appVersionName = "Some Version")
+private class SettingsUiModelPreviewProvider : PreviewParameterProvider<SettingsUiModel> {
+  override val values: Sequence<SettingsUiModel>
+    get() =
+      sequenceOf(element = SettingsUiModel.defaultOrEmpty.copy(appVersionName = "Some Version"))
 }

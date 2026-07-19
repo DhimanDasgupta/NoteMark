@@ -45,6 +45,8 @@ import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
@@ -65,7 +67,7 @@ import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
 internal fun LoginPane(
@@ -82,14 +84,14 @@ internal fun LoginPane(
 
   LaunchedEffect(key1 = Unit) {
     snapshotFlow { loginUiModel().loginSuccess }
-      .filter { value -> value != null }
+      .filterNotNull()
       .collect { isSuccess ->
-        val message = if (isSuccess == true) "Login successful" else "Login failed"
+        val message = if (isSuccess) "Login successful" else "Login failed"
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 
         // Always call the latest lambdas
         loginAction(LoginAction.LoginChangeConsumed)
-        if (isSuccess == true) {
+        if (isSuccess) {
           navigateToAfterLogin()
         }
       }
@@ -443,11 +445,18 @@ private fun LoginFooterField(
 
 @WindowSizePreviews
 @Composable
-private fun LoginPanePreview() {
+private fun LoginPanePreview(
+  @PreviewParameter(provider = LoginUiModelPreviewProvider::class) defaultLoginUiModel: LoginUiModel
+) {
   NoteMarkTheme {
     LoginPane(
       modifier = Modifier,
-      loginUiModel = { LoginUiModel.defaultOrEmpty },
+      loginUiModel = { defaultLoginUiModel },
     )
   }
+}
+
+private class LoginUiModelPreviewProvider : PreviewParameterProvider<LoginUiModel> {
+  override val values: Sequence<LoginUiModel>
+    get() = sequenceOf(element = LoginUiModel.defaultOrEmpty)
 }

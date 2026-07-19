@@ -51,6 +51,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
@@ -332,7 +334,10 @@ private fun AddNoteBody(
 
 @WindowSizePreviews
 @Composable
-private fun AddNotePreview() {
+private fun AddNotePreview(
+  @PreviewParameter(provider = AddNoteUiModelPreviewProvider::class)
+  defaultAddNoteUiModel: AddNoteUiModel
+) {
   NoteMarkTheme {
     AddNotePane(
       modifier = Modifier,
@@ -341,9 +346,15 @@ private fun AddNotePreview() {
   }
 }
 
-private val defaultAddNoteUiModel =
-  AddNoteUiModel(
-    title = "Hello there, this is a the title of the Note",
-    content =
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-  )
+private class AddNoteUiModelPreviewProvider : PreviewParameterProvider<AddNoteUiModel> {
+  override val values: Sequence<AddNoteUiModel>
+    get() =
+      sequenceOf(
+        element =
+          AddNoteUiModel(
+            title = "Hello there, this is a the title of the Note",
+            content =
+              "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+          )
+      )
+}
