@@ -645,7 +645,7 @@ private class NoteListUiModelPreviewParameterProvider : PreviewParameterProvider
       sequenceOf(
         NoteListUiModel(
           userName = "Dhiman",
-          loading = true,
+          loading = false,
           noteEntities =
             persistentListOf(
               NoteEntityUiModel(
@@ -713,6 +713,12 @@ private class NoteListUiModelPreviewParameterProvider : PreviewParameterProvider
         NoteListUiModel(
           userName = "Dhiman",
           loading = false,
+          noteEntities = persistentListOf(),
+        ),
+        NoteListUiModel(
+          userName = "Dhiman",
+          loading = true,
+          isConnected = true,
           noteEntities =
             persistentListOf(
               NoteEntityUiModel(
