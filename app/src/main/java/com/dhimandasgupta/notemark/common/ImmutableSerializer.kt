@@ -14,6 +14,14 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
+/**
+ * A custom serializer for `ImmutableList` that delegates to a standard `ListSerializer` for
+ * serialization and deserialization processes. This class facilitates seamless serialization of
+ * immutable list data structures using the Kotlin Serialization framework.
+ *
+ * @param T The type of the elements contained in the `ImmutableList`.
+ * @param elementSerializer The serializer for the elements of the `ImmutableList`.
+ */
 open class ImmutableListSerializer<T>(elementSerializer: KSerializer<T>) :
   KSerializer<ImmutableList<T>> {
 
@@ -33,6 +41,14 @@ open class ImmutableListSerializer<T>(elementSerializer: KSerializer<T>) :
   }
 }
 
+/**
+ * A custom serializer for `ImmutableSet` that delegates to a standard `SetSerializer` for
+ * serialization and deserialization processes. This class facilitates seamless serialization of
+ * immutable set data structures using the Kotlin Serialization framework.
+ *
+ * @param T The type of the elements contained in the `ImmutableSet`.
+ * @param elementSerializer The serializer for the elements of the `ImmutableSet`.
+ */
 open class ImmutableSetSerializer<T>(elementSerializer: KSerializer<T>) :
   KSerializer<ImmutableSet<T>> {
 
@@ -52,6 +68,16 @@ open class ImmutableSetSerializer<T>(elementSerializer: KSerializer<T>) :
   }
 }
 
+/**
+ * A custom serializer for `ImmutableMap` that delegates to a standard `MapSerializer` for
+ * serialization and deserialization processes. This class enables seamless serialization of
+ * immutable map data structures using the Kotlin Serialization framework.
+ *
+ * @param K The type of keys in the `ImmutableMap`.
+ * @param V The type of values in the `ImmutableMap`.
+ * @param keySerializer The serializer for the keys of the `ImmutableMap`.
+ * @param valueSerializer The serializer for the values of the `ImmutableMap`.
+ */
 open class ImmutableMapSerializer<K, V>(
   keySerializer: KSerializer<K>,
   valueSerializer: KSerializer<V>,

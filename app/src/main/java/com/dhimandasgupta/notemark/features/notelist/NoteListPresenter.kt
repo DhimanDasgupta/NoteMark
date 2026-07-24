@@ -29,8 +29,8 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
-object NoteEntityUiModelImmutableListSerializer :
-  ImmutableListSerializer<NoteEntityUiModel>(NoteEntityUiModel.serializer())
+private object NoteEntityUiModelImmutableListSerializer :
+  ImmutableListSerializer<NoteEntityUiModel>(elementSerializer = NoteEntityUiModel.serializer())
 
 @Serializable
 @Immutable
@@ -94,7 +94,7 @@ class NoteListPresenter(
           .cancellable()
           .catch { throwable ->
             if (throwable is CancellationException) throw throwable
-            // else can can be something like page level error etc.
+            // else can be something like page level error etc.
           }
           .flowOn(context = Dispatchers.Default)
           .collectLatest { mappedNoteListUiModel ->

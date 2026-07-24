@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.dhimandasgupta.notemark.features.addnote.NoteCreateEntryBuilder
 import com.dhimandasgupta.notemark.features.editnote.NoteEditEntryBuilder
@@ -27,11 +28,13 @@ import com.dhimandasgupta.notemark.features.settings.SettingsEntryBuilder
 fun NoteMarkRoot(modifier: Modifier) {
   val backStack = rememberNavBackStack(LauncherNavKey)
   val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
+  val decorators = listOf(rememberSaveableStateHolderNavEntryDecorator<NavKey>())
 
   SharedTransitionLayout(modifier = modifier) {
     NavDisplay(
       modifier = Modifier.fillMaxSize(),
       backStack = backStack,
+      entryDecorators = decorators,
       sceneStrategies = listOf(sceneStrategy),
       onBack = { backStack.removeLastOrNull() },
       sharedTransitionScope = this,

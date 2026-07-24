@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.retain.retain
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -27,10 +28,11 @@ fun EntryProviderScope<NavKey>.NoteEditEntryBuilder(
   navigateUp: () -> Unit,
 ) {
   entry<NoteEditNavKey>(metadata = ListDetailSceneStrategy.detailPane()) { noteEditNavKey ->
+    val noteId by rememberSaveable { mutableStateOf(noteEditNavKey.noteId) }
     val editNotePresenter: EditNotePresenter = retain {
       get(
         clazz = EditNotePresenter::class.java,
-        parameters = { parametersOf(noteEditNavKey.noteId) },
+        parameters = { parametersOf(noteId) },
       )
     }
 
