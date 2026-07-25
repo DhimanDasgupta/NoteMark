@@ -22,7 +22,7 @@ import kotlinx.serialization.encoding.Encoder
  * @param T The type of the elements contained in the `ImmutableList`.
  * @param elementSerializer The serializer for the elements of the `ImmutableList`.
  */
-open class ImmutableListSerializer<T>(elementSerializer: KSerializer<T>) :
+abstract class ImmutableListSerializer<T>(elementSerializer: KSerializer<T>) :
   KSerializer<ImmutableList<T>> {
 
   private val listSerializer = ListSerializer(elementSerializer)
@@ -49,7 +49,7 @@ open class ImmutableListSerializer<T>(elementSerializer: KSerializer<T>) :
  * @param T The type of the elements contained in the `ImmutableSet`.
  * @param elementSerializer The serializer for the elements of the `ImmutableSet`.
  */
-open class ImmutableSetSerializer<T>(elementSerializer: KSerializer<T>) :
+abstract class ImmutableSetSerializer<T>(elementSerializer: KSerializer<T>) :
   KSerializer<ImmutableSet<T>> {
 
   private val setSerializer = SetSerializer(elementSerializer)
@@ -78,7 +78,7 @@ open class ImmutableSetSerializer<T>(elementSerializer: KSerializer<T>) :
  * @param keySerializer The serializer for the keys of the `ImmutableMap`.
  * @param valueSerializer The serializer for the values of the `ImmutableMap`.
  */
-open class ImmutableMapSerializer<K, V>(
+abstract class ImmutableMapSerializer<K, V>(
   keySerializer: KSerializer<K>,
   valueSerializer: KSerializer<V>,
 ) : KSerializer<ImmutableMap<K, V>> {
