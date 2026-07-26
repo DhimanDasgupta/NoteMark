@@ -1,4 +1,5 @@
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Properties
@@ -21,6 +22,10 @@ private val localPropertiesFile: File = rootProject.file("local.properties")
 // Load the properties if the file exists
 if (localPropertiesFile.exists() && localPropertiesFile.isFile) {
   localProperties.load(FileInputStream(localPropertiesFile))
+} else {
+  throw FileNotFoundException(
+    "local.properties file not found, should contain the header values HEADER_VALUE_FOR_NOTE_MARK_API"
+  )
 }
 
 private val applicationId = "com.dhimandasgupta.notemark"
