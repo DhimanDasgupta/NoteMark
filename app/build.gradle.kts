@@ -67,6 +67,9 @@ android {
       isMinifyEnabled = false
     }
     getByName("release") {
+      optimization {
+        enable = true
+      }
       buildConfigField("Boolean", "DEBUGGABLE", "false")
       isMinifyEnabled = true
       isShrinkResources = true

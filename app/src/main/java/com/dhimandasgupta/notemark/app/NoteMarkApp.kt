@@ -10,6 +10,7 @@ import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.dhimandasgupta.notemark.BuildConfig
 import com.dhimandasgupta.notemark.app.di.appModule
+import com.skydoves.compose.stability.runtime.ComposeStabilityAnalyzer
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -18,12 +19,14 @@ import timber.log.Timber
 class NoteMarkApp : Application() {
   override fun onCreate() {
     super.onCreate()
+
+    ComposeStabilityAnalyzer.setEnabled(BuildConfig.DEBUG)
     if (BuildConfig.DEBUG) {
       Timber.plant(tree = Timber.DebugTree())
       enableStrictMode()
       Composer.setDiagnosticStackTraceMode(ComposeStackTraceMode.SourceInformation)
     } else {
-      Composer.setDiagnosticStackTraceMode(ComposeStackTraceMode.Auto)
+      Composer.setDiagnosticStackTraceMode(ComposeStackTraceMode.None)
     }
 
     val config =
