@@ -388,18 +388,6 @@ private fun EditNoteBody(
         modifier
           .fillMaxWidth()
           .verticalScroll(scrollState)
-          .padding(
-            start =
-              WindowInsets.navigationBars
-                .union(insets = WindowInsets.displayCutout)
-                .asPaddingValues()
-                .calculateLeftPadding(LayoutDirection.Ltr),
-            end =
-              WindowInsets.navigationBars
-                .union(insets = WindowInsets.displayCutout)
-                .asPaddingValues()
-                .calculateEndPadding(LayoutDirection.Ltr),
-          )
           .windowInsetsPadding(insets = WindowInsets.ime)
           .padding(vertical = 16.dp),
       verticalArrangement = Arrangement.Top,

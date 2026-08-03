@@ -32,7 +32,7 @@ fun NoteMarkRoot(modifier: Modifier) {
 
   SharedTransitionLayout(modifier = modifier) {
     NavDisplay(
-      modifier = Modifier.fillMaxSize(),
+      modifier = modifier.fillMaxSize(),
       backStack = backStack,
       entryDecorators = decorators,
       sceneStrategies = listOf(sceneStrategy),

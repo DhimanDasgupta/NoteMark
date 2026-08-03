@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.ComposeFoundationFlags
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
@@ -13,8 +15,10 @@ import com.dhimandasgupta.notemark.app.nav.NoteMarkRoot
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 
 class MainActivity : ComponentActivity() {
+  @OptIn(ExperimentalFoundationApi::class)
   override fun onCreate(savedInstanceState: Bundle?) {
     installSplashScreen()
+    ComposeFoundationFlags.isInheritedTextStyleEnabled = true
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setContent {
