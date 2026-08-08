@@ -34,7 +34,6 @@ import com.dhimandasgupta.notemark.data.remote.model.RefreshResponse
 import com.dhimandasgupta.notemark.database.NoteMarkDatabase
 import com.dhimandasgupta.notemark.features.addnote.AddNotePresenter
 import com.dhimandasgupta.notemark.features.editnote.EditNotePresenterFactory
-import com.dhimandasgupta.notemark.features.editnote.EditNoteStateMachineFactoryFactory
 import com.dhimandasgupta.notemark.features.launcher.LauncherPresenter
 import com.dhimandasgupta.notemark.features.login.LoginPresenter
 import com.dhimandasgupta.notemark.features.notelist.NoteListPresenter
@@ -101,8 +100,6 @@ interface NoteMarkGraph : AppModule {
   fun settingsPresenter(): SettingsPresenter
 
   fun editNotePresenterFactory(): EditNotePresenterFactory
-
-  fun editNoteStateMachineFactoryFactory(): EditNoteStateMachineFactoryFactory
 
   fun workerFactory(): MetroWorkerFactory
 }
