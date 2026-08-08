@@ -13,6 +13,7 @@ import com.dhimandasgupta.notemark.common.extensions.android.ConnectionState
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppState.LoggedIn
 import com.dhimandasgupta.notemark.features.launcher.AppStateMachineFactory
+import dev.zacsweers.metro.Inject
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -63,6 +64,7 @@ data class NoteEntityUiModel(
 
 private val defaultNoteListUiModel = NoteListUiModel(noteEntities = persistentListOf())
 
+@Inject
 @Stable
 class NoteListPresenter(
   private val appStateMachineFactory: AppStateMachineFactory,

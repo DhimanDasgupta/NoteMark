@@ -15,10 +15,10 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
+import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
 import com.dhimandasgupta.notemark.app.nav.SettingsNavKey
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import kotlinx.coroutines.flow.collectLatest
-import org.koin.java.KoinJavaComponent.get
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -28,7 +28,8 @@ fun EntryProviderScope<NavKey>.SettingsEntryBuilder(
   navigateUp: () -> Unit,
 ) {
   entry<SettingsNavKey>(metadata = ListDetailSceneStrategy.extraPane()) {
-    val settingsPresenter: SettingsPresenter = retain { get(clazz = SettingsPresenter::class.java) }
+    val graph = LocalNoteMarkGraph.current
+    val settingsPresenter: SettingsPresenter = retain { graph.settingsPresenter() }
 
     SettingsEntry(
       modifier = modifier,

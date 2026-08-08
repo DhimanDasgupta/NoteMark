@@ -8,6 +8,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,8 +25,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.koin.core.parameter.parametersOf
-import org.koin.java.KoinJavaComponent.get
 
 @Serializable
 @Immutable
@@ -61,13 +62,13 @@ data class NoteEntityUi(
 )
 
 @Stable
-class EditNotePresenter(
-  private val noteId: String,
-  private val editNoteStateMachineFactory: EditNoteStateMachineFactory =
-    get(clazz = EditNoteStateMachineFactory::class.java) {
-      parametersOf(noteId)
-    },
+class EditNotePresenter
+@AssistedInject
+constructor(
+  @Assisted private val noteId: String,
+  private val stateMachineFactoryFactory: EditNoteStateMachineFactoryFactory,
 ) {
+  private val editNoteStateMachineFactory = stateMachineFactoryFactory.create(noteId)
   private val actions = MutableSharedFlow<EditNoteAction>(extraBufferCapacity = 10)
 
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -134,3 +135,8 @@ private fun EditNoteUiModel.mapToEditNoteUiModel(editNoteState: EditNoteState) =
     editEnable = editNoteState.mode == Mode.EditMode,
     isReaderMode = editNoteState.mode == Mode.ReaderMode,
   )
+
+@AssistedFactory
+interface EditNotePresenterFactory {
+  fun create(noteId: String): EditNotePresenter
+}

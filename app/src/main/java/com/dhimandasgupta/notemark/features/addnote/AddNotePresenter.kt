@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,6 +39,7 @@ data class AddNoteUiModel(
   }
 }
 
+@Inject
 @Stable
 class AddNotePresenter(private val addNoteStateMachineFactory: AddNoteStateMachineFactory) {
   private val actions = MutableSharedFlow<AddNoteAction>(extraBufferCapacity = 10)

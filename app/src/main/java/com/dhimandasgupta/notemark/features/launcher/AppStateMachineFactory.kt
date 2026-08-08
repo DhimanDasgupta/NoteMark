@@ -23,6 +23,7 @@ import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.proto.User
 import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
+import dev.zacsweers.metro.Inject
 import java.time.Duration
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -53,6 +54,7 @@ sealed interface AppAction {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@Inject
 class AppStateMachineFactory(
   private val applicationContext: Context,
   private val userRepository: UserRepository,

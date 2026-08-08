@@ -16,10 +16,9 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
+import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
 import com.dhimandasgupta.notemark.app.nav.NoteEditNavKey
 import kotlinx.coroutines.flow.collectLatest
-import org.koin.core.parameter.parametersOf
-import org.koin.java.KoinJavaComponent.get
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -29,11 +28,9 @@ fun EntryProviderScope<NavKey>.NoteEditEntryBuilder(
 ) {
   entry<NoteEditNavKey>(metadata = ListDetailSceneStrategy.detailPane()) { noteEditNavKey ->
     val noteId by rememberSaveable { mutableStateOf(noteEditNavKey.noteId) }
+    val graph = LocalNoteMarkGraph.current
     val editNotePresenter: EditNotePresenter = retain {
-      get(
-        clazz = EditNotePresenter::class.java,
-        parameters = { parametersOf(noteId) },
-      )
+      graph.editNotePresenterFactory().create(noteId)
     }
 
     EditNoteEntry(

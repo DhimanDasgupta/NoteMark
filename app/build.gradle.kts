@@ -13,6 +13,7 @@ plugins {
   alias(libs.plugins.sqlDelight)
   alias(libs.plugins.google.protobuf)
   alias(libs.plugins.compose.stability.analyser)
+  alias(libs.plugins.metro)
 }
 
 // Create a Properties object to hold our values
@@ -144,14 +145,6 @@ dependencies {
   debugImplementation(libs.bundles.compose.debug)
   implementation(libs.androidx.performance.tracing)
   androidTestImplementation(libs.androidx.ui.test.junit4)
-
-  // Koin
-  implementation(project.dependencies.platform(libs.koin.bom))
-  implementation(libs.koin.core)
-  implementation(libs.koin.android)
-  implementation(libs.koin.work.manager)
-  implementation(libs.koin.androidx.compose)
-  implementation(libs.koin.androidx.compose.navigation)
 
   // Flow Redux
   implementation(libs.flow.redux)

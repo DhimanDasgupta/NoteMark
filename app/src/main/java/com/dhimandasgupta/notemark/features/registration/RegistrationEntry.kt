@@ -13,9 +13,9 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
+import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
 import com.dhimandasgupta.notemark.app.nav.RegistrationNavKey
 import kotlinx.coroutines.flow.collectLatest
-import org.koin.java.KoinJavaComponent.get
 
 @Composable
 fun EntryProviderScope<NavKey>.RegistrationEntryBuilder(
@@ -23,8 +23,9 @@ fun EntryProviderScope<NavKey>.RegistrationEntryBuilder(
   navigateToLoginFromRegistration: () -> Unit,
 ) {
   entry<RegistrationNavKey> {
+    val graph = LocalNoteMarkGraph.current
     val registrationPresenter: RegistrationPresenter = retain {
-      get(clazz = RegistrationPresenter::class.java)
+      graph.registrationPresenter()
     }
 
     RegistrationEntry(

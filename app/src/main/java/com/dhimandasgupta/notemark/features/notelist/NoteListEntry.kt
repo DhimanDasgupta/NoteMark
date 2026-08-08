@@ -15,9 +15,9 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
+import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
 import com.dhimandasgupta.notemark.app.nav.NoteListNavKey
 import kotlinx.coroutines.flow.collectLatest
-import org.koin.java.KoinJavaComponent.get
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -34,7 +34,8 @@ fun EntryProviderScope<NavKey>.NoteListEntryBuilder(
         NoNoteSelectedPane()
       }
   ) {
-    val noteListPresenter: NoteListPresenter = retain { get(clazz = NoteListPresenter::class.java) }
+    val graph = LocalNoteMarkGraph.current
+    val noteListPresenter: NoteListPresenter = retain { graph.noteListPresenter() }
 
     NoteListEntry(
       modifier = modifier,

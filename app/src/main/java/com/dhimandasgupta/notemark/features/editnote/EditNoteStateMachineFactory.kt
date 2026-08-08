@@ -6,6 +6,9 @@ import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.AssistedInject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -40,9 +43,11 @@ sealed interface EditNoteAction {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
-class EditNoteStateMachineFactory(
+class EditNoteStateMachineFactory
+@AssistedInject
+constructor(
   val noteMarkRepository: NoteMarkRepository,
-  val noteId: String,
+  @Assisted val noteId: String,
 ) : StateMachineFactory<EditNoteState, EditNoteAction>() {
   init {
     spec {
@@ -106,4 +111,9 @@ class EditNoteStateMachineFactory(
         mode = Mode.ViewMode,
       )
   }
+}
+
+@AssistedFactory
+interface EditNoteStateMachineFactoryFactory {
+  fun create(noteId: String): EditNoteStateMachineFactory
 }

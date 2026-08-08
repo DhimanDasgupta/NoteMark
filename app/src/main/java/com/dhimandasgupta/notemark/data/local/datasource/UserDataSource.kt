@@ -1,7 +1,9 @@
 package com.dhimandasgupta.notemark.data.local.datasource
 
 import androidx.datastore.core.DataStore
+import com.dhimandasgupta.notemark.app.di.UserDataStore
 import com.dhimandasgupta.notemark.proto.User
+import dev.zacsweers.metro.Inject
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -18,7 +20,9 @@ interface UserDataSource {
   suspend fun reset()
 }
 
-class UserDataSourceImpl(private val userDataStore: DataStore<User>) : UserDataSource {
+@Inject
+class UserDataSourceImpl(@UserDataStore private val userDataStore: DataStore<User>) :
+  UserDataSource {
 
   override fun getUser(): Flow<User?> =
     userDataStore.data.map { user ->

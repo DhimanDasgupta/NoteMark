@@ -3,7 +3,7 @@ package com.dhimandasgupta.notemark.app.work
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.dhimandasgupta.notemark.app.di.APP_BACKGROUND_DISPATCHER
+import com.dhimandasgupta.notemark.app.di.AppBackgroundDispatcher
 import com.dhimandasgupta.notemark.common.getCurrentIso8601Timestamp
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.SyncRepository
@@ -12,29 +12,28 @@ import com.dhimandasgupta.notemark.data.remote.api.AuthenticationException
 import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.database.NoteEntity
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
-import org.koin.core.qualifier.named
-import org.koin.java.KoinJavaComponent.inject
 
 private const val DELAY_IN_BETWEEN_EVERY_NOTE = 10L
 
-class NoteSyncWorker(
-  context: Context,
-  workerParameters: WorkerParameters,
-) : CoroutineWorker(appContext = context, params = workerParameters), KoinComponent {
-  private val applicationDispatcher: CoroutineDispatcher by
-    inject(qualifier = named(name = APP_BACKGROUND_DISPATCHER))
-  private val syncRepository: SyncRepository by inject(clazz = SyncRepository::class.java)
-  private val noteMarkRepository: NoteMarkRepository by
-    inject(clazz = NoteMarkRepository::class.java)
-  private val userRepository: UserRepository by inject(clazz = UserRepository::class.java)
+class NoteSyncWorker
+@AssistedInject
+constructor(
+  @Assisted context: Context,
+  @Assisted workerParameters: WorkerParameters,
+  @AppBackgroundDispatcher private val applicationDispatcher: CoroutineDispatcher,
+  private val syncRepository: SyncRepository,
+  private val noteMarkRepository: NoteMarkRepository,
+  private val userRepository: UserRepository,
+) : CoroutineWorker(appContext = context, params = workerParameters) {
 
   override suspend fun doWork(): Result =
     withContext(applicationDispatcher) {
@@ -146,5 +145,10 @@ class NoteSyncWorker(
     if (deleted) {
       noteMarkRepository.deleteLocalNote(noteEntity = note)
     }
+  }
+
+  @AssistedFactory
+  interface Factory {
+    fun create(context: Context, workerParameters: WorkerParameters): NoteSyncWorker
   }
 }

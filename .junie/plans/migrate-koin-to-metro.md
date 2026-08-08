@@ -1,7 +1,3 @@
----
-sessionId: session-260808-175638-5a12
----
-
 # Requirements
 
 ### Overview & Goals
@@ -85,19 +81,40 @@ graph TD
 - **Removed**:
     - `app/src/main/java/com/dhimandasgupta/notemark/app/di/AppModule.kt`: No longer needed.
 
-# Testing
+# Plan
 
-### Validation Approach
-- Verify successful compilation with Metro's KSP processor.
-- Manually test the app's main flows to ensure DI is working correctly.
+### ✓ Step 1: Add Metro dependencies and configuration
+- Update `gradle/libs.versions.toml` to include `metro` version 1.4.0 and the corresponding KSP plugin.
+- Add `metro-runtime` and `metro-compiler` (KSP) to `app/build.gradle.kts`.
+- Ensure the KSP plugin is correctly applied in the `plugins` block.
 
-### Key Scenarios
-- **App Launch**: Verify `LauncherPresenter` is correctly injected and connection state is shown.
-- **Login/Registration**: Verify `LoginPresenter` and `RegistrationPresenter` work and interact with the API.
-- **Note List**: Verify `NoteListPresenter` fetches and displays notes.
-- **Edit Note**: Verify `EditNotePresenter` receives the `noteId` via assisted injection and saves changes.
-- **Syncing**: Verify `NoteSyncWorker` runs and successfully syncs notes (using WorkManager logs).
+### ✓ Step 2: Implement Metro Graph and migrate core dependencies
+- Create `NoteMarkGraph.kt` annotated with `@DependencyGraph`.
+- Define custom `@Qualifier` annotations for named dependencies: `@AppBackgroundDispatcher`, `@AppBackgroundScope`, `@UserDataStore`, and `@SyncDataStore`.
+- Implement Metro modules for `HttpClient`, `Database`, and `DataStore` providers, migrating logic from `AppModule.kt`.
+- Add `@Inject` to constructors of Repositories and DataSources.
+- Define `@Binds` or `@Provides` in the Graph/Modules for all interfaces.
 
-### Edge Cases
-- **Retained Presenters**: Ensure Presenters are not re-created on every recomposition by correctly using `retain` with the Metro Graph in `EntryBuilders`.
-- **Named Dependencies**: Ensure the correct `DataStore` (User vs Sync) and `Dispatcher` are injected where qualified.
+### ✓ Step 3: Migrate Presenters and StateMachine Factories
+- Add `@Inject` constructor to all Presenters (`LauncherPresenter`, `LoginPresenter`, etc.).
+- Update `EditNotePresenter` and `EditNoteStateMachineFactory` to use `@AssistedInject` with `noteId`.
+- Define `@AssistedFactory` interfaces for assisted components.
+- Migrate StateMachineFactories to use `@Inject` where possible.
+
+### ✓ Step 4: Initialize Metro and integrate with WorkManager
+- Update `NoteMarkApp.kt` to initialize the `NoteMarkGraph`.
+- Implement `MetroWorkerFactory` to handle `NoteSyncWorker` injection via `@AssistedInject`.
+- Update `NoteMarkApp.kt` to set the custom `WorkerFactory` in `WorkManager` configuration.
+- Update `NoteSyncWorker.kt` to use constructor injection instead of Koin's `by inject`.
+
+### ✓ Step 5: Integrate Metro with Compose UI
+- Create `LocalNoteMarkGraph` using `staticCompositionLocalOf`.
+- Update `MainActivity.kt` to wrap `NoteMarkRoot` with `CompositionLocalProvider(LocalNoteMarkGraph provides graph)`.
+- Update all `EntryBuilder` functions (e.g., `LauncherEntryBuilder`, `NoteEditEntryBuilder`) to retrieve Presenters from the graph using `LocalNoteMarkGraph.current`.
+- Remove all Koin `get()` and `parametersOf()` calls from the UI layer.
+
+### ✓ Step 6: Finalize Koin removal and cleanup
+- Delete `app/src/main/java/com/dhimandasgupta/notemark/app/di/AppModule.kt`.
+- Remove Koin initialization from `NoteMarkApp.kt`.
+- Remove Koin imports from all modified files.
+- Remove Koin dependencies from `gradle/libs.versions.toml` and `app/build.gradle.kts`.

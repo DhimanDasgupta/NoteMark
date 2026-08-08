@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.extensions.android.ConnectionState
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,6 +43,7 @@ data class UiUser(
 )
 
 @Stable
+@Inject
 class LauncherPresenter(private val appStateMachineFactory: AppStateMachineFactory) {
   private val actions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
 

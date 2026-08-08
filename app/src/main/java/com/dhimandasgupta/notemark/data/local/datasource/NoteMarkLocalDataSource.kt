@@ -2,8 +2,10 @@ package com.dhimandasgupta.notemark.data.local.datasource
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import com.dhimandasgupta.notemark.app.di.AppBackgroundDispatcher
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.database.NoteMarkDatabase
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
@@ -45,9 +47,10 @@ interface NoteMarkLocalDataSource {
   suspend fun deleteAllNotes(): Boolean
 }
 
+@Inject
 class NoteMarkLocalDataSourceImpl(
   database: NoteMarkDatabase,
-  private val applicationDispatcher: CoroutineDispatcher,
+  @AppBackgroundDispatcher private val applicationDispatcher: CoroutineDispatcher,
 ) : NoteMarkLocalDataSource {
   private val queries = database.noteMarkDatabaseQueries
 

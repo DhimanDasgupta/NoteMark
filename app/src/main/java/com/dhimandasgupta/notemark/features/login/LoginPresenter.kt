@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,6 +37,7 @@ data class LoginUiModel(
   }
 }
 
+@Inject
 @Stable
 class LoginPresenter(private val loginStateMachineFactory: LoginStateMachineFactory) {
   private val actions = MutableSharedFlow<LoginAction>(extraBufferCapacity = 10)

@@ -2,6 +2,7 @@ package com.dhimandasgupta.notemark.data
 
 import com.dhimandasgupta.notemark.data.local.datasource.NoteSyncDataSource
 import com.dhimandasgupta.notemark.proto.Sync
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.Flow
 
 interface SyncRepository {
@@ -20,6 +21,7 @@ interface SyncRepository {
   suspend fun reset()
 }
 
+@Inject
 class SyncRepositoryImpl(private val noteSyncDataSource: NoteSyncDataSource) : SyncRepository {
   override fun getSync(): Flow<Sync> = noteSyncDataSource.getSync()
 

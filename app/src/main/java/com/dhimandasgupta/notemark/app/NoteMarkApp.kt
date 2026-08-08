@@ -9,16 +9,18 @@ import androidx.compose.runtime.tooling.ComposeStackTraceMode
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.dhimandasgupta.notemark.BuildConfig
-import com.dhimandasgupta.notemark.app.di.appModule
+import com.dhimandasgupta.notemark.app.di.NoteMarkGraph
 import com.skydoves.compose.stability.runtime.ComposeStabilityAnalyzer
-import org.koin.android.ext.koin.androidContext
-import org.koin.android.ext.koin.androidLogger
-import org.koin.core.context.startKoin
+import dev.zacsweers.metro.createGraphFactory
 import timber.log.Timber
 
 class NoteMarkApp : Application() {
+  private lateinit var graph: NoteMarkGraph
+
   override fun onCreate() {
     super.onCreate()
+
+    graph = createGraphFactory<NoteMarkGraph.Factory>().create(context = this)
 
     ComposeStabilityAnalyzer.setEnabled(BuildConfig.DEBUG)
     if (BuildConfig.DEBUG) {
@@ -32,32 +34,20 @@ class NoteMarkApp : Application() {
     val config =
       Configuration.Builder()
         .setMinimumLoggingLevel(if (BuildConfig.DEBUG) DEBUG else ERROR)
+        .setWorkerFactory(workerFactory = graph.workerFactory())
         .build()
 
     WorkManager.initialize(context = this, configuration = config)
+  }
 
-    startKoin {
-      androidLogger()
-      androidContext(androidContext = this@NoteMarkApp)
-      modules(modules = appModule)
-    }
+  fun getGraph(): NoteMarkGraph {
+    require(::graph.isInitialized)
+    return graph
   }
 
   private fun enableStrictMode() {
-    StrictMode.setVmPolicy(
-      StrictMode.VmPolicy.Builder()
-        .detectAll()
-        .penaltyLog()
-        // .penaltyDeath() // Koin causes crash on this
-        .build()
-    )
+    StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build())
 
-    StrictMode.setThreadPolicy(
-      StrictMode.ThreadPolicy.Builder()
-        .detectAll()
-        .penaltyLog()
-        // .penaltyDeath()  // Koin causes crash on this
-        .build()
-    )
+    StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build())
   }
 }

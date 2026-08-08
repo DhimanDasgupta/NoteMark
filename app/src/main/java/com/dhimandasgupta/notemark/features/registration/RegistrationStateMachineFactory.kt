@@ -16,6 +16,7 @@ import com.dhimandasgupta.notemark.features.registration.RegistrationAction.User
 import com.dhimandasgupta.notemark.features.registration.RegistrationAction.UserNameFiledLostFocus
 import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @Immutable
@@ -55,6 +56,7 @@ sealed interface RegistrationAction {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@Inject
 class RegistrationStateMachineFactory(val noteMarkApi: NoteMarkApi) :
   StateMachineFactory<RegistrationState, RegistrationAction>() {
   init {

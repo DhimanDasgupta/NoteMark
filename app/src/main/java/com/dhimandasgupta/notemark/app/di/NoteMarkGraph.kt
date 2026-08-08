@@ -1,5 +1,7 @@
 package com.dhimandasgupta.notemark.app.di
 
+import android.content.Context
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.dataStoreFile
@@ -8,7 +10,6 @@ import app.cash.sqldelight.async.coroutines.synchronous
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.dhimandasgupta.notemark.BuildConfig
-import com.dhimandasgupta.notemark.app.work.NoteSyncWorker
 import com.dhimandasgupta.notemark.common.storage.SyncSerializer
 import com.dhimandasgupta.notemark.common.storage.UserSerializer
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
@@ -31,20 +32,19 @@ import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.data.remote.model.RefreshResponse
 import com.dhimandasgupta.notemark.database.NoteMarkDatabase
 import com.dhimandasgupta.notemark.features.addnote.AddNotePresenter
-import com.dhimandasgupta.notemark.features.addnote.AddNoteStateMachineFactory
-import com.dhimandasgupta.notemark.features.editnote.EditNotePresenter
-import com.dhimandasgupta.notemark.features.editnote.EditNoteStateMachineFactory
-import com.dhimandasgupta.notemark.features.launcher.AppStateMachineFactory
+import com.dhimandasgupta.notemark.features.editnote.EditNotePresenterFactory
+import com.dhimandasgupta.notemark.features.editnote.EditNoteStateMachineFactoryFactory
 import com.dhimandasgupta.notemark.features.launcher.LauncherPresenter
 import com.dhimandasgupta.notemark.features.login.LoginPresenter
-import com.dhimandasgupta.notemark.features.login.LoginStateMachineFactory
 import com.dhimandasgupta.notemark.features.notelist.NoteListPresenter
-import com.dhimandasgupta.notemark.features.notelist.NoteListStateMachineFactory
 import com.dhimandasgupta.notemark.features.registration.RegistrationPresenter
-import com.dhimandasgupta.notemark.features.registration.RegistrationStateMachineFactory
 import com.dhimandasgupta.notemark.features.settings.SettingsPresenter
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.proto.User
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.DependencyGraph
+import dev.zacsweers.metro.Provides
+import dev.zacsweers.metro.SingleIn
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
@@ -61,9 +61,10 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
-import io.ktor.http.ContentType.Application
+import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlin.collections.listOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -73,76 +74,110 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import org.koin.android.ext.koin.androidApplication
-import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.workmanager.dsl.worker
-import org.koin.core.module.dsl.factoryOf
-import org.koin.core.module.dsl.singleOf
-import org.koin.core.qualifier.named
-import org.koin.dsl.bind
-import org.koin.dsl.module
 import timber.log.Timber
 
-// Define unique names for your DataStores
-private enum class DataStoreType {
-  USER_PREFERENCES,
-  SYNC_PREFERENCES,
-}
-
-const val APP_BACKGROUND_DISPATCHER = "app_background_dispatcher"
-const val APP_BACKGROUND_SCOPE = "app_background_scope"
 private const val USER_DATA_STORE_FILE_NAME = "user_store.pb"
 private const val SYNC_DATA_STORE_FILE_NAME = "sync_store.pb"
 
-val appModule = module {
-  single<CoroutineDispatcher>(qualifier = named(name = APP_BACKGROUND_DISPATCHER)) {
-    Dispatchers.IO
+@DependencyGraph(AppScope::class)
+@SingleIn(AppScope::class)
+interface NoteMarkGraph : AppModule {
+  @DependencyGraph.Factory
+  fun interface Factory {
+    fun create(@Provides context: Context): NoteMarkGraph
   }
-  single<CoroutineScope>(qualifier = named(name = APP_BACKGROUND_SCOPE)) {
-    CoroutineScope(
+
+  fun launcherPresenter(): LauncherPresenter
+
+  fun loginPresenter(): LoginPresenter
+
+  fun registrationPresenter(): RegistrationPresenter
+
+  fun noteListPresenter(): NoteListPresenter
+
+  fun addNotePresenter(): AddNotePresenter
+
+  fun settingsPresenter(): SettingsPresenter
+
+  fun editNotePresenterFactory(): EditNotePresenterFactory
+
+  fun editNoteStateMachineFactoryFactory(): EditNoteStateMachineFactoryFactory
+
+  fun workerFactory(): MetroWorkerFactory
+}
+
+val LocalNoteMarkGraph =
+  staticCompositionLocalOf<NoteMarkGraph> {
+    error("No NoteMarkGraph provided")
+  }
+
+interface AppModule {
+  @Provides
+  @SingleIn(AppScope::class)
+  @AppBackgroundDispatcher
+  fun provideAppBackgroundDispatcher(): CoroutineDispatcher =
+    Dispatchers.IO.limitedParallelism(
+      parallelism = 2,
+      name = "AppBackgroundDispatcher",
+    )
+
+  @Provides
+  @SingleIn(AppScope::class)
+  @AppBackgroundScope
+  fun provideAppBackgroundScope(
+    @AppBackgroundDispatcher dispatcher: CoroutineDispatcher
+  ): CoroutineScope {
+    return CoroutineScope(
       context =
-        get<CoroutineDispatcher>(qualifier = named(name = APP_BACKGROUND_DISPATCHER)) +
+        dispatcher +
           SupervisorJob() +
           CoroutineExceptionHandler { context, throwable ->
             Timber.e(
-              message =
-                "CoroutineExceptionHandler got $throwable in ${context.job} and ${Thread.currentThread()}"
+              "CoroutineExceptionHandler got $throwable in ${context.job} and ${Thread.currentThread()}"
             )
           }
     )
   }
-  single<DataStore<User>>(qualifier = named(DataStoreType.USER_PREFERENCES)) {
-    DataStoreFactory.create(
+
+  @Provides
+  @SingleIn(AppScope::class)
+  @UserDataStore
+  fun provideUserDataStore(
+    context: Context,
+    @AppBackgroundScope scope: CoroutineScope,
+  ): DataStore<User> {
+    return DataStoreFactory.create(
       serializer = UserSerializer(),
-      produceFile = { androidApplication().dataStoreFile(fileName = USER_DATA_STORE_FILE_NAME) },
+      produceFile = { context.dataStoreFile(fileName = USER_DATA_STORE_FILE_NAME) },
       corruptionHandler = null,
       migrations = listOf(),
-      scope = get(qualifier = named(name = APP_BACKGROUND_SCOPE)),
+      scope = scope,
     )
   }
-  single {
-    UserDataSourceImpl(
-      userDataStore = get(qualifier = named(enum = DataStoreType.USER_PREFERENCES))
-    )
-  } bind UserDataSource::class
-  single { UserRepositoryImpl(userDataSource = get()) } bind UserRepository::class
-  single<DataStore<Sync>>(qualifier = named(enum = DataStoreType.SYNC_PREFERENCES)) {
-    DataStoreFactory.create(
+
+  @Provides
+  @SingleIn(AppScope::class)
+  @SyncDataStore
+  fun provideSyncDataStore(
+    context: Context,
+    @AppBackgroundScope scope: CoroutineScope,
+  ): DataStore<Sync> {
+    return DataStoreFactory.create(
       serializer = SyncSerializer(),
-      produceFile = { androidApplication().dataStoreFile(fileName = SYNC_DATA_STORE_FILE_NAME) },
+      produceFile = { context.dataStoreFile(fileName = SYNC_DATA_STORE_FILE_NAME) },
       corruptionHandler = null,
       migrations = listOf(),
-      scope = get(qualifier = named(name = APP_BACKGROUND_SCOPE)),
+      scope = scope,
     )
   }
-  single {
-    NoteSyncDataSourceImpl(
-      syncDataStore = get(qualifier = named(enum = DataStoreType.SYNC_PREFERENCES))
-    )
-  } bind NoteSyncDataSource::class
-  single { SyncRepositoryImpl(noteSyncDataSource = get()) } bind SyncRepository::class
-  single {
-    HttpClient(engineFactory = Android) {
+
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideHttpClient(
+    @AppBackgroundDispatcher dispatcher: CoroutineDispatcher,
+    userRepository: UserRepository,
+  ): HttpClient {
+    return HttpClient(engineFactory = Android) {
       install(plugin = ContentNegotiation) {
         json(
           Json {
@@ -160,10 +195,8 @@ val appModule = module {
       install(plugin = Auth) {
         bearer {
           loadTokens {
-            withContext(
-              get<CoroutineDispatcher>(qualifier = named(name = APP_BACKGROUND_DISPATCHER))
-            ) {
-              val user = get<UserRepository>().getUser().first()
+            withContext(dispatcher) {
+              val user = userRepository.getUser().first()
               if (user?.accessToken != null && user.refreshToken != null) {
                 BearerTokens(
                   accessToken = user.accessToken,
@@ -174,10 +207,8 @@ val appModule = module {
             }
           }
           refreshTokens {
-            withContext(
-              get<CoroutineDispatcher>(qualifier = named(name = APP_BACKGROUND_DISPATCHER))
-            ) {
-              val user = get<UserRepository>().getUser().first()
+            withContext(dispatcher) {
+              val user = userRepository.getUser().first()
               val currentTokens =
                 if (user?.accessToken != null && user.refreshToken != null) {
                   BearerTokens(
@@ -194,7 +225,7 @@ val appModule = module {
                     .post {
                       url(urlString = "/api/auth/refresh")
                       markAsRefreshTokenRequest()
-                      contentType(type = Application.Json)
+                      contentType(type = ContentType.Application.Json)
                       setBody(RefreshRequest(refreshToken = currentTokens.refreshToken ?: ""))
                     }
                     .body<RefreshResponse>()
@@ -204,10 +235,10 @@ val appModule = module {
                     accessToken = response.accessToken,
                     refreshToken = response.refreshToken,
                   )
-                get<UserRepository>().saveBearToken(token = newTokens)
+                userRepository.saveBearToken(token = newTokens)
                 newTokens
               } catch (_: Exception) {
-                get<UserRepository>().deleteUser()
+                userRepository.deleteUser()
                 null
               }
             }
@@ -217,14 +248,17 @@ val appModule = module {
       defaultRequest {
         url(urlString = "https://notemark.pl-coding.com")
         header("X-User-Email", BuildConfig.HEADER_VALUE_FOR_NOTE_MARK_API)
-        header("Debug", if (BuildConfig.DEBUG) "true" else "false") // Only here
+        header("Debug", if (BuildConfig.DEBUG) "true" else "false")
       }
     }
   }
-  single {
-    AndroidSqliteDriver(
+
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideSqlDriver(context: Context): SqlDriver {
+    return AndroidSqliteDriver(
       schema = NoteMarkDatabase.Schema.synchronous(),
-      context = androidContext(),
+      context = context,
       name = "app.db",
       callback =
         object : AndroidSqliteDriver.Callback(NoteMarkDatabase.Schema.synchronous()) {
@@ -243,11 +277,7 @@ val appModule = module {
             Timber.d("Database corrupted: onCorruption, $db")
           }
 
-          override fun onDowngrade(
-            db: SupportSQLiteDatabase,
-            oldVersion: Int,
-            newVersion: Int,
-          ) {
+          override fun onDowngrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
             super.onDowngrade(db, oldVersion, newVersion)
             Timber.d(
               "Database downgraded: onDowngrade, $db, oldVersion: $oldVersion, newVersion: $newVersion"
@@ -259,11 +289,7 @@ val appModule = module {
             Timber.d("Database opened: onOpen, $db")
           }
 
-          override fun onUpgrade(
-            db: SupportSQLiteDatabase,
-            oldVersion: Int,
-            newVersion: Int,
-          ) {
+          override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
             super.onUpgrade(db, oldVersion, newVersion)
             Timber.d(
               "Database upgraded: onUpgrade, $db, oldVersion: $oldVersion, newVersion: $newVersion"
@@ -271,61 +297,43 @@ val appModule = module {
           }
         },
     )
-  } bind SqlDriver::class
-  single { NoteMarkDatabase(driver = get()) }
-  singleOf(constructor = ::NoteMarkApiImpl) bind NoteMarkApi::class
-  singleOf(constructor = ::NoteMarkApiDataSourceImpl) bind NoteMarkApiDataSource::class
-  single {
-    NoteMarkLocalDataSourceImpl(
-      database = get(),
-      applicationDispatcher = get(qualifier = named(name = APP_BACKGROUND_DISPATCHER)),
-    )
-  } bind NoteMarkLocalDataSource::class
-  single {
-    NoteMarkRepositoryImpl(
-      localDataSource = get(),
-      remoteDataSource = get(),
-    )
-  } bind NoteMarkRepository::class
-  single {
-    AppStateMachineFactory(
-      applicationContext = androidContext(),
-      userRepository = get(),
-      syncRepository = get(),
-      noteMarkRepository = get(),
-    )
-  }
-  factoryOf(constructor = ::LauncherPresenter)
-
-  factory { LoginStateMachineFactory(noteMarkApi = get()) }
-  factoryOf(constructor = ::LoginPresenter)
-
-  factory { RegistrationStateMachineFactory(noteMarkApi = get()) }
-  factoryOf(constructor = ::RegistrationPresenter)
-
-  factory { NoteListStateMachineFactory(userRepository = get(), noteMarkRepository = get()) }
-  factoryOf(constructor = ::NoteListPresenter)
-
-  factory { AddNoteStateMachineFactory(noteMarkRepository = get()) }
-  factoryOf(constructor = ::AddNotePresenter)
-
-  factory { params ->
-    require(params.isNotEmpty()) {
-      "NoteId is required for ${EditNoteStateMachineFactory::class.java} to instantiate."
-    }
-    EditNoteStateMachineFactory(
-      noteMarkRepository = get(),
-      noteId = params[0],
-    )
-  }
-  factory { params ->
-    require(params.isNotEmpty()) {
-      "NoteId is required for ${EditNotePresenter::class.java} to instantiate."
-    }
-    EditNotePresenter(noteId = params[0])
   }
 
-  factoryOf(constructor = ::SettingsPresenter)
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideNoteMarkDatabase(driver: SqlDriver): NoteMarkDatabase =
+    NoteMarkDatabase(driver = driver)
 
-  worker { NoteSyncWorker(context = androidContext(), workerParameters = get()) }
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideUserDataSource(impl: UserDataSourceImpl): UserDataSource = impl
+
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideUserRepository(impl: UserRepositoryImpl): UserRepository = impl
+
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideNoteSyncDataSource(impl: NoteSyncDataSourceImpl): NoteSyncDataSource = impl
+
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideSyncRepository(impl: SyncRepositoryImpl): SyncRepository = impl
+
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideNoteMarkApi(impl: NoteMarkApiImpl): NoteMarkApi = impl
+
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideNoteMarkApiDataSource(impl: NoteMarkApiDataSourceImpl): NoteMarkApiDataSource = impl
+
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideNoteMarkLocalDataSource(impl: NoteMarkLocalDataSourceImpl): NoteMarkLocalDataSource =
+    impl
+
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideNoteMarkRepository(impl: NoteMarkRepositoryImpl): NoteMarkRepository = impl
 }
