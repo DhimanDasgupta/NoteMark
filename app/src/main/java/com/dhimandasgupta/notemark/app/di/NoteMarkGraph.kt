@@ -1,7 +1,6 @@
 package com.dhimandasgupta.notemark.app.di
 
 import android.content.Context
-import android.os.StrictMode
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
@@ -80,7 +79,6 @@ private const val USER_DATA_STORE_FILE_NAME = "user_store.pb"
 private const val SYNC_DATA_STORE_FILE_NAME = "sync_store.pb"
 
 @DependencyGraph(AppScope::class)
-@SingleIn(AppScope::class)
 interface NoteMarkGraph : AppModule {
   @DependencyGraph.Factory
   fun interface Factory {
@@ -174,84 +172,81 @@ interface AppModule {
   fun provideHttpClient(
     @AppBackgroundDispatcher dispatcher: CoroutineDispatcher,
     userRepository: UserRepository,
-  ): HttpClient {
-    return StrictMode.allowThreadDiskReads().run {
-      HttpClient(engineFactory = Android) {
-        install(plugin = ContentNegotiation) {
-          json(
-            Json {
-              prettyPrint = true
-              isLenient = true
-              ignoreUnknownKeys = true
-            }
-          )
-        }
-        install(plugin = Logging) {
-          logger = Logger.ANDROID
-          level = if (BuildConfig.DEBUG) LogLevel.ALL else LogLevel.NONE
-        }
+  ): HttpClient =
+    HttpClient(engineFactory = Android) {
+      install(plugin = ContentNegotiation) {
+        json(
+          Json {
+            prettyPrint = true
+            isLenient = true
+            ignoreUnknownKeys = true
+          }
+        )
+      }
+      install(plugin = Logging) {
+        logger = Logger.ANDROID
+        level = if (BuildConfig.DEBUG) LogLevel.ALL else LogLevel.NONE
+      }
 
-        install(plugin = Auth) {
-          bearer {
-            loadTokens {
-              withContext(dispatcher) {
-                val user = userRepository.getUser().first()
+      install(plugin = Auth) {
+        bearer {
+          loadTokens {
+            withContext(dispatcher) {
+              val user = userRepository.getUser().first()
+              if (user?.accessToken != null && user.refreshToken != null) {
+                BearerTokens(
+                  accessToken = user.accessToken,
+                  refreshToken = user.refreshToken,
+                )
+              }
+              null
+            }
+          }
+          refreshTokens {
+            withContext(dispatcher) {
+              val user = userRepository.getUser().first()
+              val currentTokens =
                 if (user?.accessToken != null && user.refreshToken != null) {
                   BearerTokens(
                     accessToken = user.accessToken,
                     refreshToken = user.refreshToken,
                   )
+                } else {
+                  return@withContext null
                 }
+
+              try {
+                val response =
+                  client
+                    .post {
+                      url(urlString = "/api/auth/refresh")
+                      markAsRefreshTokenRequest()
+                      contentType(type = ContentType.Application.Json)
+                      setBody(RefreshRequest(refreshToken = currentTokens.refreshToken ?: ""))
+                    }
+                    .body<RefreshResponse>()
+
+                val newTokens =
+                  BearerTokens(
+                    accessToken = response.accessToken,
+                    refreshToken = response.refreshToken,
+                  )
+                userRepository.saveBearToken(token = newTokens)
+                newTokens
+              } catch (_: Exception) {
+                userRepository.deleteUser()
                 null
-              }
-            }
-            refreshTokens {
-              withContext(dispatcher) {
-                val user = userRepository.getUser().first()
-                val currentTokens =
-                  if (user?.accessToken != null && user.refreshToken != null) {
-                    BearerTokens(
-                      accessToken = user.accessToken,
-                      refreshToken = user.refreshToken,
-                    )
-                  } else {
-                    return@withContext null
-                  }
-
-                try {
-                  val response =
-                    client
-                      .post {
-                        url(urlString = "/api/auth/refresh")
-                        markAsRefreshTokenRequest()
-                        contentType(type = ContentType.Application.Json)
-                        setBody(RefreshRequest(refreshToken = currentTokens.refreshToken ?: ""))
-                      }
-                      .body<RefreshResponse>()
-
-                  val newTokens =
-                    BearerTokens(
-                      accessToken = response.accessToken,
-                      refreshToken = response.refreshToken,
-                    )
-                  userRepository.saveBearToken(token = newTokens)
-                  newTokens
-                } catch (_: Exception) {
-                  userRepository.deleteUser()
-                  null
-                }
               }
             }
           }
         }
-        defaultRequest {
-          url(urlString = "https://notemark.pl-coding.com")
-          header("X-User-Email", BuildConfig.HEADER_VALUE_FOR_NOTE_MARK_API)
-          header("Debug", if (BuildConfig.DEBUG) "true" else "false")
-        }
+      }
+      defaultRequest {
+        url(urlString = "https://notemark.pl-coding.com")
+        header("X-User-Email", BuildConfig.HEADER_VALUE_FOR_NOTE_MARK_API)
+        header("Debug", if (BuildConfig.DEBUG) "true" else "false")
       }
     }
-  }
 
   @Provides
   @SingleIn(AppScope::class)
