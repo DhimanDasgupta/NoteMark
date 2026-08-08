@@ -6,10 +6,10 @@ lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
 composeBom = "2026.06.01"
 runtime-tracing = "1.11.4"
-koinBom = "4.2.2"
 androidxSplashScreen = "1.2.0"
 desugar = "2.1.5"
 sqlDelight = "2.3.2"
+metro = "1.4.0"
 ksp = "2.3.10"
 kotlinxSerializationJson = "1.11.0"
 coroutines = "1.11.0"
@@ -67,13 +67,6 @@ sql-delight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "s
 sql-delight-coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqlDelight" }
 sql-delight-paging3-extensions = { module = "app.cash.sqldelight:androidx-paging3-extensions", version.ref = "sqlDelight" }
 
-koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koinBom" }
-koin-core = { module = "io.insert-koin:koin-core" }
-koin-work-manager = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koinBom" }
-koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinBom" }
-koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinBom" }
-koin-androidx-compose-navigation = { module = "io.insert-koin:koin-androidx-compose-navigation", version.ref = "koinBom" }
-
 flow-redux = { module = "com.freeletics.flowredux2:flowredux", version.ref = "flowRedux2" }
 flow-redux-extension-jvm = { module = "com.freeletics.flowredux2:extensions-jvm", version.ref = "flowRedux2" }
 
@@ -114,6 +107,7 @@ kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", vers
 sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
 google-protobuf = { id = "com.google.protobuf", version.ref = "gradleProtobufPlugin" }
 compose-stability-analyser = { id = "com.github.skydoves.compose.stability.analyzer", version.ref = "composeStabilityAnalyser" }
+metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
 
 [bundles]
 compose = [

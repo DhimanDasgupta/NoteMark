@@ -9,6 +9,7 @@ import com.dhimandasgupta.notemark.features.login.LoginAction.EmailEntered
 import com.dhimandasgupta.notemark.features.login.LoginAction.PasswordEntered
 import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @Immutable
@@ -34,6 +35,7 @@ sealed interface LoginAction {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@Inject
 class LoginStateMachineFactory(val noteMarkApi: NoteMarkApi) :
   StateMachineFactory<LoginState, LoginAction>() {
   init {

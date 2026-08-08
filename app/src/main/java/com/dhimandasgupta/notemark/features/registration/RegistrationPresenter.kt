@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,6 +43,7 @@ data class RegistrationUiModel(
   }
 }
 
+@Inject
 @Stable
 class RegistrationPresenter(private val registrationStateMachine: RegistrationStateMachineFactory) {
   private val actions = MutableSharedFlow<RegistrationAction>(extraBufferCapacity = 10)

@@ -6,6 +6,7 @@ import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
+import dev.zacsweers.metro.Inject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,6 +27,7 @@ sealed interface AddNoteAction {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
+@Inject
 class AddNoteStateMachineFactory(val noteMarkRepository: NoteMarkRepository) :
   StateMachineFactory<AddNoteState, AddNoteAction>() {
   init {

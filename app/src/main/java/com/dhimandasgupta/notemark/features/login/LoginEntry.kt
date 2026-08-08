@@ -13,9 +13,9 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
+import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
 import com.dhimandasgupta.notemark.app.nav.LoginNavKey
 import kotlinx.coroutines.flow.collectLatest
-import org.koin.java.KoinJavaComponent.get
 
 @Composable
 fun EntryProviderScope<NavKey>.LoginEntryBuilder(
@@ -24,7 +24,8 @@ fun EntryProviderScope<NavKey>.LoginEntryBuilder(
   navigateToAfterLogin: () -> Unit,
 ) {
   entry<LoginNavKey> {
-    val loginPresenter: LoginPresenter = retain { get(clazz = LoginPresenter::class.java) }
+    val graph = LocalNoteMarkGraph.current
+    val loginPresenter: LoginPresenter = retain { graph.loginPresenter() }
 
     LoginEntry(
       modifier = modifier,

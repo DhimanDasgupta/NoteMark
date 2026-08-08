@@ -2,6 +2,7 @@ package com.dhimandasgupta.notemark.data
 
 import com.dhimandasgupta.notemark.data.local.datasource.UserDataSource
 import com.dhimandasgupta.notemark.proto.User
+import dev.zacsweers.metro.Inject
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import kotlinx.coroutines.flow.Flow
 
@@ -17,6 +18,7 @@ interface UserRepository {
   suspend fun reset()
 }
 
+@Inject
 class UserRepositoryImpl(private val userDataSource: UserDataSource) : UserRepository {
   override fun getUser(): Flow<User?> = userDataSource.getUser()
 

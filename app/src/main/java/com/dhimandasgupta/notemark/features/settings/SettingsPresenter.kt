@@ -13,6 +13,7 @@ import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppState
 import com.dhimandasgupta.notemark.features.launcher.AppStateMachineFactory
 import com.dhimandasgupta.notemark.proto.Sync
+import dev.zacsweers.metro.Inject
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CancellationException
@@ -53,6 +54,7 @@ data class SettingsUiModel(
     )
 }
 
+@Inject
 @Stable
 class SettingsPresenter(private val appStateMachineFactory: AppStateMachineFactory) {
   private val actions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)

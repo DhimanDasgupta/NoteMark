@@ -9,8 +9,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.dhimandasgupta.notemark.app.NoteMarkApp
+import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
 import com.dhimandasgupta.notemark.app.nav.NoteMarkRoot
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 
@@ -22,9 +25,12 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setContent {
-      NoteMarkTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-          NoteMarkRoot(modifier = Modifier.consumeWindowInsets(paddingValues = innerPadding))
+      val graph = (applicationContext as NoteMarkApp).getGraph()
+      CompositionLocalProvider(LocalNoteMarkGraph provides graph) {
+        NoteMarkTheme {
+          Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            NoteMarkRoot(modifier = Modifier.consumeWindowInsets(paddingValues = innerPadding))
+          }
         }
       }
     }

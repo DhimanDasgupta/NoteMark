@@ -5,6 +5,7 @@ import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSource
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.database.NoteEntity
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
@@ -59,6 +60,7 @@ interface NoteMarkRepository {
   suspend fun logout(request: RefreshRequest): Result<Unit>
 }
 
+@Inject
 class NoteMarkRepositoryImpl(
   private val localDataSource: NoteMarkLocalDataSource,
   private val remoteDataSource: NoteMarkApiDataSource,

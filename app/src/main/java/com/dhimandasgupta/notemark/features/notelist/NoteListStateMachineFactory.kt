@@ -8,6 +8,7 @@ import com.dhimandasgupta.notemark.features.notelist.NoteListState.NoteListState
 import com.dhimandasgupta.notemark.features.notelist.NoteListState.NoteListStateWithNotes
 import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -36,6 +37,7 @@ sealed interface NoteListAction {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@Inject
 class NoteListStateMachineFactory(
   private val userRepository: UserRepository,
   private val noteMarkRepository: NoteMarkRepository,

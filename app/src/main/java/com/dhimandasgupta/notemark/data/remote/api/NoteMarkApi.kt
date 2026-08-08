@@ -10,6 +10,7 @@ import com.dhimandasgupta.notemark.data.remote.model.RegisterRequest
 import com.dhimandasgupta.notemark.data.toNote
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.proto.User
+import dev.zacsweers.metro.Inject
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
@@ -62,6 +63,7 @@ interface NoteMarkApi {
   suspend fun deleteNote(noteEntity: NoteEntity): Result<Unit>
 }
 
+@Inject
 class NoteMarkApiImpl(
   val client: HttpClient,
   private val userDataSource: UserDataSource,

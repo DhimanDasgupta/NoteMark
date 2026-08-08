@@ -5,6 +5,7 @@ import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.database.NoteEntity
+import dev.zacsweers.metro.Inject
 
 interface NoteMarkApiDataSource {
   suspend fun getAllNotes(page: Int = -1, size: Int = 20): Result<NoteResponse>
@@ -23,6 +24,7 @@ interface NoteMarkApiDataSource {
   suspend fun logout(request: RefreshRequest): Result<Unit>
 }
 
+@Inject
 class NoteMarkApiDataSourceImpl(private val noteMarkApi: NoteMarkApi) : NoteMarkApiDataSource {
   override suspend fun getAllNotes(page: Int, size: Int) =
     noteMarkApi.getNotes(page = page, size = size)
