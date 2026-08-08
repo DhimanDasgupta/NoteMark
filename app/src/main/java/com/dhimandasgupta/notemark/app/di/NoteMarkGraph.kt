@@ -122,8 +122,8 @@ interface AppModule {
   @AppBackgroundScope
   fun provideAppBackgroundScope(
     @AppBackgroundDispatcher dispatcher: CoroutineDispatcher
-  ): CoroutineScope {
-    return CoroutineScope(
+  ): CoroutineScope =
+    CoroutineScope(
       context =
         dispatcher +
           SupervisorJob() +
@@ -133,7 +133,6 @@ interface AppModule {
             )
           }
     )
-  }
 
   @Provides
   @SingleIn(AppScope::class)
@@ -141,15 +140,14 @@ interface AppModule {
   fun provideUserDataStore(
     context: Context,
     @AppBackgroundScope scope: CoroutineScope,
-  ): DataStore<User> {
-    return DataStoreFactory.create(
+  ): DataStore<User> =
+    DataStoreFactory.create(
       serializer = UserSerializer(),
       produceFile = { context.dataStoreFile(fileName = USER_DATA_STORE_FILE_NAME) },
       corruptionHandler = null,
       migrations = listOf(),
       scope = scope,
     )
-  }
 
   @Provides
   @SingleIn(AppScope::class)
@@ -157,15 +155,14 @@ interface AppModule {
   fun provideSyncDataStore(
     context: Context,
     @AppBackgroundScope scope: CoroutineScope,
-  ): DataStore<Sync> {
-    return DataStoreFactory.create(
+  ): DataStore<Sync> =
+    DataStoreFactory.create(
       serializer = SyncSerializer(),
       produceFile = { context.dataStoreFile(fileName = SYNC_DATA_STORE_FILE_NAME) },
       corruptionHandler = null,
       migrations = listOf(),
       scope = scope,
     )
-  }
 
   @Provides
   @SingleIn(AppScope::class)
