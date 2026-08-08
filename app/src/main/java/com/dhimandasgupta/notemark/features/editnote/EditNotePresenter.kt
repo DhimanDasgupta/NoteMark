@@ -66,7 +66,7 @@ class EditNotePresenter
 @AssistedInject
 constructor(
   @Assisted private val noteId: String,
-  private val stateMachineFactoryFactory: EditNoteStateMachineFactoryFactory,
+  stateMachineFactoryFactory: EditNoteStateMachineFactoryFactory,
 ) {
   private val editNoteStateMachineFactory = stateMachineFactoryFactory.create(noteId)
   private val actions = MutableSharedFlow<EditNoteAction>(extraBufferCapacity = 10)
