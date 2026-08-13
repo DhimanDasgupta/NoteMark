@@ -19,15 +19,15 @@ interface UserRepository {
 }
 
 @Inject
-class UserRepositoryImpl(private val userDataSource: UserDataSource) : UserRepository {
-  override fun getUser(): Flow<User?> = userDataSource.getUser()
+class UserRepositoryImpl(private val userDataSource: Lazy<UserDataSource>) : UserRepository {
+  override fun getUser(): Flow<User?> = userDataSource.value.getUser()
 
-  override suspend fun saveUser(user: User) = userDataSource.saveUser(user = user)
+  override suspend fun saveUser(user: User) = userDataSource.value.saveUser(user = user)
 
   override suspend fun saveBearToken(token: BearerTokens) =
-    userDataSource.saveBearToken(token = token)
+    userDataSource.value.saveBearToken(token = token)
 
-  override suspend fun deleteUser() = userDataSource.deleteUser()
+  override suspend fun deleteUser() = userDataSource.value.deleteUser()
 
-  override suspend fun reset() = userDataSource.reset()
+  override suspend fun reset() = userDataSource.value.reset()
 }

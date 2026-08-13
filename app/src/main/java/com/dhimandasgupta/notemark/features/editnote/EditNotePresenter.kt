@@ -61,10 +61,9 @@ data class NoteEntityUi(
   val markAsDeleted: Boolean,
 )
 
-@Stable
-class EditNotePresenter
 @AssistedInject
-constructor(
+@Stable
+class EditNotePresenter(
   @Assisted private val noteId: String,
   stateMachineFactoryFactory: EditNoteStateMachineFactoryFactory,
 ) {

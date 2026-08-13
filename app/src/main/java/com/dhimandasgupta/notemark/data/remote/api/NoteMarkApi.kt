@@ -65,16 +65,17 @@ interface NoteMarkApi {
 
 @Inject
 class NoteMarkApiImpl(
-  val client: HttpClient,
-  private val userDataSource: UserDataSource,
+  val client: Lazy<HttpClient>,
+  private val userDataSource: Lazy<UserDataSource>,
 ) : NoteMarkApi {
   override suspend fun register(request: RegisterRequest): Result<Unit> {
     return try {
-      val response = client.post {
-        url(urlString = "/api/auth/register")
-        contentType(type = ContentType.Application.Json)
-        setBody(request)
-      }
+      val response =
+        client.value.post {
+          url(urlString = "/api/auth/register")
+          contentType(type = ContentType.Application.Json)
+          setBody(request)
+        }
 
       // HttpResponseValidator should ideally handle non-2xx responses by throwing.
       // If it doesn't, or you want more specific handling here:
@@ -134,11 +135,12 @@ class NoteMarkApiImpl(
 
   override suspend fun login(request: LoginRequest): Result<Unit> {
     return try {
-      val response = client.post {
-        url(urlString = "/api/auth/login")
-        contentType(type = ContentType.Application.Json)
-        setBody(request)
-      } // Ktor will throw for non-2xx if not handled by HttpResponseValidator
+      val response =
+        client.value.post {
+          url(urlString = "/api/auth/login")
+          contentType(type = ContentType.Application.Json)
+          setBody(request)
+        } // Ktor will throw for non-2xx if not handled by HttpResponseValidator
 
       // HttpResponseValidator should ideally handle non-2xx responses by throwing.
       // If it doesn't, or you want more specific handling here:
@@ -146,7 +148,7 @@ class NoteMarkApiImpl(
         HttpStatusCode.OK -> {
           val authResponse = response.body<AuthResponse>()
           // Save user only after successful response parsing
-          userDataSource.saveUser(
+          userDataSource.value.saveUser(
             user =
               User.newBuilder()
                 .apply {
@@ -210,12 +212,13 @@ class NoteMarkApiImpl(
 
   override suspend fun getNotes(page: Int, size: Int): Result<NoteResponse> {
     return try {
-      val response = client.get {
-        url(urlString = "/api/notes")
-        contentType(type = ContentType.Application.Json)
-        parameter("page", page)
-        parameter("size", size)
-      }
+      val response =
+        client.value.get {
+          url(urlString = "/api/notes")
+          contentType(type = ContentType.Application.Json)
+          parameter("page", page)
+          parameter("size", size)
+        }
 
       when (response.status) {
         HttpStatusCode.OK -> {
@@ -274,17 +277,18 @@ class NoteMarkApiImpl(
 
   override suspend fun logout(request: RefreshRequest): Result<Unit> {
     return try {
-      val response = client.post {
-        url(urlString = "/api/auth/logout")
-        contentType(type = ContentType.Application.Json)
-        setBody(request)
-      }
+      val response =
+        client.value.post {
+          url(urlString = "/api/auth/logout")
+          contentType(type = ContentType.Application.Json)
+          setBody(request)
+        }
 
       // HttpResponseValidator should ideally handle non-2xx responses by throwing.
       // If it doesn't, or you want more specific handling here:
       when (response.status) {
         HttpStatusCode.OK -> {
-          userDataSource.deleteUser()
+          userDataSource.value.deleteUser()
           Result.success(value = Unit)
         }
         // Consider handling other specific statuses like BadRequest, Unauthorized, etc.
@@ -338,11 +342,12 @@ class NoteMarkApiImpl(
   @OptIn(ExperimentalUuidApi::class)
   override suspend fun createNote(noteEntity: NoteEntity): Result<Note> {
     return try {
-      val response = client.post {
-        url(urlString = "/api/notes")
-        contentType(type = ContentType.Application.Json)
-        setBody(noteEntity.toNote())
-      }
+      val response =
+        client.value.post {
+          url(urlString = "/api/notes")
+          contentType(type = ContentType.Application.Json)
+          setBody(noteEntity.toNote())
+        }
 
       when (response.status) {
         HttpStatusCode.OK -> {
@@ -406,19 +411,20 @@ class NoteMarkApiImpl(
     noteEntity: NoteEntity,
   ): Result<Note> {
     return try {
-      val response = client.put {
-        url(urlString = "/api/notes")
-        contentType(type = ContentType.Application.Json)
-        setBody(
-          noteEntity
-            .copy(
-              title = title,
-              content = content,
-              lastEditedAt = lastEditedAt,
-            )
-            .toNote()
-        )
-      }
+      val response =
+        client.value.put {
+          url(urlString = "/api/notes")
+          contentType(type = ContentType.Application.Json)
+          setBody(
+            noteEntity
+              .copy(
+                title = title,
+                content = content,
+                lastEditedAt = lastEditedAt,
+              )
+              .toNote()
+          )
+        }
 
       when (response.status) {
         HttpStatusCode.OK -> {
@@ -477,10 +483,11 @@ class NoteMarkApiImpl(
 
   override suspend fun deleteNote(noteEntity: NoteEntity): Result<Unit> {
     return try {
-      val response = client.delete {
-        url(urlString = "/api/notes/${noteEntity.uuid}")
-        contentType(type = ContentType.Application.Json)
-      }
+      val response =
+        client.value.delete {
+          url(urlString = "/api/notes/${noteEntity.uuid}")
+          contentType(type = ContentType.Application.Json)
+        }
 
       when (response.status) {
         HttpStatusCode.OK -> Result.success(value = Unit)

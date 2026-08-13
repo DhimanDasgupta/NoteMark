@@ -26,9 +26,9 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
     setContent {
       val graph = (applicationContext as NoteMarkApp).getGraph()
-      CompositionLocalProvider(LocalNoteMarkGraph provides graph) {
-        NoteMarkTheme {
-          Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+      NoteMarkTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+          CompositionLocalProvider(LocalNoteMarkGraph provides graph) {
             NoteMarkRoot(modifier = Modifier.consumeWindowInsets(paddingValues = innerPadding))
           }
         }

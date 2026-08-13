@@ -47,7 +47,6 @@ class NoteMarkApp : Application() {
 
   private fun enableStrictMode() {
     StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build())
-
     StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build())
   }
 }

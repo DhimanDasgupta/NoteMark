@@ -25,12 +25,13 @@ interface NoteMarkApiDataSource {
 }
 
 @Inject
-class NoteMarkApiDataSourceImpl(private val noteMarkApi: NoteMarkApi) : NoteMarkApiDataSource {
+class NoteMarkApiDataSourceImpl(private val noteMarkApi: Lazy<NoteMarkApi>) :
+  NoteMarkApiDataSource {
   override suspend fun getAllNotes(page: Int, size: Int) =
-    noteMarkApi.getNotes(page = page, size = size)
+    noteMarkApi.value.getNotes(page = page, size = size)
 
   override suspend fun createNote(noteEntity: NoteEntity) =
-    noteMarkApi.createNote(noteEntity = noteEntity)
+    noteMarkApi.value.createNote(noteEntity = noteEntity)
 
   override suspend fun updateNote(
     title: String,
@@ -38,7 +39,7 @@ class NoteMarkApiDataSourceImpl(private val noteMarkApi: NoteMarkApi) : NoteMark
     lastEditedAt: String,
     noteEntity: NoteEntity,
   ) =
-    noteMarkApi.updateNote(
+    noteMarkApi.value.updateNote(
       title = title,
       content = content,
       lastEditedAt = lastEditedAt,
@@ -46,8 +47,8 @@ class NoteMarkApiDataSourceImpl(private val noteMarkApi: NoteMarkApi) : NoteMark
     )
 
   override suspend fun deleteNote(noteEntity: NoteEntity) =
-    noteMarkApi.deleteNote(noteEntity = noteEntity)
+    noteMarkApi.value.deleteNote(noteEntity = noteEntity)
 
   override suspend fun logout(request: RefreshRequest): Result<Unit> =
-    noteMarkApi.logout(request = request)
+    noteMarkApi.value.logout(request = request)
 }

@@ -49,10 +49,10 @@ interface NoteMarkLocalDataSource {
 
 @Inject
 class NoteMarkLocalDataSourceImpl(
-  database: NoteMarkDatabase,
+  database: Lazy<NoteMarkDatabase>,
   @AppBackgroundDispatcher private val applicationDispatcher: CoroutineDispatcher,
 ) : NoteMarkLocalDataSource {
-  private val queries = database.noteMarkDatabaseQueries
+  private val queries = database.value.noteMarkDatabaseQueries
 
   override fun getNotesFromOffSetWithLimitAsList(
     limit: Long,

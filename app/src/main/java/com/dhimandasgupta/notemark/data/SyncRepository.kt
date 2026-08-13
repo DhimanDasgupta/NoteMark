@@ -22,25 +22,26 @@ interface SyncRepository {
 }
 
 @Inject
-class SyncRepositoryImpl(private val noteSyncDataSource: NoteSyncDataSource) : SyncRepository {
-  override fun getSync(): Flow<Sync> = noteSyncDataSource.getSync()
+class SyncRepositoryImpl(private val noteSyncDataSource: Lazy<NoteSyncDataSource>) :
+  SyncRepository {
+  override fun getSync(): Flow<Sync> = noteSyncDataSource.value.getSync()
 
   override suspend fun saveSyncing(isSyncing: Boolean) =
-    noteSyncDataSource.saveSyncing(isSyncing = isSyncing)
+    noteSyncDataSource.value.saveSyncing(isSyncing = isSyncing)
 
   override suspend fun saveSyncDuration(syncDuration: Sync.SyncDuration) =
-    noteSyncDataSource.saveSyncDuration(syncDuration = syncDuration)
+    noteSyncDataSource.value.saveSyncDuration(syncDuration = syncDuration)
 
   override suspend fun saveLastDownloadedTime(downLoadedTime: String) =
-    noteSyncDataSource.saveLastDownloadedTime(downLoadedTime = downLoadedTime)
+    noteSyncDataSource.value.saveLastDownloadedTime(downLoadedTime = downLoadedTime)
 
   override suspend fun saveLastUploadedTime(uploadedTime: String) =
-    noteSyncDataSource.saveLastUploadedTime(uploadedTime = uploadedTime)
+    noteSyncDataSource.value.saveLastUploadedTime(uploadedTime = uploadedTime)
 
   override suspend fun saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout: Boolean) =
-    noteSyncDataSource.saveDeleteLocalNotesOnLogout(
+    noteSyncDataSource.value.saveDeleteLocalNotesOnLogout(
       deleteLocalNotesOnLogout = deleteLocalNotesOnLogout
     )
 
-  override suspend fun reset() = noteSyncDataSource.reset()
+  override suspend fun reset() = noteSyncDataSource.value.reset()
 }

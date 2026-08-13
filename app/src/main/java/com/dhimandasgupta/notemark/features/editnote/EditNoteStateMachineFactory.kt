@@ -42,10 +42,9 @@ sealed interface EditNoteAction {
   data object Save : EditNoteAction
 }
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
-class EditNoteStateMachineFactory
 @AssistedInject
-constructor(
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
+class EditNoteStateMachineFactory(
   val noteMarkRepository: NoteMarkRepository,
   @Assisted val noteId: String,
 ) : StateMachineFactory<EditNoteState, EditNoteAction>() {

@@ -24,9 +24,8 @@ import kotlinx.coroutines.withContext
 
 private const val DELAY_IN_BETWEEN_EVERY_NOTE = 10L
 
-class NoteSyncWorker
 @AssistedInject
-constructor(
+class NoteSyncWorker(
   @Assisted context: Context,
   @Assisted workerParameters: WorkerParameters,
   @AppBackgroundDispatcher private val applicationDispatcher: CoroutineDispatcher,

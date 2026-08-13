@@ -23,43 +23,43 @@ interface NoteSyncDataSource {
 }
 
 @Inject
-class NoteSyncDataSourceImpl(@SyncDataStore private val syncDataStore: DataStore<Sync>) :
+class NoteSyncDataSourceImpl(@SyncDataStore private val syncDataStore: Lazy<DataStore<Sync>>) :
   NoteSyncDataSource {
 
-  override fun getSync(): Flow<Sync> = syncDataStore.data
+  override fun getSync(): Flow<Sync> = syncDataStore.value.data
 
   override suspend fun saveSyncing(isSyncing: Boolean) {
-    syncDataStore.updateData { transform ->
+    syncDataStore.value.updateData { transform ->
       transform.toBuilder().setSyncing(isSyncing).build()
     }
   }
 
   override suspend fun saveSyncDuration(syncDuration: Sync.SyncDuration) {
-    syncDataStore.updateData { transform ->
+    syncDataStore.value.updateData { transform ->
       transform.toBuilder().setSyncDuration(syncDuration).build()
     }
   }
 
   override suspend fun saveLastDownloadedTime(downLoadedTime: String) {
-    syncDataStore.updateData { transform ->
+    syncDataStore.value.updateData { transform ->
       transform.toBuilder().setLastDownloadedTime(downLoadedTime).build()
     }
   }
 
   override suspend fun saveLastUploadedTime(uploadedTime: String) {
-    syncDataStore.updateData { transform ->
+    syncDataStore.value.updateData { transform ->
       transform.toBuilder().setLastUploadedTime(uploadedTime).build()
     }
   }
 
   override suspend fun saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout: Boolean) {
-    syncDataStore.updateData { transform ->
+    syncDataStore.value.updateData { transform ->
       transform.toBuilder().setDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout).build()
     }
   }
 
   override suspend fun reset() {
-    syncDataStore.updateData { transform ->
+    syncDataStore.value.updateData { transform ->
       transform.toBuilder().clear().build()
     }
   }
