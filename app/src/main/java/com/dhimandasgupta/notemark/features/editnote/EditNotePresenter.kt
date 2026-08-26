@@ -65,9 +65,9 @@ data class NoteEntityUi(
 @Stable
 class EditNotePresenter(
   @Assisted private val noteId: String,
-  stateMachineFactoryFactory: EditNoteStateMachineFactoryFactory,
+  editNoteStateMachineFactoryBuilder: EditNoteStateMachineFactoryBuilder,
 ) {
-  private val editNoteStateMachineFactory = stateMachineFactoryFactory.create(noteId)
+  private val editNoteStateMachineFactory = editNoteStateMachineFactoryBuilder.create(noteId)
   private val actions = MutableSharedFlow<EditNoteAction>(extraBufferCapacity = 10)
 
   @OptIn(ExperimentalCoroutinesApi::class)

@@ -17,11 +17,15 @@ class EditNotePresenterTest {
       val presenter =
         EditNotePresenter(
           noteId = "",
-          editNoteStateMachineFactory =
-            EditNoteStateMachineFactory(
-              noteMarkRepository = FakeSuccessfulNoteRepository(),
-              noteId = "",
-            ),
+          editNoteStateMachineFactoryBuilder =
+            object : EditNoteStateMachineFactoryBuilder {
+              override fun create(noteId: String): EditNoteStateMachineFactory {
+                return EditNoteStateMachineFactory(
+                  noteMarkRepository = FakeSuccessfulNoteRepository(),
+                  noteId = noteId,
+                )
+              }
+            },
         )
 
       // Setup uiModel flow

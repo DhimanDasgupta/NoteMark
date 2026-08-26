@@ -113,6 +113,6 @@ class EditNoteStateMachineFactory(
 }
 
 @AssistedFactory
-interface EditNoteStateMachineFactoryFactory {
+interface EditNoteStateMachineFactoryBuilder {
   fun create(noteId: String): EditNoteStateMachineFactory
 }
