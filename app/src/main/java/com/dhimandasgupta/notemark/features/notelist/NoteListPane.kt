@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -60,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -68,6 +70,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -257,7 +260,9 @@ private fun NoteListWithNotes(
     }
   }
 
-  Column(
+  Box(
+    // No inset padding here: the grid spans the full width and applies the insets as content
+    // padding, so the toolbar can draw edge to edge.
     modifier =
       modifier.fillMaxSize().onSizeChanged { intSize ->
         val widthInDp = with(density) { intSize.width.toDp() }
@@ -277,56 +282,40 @@ private fun NoteListWithNotes(
           }
       }
   ) {
-    NoteListPaneToolbar(
-      modifier = Modifier,
-      toolbarTitle = "NoteMark",
+    NoteGrid(
+      modifier = Modifier.fillMaxSize(),
+      columnCount = columnCount,
+      maxLength = maxLength,
+      state = scrollState,
+      noteListUiModel = noteListState,
       userName = userName,
-      isConnected = noteListState().isConnected,
+      onNoteClicked = onNoteClicked,
+      onNoteLongClicked = onNoteLongClicked,
       onSettingsClicked = onSettingsClicked,
       onProfileClicked = onProfileClicked,
     )
 
-    Box(
+    Column(
+      // The grid no longer insets its parent, so the FAB keeps itself clear of the navigation
+      // bar and cutout. windowInsetsPadding resolves during layout, so an inset change moves the
+      // FAB without recomposing.
       modifier =
         Modifier.fillMaxSize()
-          .padding(
-            start =
-              WindowInsets.navigationBars
-                .union(insets = WindowInsets.displayCutout)
-                .asPaddingValues()
-                .calculateLeftPadding(LayoutDirection.Ltr),
-            end =
-              WindowInsets.navigationBars
-                .union(insets = WindowInsets.displayCutout)
-                .asPaddingValues()
-                .calculateEndPadding(LayoutDirection.Ltr),
-          )
+          .windowInsetsPadding(
+            insets = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
+          ),
+      verticalArrangement = Arrangement.Bottom,
+      horizontalAlignment = Alignment.End,
     ) {
-      NoteGrid(
-        modifier = Modifier.fillMaxSize(),
-        columnCount = columnCount,
-        maxLength = maxLength,
-        state = scrollState,
-        noteListUiModel = noteListState,
-        onNoteClicked = onNoteClicked,
-        onNoteLongClicked = onNoteLongClicked,
-      )
-
-      Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.End,
+      AnimatedVisibility(
+        visible = shouldShowFAB,
+        enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+        exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
       ) {
-        AnimatedVisibility(
-          visible = shouldShowFAB,
-          enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
-          exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
-        ) {
-          NoteMarkFAB(
-            modifier = Modifier.padding(all = 16.dp),
-            onClick = onFabClicked,
-          )
-        }
+        NoteMarkFAB(
+          modifier = Modifier.padding(all = 16.dp),
+          onClick = onFabClicked,
+        )
       }
     }
   }
@@ -365,27 +354,19 @@ private fun NoteListPaneToolbar(
   onSettingsClicked: () -> Unit,
   onProfileClicked: () -> Unit,
 ) {
+  val insets = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout).asPaddingValues()
+
   Row(
     modifier =
       modifier
+        // Background sits outside the inset padding, so it fills the bar areas while the content
+        // stays clear of them.
         .background(color = colorScheme.surfaceContainerLowest)
         .fillMaxWidth()
         .padding(
-          start =
-            WindowInsets.systemBars
-              .union(insets = WindowInsets.displayCutout)
-              .asPaddingValues()
-              .calculateLeftPadding(LayoutDirection.Ltr),
-          top =
-            WindowInsets.systemBars
-              .union(insets = WindowInsets.displayCutout)
-              .asPaddingValues()
-              .calculateTopPadding(),
-          end =
-            WindowInsets.systemBars
-              .union(insets = WindowInsets.displayCutout)
-              .asPaddingValues()
-              .calculateEndPadding(LayoutDirection.Ltr),
+          start = insets.calculateLeftPadding(LayoutDirection.Ltr),
+          top = insets.calculateTopPadding(),
+          end = insets.calculateEndPadding(LayoutDirection.Ltr),
         )
         .padding(
           vertical = 4.dp,
@@ -485,8 +466,11 @@ private fun NoteGrid(
   maxLength: Int,
   state: LazyStaggeredGridState,
   noteListUiModel: () -> NoteListUiModel,
+  userName: String,
   onNoteClicked: (String) -> Unit = {},
   onNoteLongClicked: (String) -> Unit = {},
+  onSettingsClicked: () -> Unit = {},
+  onProfileClicked: () -> Unit = {},
 ) {
   // Hoisted out of NoteItem: the locale is identical for every item in the grid.
   val configuration = LocalConfiguration.current
@@ -495,14 +479,43 @@ private fun NoteGrid(
       configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0)
     }
 
+  val insets =
+    WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout).asPaddingValues()
+  val startPadding = insets.calculateLeftPadding(LayoutDirection.Ltr) + 8.dp
+  val endPadding = insets.calculateEndPadding(LayoutDirection.Ltr) + 8.dp
+
   LazyVerticalStaggeredGrid(
     state = state,
     columns = StaggeredGridCells.Fixed(count = columnCount),
-    contentPadding = PaddingValues(all = 8.dp),
+    contentPadding =
+      PaddingValues(
+        start = startPadding,
+        end = endPadding,
+        bottom = insets.calculateBottomPadding() + 8.dp,
+      ),
     verticalItemSpacing = 8.dp,
     horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
     modifier = modifier.fillMaxSize(),
   ) {
+    item(
+      span = StaggeredGridItemSpan.FullLine,
+      key = "toolbar",
+      contentType = "toolbar",
+    ) {
+      NoteListPaneToolbar(
+        // Cancels the grid's horizontal content padding so the toolbar background reaches the
+        // screen edges; the toolbar then applies the insets to its own content.
+        modifier = Modifier.bleedHorizontally(start = startPadding, end = endPadding),
+        toolbarTitle = "NoteMark",
+        userName = userName,
+        // Read inside the item lambda, so a connectivity change now recomposes only the toolbar
+        // item rather than the whole pane.
+        isConnected = noteListUiModel().isConnected,
+        onSettingsClicked = onSettingsClicked,
+        onProfileClicked = onProfileClicked,
+      )
+    }
+
     if (noteListUiModel().showSyncProgress) {
       item(
         span = StaggeredGridItemSpan.FullLine,
@@ -552,21 +565,30 @@ private fun NoteGrid(
         onNoteLongClicked = onNoteLongClicked,
       )
     }
-
-    item(
-      span = StaggeredGridItemSpan.FullLine,
-      key = "spacer",
-      contentType = "spacer",
-    ) {
-      Spacer(
-        modifier =
-          Modifier.height(
-            height = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-          )
-      )
-    }
   }
 }
+
+/**
+ * Expands content horizontally by [start] and [end] so it can draw past an ancestor's content
+ * padding, while the layout node itself still reports its original slot width. Used to let a
+ * full-line lazy grid item bleed to the screen edges.
+ */
+private fun Modifier.bleedHorizontally(start: Dp, end: Dp): Modifier =
+  layout { measurable, constraints ->
+    if (!constraints.hasBoundedWidth) {
+      val placeable = measurable.measure(constraints)
+      return@layout layout(placeable.width, placeable.height) { placeable.place(x = 0, y = 0) }
+    }
+
+    val startPx = start.roundToPx()
+    val bleedWidth = constraints.maxWidth + startPx + end.roundToPx()
+    val placeable =
+      measurable.measure(constraints.copy(minWidth = bleedWidth, maxWidth = bleedWidth))
+
+    layout(width = constraints.maxWidth, height = placeable.height) {
+      placeable.place(x = -startPx, y = 0)
+    }
+  }
 
 @Composable
 private fun NoteItem(
