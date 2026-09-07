@@ -154,13 +154,8 @@ internal fun EditNotePane(
       },
     )
 
-    val showLoading by
-      remember(updatedEditNoteUiModel()) {
-        mutableStateOf(
-          value =
-            updatedEditNoteUiModel().content.isEmpty() && updatedEditNoteUiModel().title.isEmpty()
-        )
-      }
+    val showLoading =
+      updatedEditNoteUiModel().content.isEmpty() && updatedEditNoteUiModel().title.isEmpty()
 
     AnimatedVisibility(
       visible = showLoading,
@@ -512,11 +507,9 @@ private fun NoteDateTime(
   lastEdited: String,
 ) {
   val configuration = LocalConfiguration.current
-  val locale by
+  val locale =
     remember(key1 = configuration) {
-      mutableStateOf(
-        configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0)
-      )
+      configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0)
     }
 
   Row(

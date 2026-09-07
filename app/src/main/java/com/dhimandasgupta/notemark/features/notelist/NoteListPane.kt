@@ -82,6 +82,7 @@ import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkToolbarButton
 import com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton
 import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
+import java.util.Locale
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 
@@ -223,13 +224,13 @@ private fun NoteListWithNotes(
   onSettingsClicked: () -> Unit = {},
   onProfileClicked: () -> Unit = {},
 ) {
-  if (loading) {
-    LoadingPane(
-      modifier = Modifier,
-      showLoading = true,
-    )
-    return
-  }
+  // Kept above the early return so AnimatedVisibility outlives the flip and can actually run its
+  // exit; calling it behind `if (loading)` unmounted the subtree instead of animating it out.
+  LoadingPane(
+    modifier = Modifier,
+    showLoading = loading,
+  )
+  if (loading) return
 
   var columnCount by remember { mutableIntStateOf(value = 2) }
   var maxLength by remember { mutableIntStateOf(value = 150) }
@@ -487,6 +488,13 @@ private fun NoteGrid(
   onNoteClicked: (String) -> Unit = {},
   onNoteLongClicked: (String) -> Unit = {},
 ) {
+  // Hoisted out of NoteItem: the locale is identical for every item in the grid.
+  val configuration = LocalConfiguration.current
+  val locale =
+    remember(key1 = configuration) {
+      configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0)
+    }
+
   LazyVerticalStaggeredGrid(
     state = state,
     columns = StaggeredGridCells.Fixed(count = columnCount),
@@ -539,6 +547,7 @@ private fun NoteGrid(
           ),
         note = noteEntity,
         maxLength = maxLength,
+        locale = locale,
         onNoteClicked = onNoteClicked,
         onNoteLongClicked = onNoteLongClicked,
       )
@@ -564,6 +573,7 @@ private fun NoteItem(
   modifier: Modifier = Modifier,
   note: NoteEntityUiModel,
   maxLength: Int,
+  locale: Locale,
   onNoteClicked: (String) -> Unit = {},
   onNoteLongClicked: (String) -> Unit = {},
 ) {
@@ -588,20 +598,17 @@ private fun NoteItem(
         )
         .padding(all = 16.dp)
   ) {
-    val configuration = LocalConfiguration.current
-    val locale by
-      remember(key1 = configuration) {
-        mutableStateOf(
-          configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0)
+    // Date parsing and pattern compilation are expensive; keep them out of every recomposition.
+    val lastEditedLabel =
+      remember(key1 = note.lastEditedAt, key2 = locale) {
+        convertIsoToRelativeYearFormat(
+          locale = locale,
+          isoOffsetDateTimeString = note.lastEditedAt,
         )
       }
 
     Text(
-      text =
-        convertIsoToRelativeYearFormat(
-          locale = locale,
-          isoOffsetDateTimeString = note.lastEditedAt,
-        ),
+      text = lastEditedLabel,
       style = typography.bodyMedium,
       color = colorScheme.primary,
     )

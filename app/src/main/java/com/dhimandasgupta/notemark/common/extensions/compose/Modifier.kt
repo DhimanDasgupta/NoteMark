@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -52,7 +51,7 @@ fun Modifier.lifecycleAwareDebouncedClickable(
   role: Role? = null,
   debounceIntervalMs: Long = 700L, // Default debounce interval
   onClick: () -> Unit,
-): Modifier = composed {
+): Modifier {
   val owner = LocalLifecycleOwner.current
 
   val currentOnClick by rememberUpdatedState(newValue = onClick)
@@ -73,7 +72,7 @@ fun Modifier.lifecycleAwareDebouncedClickable(
 
   val isClickEnabled = enabled && lifecycleAllowsClick
 
-  clickable(
+  return this.clickable(
     interactionSource = interactionSource,
     indication = null,
     enabled = isClickEnabled, // Combined enabled state
@@ -104,7 +103,6 @@ fun Modifier.lifecycleAwareDebouncedClickable(
  * handling approach should be used, such as the accompanist-insets library or the official
  * `WindowInsets` APIs in Compose.
  */
-@Composable
 fun Modifier.alignToSafeDrawing(): Modifier {
   return layout { measurable, constraints ->
     if (constraints.hasBoundedWidth && constraints.hasBoundedHeight) {
@@ -148,7 +146,6 @@ fun Modifier.alignToSafeDrawing(): Modifier {
  * @param gridColor The color of the grid lines. Defaults to [Color.Red].
  * @param gridSize The size of each grid square in density-independent pixels (dp). Defaults to 10.
  */
-@Composable
 fun Modifier.drawBackgroundGrid(
   gridColor: Color = Color.Red,
   gridSize: Int = 10, // Default grid size

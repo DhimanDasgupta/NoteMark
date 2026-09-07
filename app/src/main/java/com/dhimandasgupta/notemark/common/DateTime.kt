@@ -37,14 +37,14 @@ fun convertIsoToRelativeYearFormat(
   return try {
     val offsetDateTime =
       OffsetDateTime.parse(isoOffsetDateTimeString, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-    val targetFormatterCurrentYear = DateTimeFormatter.ofPattern(CURRENT_YEAR_PATTERN, locale)
-    val targetFormatterPreviousYear = DateTimeFormatter.ofPattern(PREVIOUS_YEAR_PATTERN, locale)
+    val now = OffsetDateTime.now()
 
-    if (offsetDateTime.dayOfYear == OffsetDateTime.now().dayOfYear) "Today"
-    else if (offsetDateTime.year == OffsetDateTime.now().year) {
-      offsetDateTime.format(targetFormatterCurrentYear)
+    // Only the formatter that is actually used gets built; ofPattern compiles the pattern string.
+    if (offsetDateTime.dayOfYear == now.dayOfYear) "Today"
+    else if (offsetDateTime.year == now.year) {
+      offsetDateTime.format(DateTimeFormatter.ofPattern(CURRENT_YEAR_PATTERN, locale))
     } else {
-      offsetDateTime.format(targetFormatterPreviousYear)
+      offsetDateTime.format(DateTimeFormatter.ofPattern(PREVIOUS_YEAR_PATTERN, locale))
     }
   } catch (_: Exception) {
     "Unknown"

@@ -167,7 +167,7 @@ private fun SettingsToolbar(
   ) {
     Icon(
       painter = painterResource(id = R.drawable.ic_back_arrow),
-      contentDescription = "Settings",
+      contentDescription = "Back",
       tint = colorScheme.onSurface,
       modifier = Modifier.requiredSize(size = 32.dp),
     )
@@ -327,33 +327,13 @@ private fun SyncDataRow(
     horizontalArrangement = Arrangement.spacedBy(space = 0.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "InfiniteTransition")
-    val rotationAngle by
-      infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec =
-          infiniteRepeatable(
-            animation = tween(durationMillis = 1000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-          ),
-        label = "RotationAnimation",
-      )
-
-    Icon(
-      painter = painterResource(id = R.drawable.ic_sync),
-      contentDescription = "Settings",
-      tint = colorScheme.onSurface,
-      modifier =
-        Modifier.padding(horizontal = 8.dp)
-          .requiredSize(size = 24.dp)
-          .then(
-            other =
-              Modifier.graphicsLayer {
-                rotationZ = if (settingsUiModel().isSyncing) rotationAngle else 0f
-              }
-          ),
-    )
+    // The transition is only composed while syncing. Creating it unconditionally would keep the
+    // animation clock running for as long as this screen is shown, so the frame loop would never
+    // go idle even with the icon standing still.
+    when (settingsUiModel().isSyncing) {
+      true -> RotatingSyncIcon()
+      false -> SyncIcon()
+    }
 
     Column {
       Text(
@@ -364,11 +344,9 @@ private fun SyncDataRow(
       )
 
       val configuration = LocalConfiguration.current
-      val locale by
+      val locale =
         remember(key1 = configuration) {
-          mutableStateOf(
-            configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0)
-          )
+          configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0)
         }
 
       Text(
@@ -385,6 +363,37 @@ private fun SyncDataRow(
       )
     }
   }
+}
+
+/** [modifier] is appended last so it wraps the sized icon, matching the original chain. */
+@Composable
+private fun SyncIcon(modifier: Modifier = Modifier) {
+  Icon(
+    painter = painterResource(id = R.drawable.ic_sync),
+    contentDescription = "Sync Data",
+    tint = colorScheme.onSurface,
+    modifier = Modifier.padding(horizontal = 8.dp).requiredSize(size = 24.dp).then(modifier),
+  )
+}
+
+@Composable
+private fun RotatingSyncIcon() {
+  val infiniteTransition = rememberInfiniteTransition(label = "SyncRotation")
+  val rotationAngle by
+    infiniteTransition.animateFloat(
+      initialValue = 0f,
+      targetValue = 360f,
+      animationSpec =
+        infiniteRepeatable(
+          animation = tween(durationMillis = 1000, easing = LinearEasing),
+          repeatMode = RepeatMode.Restart,
+        ),
+      label = "RotationAngle",
+    )
+
+  // rotationZ is read inside the graphicsLayer block so the angle drives the draw phase only,
+  // without recomposing on every frame.
+  SyncIcon(modifier = Modifier.graphicsLayer { rotationZ = rotationAngle })
 }
 
 @Composable
@@ -443,7 +452,7 @@ private fun LogoutRow(
   ) {
     Icon(
       painter = painterResource(id = R.drawable.ic_log_out),
-      contentDescription = "Settings",
+      contentDescription = "Log out",
       tint = if (isConnected) colorScheme.error else colorScheme.onSurfaceVariant,
       modifier = Modifier.padding(horizontal = 8.dp).requiredSize(size = 32.dp),
     )

@@ -1,10 +1,13 @@
 package com.dhimandasgupta.notemark.ui.designsystem
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.StartOffset
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -46,9 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +65,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -82,7 +84,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.common.extensions.compose.trackRecompositions
-import kotlinx.coroutines.delay
 
 @Composable
 fun NoteMarkButton(
@@ -437,36 +438,21 @@ fun LimitedText(
   color: Color,
   targetCharacterCount: Int = 100,
 ) {
-  var textToDisplay by remember(key1 = fullText) { mutableStateOf(value = fullText) }
+  // Truncation is a pure function of the inputs, so it is resolved during composition. Deriving it
+  // from onTextLayout instead would write layout results back into composition, forcing a second
+  // composition and layout pass for every item.
+  val textToDisplay =
+    remember(key1 = fullText, key2 = targetCharacterCount) {
+      if (fullText.length > targetCharacterCount) fullText.take(targetCharacterCount) else fullText
+    }
 
-  key(textToDisplay) {
-    Text(
-      text = textToDisplay,
-      style = style,
-      color = color,
-      onTextLayout = { textLayoutResult ->
-        if (textLayoutResult.layoutInput.text.length > targetCharacterCount) {
-          if (
-            textLayoutResult.isLineEllipsized(lineIndex = textLayoutResult.lineCount - 1) ||
-              textLayoutResult.getLineEnd(
-                lineIndex = textLayoutResult.lineCount - 1,
-                visibleEnd = true,
-              ) < targetCharacterCount && fullText.length > targetCharacterCount
-          ) {
-            if (textToDisplay.length > targetCharacterCount) { // Ensure we only shorten once
-              textToDisplay = fullText.take(targetCharacterCount)
-            }
-          } else if (
-            fullText.length > targetCharacterCount && textToDisplay.length > targetCharacterCount
-          ) {
-            textToDisplay = fullText.take(targetCharacterCount)
-          }
-        }
-      },
-      maxLines = 5,
-      overflow = TextOverflow.Ellipsis,
-    )
-  }
+  Text(
+    text = textToDisplay,
+    style = style,
+    color = color,
+    maxLines = 5,
+    overflow = TextOverflow.Ellipsis,
+  )
 }
 
 @Composable
@@ -474,34 +460,36 @@ private fun BouncingDot(
   modifier: Modifier = Modifier,
   color: Color = Color.Blue,
   size: Dp = 10.dp,
-  bounceHeight: Dp = 30.dp,
+  bounceHeight: Dp = 2.dp,
   animationDurationMillis: Int = 500,
   delayMillis: Int = 0, // Delay before this specific dot starts its animation
 ) {
-  val offsetY = remember { Animatable(initialValue = 0f) }
+  // Dp.value is a raw dp number, so converting to px here keeps the bounce the same physical
+  // height on every density instead of shrinking as density rises.
+  val bounceHeightPx = with(receiver = LocalDensity.current) { bounceHeight.toPx() }
 
-  LaunchedEffect(key1 = Unit) {
-    delay(timeMillis = delayMillis.toLong()) // Apply initial delay
-    offsetY.animateTo(
-      targetValue = -bounceHeight.value, // Move up
+  val transition = rememberInfiniteTransition(label = "BouncingDot")
+  val offsetY by
+    transition.animateFloat(
+      initialValue = 0f,
+      targetValue = -bounceHeightPx / 2,
       animationSpec =
         infiniteRepeatable(
           animation =
-            keyframes {
-              durationMillis = animationDurationMillis
-              0f at 0 // Start at original position
-              bounceHeight.value.times(-1) at animationDurationMillis / 2 // Peak
-              0f at animationDurationMillis // Return to original position
-            },
-          repeatMode = RepeatMode.Restart, // Could also be Reverse for a different effect
+            tween(
+              durationMillis = animationDurationMillis / 2,
+              easing = FastOutSlowInEasing,
+            ),
+          repeatMode = RepeatMode.Reverse,
+          initialStartOffset = StartOffset(offsetMillis = delayMillis),
         ),
+      label = "offsetY",
     )
-  }
 
   Box(
     modifier =
       modifier
-        .offset { IntOffset(x = 0, y = offsetY.value.toInt()) }
+        .offset { IntOffset(x = 0, y = offsetY.toInt()) }
         .size(size)
         .clip(CircleShape)
         .background(color)
