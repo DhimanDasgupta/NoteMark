@@ -1,15 +1,15 @@
 [versions]
 agp = "9.4.0"
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 coreKtx = "1.19.0"
 lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
-composeBom = "2026.08.00"
-runtime-tracing = "1.12.0"
+composeBom = "2026.09.00"
+runtime-tracing = "1.12.1"
 androidxSplashScreen = "1.2.0"
 desugar = "2.1.5"
 sqlDelight = "2.3.2"
-metro = "1.4.2"
+metro = "1.4.3"
 ksp = "2.3.11"
 kotlinxSerializationJson = "1.11.0"
 coroutines = "1.11.0"
@@ -113,6 +113,7 @@ metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
 compose = [
     "androidx-material3",
     "androidx-ui",
+    "androidx-ui-graphics",
     "androidx-ui-tooling-preview",
     "androidx-material-icons-extended"
 ]
