@@ -74,8 +74,8 @@ internal fun LauncherPane(
   SideEffect { context?.setForcedDarkStatusBarIcons(true) }
 
   val updatedLauncherUiModel by rememberUpdatedState(newValue = launcherUiModel)
-  val updatedNavigateToList by rememberUpdatedState(navigateToList)
-  val updatedNavigateToLogin by rememberUpdatedState(navigateToLogin)
+  val updatedNavigateToList by rememberUpdatedState(newValue = navigateToList)
+  val updatedNavigateToLogin by rememberUpdatedState(newValue = navigateToLogin)
 
   LaunchedEffect(key1 = Unit) {
     snapshotFlow { updatedLauncherUiModel().loggedInUser }
