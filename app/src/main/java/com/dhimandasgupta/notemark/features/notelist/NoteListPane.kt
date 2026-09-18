@@ -106,8 +106,6 @@ internal fun NoteListPane(
   val updateNoteListUiModel by rememberUpdatedState(newValue = noteListUiModel)
   var noteDeleteId by remember { mutableStateOf<String?>(value = null) }
 
-  // The pane itself only needs the user name. Reading it through derivedStateOf means this scope
-  // recomposes when the name changes, not on every ui model emission (paging, sync, connectivity).
   val userName by remember { derivedStateOf { updateNoteListUiModel().userName } }
 
   LaunchedEffect(key1 = userName) {
@@ -231,8 +229,6 @@ private fun NoteListWithNotes(
   onSettingsClicked: () -> Unit = {},
   onProfileClicked: () -> Unit = {},
 ) {
-  // Kept above the early return so AnimatedVisibility outlives the flip and can actually run its
-  // exit; calling it behind `if (loading)` unmounted the subtree instead of animating it out.
   LoadingPane(
     modifier = Modifier,
     showLoading = loading,
@@ -246,9 +242,6 @@ private fun NoteListWithNotes(
 
   val scrollState = rememberLazyStaggeredGridState()
 
-  // Observed in a coroutine rather than read in composition: the old derivedStateOf +
-  // LaunchedEffect(reachedBottom) pair recomposed this whole composable every time the flag
-  // flipped. snapshotFlow only emits on change, so the filter fires once per arrival at the end.
   val currentLoadNotes by rememberUpdatedState(newValue = loadNotes)
   LaunchedEffect(key1 = scrollState) {
     snapshotFlow {
@@ -260,8 +253,6 @@ private fun NoteListWithNotes(
   }
 
   Box(
-    // No inset padding here: the grid spans the full width and applies the insets as content
-    // padding, so the toolbar can draw edge to edge.
     modifier =
       modifier.fillMaxSize().onSizeChanged { intSize ->
         val widthInDp = with(density) { intSize.width.toDp() }
@@ -490,7 +481,6 @@ private fun NoteGrid(
   onSettingsClicked: () -> Unit = {},
   onProfileClicked: () -> Unit = {},
 ) {
-  // Hoisted out of NoteItem: the locale is identical for every item in the grid.
   val configuration = LocalConfiguration.current
   val locale =
     remember(key1 = configuration) {
@@ -521,13 +511,9 @@ private fun NoteGrid(
       contentType = "toolbar",
     ) {
       NoteListPaneToolbar(
-        // Cancels the grid's horizontal content padding so the toolbar background reaches the
-        // screen edges; the toolbar then applies the insets to its own content.
         modifier = Modifier.bleedHorizontally(start = startPadding, end = endPadding),
         toolbarTitle = "NoteMark",
         userName = userName,
-        // Read inside the item lambda, so a connectivity change now recomposes only the toolbar
-        // item rather than the whole pane.
         isConnected = noteListUiModel().isConnected,
         onSettingsClicked = onSettingsClicked,
         onProfileClicked = onProfileClicked,
@@ -554,9 +540,6 @@ private fun NoteGrid(
       key = { note -> note.id },
       contentType = { "notes" },
     ) { noteEntity ->
-      // `animateItem` only offers fade and placement, so the appearance (scale up from 50% while
-      // rising from below) is driven by a single progress value read inside `graphicsLayer`, which
-      // keeps the per-frame updates in the draw phase instead of recomposing the item.
       val appearance = remember { Animatable(0f) }
       LaunchedEffect(Unit) {
         appearance.animateTo(
@@ -633,7 +616,6 @@ private fun NoteItem(
         )
         .padding(all = 16.dp)
   ) {
-    // Date parsing and pattern compilation are expensive; keep them out of every recomposition.
     val lastEditedLabel =
       remember(key1 = note.lastEditedAt, key2 = locale) {
         convertIsoToRelativeYearFormat(
