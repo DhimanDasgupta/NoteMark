@@ -41,14 +41,14 @@ sealed interface NoteListAction {
 class NoteListStateMachineFactory(
   private val userRepository: UserRepository,
   private val noteMarkRepository: NoteMarkRepository,
+  private val pagedNotes: PagedNotes,
 ) : StateMachineFactory<NoteListState, NoteListAction>() {
   init {
     spec {
       initializeWith { defaultNoteListState }
 
       inState<NoteListStateWithNoNotes> {
-        collectWhileInState(flow = noteMarkRepository.getAllNotes().distinctUntilChanged()) { notes
-          ->
+        collectWhileInState(flow = pagedNotes.snapshots) { notes ->
           if (notes.isEmpty()) {
             override {
               NoteListStateWithNoNotes(
@@ -61,7 +61,7 @@ class NoteListStateMachineFactory(
               NoteListStateWithNotes(
                 userName = userName,
                 loading = false,
-                notes = notes.distinctBy { note -> note.id }.sortedByDescending { it.lastEditedAt },
+                notes = notes,
               )
             }
           }
@@ -74,14 +74,12 @@ class NoteListStateMachineFactory(
       }
 
       inState<NoteListStateWithNotes> {
-        collectWhileInState(flow = noteMarkRepository.getAllNotes().distinctUntilChanged()) { notes
-          ->
+        collectWhileInState(flow = pagedNotes.snapshots) { notes ->
           if (notes.isNotEmpty()) {
             mutate {
-              NoteListStateWithNotes(
-                userName = userName,
+              copy(
                 loading = false,
-                notes = notes.distinctBy { note -> note.id }.sortedByDescending { it.lastEditedAt },
+                notes = notes,
               )
             }
           } else {
@@ -100,14 +98,12 @@ class NoteListStateMachineFactory(
         }
         on<NoteListAction.NoteDelete> { action ->
           noteMarkRepository.getNoteByUUID(uuid = action.uuid)?.let { noteEntity ->
-            if (noteMarkRepository.markAsDeleted(noteEntity)) {
-              return@on override { copy(notes = notes.filter { it.uuid != action.uuid }) }
-            }
+            noteMarkRepository.markAsDeleted(noteEntity = noteEntity)
           }
           noChange()
         }
         on<NoteListAction.LoadNextNotes> { _ ->
-          // TODO
+          pagedNotes.loadMore()
           noChange()
         }
       }

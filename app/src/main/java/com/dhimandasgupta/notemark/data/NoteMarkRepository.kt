@@ -1,5 +1,8 @@
 package com.dhimandasgupta.notemark.data
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.dhimandasgupta.notemark.data.local.datasource.NoteMarkLocalDataSource
 import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSource
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
@@ -10,7 +13,17 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 
+/** Notes held in memory per page by [NoteMarkRepository.getPagedNotes]. */
+const val NOTES_PAGE_SIZE: Int = 10
+
 interface NoteMarkRepository {
+  /**
+   * Pages of notes read straight from the database, newest edit first. The stream re-emits whenever
+   * a write touches the notes table, so a sync, an edit or a delete refreshes the pages already
+   * loaded.
+   */
+  fun getPagedNotes(pageSize: Int = NOTES_PAGE_SIZE): Flow<PagingData<NoteEntity>>
+
   fun getNotesFromOffSetWithLimitAsList(limit: Long = 10L, offset: Long): List<NoteEntity>
 
   fun getNotesFromOffSetWithLimit(limit: Long = 10L, offset: Long): Flow<List<NoteEntity>>
@@ -65,6 +78,18 @@ class NoteMarkRepositoryImpl(
   private val localDataSource: Lazy<NoteMarkLocalDataSource>,
   private val remoteDataSource: Lazy<NoteMarkApiDataSource>,
 ) : NoteMarkRepository {
+  override fun getPagedNotes(pageSize: Int): Flow<PagingData<NoteEntity>> =
+    Pager(
+        config =
+          PagingConfig(
+            pageSize = pageSize,
+            enablePlaceholders = true,
+            initialLoadSize = pageSize * 2,
+          ),
+        pagingSourceFactory = { localDataSource.value.notesPagingSource() },
+      )
+      .flow
+
   override fun getNotesFromOffSetWithLimitAsList(
     limit: Long,
     offset: Long,

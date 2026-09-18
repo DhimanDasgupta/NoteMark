@@ -1,7 +1,10 @@
 package com.dhimandasgupta.notemark.data.local.datasource
 
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.paging3.QueryPagingSource
 import com.dhimandasgupta.notemark.app.di.AppBackgroundDispatcher
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.database.NoteMarkDatabase
@@ -12,6 +15,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 interface NoteMarkLocalDataSource {
+  /**
+   * A [PagingSource] over the notes the list shows, newest edit first. Pages are read with SQL
+   * `LIMIT`/`OFFSET`, and the source invalidates itself whenever a write touches `NoteEntity`, so
+   * inserts, edits and deletes reach the list without the caller re-subscribing.
+   */
+  fun notesPagingSource(): PagingSource<Int, NoteEntity>
+
   fun getNotesFromOffSetWithLimitAsList(limit: Long = 10L, offset: Long): List<NoteEntity>
 
   fun getNotesFromOffSetWithLimit(limit: Long = 10L, offset: Long): Flow<List<NoteEntity>>
@@ -53,6 +63,19 @@ class NoteMarkLocalDataSourceImpl(
   @AppBackgroundDispatcher private val applicationDispatcher: CoroutineDispatcher,
 ) : NoteMarkLocalDataSource {
   private val queries = database.value.noteMarkDatabaseQueries
+
+  override fun notesPagingSource(): PagingSource<Int, NoteEntity> =
+    TopAnchoredPagingSource(
+      delegate =
+        QueryPagingSource(
+          countQuery = queries.getVisibleNoteCount(),
+          transacter = queries,
+          context = applicationDispatcher,
+          queryProvider = { limit, offset ->
+            queries.getNotesFromOffSetWithLimit(limit = limit, offset = offset)
+          },
+        )
+    )
 
   override fun getNotesFromOffSetWithLimitAsList(
     limit: Long,
@@ -190,4 +213,38 @@ class NoteMarkLocalDataSourceImpl(
       }
       return@withContext result == 1L
     }
+}
+
+/**
+ * Restarts the loaded window at the top of the table after an invalidation, instead of around the
+ * row that was read last.
+ *
+ * `OffsetQueryPagingSource.getRefreshKey` anchors the next generation on `anchorPosition`, which is
+ * wherever the last access hint pointed. The note list grows only through explicit `loadMore()`
+ * calls, and those read the *last* loaded row, so once everything is paged in the anchor sits at
+ * the bottom of the table. A write then invalidates the source and the refresh reloads a window
+ * near that anchor — dropping every note above it, with no placeholders to mark the gap and no
+ * scrolling list to prepend them back.
+ *
+ * Returning a null refresh key pins each new generation to offset 0; the presenter re-appends from
+ * there up to however many notes had already been paged in.
+ */
+private class TopAnchoredPagingSource<Value : Any>(private val delegate: PagingSource<Int, Value>) :
+  PagingSource<Int, Value>() {
+  init {
+    // The delegate is the one listening to the notes table, so its invalidation has to become ours;
+    // ours has to reach the delegate so it drops that listener rather than leaking it.
+    delegate.registerInvalidatedCallback { invalidate() }
+    registerInvalidatedCallback { delegate.invalidate() }
+  }
+
+  override val jumpingSupported: Boolean
+    get() = delegate.jumpingSupported
+
+  override val keyReuseSupported: Boolean
+    get() = delegate.keyReuseSupported
+
+  override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Value> = delegate.load(params)
+
+  override fun getRefreshKey(state: PagingState<Int, Value>): Int? = null
 }

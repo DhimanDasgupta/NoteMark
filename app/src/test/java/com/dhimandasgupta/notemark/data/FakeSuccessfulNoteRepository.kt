@@ -1,5 +1,6 @@
 package com.dhimandasgupta.notemark.data
 
+import androidx.paging.PagingData
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.database.NoteEntity
@@ -8,6 +9,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
 class FakeSuccessfulNoteRepository : NoteMarkRepository {
+  override fun getPagedNotes(pageSize: Int): Flow<PagingData<NoteEntity>> =
+    flowOf(value = PagingData.from(data = listOf(noteEntity)))
+
   override fun getNotesFromOffSetWithLimitAsList(
     limit: Long,
     offset: Long,

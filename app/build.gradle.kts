@@ -162,6 +162,10 @@ dependencies {
   implementation(libs.sql.delight.coroutines.extensions)
   implementation(libs.sql.delight.paging3.extensions)
 
+  // Paging 3
+  implementation(libs.androidx.paging.runtime)
+  implementation(libs.androidx.paging.compose)
+
   // Datastore
   implementation(libs.datastore.preferences)
   implementation(libs.datastore.preferences.android)

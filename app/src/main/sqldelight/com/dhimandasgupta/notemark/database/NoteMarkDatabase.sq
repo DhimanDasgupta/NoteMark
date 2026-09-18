@@ -27,12 +27,19 @@ CREATE INDEX idx_NoteEntity_modifiedAt ON NoteEntity(lastEditedAt);
 getTotalNoteCount:
 SELECT count(*) FROM NoteEntity;
 
--- Get pagniated Notes
+-- Number of notes the list shows. Paired with getNotesFromOffSetWithLimit as the count query of
+-- the Paging 3 source, so it has to apply exactly the same markAsDeleted filter as that query.
+getVisibleNoteCount:
+SELECT count(*) FROM NoteEntity WHERE markAsDeleted = 0;
+
+-- Page of notes for the Paging 3 source. id breaks ties on lastEditedAt so that the total order is
+-- deterministic; without it two notes sharing a timestamp can swap between pages and be shown twice
+-- or skipped entirely by offset paging.
 getNotesFromOffSetWithLimit:
 SELECT *
 FROM NoteEntity
 WHERE markAsDeleted = 0
-ORDER BY lastEditedAt DESC
+ORDER BY lastEditedAt DESC, id DESC
 LIMIT :limit OFFSET :offset;
 
 -- Get all notes, ordered by modification date (newest first)
