@@ -52,18 +52,18 @@ class FakeSuccessfulNoteRepository : NoteMarkRepository {
 
   override suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity> = listOf(noteEntity)
 
-  override suspend fun getNoteById(noteId: Long): NoteEntity? = noteEntity
+  override suspend fun getNoteById(noteId: Long): NoteEntity = noteEntity
 
-  override suspend fun getNoteByUUID(uuid: String): NoteEntity? = noteEntity
+  override suspend fun getNoteByUUID(uuid: String): NoteEntity = noteEntity
 
-  override suspend fun createNote(noteEntity: NoteEntity): NoteEntity? = noteEntity
+  override suspend fun createNote(noteEntity: NoteEntity): NoteEntity = noteEntity
 
   override suspend fun updateLocalNote(
     title: String,
     content: String,
     lastEditedAt: String,
     noteEntity: NoteEntity,
-  ): NoteEntity? = noteEntity
+  ): NoteEntity = noteEntity
 
   override suspend fun createNewRemoteNote(noteEntity: NoteEntity): Boolean = true
 
