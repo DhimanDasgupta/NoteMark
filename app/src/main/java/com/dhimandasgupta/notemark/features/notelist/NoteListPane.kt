@@ -2,15 +2,13 @@ package com.dhimandasgupta.notemark.features.notelist
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.keyframesWithSpline
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -56,12 +54,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.innerShadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.shadow.Shadow
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -70,8 +69,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
@@ -85,9 +82,12 @@ import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkToolbarButton
 import com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton
 import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
+import com.dhimandasgupta.notemark.ui.designsystem.bleedHorizontally
 import java.util.Locale
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 
 @Composable
 internal fun NoteListPane(
@@ -106,9 +106,13 @@ internal fun NoteListPane(
   val updateNoteListUiModel by rememberUpdatedState(newValue = noteListUiModel)
   var noteDeleteId by remember { mutableStateOf<String?>(value = null) }
 
-  LaunchedEffect(key1 = updateNoteListUiModel().userName) {
+  // The pane itself only needs the user name. Reading it through derivedStateOf means this scope
+  // recomposes when the name changes, not on every ui model emission (paging, sync, connectivity).
+  val userName by remember { derivedStateOf { updateNoteListUiModel().userName } }
+
+  LaunchedEffect(key1 = userName) {
     delay(timeMillis = 100)
-    if (noteListUiModel().userName?.isEmpty() == true) {
+    if (updateNoteListUiModel().userName?.isEmpty() == true) {
       navigateToLauncherIfLoggedOut()
     }
   }
@@ -119,7 +123,7 @@ internal fun NoteListPane(
   ) {
     NoteListValidPane(
       modifier = Modifier,
-      userName = noteListUiModel().userName?.formatUserName() ?: "",
+      userName = userName?.formatUserName() ?: "",
       noteListUiModel = updateNoteListUiModel,
       onNoteClicked = onNoteClicked,
       loadNotes = { noteListAction(NoteListAction.LoadNextNotes) },
@@ -241,23 +245,18 @@ private fun NoteListWithNotes(
   val density = LocalDensity.current
 
   val scrollState = rememberLazyStaggeredGridState()
-  val shouldShowFAB by remember {
-    derivedStateOf {
-      scrollState.firstVisibleItemIndex == 0 && !scrollState.isScrollInProgress
-    }
-  }
 
-  val reachedBottom by remember {
-    derivedStateOf {
-      scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ==
-        scrollState.layoutInfo.totalItemsCount - 1
-    }
-  }
-
-  LaunchedEffect(reachedBottom) {
-    if (reachedBottom) {
-      loadNotes()
-    }
+  // Observed in a coroutine rather than read in composition: the old derivedStateOf +
+  // LaunchedEffect(reachedBottom) pair recomposed this whole composable every time the flag
+  // flipped. snapshotFlow only emits on change, so the filter fires once per arrival at the end.
+  val currentLoadNotes by rememberUpdatedState(newValue = loadNotes)
+  LaunchedEffect(key1 = scrollState) {
+    snapshotFlow {
+        val layoutInfo = scrollState.layoutInfo
+        layoutInfo.visibleItemsInfo.lastOrNull()?.index == layoutInfo.totalItemsCount - 1
+      }
+      .filter { reachedBottom -> reachedBottom }
+      .collect { currentLoadNotes() }
   }
 
   Box(
@@ -295,29 +294,44 @@ private fun NoteListWithNotes(
       onProfileClicked = onProfileClicked,
     )
 
-    Column(
-      // The grid no longer insets its parent, so the FAB keeps itself clear of the navigation
-      // bar and cutout. windowInsetsPadding resolves during layout, so an inset change moves the
-      // FAB without recomposing.
-      modifier =
-        Modifier.fillMaxSize()
-          .windowInsetsPadding(
-            insets = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
-          ),
-      verticalArrangement = Arrangement.Bottom,
-      horizontalAlignment = Alignment.End,
-    ) {
-      AnimatedVisibility(
-        visible = shouldShowFAB,
-        enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
-        exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
-      ) {
-        NoteMarkFAB(
-          modifier = Modifier.padding(all = 16.dp),
-          onClick = onFabClicked,
-        )
+    NoteListFab(
+      scrollState = scrollState,
+      onFabClicked = onFabClicked,
+    )
+  }
+}
+
+@Composable
+private fun NoteListFab(
+  scrollState: LazyStaggeredGridState,
+  onFabClicked: () -> Unit,
+) {
+  val visibility = remember { Animatable(initialValue = 1f) }
+
+  LaunchedEffect(key1 = scrollState) {
+    snapshotFlow { scrollState.firstVisibleItemIndex == 0 && !scrollState.isScrollInProgress }
+      .collectLatest { shouldShow ->
+        visibility.animateTo(targetValue = if (shouldShow) 1f else 0f)
       }
-    }
+  }
+
+  Box(
+    modifier =
+      Modifier.fillMaxSize()
+        .windowInsetsPadding(
+          insets = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
+        ),
+    contentAlignment = Alignment.BottomEnd,
+  ) {
+    NoteMarkFAB(
+      modifier =
+        Modifier.padding(all = 16.dp).graphicsLayer {
+          val progress = visibility.value
+          alpha = progress
+          translationY = (1f - progress) * size.height / 2f
+        },
+      onClick = { if (visibility.targetValue == 1f) onFabClicked() },
+    )
   }
 }
 
@@ -354,23 +368,27 @@ private fun NoteListPaneToolbar(
   onSettingsClicked: () -> Unit,
   onProfileClicked: () -> Unit,
 ) {
-  val insets = WindowInsets.systemBars.union(insets = WindowInsets.displayCutout).asPaddingValues()
-
   Row(
     modifier =
       modifier
-        // Background sits outside the inset padding, so it fills the bar areas while the content
-        // stays clear of them.
         .background(color = colorScheme.surfaceContainerLowest)
         .fillMaxWidth()
         .padding(
-          start = insets.calculateLeftPadding(LayoutDirection.Ltr),
-          top = insets.calculateTopPadding(),
-          end = insets.calculateEndPadding(LayoutDirection.Ltr),
-        )
-        .padding(
-          vertical = 4.dp,
-          horizontal = 16.dp,
+          top =
+            WindowInsets.systemBars
+              .union(WindowInsets.displayCutout)
+              .asPaddingValues()
+              .calculateTopPadding(),
+          start =
+            WindowInsets.navigationBars
+              .union(WindowInsets.displayCutout)
+              .asPaddingValues()
+              .calculateLeftPadding(LayoutDirection.Ltr) + 16.dp,
+          end =
+            WindowInsets.navigationBars
+              .union(WindowInsets.displayCutout)
+              .asPaddingValues()
+              .calculateRightPadding(LayoutDirection.Ltr) + 16.dp,
         ),
     horizontalArrangement = Arrangement.SpaceBetween,
     verticalAlignment = Alignment.CenterVertically,
@@ -536,28 +554,42 @@ private fun NoteGrid(
       key = { note -> note.id },
       contentType = { "notes" },
     ) { noteEntity ->
+      // `animateItem` only offers fade and placement, so the appearance (scale up from 50% while
+      // rising from below) is driven by a single progress value read inside `graphicsLayer`, which
+      // keeps the per-frame updates in the draw phase instead of recomposing the item.
+      val appearance = remember { Animatable(0f) }
+      LaunchedEffect(Unit) {
+        appearance.animateTo(
+          targetValue = 1f,
+          animationSpec =
+            spring(
+              stiffness = Spring.StiffnessLow,
+              dampingRatio = Spring.DampingRatioLowBouncy,
+            ),
+        )
+      }
       NoteItem(
         modifier =
           Modifier.animateItem(
-            fadeInSpec =
-              spring(
-                stiffness = Spring.StiffnessVeryLow,
-                dampingRatio = Spring.DampingRatioLowBouncy,
-              ),
-            placementSpec =
-              keyframesWithSpline {
-                IntOffset(0, 200) at 0
-                IntOffset(0, 100) at 75
-                IntOffset(0, 50) at 225
-                IntOffset(0, 0) at 375
-                durationMillis = 375
-              },
-            fadeOutSpec =
-              spring(
-                stiffness = Spring.StiffnessVeryLow,
-                dampingRatio = Spring.DampingRatioLowBouncy,
-              ),
-          ),
+              fadeInSpec = null,
+              placementSpec =
+                spring(
+                  stiffness = Spring.StiffnessLow,
+                  dampingRatio = Spring.DampingRatioLowBouncy,
+                ),
+              fadeOutSpec =
+                spring(
+                  stiffness = Spring.StiffnessVeryLow,
+                  dampingRatio = Spring.DampingRatioLowBouncy,
+                ),
+            )
+            .graphicsLayer {
+              val progress = appearance.value
+              val scale = 0.5f + 0.5f * progress
+              scaleX = scale
+              scaleY = scale
+              translationY = (1f - progress) * NoteItemAppearOffset.toPx()
+            },
         note = noteEntity,
         maxLength = maxLength,
         locale = locale,
@@ -568,27 +600,8 @@ private fun NoteGrid(
   }
 }
 
-/**
- * Expands content horizontally by [start] and [end] so it can draw past an ancestor's content
- * padding, while the layout node itself still reports its original slot width. Used to let a
- * full-line lazy grid item bleed to the screen edges.
- */
-private fun Modifier.bleedHorizontally(start: Dp, end: Dp): Modifier =
-  layout { measurable, constraints ->
-    if (!constraints.hasBoundedWidth) {
-      val placeable = measurable.measure(constraints)
-      return@layout layout(placeable.width, placeable.height) { placeable.place(x = 0, y = 0) }
-    }
-
-    val startPx = start.roundToPx()
-    val bleedWidth = constraints.maxWidth + startPx + end.roundToPx()
-    val placeable =
-      measurable.measure(constraints.copy(minWidth = bleedWidth, maxWidth = bleedWidth))
-
-    layout(width = constraints.maxWidth, height = placeable.height) {
-      placeable.place(x = -startPx, y = 0)
-    }
-  }
+/** How far below its final position a note starts when it appears in the grid. */
+private val NoteItemAppearOffset = 100.dp
 
 @Composable
 private fun NoteItem(

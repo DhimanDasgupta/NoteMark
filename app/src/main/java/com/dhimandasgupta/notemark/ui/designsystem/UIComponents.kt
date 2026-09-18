@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.union
@@ -64,8 +63,14 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.shadow.Shadow
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.node.LayoutModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -74,8 +79,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -464,15 +469,14 @@ private fun BouncingDot(
   animationDurationMillis: Int = 500,
   delayMillis: Int = 0, // Delay before this specific dot starts its animation
 ) {
-  // Dp.value is a raw dp number, so converting to px here keeps the bounce the same physical
-  // height on every density instead of shrinking as density rises.
-  val bounceHeightPx = with(receiver = LocalDensity.current) { bounceHeight.toPx() }
-
+  // Animates a unitless 0..1 progress and resolves it to pixels inside `graphicsLayer`, so the
+  // per-frame value is read only in the draw phase: no recomposition and no re-layout of the dot,
+  // and `bounceHeight` still converts through the current density.
   val transition = rememberInfiniteTransition(label = "BouncingDot")
-  val offsetY by
+  val bounceProgress =
     transition.animateFloat(
       initialValue = 0f,
-      targetValue = -bounceHeightPx / 2,
+      targetValue = 1f,
       animationSpec =
         infiniteRepeatable(
           animation =
@@ -483,13 +487,13 @@ private fun BouncingDot(
           repeatMode = RepeatMode.Reverse,
           initialStartOffset = StartOffset(offsetMillis = delayMillis),
         ),
-      label = "offsetY",
+      label = "bounceProgress",
     )
 
   Box(
     modifier =
       modifier
-        .offset { IntOffset(x = 0, y = offsetY.toInt()) }
+        .graphicsLayer { translationY = -bounceProgress.value * bounceHeight.toPx() / 2 }
         .size(size)
         .clip(CircleShape)
         .background(color)
@@ -587,5 +591,60 @@ fun SafeIconButton(
     colors = colors,
   ) {
     content()
+  }
+}
+
+/**
+ * Expands content horizontally by [start] and [end] so it can draw past an ancestor's content
+ * padding, while the layout node itself still reports its original slot width. Used to let a
+ * full-line lazy grid item bleed to the screen edges.
+ *
+ * Built as a [ModifierNodeElement] rather than `Modifier.layout { }` so that two calls with the
+ * same [start] and [end] produce equal modifiers. A `layout { }` lambda is a new instance on every
+ * call, which made the toolbar's `modifier` parameter differ each time the grid item recomposed and
+ * defeated the toolbar's skipping.
+ */
+fun Modifier.bleedHorizontally(start: Dp, end: Dp): Modifier =
+  this then BleedHorizontallyElement(start = start, end = end)
+
+private data class BleedHorizontallyElement(
+  val start: Dp,
+  val end: Dp,
+) : ModifierNodeElement<BleedHorizontallyNode>() {
+  override fun create(): BleedHorizontallyNode = BleedHorizontallyNode(start = start, end = end)
+
+  override fun update(node: BleedHorizontallyNode) {
+    node.start = start
+    node.end = end
+  }
+
+  override fun InspectorInfo.inspectableProperties() {
+    name = "bleedHorizontally"
+    properties["start"] = start
+    properties["end"] = end
+  }
+}
+
+private class BleedHorizontallyNode(
+  var start: Dp,
+  var end: Dp,
+) : LayoutModifierNode, Modifier.Node() {
+  override fun MeasureScope.measure(
+    measurable: Measurable,
+    constraints: Constraints,
+  ): MeasureResult {
+    if (!constraints.hasBoundedWidth) {
+      val placeable = measurable.measure(constraints)
+      return layout(placeable.width, placeable.height) { placeable.place(x = 0, y = 0) }
+    }
+
+    val startPx = start.roundToPx()
+    val bleedWidth = constraints.maxWidth + startPx + end.roundToPx()
+    val placeable =
+      measurable.measure(constraints.copy(minWidth = bleedWidth, maxWidth = bleedWidth))
+
+    return layout(width = constraints.maxWidth, height = placeable.height) {
+      placeable.place(x = -startPx, y = 0)
+    }
   }
 }
