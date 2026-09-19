@@ -44,7 +44,7 @@ private fun LauncherEntry(
   navigateAfterLogin: () -> Unit,
   navigateToLogin: () -> Unit,
 ) {
-  val context = LocalActivity.current
+  val context = LocalActivity.current ?: return
 
   var launcherUiModel by rememberSerializable {
     mutableStateOf(value = LauncherUiModel.defaultOrEmpty)

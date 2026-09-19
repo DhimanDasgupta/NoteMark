@@ -80,8 +80,8 @@ internal fun SettingsPane(
   onBackClicked: () -> Unit = {},
   onLogoutClicked: () -> Unit = {},
 ) {
-  val context = LocalActivity.current
-  SideEffect { context?.setDarkStatusBarIcons(true) }
+  val context = LocalActivity.current ?: return
+  SideEffect { context.setDarkStatusBarIcons(true) }
 
   val updatedSettingsUiModel by rememberUpdatedState(newValue = settingsUiModel)
   val updatedOnLogoutSuccessful by rememberUpdatedState(newValue = onLogoutSuccessful)
@@ -191,6 +191,11 @@ private fun SettingsBody(
   onDeleteNoteCheckChanged: () -> Unit = {},
   onLogoutClicked: () -> Unit = {},
 ) {
+  // The model is read once here and handed down as primitives: this body already subscribes to
+  // every model change, so passing the lambda further down would only make each row recompose as
+  // well. With primitives, only the row whose value changed recomposes.
+  val model = settingsUiModel()
+
   Box(modifier = modifier.fillMaxSize()) {
     Column(
       modifier =
@@ -213,7 +218,7 @@ private fun SettingsBody(
       // Sync Interval
       SyncIntervalRow(
         modifier = Modifier,
-        settingsUiModel = settingsUiModel,
+        selectedSyncInterval = model.selectedSyncInterval,
         toggleSyncIntervalVisibility = toggleSyncIntervalVisibility,
       )
 
@@ -222,7 +227,8 @@ private fun SettingsBody(
       // Sync Data
       SyncDataRow(
         modifier = Modifier,
-        settingsUiModel = settingsUiModel,
+        isSyncing = model.isSyncing,
+        lastSynced = model.lastSynced,
       )
 
       Divider()
@@ -230,7 +236,7 @@ private fun SettingsBody(
       // Delete Local Data
       DeleteLocalDataRow(
         modifier = Modifier,
-        settingsUiModel = settingsUiModel,
+        deleteLocalNotesOnLogout = model.deleteLocalNotesOnLogout,
         onCheckChange = onDeleteNoteCheckChanged,
       )
 
@@ -239,12 +245,12 @@ private fun SettingsBody(
       // Logout
       LogoutRow(
         modifier = Modifier,
-        isConnected = settingsUiModel().isConnected,
+        isConnected = model.isConnected,
         onLogoutClicked = onLogoutClicked,
       )
 
       // AppVersion
-      settingsUiModel().appVersionName?.let { appVersionName ->
+      model.appVersionName?.let { appVersionName ->
         AppVersion(
           modifier = Modifier,
           appVersionName = appVersionName,
@@ -255,8 +261,8 @@ private fun SettingsBody(
     if (showSyncInterval) {
       SyncDropDown(
         modifier = Modifier,
-        selectedSyncInterval = settingsUiModel().selectedSyncInterval,
-        syncIntervals = settingsUiModel().syncIntervals(),
+        selectedSyncInterval = model.selectedSyncInterval,
+        syncIntervals = model.syncIntervals(),
         toggleDropDownVisibility = toggleSyncIntervalVisibility,
         onDropDownItemSelected = onSyncIntervalSelected,
       )
@@ -267,7 +273,7 @@ private fun SettingsBody(
 @Composable
 private fun SyncIntervalRow(
   modifier: Modifier = Modifier,
-  settingsUiModel: () -> SettingsUiModel,
+  selectedSyncInterval: String,
   toggleSyncIntervalVisibility: () -> Unit,
 ) {
   Row(
@@ -297,7 +303,7 @@ private fun SyncIntervalRow(
     Spacer(modifier = Modifier.fillMaxWidth().weight(weight = 1f))
 
     Text(
-      text = settingsUiModel().selectedSyncInterval,
+      text = selectedSyncInterval,
       style = typography.bodyLarge,
       color = colorScheme.onSurfaceVariant,
       modifier = Modifier.wrapContentSize(),
@@ -315,7 +321,8 @@ private fun SyncIntervalRow(
 @Composable
 private fun SyncDataRow(
   modifier: Modifier = Modifier,
-  settingsUiModel: () -> SettingsUiModel,
+  isSyncing: Boolean,
+  lastSynced: String,
 ) {
   Row(
     modifier =
@@ -330,7 +337,7 @@ private fun SyncDataRow(
     // The transition is only composed while syncing. Creating it unconditionally would keep the
     // animation clock running for as long as this screen is shown, so the frame loop would never
     // go idle even with the icon standing still.
-    when (settingsUiModel().isSyncing) {
+    when (isSyncing) {
       true -> RotatingSyncIcon()
       false -> SyncIcon()
     }
@@ -349,14 +356,18 @@ private fun SyncDataRow(
           configuration.locales.getFirstMatch(arrayOf("en")) ?: configuration.locales.get(0)
         }
 
-      Text(
-        text =
+      val lastSyncedLabel =
+        remember(key1 = lastSynced, key2 = locale) {
           "Last synced: ${
-                    convertNoteTimestampToReadableFormat(
-                        locale = locale,
-                        isoOffsetDateTimeString = settingsUiModel().lastSynced,
-                    )
-                }",
+            convertNoteTimestampToReadableFormat(
+              locale = locale,
+              isoOffsetDateTimeString = lastSynced,
+            )
+          }"
+        }
+
+      Text(
+        text = lastSyncedLabel,
         style = typography.bodySmall,
         color = colorScheme.onSurfaceVariant,
         modifier = Modifier.wrapContentSize(),
@@ -399,7 +410,7 @@ private fun RotatingSyncIcon() {
 @Composable
 private fun DeleteLocalDataRow(
   modifier: Modifier = Modifier,
-  settingsUiModel: () -> SettingsUiModel,
+  deleteLocalNotesOnLogout: Boolean,
   onCheckChange: () -> Unit,
 ) {
   Row(
@@ -420,10 +431,8 @@ private fun DeleteLocalDataRow(
     )
 
     Icon(
-      imageVector =
-        if (settingsUiModel().deleteLocalNotesOnLogout) Icons.Default.Check else Icons.Filled.Close,
-      contentDescription =
-        if (settingsUiModel().deleteLocalNotesOnLogout) "Checked" else "Unchecked",
+      imageVector = if (deleteLocalNotesOnLogout) Icons.Default.Check else Icons.Filled.Close,
+      contentDescription = if (deleteLocalNotesOnLogout) "Checked" else "Unchecked",
       tint = colorScheme.primary,
       modifier = Modifier.padding(horizontal = 16.dp),
     )

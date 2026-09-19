@@ -60,9 +60,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
@@ -73,7 +73,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.offset
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.convertIsoToRelativeTimeFormat
 import com.dhimandasgupta.notemark.common.extensions.android.lockToLandscape
@@ -92,6 +94,7 @@ import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @Composable
@@ -101,33 +104,49 @@ internal fun EditNotePane(
   editNoteAction: (EditNoteAction) -> Unit = {},
   onCloseClicked: () -> Unit = {},
 ) {
-  val context = LocalActivity.current
-  SideEffect { context?.setDarkStatusBarIcons(true) }
+  val context = LocalActivity.current ?: return
+  SideEffect { context.setDarkStatusBarIcons(true) }
 
   val updatedEditNoteUiModel by rememberUpdatedState(newValue = editNoteUiModel)
 
   val keyboardController = LocalSoftwareKeyboardController.current
   val focusManager = LocalFocusManager.current
 
-  LaunchedEffect(key1 = updatedEditNoteUiModel().saved) {
-    if (updatedEditNoteUiModel().saved == true) {
-      focusManager.clearFocus()
-      keyboardController?.hide()
-      onCloseClicked()
-    }
+  val updatedOnCloseClicked by rememberUpdatedState(newValue = onCloseClicked)
+
+  // The model is observed from effects and derived state rather than read in the body, so the
+  // debounced title/content echo from the presenter does not recompose this pane on every edit.
+  LaunchedEffect(key1 = Unit) {
+    snapshotFlow { updatedEditNoteUiModel().saved }
+      .filter { saved -> saved == true }
+      .collect { _ ->
+        focusManager.clearFocus()
+        keyboardController?.hide()
+        updatedOnCloseClicked()
+      }
   }
 
-  LaunchedEffect(key1 = updatedEditNoteUiModel().isReaderMode) {
-    when (updatedEditNoteUiModel().isReaderMode) {
-      true -> {
-        context?.turnOnImmersiveMode()
-        context?.lockToLandscape()
-      }
+  LaunchedEffect(key1 = Unit) {
+    snapshotFlow { updatedEditNoteUiModel().isReaderMode }
+      .collect { isReaderMode ->
+        when (isReaderMode) {
+          true -> {
+            context.turnOnImmersiveMode()
+            context.lockToLandscape()
+          }
 
-      false -> {
-        context?.turnOffImmersiveMode()
-        context?.unlockOrientation()
+          false -> {
+            context.turnOffImmersiveMode()
+            context.unlockOrientation()
+          }
+        }
       }
+  }
+
+  val editEnabled by remember { derivedStateOf { updatedEditNoteUiModel().editEnable } }
+  val showLoading by remember {
+    derivedStateOf {
+      updatedEditNoteUiModel().content.isEmpty() && updatedEditNoteUiModel().title.isEmpty()
     }
   }
 
@@ -144,7 +163,7 @@ internal fun EditNotePane(
   ) {
     EditNoteToolbar(
       modifier = Modifier.wrapContentHeight(align = Alignment.Top),
-      editEnabled = updatedEditNoteUiModel().editEnable,
+      editEnabled = editEnabled,
       onCloseClicked = onCloseClicked,
       onCrossClicked = { editNoteAction(EditNoteAction.ModeChange(Mode.ViewMode)) },
       onSaveClicked = {
@@ -153,9 +172,6 @@ internal fun EditNotePane(
         editNoteAction(EditNoteAction.Save)
       },
     )
-
-    val showLoading =
-      updatedEditNoteUiModel().content.isEmpty() && updatedEditNoteUiModel().title.isEmpty()
 
     AnimatedVisibility(
       visible = showLoading,
@@ -338,12 +354,24 @@ private fun EditNoteBody(
     }
   }
 
-  LaunchedEffect(key1 = editNoteUiModel().title, key2 = editNoteUiModel().content) {
-    if (title != editNoteUiModel().title) {
-      title = editNoteUiModel().title
+  // Only the fields this body displays are derived, so the title/content echo coming back from
+  // the presenter after each debounced edit does not invalidate the body.
+  val editEnabled by remember(editNoteUiModel) { derivedStateOf { editNoteUiModel().editEnable } }
+  val noteEntity by remember(editNoteUiModel) { derivedStateOf { editNoteUiModel().noteEntity } }
+
+  LaunchedEffect(key1 = editNoteUiModel) {
+    launch {
+      snapshotFlow { editNoteUiModel().title }
+        .collect { modelTitle ->
+          if (title != modelTitle) title = modelTitle
+        }
     }
-    if (body != editNoteUiModel().content) {
-      body = editNoteUiModel().content
+
+    launch {
+      snapshotFlow { editNoteUiModel().content }
+        .collect { modelContent ->
+          if (body != modelContent) body = modelContent
+        }
     }
   }
 
@@ -394,7 +422,7 @@ private fun EditNoteBody(
           .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
 
       TextField(
-        enabled = editNoteUiModel().editEnable,
+        enabled = editEnabled,
         value = title,
         onValueChange = { value -> title = value },
         textStyle = typography.titleLarge,
@@ -425,25 +453,34 @@ private fun EditNoteBody(
 
       Box(modifier = lineModifier)
 
-      AnimatedVisibility(visible = !editNoteUiModel().editEnable) {
+      AnimatedVisibility(visible = !editEnabled) {
         NoteDateTime(
           modifier = Modifier,
-          dateCreated = editNoteUiModel().noteEntity?.createdAt ?: "",
-          lastEdited = editNoteUiModel().noteEntity?.lastEditedAt ?: "",
+          dateCreated = noteEntity?.createdAt ?: "",
+          lastEdited = noteEntity?.lastEditedAt ?: "",
         )
       }
 
       Box(modifier = lineModifier)
 
       TextField(
-        enabled = editNoteUiModel().editEnable,
+        enabled = editEnabled,
         value = body,
         onValueChange = { value -> body = value },
         textStyle = typography.bodyLarge,
         modifier =
-          Modifier.padding(
-              bottom = with(receiver = LocalDensity.current) { bodyBottomPadding.toDp() }
-            )
+          Modifier.layout { measurable, constraints ->
+              // The bar height is written from its layout pass and consumed here in ours, so the
+              // reserved space changes without recomposing the body.
+              val bottomPadding = bodyBottomPadding
+              val placeable = measurable.measure(constraints.offset(vertical = -bottomPadding))
+              layout(
+                width = placeable.width,
+                height = constraints.constrainHeight(height = placeable.height + bottomPadding),
+              ) {
+                placeable.place(x = 0, y = 0)
+              }
+            }
             .fillMaxWidth()
             .wrapContentHeight(align = Alignment.Top)
             .alignToSafeDrawing(),

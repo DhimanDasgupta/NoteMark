@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -49,7 +50,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -61,14 +61,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.shadow.Shadow
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
@@ -100,8 +99,8 @@ internal fun NoteListPane(
   onSettingsClicked: () -> Unit = {},
   onProfileClicked: () -> Unit = {},
 ) {
-  val context = LocalActivity.current
-  SideEffect { context?.setDarkStatusBarIcons(true) }
+  val context = LocalActivity.current ?: return
+  SideEffect { context.setDarkStatusBarIcons(true) }
 
   val updateNoteListUiModel by rememberUpdatedState(newValue = noteListUiModel)
   var noteDeleteId by remember { mutableStateOf<String?>(value = null) }
@@ -235,11 +234,6 @@ private fun NoteListWithNotes(
   )
   if (loading) return
 
-  var columnCount by remember { mutableIntStateOf(value = 2) }
-  var maxLength by remember { mutableIntStateOf(value = 150) }
-
-  val density = LocalDensity.current
-
   val scrollState = rememberLazyStaggeredGridState()
 
   val currentLoadNotes by rememberUpdatedState(newValue = loadNotes)
@@ -252,26 +246,24 @@ private fun NoteListWithNotes(
       .collect { currentLoadNotes() }
   }
 
-  Box(
-    modifier =
-      modifier.fillMaxSize().onSizeChanged { intSize ->
-        val widthInDp = with(density) { intSize.width.toDp() }
-
-        columnCount =
-          when {
-            widthInDp < 600.dp -> 2
-            widthInDp < 840.dp -> 3
-            else -> 4
-          }
-
-        maxLength =
-          when {
-            widthInDp < 600.dp -> 150
-            widthInDp < 840.dp -> 250
-            else -> 300
-          }
+  // The column count depends on the width this pane actually gets (it may share the window with a
+  // detail pane), so it is resolved from the incoming constraints during layout. Deriving it from
+  // `onSizeChanged` instead would write measured size back into composition and recompose the whole
+  // grid a second time on the first frame and after every size change.
+  BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+    val columnCount =
+      when {
+        maxWidth < 600.dp -> 2
+        maxWidth < 840.dp -> 3
+        else -> 4
       }
-  ) {
+    val maxLength =
+      when {
+        maxWidth < 600.dp -> 150
+        maxWidth < 840.dp -> 250
+        else -> 300
+      }
+
     NoteGrid(
       modifier = Modifier.fillMaxSize(),
       columnCount = columnCount,
@@ -542,29 +534,14 @@ private fun NoteGrid(
     ) { noteEntity ->
       val appearance = remember { Animatable(0f) }
       LaunchedEffect(Unit) {
-        appearance.animateTo(
-          targetValue = 1f,
-          animationSpec =
-            spring(
-              stiffness = Spring.StiffnessLow,
-              dampingRatio = Spring.DampingRatioLowBouncy,
-            ),
-        )
+        appearance.animateTo(targetValue = 1f, animationSpec = NoteItemAppearSpec)
       }
       NoteItem(
         modifier =
           Modifier.animateItem(
               fadeInSpec = null,
-              placementSpec =
-                spring(
-                  stiffness = Spring.StiffnessLow,
-                  dampingRatio = Spring.DampingRatioLowBouncy,
-                ),
-              fadeOutSpec =
-                spring(
-                  stiffness = Spring.StiffnessVeryLow,
-                  dampingRatio = Spring.DampingRatioLowBouncy,
-                ),
+              placementSpec = NoteItemPlacementSpec,
+              fadeOutSpec = NoteItemFadeOutSpec,
             )
             .graphicsLayer {
               val progress = appearance.value
@@ -585,6 +562,14 @@ private fun NoteGrid(
 
 /** How far below its final position a note starts when it appears in the grid. */
 private val NoteItemAppearOffset = 100.dp
+
+// Specs are immutable, so they are shared by every item instead of being rebuilt per composition.
+private val NoteItemAppearSpec =
+  spring<Float>(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioLowBouncy)
+private val NoteItemPlacementSpec =
+  spring<IntOffset>(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioLowBouncy)
+private val NoteItemFadeOutSpec =
+  spring<Float>(stiffness = Spring.StiffnessVeryLow, dampingRatio = Spring.DampingRatioLowBouncy)
 
 @Composable
 private fun NoteItem(

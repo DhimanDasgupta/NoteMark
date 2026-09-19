@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -67,7 +68,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun AddNotePane(
@@ -79,8 +79,8 @@ internal fun AddNotePane(
   val keyboardController = LocalSoftwareKeyboardController.current
   val focusManager = LocalFocusManager.current
 
-  val context = LocalActivity.current
-  SideEffect { context?.setDarkStatusBarIcons(true) }
+  val context = LocalActivity.current ?: return
+  SideEffect { context.setDarkStatusBarIcons(true) }
 
   val updatedAddNoteUiModel by rememberUpdatedState(newValue = addNoteUiModel)
 
@@ -191,7 +191,6 @@ private fun AddNoteToolbar(
   }
 }
 
-@OptIn(FlowPreview::class)
 @Composable
 private fun AddNoteBody(
   modifier: Modifier = Modifier,
@@ -202,23 +201,6 @@ private fun AddNoteBody(
   val scrollState = rememberScrollState()
 
   LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
-
-  var title by remember { mutableStateOf(value = addNoteUiModel().title) }
-  var body by remember { mutableStateOf(value = addNoteUiModel().content) }
-
-  LaunchedEffect(key1 = Unit) {
-    launch {
-      snapshotFlow { title }
-        .debounce(timeoutMillis = 100)
-        .collectLatest { addNoteAction(AddNoteAction.UpdateTitle(title = title)) }
-    }
-
-    launch {
-      snapshotFlow { body }
-        .debounce(timeoutMillis = 100)
-        .collectLatest { addNoteAction(AddNoteAction.UpdateContent(content = body)) }
-    }
-  }
 
   Box(
     modifier =
@@ -243,32 +225,14 @@ private fun AddNoteBody(
       verticalArrangement = Arrangement.Top,
       horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-      TextField(
-        value = title,
-        onValueChange = { value -> title = value },
-        textStyle = typography.titleLarge,
+      // Each field owns its text state, so a keystroke only recomposes that field rather than
+      // this whole body (both fields, both dividers and their colors).
+      AddNoteTitleField(
         modifier =
           Modifier.fillMaxWidth().wrapContentHeight(align = Alignment.Top).alignToSafeDrawing(),
-        visualTransformation = VisualTransformation.None,
-        placeholder = { Text(text = "Note title", style = typography.titleLarge) },
-        colors =
-          OutlinedTextFieldDefaults.colors()
-            .copy(
-              focusedTextColor = colorScheme.onSurface,
-              unfocusedTextColor = colorScheme.onSurface,
-              focusedContainerColor = colorScheme.surfaceContainerLowest,
-              unfocusedContainerColor = Color.Transparent,
-              focusedIndicatorColor = Color.Transparent,
-              unfocusedIndicatorColor = Color.Transparent,
-              disabledIndicatorColor = Color.Transparent,
-              errorIndicatorColor = Color.Transparent,
-            ),
-        keyboardOptions =
-          KeyboardOptions(
-            keyboardType = KeyboardType.Unspecified,
-            imeAction = ImeAction.Next,
-          ),
-        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Next) }),
+        initialTitle = addNoteUiModel().title,
+        onTitleChanged = { title -> addNoteAction(AddNoteAction.UpdateTitle(title = title)) },
+        onNextClicked = { focusManager.moveFocus(FocusDirection.Next) },
       )
 
       Box(
@@ -285,38 +249,107 @@ private fun AddNoteBody(
             .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
       )
 
-      TextField(
-        value = body,
-        onValueChange = { value -> body = value },
-        textStyle = typography.bodyLarge,
+      AddNoteContentField(
         modifier =
           Modifier.fillMaxWidth().wrapContentHeight(align = Alignment.Top).alignToSafeDrawing(),
-        visualTransformation = VisualTransformation.None,
-        placeholder = {
-          Text(
-            text = "Tap to enter note content",
-            style = typography.bodyLarge,
-          )
+        initialContent = addNoteUiModel().content,
+        onContentChanged = { content ->
+          addNoteAction(AddNoteAction.UpdateContent(content = content))
         },
-        colors =
-          OutlinedTextFieldDefaults.colors()
-            .copy(
-              focusedTextColor = colorScheme.onSurface,
-              unfocusedTextColor = colorScheme.onSurface,
-              focusedContainerColor = colorScheme.surfaceContainerLowest,
-              unfocusedContainerColor = Color.Transparent,
-              focusedIndicatorColor = Color.Transparent,
-              unfocusedIndicatorColor = Color.Transparent,
-              disabledIndicatorColor = Color.Transparent,
-              errorIndicatorColor = Color.Transparent,
-            ),
-        keyboardOptions =
-          KeyboardOptions(
-            keyboardType = KeyboardType.Unspecified,
-            imeAction = ImeAction.Unspecified,
-          ),
       )
     }
+  }
+}
+
+@OptIn(FlowPreview::class)
+@Composable
+private fun AddNoteTitleField(
+  modifier: Modifier = Modifier,
+  initialTitle: String,
+  onTitleChanged: (String) -> Unit,
+  onNextClicked: () -> Unit,
+) {
+  var title by remember { mutableStateOf(value = initialTitle) }
+
+  val updatedOnTitleChanged by rememberUpdatedState(newValue = onTitleChanged)
+  LaunchedEffect(key1 = Unit) {
+    snapshotFlow { title }
+      .debounce(timeoutMillis = 100)
+      .collectLatest { updatedOnTitleChanged(title) }
+  }
+
+  TextField(
+    value = title,
+    onValueChange = { value -> title = value },
+    textStyle = typography.titleLarge,
+    modifier = modifier,
+    visualTransformation = VisualTransformation.None,
+    placeholder = { Text(text = "Note title", style = typography.titleLarge) },
+    colors = addNoteTextFieldColors(),
+    keyboardOptions =
+      KeyboardOptions(
+        keyboardType = KeyboardType.Unspecified,
+        imeAction = ImeAction.Next,
+      ),
+    keyboardActions = KeyboardActions(onNext = { onNextClicked() }),
+  )
+}
+
+@OptIn(FlowPreview::class)
+@Composable
+private fun AddNoteContentField(
+  modifier: Modifier = Modifier,
+  initialContent: String,
+  onContentChanged: (String) -> Unit,
+) {
+  var body by remember { mutableStateOf(value = initialContent) }
+
+  val updatedOnContentChanged by rememberUpdatedState(newValue = onContentChanged)
+  LaunchedEffect(key1 = Unit) {
+    snapshotFlow { body }
+      .debounce(timeoutMillis = 100)
+      .collectLatest { updatedOnContentChanged(body) }
+  }
+
+  TextField(
+    value = body,
+    onValueChange = { value -> body = value },
+    textStyle = typography.bodyLarge,
+    modifier = modifier,
+    visualTransformation = VisualTransformation.None,
+    placeholder = {
+      Text(
+        text = "Tap to enter note content",
+        style = typography.bodyLarge,
+      )
+    },
+    colors = addNoteTextFieldColors(),
+    keyboardOptions =
+      KeyboardOptions(
+        keyboardType = KeyboardType.Unspecified,
+        imeAction = ImeAction.Unspecified,
+      ),
+  )
+}
+
+/**
+ * Remembered per color scheme so a keystroke does not rebuild the colors on every recomposition.
+ */
+@Composable
+private fun addNoteTextFieldColors(): TextFieldColors {
+  val colorScheme = colorScheme
+  val defaults = OutlinedTextFieldDefaults.colors()
+  return remember(colorScheme, defaults) {
+    defaults.copy(
+      focusedTextColor = colorScheme.onSurface,
+      unfocusedTextColor = colorScheme.onSurface,
+      focusedContainerColor = colorScheme.surfaceContainerLowest,
+      unfocusedContainerColor = Color.Transparent,
+      focusedIndicatorColor = Color.Transparent,
+      unfocusedIndicatorColor = Color.Transparent,
+      disabledIndicatorColor = Color.Transparent,
+      errorIndicatorColor = Color.Transparent,
+    )
   }
 }
 

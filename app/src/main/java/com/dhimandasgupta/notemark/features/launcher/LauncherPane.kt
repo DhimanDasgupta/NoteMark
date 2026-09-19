@@ -50,6 +50,9 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.extensions.android.setForcedDarkStatusBarIcons
 import com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType
@@ -70,8 +73,8 @@ internal fun LauncherPane(
   navigateToLogin: () -> Unit = {},
   navigateToList: () -> Unit = {},
 ) {
-  val context = LocalActivity.current
-  SideEffect { context?.setForcedDarkStatusBarIcons(true) }
+  val context = LocalActivity.current ?: return
+  SideEffect { context.setForcedDarkStatusBarIcons(true) }
 
   val updatedLauncherUiModel by rememberUpdatedState(newValue = launcherUiModel)
   val updatedNavigateToList by rememberUpdatedState(newValue = navigateToList)
@@ -86,18 +89,24 @@ internal fun LauncherPane(
       }
   }
 
+  // The radius is only ever read inside `graphicsLayer`, so each tick invalidates the draw phase
+  // alone. The ticker is tied to STARTED so it stops writing snapshot state (and re-rendering the
+  // blur layer) while the activity is in the background, where nothing can be drawn.
   var blurRadius by remember { mutableFloatStateOf(0f) }
-  LaunchedEffect(key1 = Unit) {
-    var step = 1f
-    while (isActive) {
-      if (blurRadius == 10f) {
-        step = -1f
-      } else if (blurRadius == 0f) {
-        step = 1f
-      }
+  val lifecycleOwner = LocalLifecycleOwner.current
+  LaunchedEffect(key1 = lifecycleOwner) {
+    lifecycleOwner.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
+      var step = 1f
+      while (isActive) {
+        if (blurRadius == 10f) {
+          step = -1f
+        } else if (blurRadius == 0f) {
+          step = 1f
+        }
 
-      delay(200.milliseconds)
-      blurRadius += step
+        delay(200.milliseconds)
+        blurRadius += step
+      }
     }
   }
 

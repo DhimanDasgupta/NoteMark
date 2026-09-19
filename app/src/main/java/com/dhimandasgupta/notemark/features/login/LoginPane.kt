@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,8 +78,8 @@ internal fun LoginPane(
   navigateToAfterLogin: () -> Unit = {},
   navigateToRegistration: () -> Unit = {},
 ) {
-  val context = LocalActivity.current
-  SideEffect { context?.setDarkStatusBarIcons(false) }
+  val context = LocalActivity.current ?: return
+  SideEffect { context.setDarkStatusBarIcons(false) }
 
   val updatedLoginUiModel by rememberUpdatedState(newValue = loginUiModel)
 
@@ -408,6 +409,10 @@ private fun LoginButton(
 ) {
   val focusManager = LocalFocusManager.current
 
+  // Derived so the email/password echo from the presenter only recomposes the button when the
+  // enabled flag actually flips.
+  val loginEnabled by remember(loginUiModel) { derivedStateOf { loginUiModel().loginEnabled } }
+
   NoteMarkButton(
     onClick = {
       keyboardController?.hide()
@@ -416,7 +421,7 @@ private fun LoginButton(
       loginAction(LoginClicked)
     },
     modifier = modifier.fillMaxWidth(),
-    enabled = loginUiModel().loginEnabled,
+    enabled = loginEnabled,
   ) {
     Text(
       text = "Log in",

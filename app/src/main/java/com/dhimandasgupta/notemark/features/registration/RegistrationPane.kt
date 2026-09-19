@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,6 +72,7 @@ import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
 internal fun RegistrationPane(
@@ -79,8 +81,8 @@ internal fun RegistrationPane(
   navigateToLogin: () -> Unit = {},
   registrationAction: (RegistrationAction) -> Unit = {},
 ) {
-  val context = LocalActivity.current
-  SideEffect { context?.setDarkStatusBarIcons(false) }
+  val context = LocalActivity.current ?: return
+  SideEffect { context.setDarkStatusBarIcons(false) }
 
   val updatedRegistrationUiModel by rememberUpdatedState(newValue = registrationUiModel)
 
@@ -278,21 +280,28 @@ private fun RightPane(
 ) {
   val keyboardController = LocalSoftwareKeyboardController.current
   val focusManager = LocalFocusManager.current
-  val context = LocalActivity.current
+  val context = LocalActivity.current ?: return
 
   LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
-  LaunchedEffect(key1 = registrationUiModel().registrationSuccess) {
-    if (registrationUiModel().registrationSuccess == null) return@LaunchedEffect
-    registrationAction(RegistrationChangeStatusConsumed)
-    Toast.makeText(
-        context,
-        if (registrationUiModel().registrationSuccess == true) "Registration successful"
-        else "Registration failed",
-        Toast.LENGTH_SHORT,
-      )
-      .show()
-    navigateToLogin()
+  val updatedRegistrationAction by rememberUpdatedState(newValue = registrationAction)
+  val updatedNavigateToLogin by rememberUpdatedState(newValue = navigateToLogin)
+
+  // Observed through a snapshotFlow so that every validation update (which arrives after each
+  // debounced keystroke) does not recompose this pane and all of its fields.
+  LaunchedEffect(key1 = registrationUiModel) {
+    snapshotFlow { registrationUiModel().registrationSuccess }
+      .filterNotNull()
+      .collect { registrationSuccess ->
+        updatedRegistrationAction(RegistrationChangeStatusConsumed)
+        Toast.makeText(
+            context,
+            if (registrationSuccess) "Registration successful" else "Registration failed",
+            Toast.LENGTH_SHORT,
+          )
+          .show()
+        updatedNavigateToLogin()
+      }
   }
 
   Column(
@@ -356,6 +365,14 @@ private fun RegistrationUsernameField(
       .collectLatest { registrationAction(UserNameEntered(userName)) }
   }
 
+  // Each field derives only what it shows, so edits to the other fields do not recompose it.
+  val explanationText by
+    remember(registrationUiModel) {
+      derivedStateOf { registrationUiModel().userNameExplanation ?: "" }
+    }
+  val errorText by
+    remember(registrationUiModel) { derivedStateOf { registrationUiModel().userNameError ?: "" } }
+
   NoteMarkTextField(
     modifier = modifier.fillMaxWidth().alignToSafeDrawing(),
     label = "Username",
@@ -367,8 +384,8 @@ private fun RegistrationUsernameField(
     onFocusLost = {
       registrationAction(UserNameFiledLostFocus(userName = registrationUiModel().userName))
     },
-    explanationText = registrationUiModel().userNameExplanation ?: "",
-    errorText = registrationUiModel().userNameError ?: "",
+    explanationText = explanationText,
+    errorText = errorText,
     onTextChanged = { value -> userName = value },
     onNextClicked = { focusManager.moveFocus(FocusDirection.Next) },
   )
@@ -390,12 +407,15 @@ private fun RegistrationEmailField(
       .collectLatest { registrationAction(EmailEntered(email)) }
   }
 
+  val errorText by
+    remember(registrationUiModel) { derivedStateOf { registrationUiModel().emailError ?: "" } }
+
   NoteMarkTextField(
     modifier = modifier.fillMaxWidth().alignToSafeDrawing(),
     label = "Email",
     enteredText = email,
     hintText = "john.doe@gmail.com",
-    errorText = registrationUiModel().emailError ?: "",
+    errorText = errorText,
     onTextChanged = { value -> email = value },
     onNextClicked = { focusManager.moveFocus(FocusDirection.Next) },
   )
@@ -417,13 +437,20 @@ private fun RegistrationPasswordField(
       .collectLatest { registrationAction(PasswordEntered(password)) }
   }
 
+  val explanationText by
+    remember(registrationUiModel) {
+      derivedStateOf { registrationUiModel().passwordExplanation ?: "" }
+    }
+  val errorText by
+    remember(registrationUiModel) { derivedStateOf { registrationUiModel().passwordError ?: "" } }
+
   NoteMarkPasswordTextField(
     modifier = modifier.fillMaxWidth().alignToSafeDrawing(),
     label = "Password",
     enteredText = password,
     hintText = "Password",
-    explanationText = registrationUiModel().passwordExplanation ?: "",
-    errorText = registrationUiModel().passwordError ?: "",
+    explanationText = explanationText,
+    errorText = errorText,
     onFocusGained = {
       registrationAction(PasswordFiledInFocus(password = registrationUiModel().password))
     },
@@ -449,12 +476,17 @@ private fun RegistrationRepeatPasswordField(
       .collectLatest { registrationAction(RepeatPasswordEntered(repeatPassword)) }
   }
 
+  val errorText by
+    remember(registrationUiModel) {
+      derivedStateOf { registrationUiModel().repeatPasswordError ?: "" }
+    }
+
   NoteMarkPasswordTextField(
     modifier = modifier.fillMaxWidth().alignToSafeDrawing(),
     label = "Repeat password",
     enteredText = repeatPassword,
     hintText = "Password",
-    errorText = registrationUiModel().repeatPasswordError ?: "",
+    errorText = errorText,
     onTextChanged = { repeatPassword = it },
     onDoneClicked = {
       if (registrationUiModel().registrationEnabled) {
@@ -476,6 +508,9 @@ private fun RegistrationButton(
 ) {
   val focusManager = LocalFocusManager.current
 
+  val registrationEnabled by
+    remember(registrationUiModel) { derivedStateOf { registrationUiModel().registrationEnabled } }
+
   NoteMarkButton(
     onClick = {
       keyboardController?.hide()
@@ -483,7 +518,7 @@ private fun RegistrationButton(
       registrationAction(RegisterClicked)
     },
     modifier = modifier.fillMaxWidth(),
-    enabled = registrationUiModel().registrationEnabled,
+    enabled = registrationEnabled,
   ) {
     Text(
       text = "Create account",
