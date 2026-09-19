@@ -50,3 +50,8 @@
 -dontwarn org.slf4j.**
 -dontwarn javax.naming.**
 -dontwarn javax.annotation.**
+# Fail the release build if any Compose preview code survives shrinking.
+# Previews are tooling-only: the annotations, the parameter providers and the
+# @Preview composables themselves must never reach the release DEX.
+-checkdiscard class androidx.compose.ui.tooling.preview.** { *; }
+-checkdiscard class * implements androidx.compose.ui.tooling.preview.PreviewParameterProvider
