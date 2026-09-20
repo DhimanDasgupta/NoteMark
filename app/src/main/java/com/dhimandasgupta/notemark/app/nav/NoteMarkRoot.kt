@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -22,13 +23,25 @@ import com.dhimandasgupta.notemark.features.login.LoginEntryBuilder
 import com.dhimandasgupta.notemark.features.notelist.NoteListEntryBuilder
 import com.dhimandasgupta.notemark.features.registration.RegistrationEntryBuilder
 import com.dhimandasgupta.notemark.features.settings.SettingsEntryBuilder
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun NoteMarkRoot(modifier: Modifier) {
-  val backStack = rememberNavBackStack(LauncherNavKey)
+fun NoteMarkRoot(
+  modifier: Modifier,
+  initialKeys: PersistentList<NavKey> = persistentListOf(LauncherNavKey),
+) {
+  val backStack = rememberNavBackStack(*initialKeys.toTypedArray())
   val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
   val decorators = listOf(rememberSaveableStateHolderNavEntryDecorator<NavKey>())
+
+  LaunchedEffect(initialKeys) {
+    if (initialKeys.isNotEmpty() && initialKeys != persistentListOf(LauncherNavKey)) {
+      backStack.clear()
+      backStack.addAll(initialKeys)
+    }
+  }
 
   SharedTransitionLayout(modifier = modifier) {
     NavDisplay(

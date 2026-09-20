@@ -2,4 +2,7 @@
     <string name="app_name">Note Mark</string>
     <string name="landing_info_one">Your own collection of Notes</string>
     <string name="landing_info_two">Capture your thoughts and ideas</string>
+    <string name="shortcut_new_note_short">New Note</string>
+    <string name="shortcut_new_note_long">Add a new note</string>
+    <string name="shortcut_new_note_disabled">Creating new note is disabled</string>
 </resources>

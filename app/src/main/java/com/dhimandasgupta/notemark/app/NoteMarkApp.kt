@@ -15,12 +15,12 @@ import dev.zacsweers.metro.createGraphFactory
 import timber.log.Timber
 
 class NoteMarkApp : Application() {
-  private lateinit var graph: NoteMarkGraph
+  private val noteMarkGraph: NoteMarkGraph by lazy {
+    createGraphFactory<NoteMarkGraph.Factory>().create(context = this)
+  }
 
   override fun onCreate() {
     super.onCreate()
-
-    graph = createGraphFactory<NoteMarkGraph.Factory>().create(context = this)
 
     ComposeStabilityAnalyzer.setEnabled(BuildConfig.DEBUG)
     if (BuildConfig.DEBUG) {
@@ -34,16 +34,13 @@ class NoteMarkApp : Application() {
     val config =
       Configuration.Builder()
         .setMinimumLoggingLevel(if (BuildConfig.DEBUG) DEBUG else ERROR)
-        .setWorkerFactory(workerFactory = graph.workerFactory())
+        .setWorkerFactory(workerFactory = noteMarkGraph.workerFactory())
         .build()
 
     WorkManager.initialize(context = this, configuration = config)
   }
 
-  fun getGraph(): NoteMarkGraph {
-    require(::graph.isInitialized)
-    return graph
-  }
+  fun getGraph(): NoteMarkGraph = noteMarkGraph
 
   private fun enableStrictMode() {
     StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build())
