@@ -3,17 +3,12 @@ package com.dhimandasgupta.notemark.features.launcher
 import android.app.Application
 import android.content.Context
 import androidx.compose.runtime.Immutable
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
-import com.dhimandasgupta.notemark.app.work.NoteSyncWorker
 import com.dhimandasgupta.notemark.common.extensions.android.ConnectionState
+import com.dhimandasgupta.notemark.common.extensions.android.addCreateNewNoteShortcut
+import com.dhimandasgupta.notemark.common.extensions.android.cancelPreviousAndTriggerNewWork
 import com.dhimandasgupta.notemark.common.extensions.android.getAppVersionName
 import com.dhimandasgupta.notemark.common.extensions.android.observeConnectivityAsFlow
+import com.dhimandasgupta.notemark.common.extensions.android.removeCreateNewNoteShortcut
 import com.dhimandasgupta.notemark.common.getDifferenceFromTimestampInMinutes
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.SyncRepository
@@ -68,6 +63,7 @@ class AppStateMachineFactory(
       initializeWith { defaultAppState }
 
       inState<AppState.NotLoggedIn> {
+        onEnterEffect { applicationContext.removeCreateNewNoteShortcut() }
         collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user ->
           user?.let {
             override {
@@ -77,7 +73,10 @@ class AppStateMachineFactory(
                 appVersionName = applicationContext.getAppVersionName(),
               )
             }
-          } ?: noChange()
+          }
+            ?: run {
+              noChange()
+            }
         }
         collectWhileInState(
           flow = applicationContext.observeConnectivityAsFlow().distinctUntilChanged()
@@ -87,7 +86,10 @@ class AppStateMachineFactory(
       }
 
       inState<AppState.LoggedIn> {
-        onEnterEffect { syncOnEnter() }
+        onEnterEffect {
+          syncOnEnter()
+          applicationContext.addCreateNewNoteShortcut()
+        }
         collectWhileInState(
           flow = applicationContext.observeConnectivityAsFlow().distinctUntilChanged()
         ) { connected ->
@@ -97,13 +99,9 @@ class AppStateMachineFactory(
           mutate { copy(sync = sync) }
         }
         collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user ->
-          if (user == null) {
-            override {
-              AppState.NotLoggedIn(connectionState = connectionState)
-            }
-          } else {
+          user?.let {
             noChange()
-          }
+          } ?: override { AppState.NotLoggedIn(connectionState = connectionState) }
         }
 
         // All the actions valid for app state should be handled here
@@ -165,7 +163,8 @@ class AppStateMachineFactory(
 
   private suspend fun syncOnEnter() {
     val sync = syncRepository.getSync().first()
-    val neverSynced = sync.lastUploadedTime == "0" && sync.lastDownloadedTime == "0"
+    val neverSynced =
+      sync.lastUploadedTime.isNullOrEmpty() && sync.lastDownloadedTime.isNullOrEmpty()
     val lastSyncTimeIsMoreThan5Minutes =
       getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString = sync.lastUploadedTime) > 5L
     // Start sync if never synced or the last sync time is more than 5 mins and not syncing.
@@ -174,44 +173,3 @@ class AppStateMachineFactory(
     }
   }
 }
-
-private fun Context.cancelPreviousAndTriggerNewWork(duration: Duration = Duration.ZERO) {
-  require(value = applicationContext is Application) { "Context must be an Application" }
-  require(value = duration >= Duration.ZERO) { "Duration must be non-negative" }
-
-  val workManager = WorkManager.getInstance(context = this)
-
-  val constraints =
-    Constraints.Builder()
-      .setRequiredNetworkType(NetworkType.CONNECTED)
-      .setRequiresBatteryNotLow(true)
-      .setRequiresStorageNotLow(true)
-      .build()
-
-  when (duration) {
-    Duration.ZERO -> {
-      workManager.cancelAllWorkByTag(tag = ONE_TIME_SYNC_WORK)
-      workManager.enqueueUniqueWork(
-        uniqueWorkName = ONE_TIME_SYNC_WORK,
-        existingWorkPolicy = ExistingWorkPolicy.REPLACE,
-        request = OneTimeWorkRequestBuilder<NoteSyncWorker>().setConstraints(constraints).build(),
-      )
-    }
-    else -> {
-      workManager.enqueueUniquePeriodicWork(
-        uniqueWorkName = PERIODIC_SYNC_WORK,
-        existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE,
-        request =
-          PeriodicWorkRequestBuilder<NoteSyncWorker>(
-              repeatInterval = duration,
-              flexTimeInterval = Duration.ofMinutes(5), // 5 mins earlier or after the schedule
-            )
-            .setConstraints(constraints)
-            .build(),
-      )
-    }
-  }
-}
-
-private const val ONE_TIME_SYNC_WORK = "one_time_sync_work"
-private const val PERIODIC_SYNC_WORK = "delayed_sync_work"
