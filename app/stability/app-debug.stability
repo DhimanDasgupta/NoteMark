@@ -5,11 +5,12 @@
 //   ./gradlew :app:stabilityDump
 
 @Composable
-public fun com.dhimandasgupta.notemark.app.nav.NoteMarkRoot(modifier: androidx.compose.ui.Modifier): kotlin.Unit
+public fun com.dhimandasgupta.notemark.app.nav.NoteMarkRoot(modifier: androidx.compose.ui.Modifier, initialKeys: kotlinx.collections.immutable.PersistentList<androidx.navigation3.runtime.NavKey>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - initialKeys: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 public fun com.dhimandasgupta.notemark.common.extensions.android.connectivityState(): androidx.compose.runtime.State<com.dhimandasgupta.notemark.common.extensions.android.ConnectionState>
@@ -52,6 +53,15 @@ private fun com.dhimandasgupta.notemark.features.addnote.AddNoteBody(modifier: a
     - addNoteAction: STABLE (function type)
 
 @Composable
+private fun com.dhimandasgupta.notemark.features.addnote.AddNoteContentField(modifier: androidx.compose.ui.Modifier, initialContent: kotlin.String, onContentChanged: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - modifier: STABLE (marked @Stable or @Immutable)
+    - initialContent: STABLE (String is immutable)
+    - onContentChanged: STABLE (function type)
+
+@Composable
 private fun com.dhimandasgupta.notemark.features.addnote.AddNoteEntry(modifier: androidx.compose.ui.Modifier, addNotePresenter: com.dhimandasgupta.notemark.features.addnote.AddNotePresenter, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
@@ -77,6 +87,16 @@ public fun com.dhimandasgupta.notemark.features.addnote.AddNotePresenter.uiModel
   params:
 
 @Composable
+private fun com.dhimandasgupta.notemark.features.addnote.AddNoteTitleField(modifier: androidx.compose.ui.Modifier, initialTitle: kotlin.String, onTitleChanged: kotlin.Function1<kotlin.String, kotlin.Unit>, onNextClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - modifier: STABLE (marked @Stable or @Immutable)
+    - initialTitle: STABLE (String is immutable)
+    - onTitleChanged: STABLE (function type)
+    - onNextClicked: STABLE (function type)
+
+@Composable
 private fun com.dhimandasgupta.notemark.features.addnote.AddNoteToolbar(modifier: androidx.compose.ui.Modifier, onBackClicked: kotlin.Function0<kotlin.Unit>, onSaveClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
@@ -92,6 +112,12 @@ public fun com.dhimandasgupta.notemark.features.addnote.NoteCreateEntryBuilder(m
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
     - navigateUp: STABLE (function type)
+
+@Composable
+private fun com.dhimandasgupta.notemark.features.addnote.addNoteTextFieldColors(): androidx.compose.material3.TextFieldColors
+  skippable: false
+  restartable: false
+  params:
 
 @Composable
 private fun com.dhimandasgupta.notemark.features.editnote.EditAndViewMode(modifier: androidx.compose.ui.Modifier, onEditClicked: kotlin.Function0<kotlin.Unit>, onViewClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
@@ -181,7 +207,7 @@ private fun com.dhimandasgupta.notemark.features.launcher.ForegroundPane(modifie
     - deviceLayoutType: STABLE (class with no mutable properties)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.launcher.LandingPaneLandscape(modifier: androidx.compose.ui.Modifier, deviceLayoutType: com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.launcher.LandingPaneLandscape(modifier: androidx.compose.ui.Modifier, deviceLayoutType: com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, radius: kotlin.Function0<kotlin.Float>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -189,9 +215,10 @@ private fun com.dhimandasgupta.notemark.features.launcher.LandingPaneLandscape(m
     - deviceLayoutType: STABLE (class with no mutable properties)
     - navigateToAfterLogin: STABLE (function type)
     - navigateToLogin: STABLE (function type)
+    - radius: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.launcher.LandingPanePortrait(modifier: androidx.compose.ui.Modifier, deviceLayoutType: com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.launcher.LandingPanePortrait(modifier: androidx.compose.ui.Modifier, deviceLayoutType: com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, radius: kotlin.Function0<kotlin.Float>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -199,9 +226,10 @@ private fun com.dhimandasgupta.notemark.features.launcher.LandingPanePortrait(mo
     - deviceLayoutType: STABLE (class with no mutable properties)
     - navigateToAfterLogin: STABLE (function type)
     - navigateToLogin: STABLE (function type)
+    - radius: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.launcher.LandingPaneTablet(modifier: androidx.compose.ui.Modifier, deviceLayoutType: com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.launcher.LandingPaneTablet(modifier: androidx.compose.ui.Modifier, deviceLayoutType: com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, radius: kotlin.Function0<kotlin.Float>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -209,6 +237,7 @@ private fun com.dhimandasgupta.notemark.features.launcher.LandingPaneTablet(modi
     - deviceLayoutType: STABLE (class with no mutable properties)
     - navigateToAfterLogin: STABLE (function type)
     - navigateToLogin: STABLE (function type)
+    - radius: STABLE (function type)
 
 @Composable
 private fun com.dhimandasgupta.notemark.features.launcher.LauncherEntry(modifier: androidx.compose.ui.Modifier, launcherPresenter: com.dhimandasgupta.notemark.features.launcher.LauncherPresenter, navigateAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
@@ -408,7 +437,7 @@ public fun com.dhimandasgupta.notemark.features.notelist.NoteDeleteDialog(modifi
     - onDismiss: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.notelist.NoteGrid(modifier: androidx.compose.ui.Modifier, columnCount: kotlin.Int, maxLength: kotlin.Int, state: androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState, noteListUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.notelist.NoteListUiModel>, onNoteClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onNoteLongClicked: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.notelist.NoteGrid(modifier: androidx.compose.ui.Modifier, columnCount: kotlin.Int, maxLength: kotlin.Int, state: androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState, noteListUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.notelist.NoteListUiModel>, userName: kotlin.String, onNoteClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onNoteLongClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -417,8 +446,11 @@ private fun com.dhimandasgupta.notemark.features.notelist.NoteGrid(modifier: and
     - maxLength: STABLE (primitive type)
     - state: STABLE (marked @Stable or @Immutable)
     - noteListUiModel: STABLE (function type)
+    - userName: STABLE (String is immutable)
     - onNoteClicked: STABLE (function type)
     - onNoteLongClicked: STABLE (function type)
+    - onSettingsClicked: STABLE (function type)
+    - onProfileClicked: STABLE (function type)
 
 @Composable
 private fun com.dhimandasgupta.notemark.features.notelist.NoteItem(modifier: androidx.compose.ui.Modifier, note: com.dhimandasgupta.notemark.features.notelist.NoteEntityUiModel, maxLength: kotlin.Int, locale: java.util.Locale, onNoteClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onNoteLongClicked: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
@@ -454,6 +486,14 @@ public fun com.dhimandasgupta.notemark.features.notelist.NoteListEntryBuilder(mo
     - navigateToAdd: STABLE (function type)
     - navigateToEdit: STABLE (function type)
     - navigateToSettings: STABLE (function type)
+
+@Composable
+private fun com.dhimandasgupta.notemark.features.notelist.NoteListFab(scrollState: androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState, onFabClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - scrollState: STABLE (marked @Stable or @Immutable)
+    - onFabClicked: STABLE (function type)
 
 @Composable
 internal fun com.dhimandasgupta.notemark.features.notelist.NoteListPane(modifier: androidx.compose.ui.Modifier, noteListUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.notelist.NoteListUiModel>, noteListAction: kotlin.Function1<com.dhimandasgupta.notemark.features.notelist.NoteListAction, kotlin.Unit>, navigateToLauncherIfLoggedOut: kotlin.Function0<kotlin.Unit>, onNoteClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onFabClicked: kotlin.Function0<kotlin.Unit>, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
@@ -676,12 +716,12 @@ private fun com.dhimandasgupta.notemark.features.settings.AppVersion(modifier: a
     - appVersionName: STABLE (String is immutable)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.settings.DeleteLocalDataRow(modifier: androidx.compose.ui.Modifier, settingsUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.settings.SettingsUiModel>, onCheckChange: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.settings.DeleteLocalDataRow(modifier: androidx.compose.ui.Modifier, deleteLocalNotesOnLogout: kotlin.Boolean, onCheckChange: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
-    - settingsUiModel: STABLE (function type)
+    - deleteLocalNotesOnLogout: STABLE (primitive type)
     - onCheckChange: STABLE (function type)
 
 @Composable
@@ -699,6 +739,12 @@ private fun com.dhimandasgupta.notemark.features.settings.LogoutRow(modifier: an
     - modifier: STABLE (marked @Stable or @Immutable)
     - isConnected: STABLE (primitive type)
     - onLogoutClicked: STABLE (function type)
+
+@Composable
+private fun com.dhimandasgupta.notemark.features.settings.RotatingSyncIcon(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
 
 @Composable
 private fun com.dhimandasgupta.notemark.features.settings.SettingsBody(modifier: androidx.compose.ui.Modifier, settingsUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.settings.SettingsUiModel>, showSyncInterval: kotlin.Boolean, toggleSyncIntervalVisibility: kotlin.Function0<kotlin.Unit>, onSyncIntervalSelected: kotlin.Function1<kotlin.String, kotlin.Unit>, onDeleteNoteCheckChanged: kotlin.Function0<kotlin.Unit>, onLogoutClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
@@ -760,12 +806,13 @@ private fun com.dhimandasgupta.notemark.features.settings.SettingsToolbar(modifi
     - onBackClicked: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.settings.SyncDataRow(modifier: androidx.compose.ui.Modifier, settingsUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.settings.SettingsUiModel>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.settings.SyncDataRow(modifier: androidx.compose.ui.Modifier, isSyncing: kotlin.Boolean, lastSynced: kotlin.String): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
-    - settingsUiModel: STABLE (function type)
+    - isSyncing: STABLE (primitive type)
+    - lastSynced: STABLE (String is immutable)
 
 @Composable
 public fun com.dhimandasgupta.notemark.features.settings.SyncDropDown(modifier: androidx.compose.ui.Modifier, selectedSyncInterval: kotlin.String, syncIntervals: kotlinx.collections.immutable.ImmutableList<kotlin.String>, toggleDropDownVisibility: kotlin.Function0<kotlin.Unit>, onDropDownItemSelected: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
@@ -779,12 +826,19 @@ public fun com.dhimandasgupta.notemark.features.settings.SyncDropDown(modifier: 
     - onDropDownItemSelected: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.settings.SyncIntervalRow(modifier: androidx.compose.ui.Modifier, settingsUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.settings.SettingsUiModel>, toggleSyncIntervalVisibility: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.settings.SyncIcon(modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
-    - settingsUiModel: STABLE (function type)
+
+@Composable
+private fun com.dhimandasgupta.notemark.features.settings.SyncIntervalRow(modifier: androidx.compose.ui.Modifier, selectedSyncInterval: kotlin.String, toggleSyncIntervalVisibility: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - modifier: STABLE (marked @Stable or @Immutable)
+    - selectedSyncInterval: STABLE (String is immutable)
     - toggleSyncIntervalVisibility: STABLE (function type)
 
 @Composable
