@@ -17,7 +17,9 @@ import androidx.work.WorkManager
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.app.work.NoteSyncWorker
 import com.dhimandasgupta.notemark.ui.activity.MainActivity
-import java.time.Duration
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.toJavaDuration
 
 private const val ONE_TIME_SYNC_WORK = "one_time_sync_work"
 private const val PERIODIC_SYNC_WORK = "delayed_sync_work"
@@ -60,8 +62,8 @@ fun Context.cancelPreviousAndTriggerNewWork(duration: Duration = Duration.ZERO) 
         existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE,
         request =
           PeriodicWorkRequestBuilder<NoteSyncWorker>(
-              repeatInterval = duration,
-              flexTimeInterval = Duration.ofMinutes(5), // 5 mins earlier or after the schedule
+              repeatInterval = duration.toJavaDuration(),
+              flexTimeInterval = 5.minutes.toJavaDuration(), // 5 mins earlier or after the schedule
             )
             .setConstraints(constraints)
             .build(),
@@ -72,9 +74,7 @@ fun Context.cancelPreviousAndTriggerNewWork(duration: Duration = Duration.ZERO) 
 
 fun Context.addCreateNewNoteShortcut() {
   require(value = applicationContext is Application) { "Context must be an Application" }
-  require(value = ShortcutManagerCompat.isRequestPinShortcutSupported(this)) {
-    "Pin shortcut is not supported"
-  }
+  if (!ShortcutManagerCompat.isRequestPinShortcutSupported(this)) return
 
   runCatching {
     val shortcut =
@@ -97,9 +97,7 @@ fun Context.addCreateNewNoteShortcut() {
 
 fun Context.removeCreateNewNoteShortcut() {
   require(value = applicationContext is Application) { "Context must be an Application" }
-  require(value = ShortcutManagerCompat.isRequestPinShortcutSupported(this)) {
-    "Pin shortcut is not supported"
-  }
+  if (!ShortcutManagerCompat.isRequestPinShortcutSupported(this)) return
 
   runCatching {
     ShortcutManagerCompat.removeDynamicShortcuts(this, listOf(SHORTCUT_ID_NEW_NOTE))

@@ -19,7 +19,9 @@ import com.dhimandasgupta.notemark.proto.User
 import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
 import dev.zacsweers.metro.Inject
-import java.time.Duration
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
@@ -108,9 +110,9 @@ class AppStateMachineFactory(
         on<AppAction.UpdateSync> { action ->
           val duration =
             when (action.syncDuration) {
-              Sync.SyncDuration.SYNC_DURATION_FIFTEEN_MINUTES -> Duration.ofMinutes(15)
-              Sync.SyncDuration.SYNC_DURATION_THIRTY_MINUTES -> Duration.ofMinutes(30)
-              Sync.SyncDuration.SYNC_DURATION_ONE_HOUR -> Duration.ofHours(1)
+              Sync.SyncDuration.SYNC_DURATION_FIFTEEN_MINUTES -> 15.minutes
+              Sync.SyncDuration.SYNC_DURATION_THIRTY_MINUTES -> 30.minutes
+              Sync.SyncDuration.SYNC_DURATION_ONE_HOUR -> 1.hours
               else -> Duration.ZERO
             }
 
