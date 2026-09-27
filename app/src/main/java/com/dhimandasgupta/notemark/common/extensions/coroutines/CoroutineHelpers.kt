@@ -1,5 +1,8 @@
 package com.dhimandasgupta.notemark.common.extensions.coroutines
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind.EXACTLY_ONCE
+import kotlin.contracts.contract
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -204,4 +207,34 @@ interface SuspendLazy<T> {
   val isInitialized: Boolean
 
   suspend operator fun invoke(): T
+}
+
+/**
+ * Executes the provided block of code, ensuring it runs exactly once, and returns the result
+ * wrapped in a [Result]. If the block throws a [CancellationException] or [InterruptedException],
+ * the exception is rethrown. For other exceptions, a [Result.failure] wrapping the exception is
+ * returned.
+ *
+ * This method is useful for wrapping potentially throwable operations while preserving cancellation
+ * semantics.
+ *
+ * @param block The block of code to execute, which returns a value of type [T].
+ * @return A [Result] wrapping the value produced by the block if successful, or a [Result.failure]
+ *   wrapping the exception if an error occurs (excluding [CancellationException] and
+ *   [InterruptedException], which are rethrown).
+ */
+@OptIn(ExperimentalContracts::class)
+inline fun <T> runCatchingCancelable(block: () -> T): Result<T> {
+  contract {
+    callsInPlace(block, EXACTLY_ONCE)
+  }
+  return try {
+    Result.success(block())
+  } catch (e: CancellationException) {
+    throw e
+  } catch (e: InterruptedException) {
+    throw e
+  } catch (e: Throwable) {
+    Result.failure(e)
+  }
 }
