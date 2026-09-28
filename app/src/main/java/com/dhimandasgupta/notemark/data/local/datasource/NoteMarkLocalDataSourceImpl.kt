@@ -80,7 +80,7 @@ class NoteMarkLocalDataSourceImpl(
     synced: Boolean,
   ): NoteEntity =
     withContext(context = applicationDispatcher + NonCancellable) {
-      val result =
+      queries.transactionWithResult {
         queries.updateNote(
           title = title,
           content = content,
@@ -89,17 +89,13 @@ class NoteMarkLocalDataSourceImpl(
           uuid = uuid,
         )
 
-      return@withContext (if (result == 1L) {
         queries.getNoteByUUID(uuid).executeAsOne()
-      } else {
-        null
-      })
-        as NoteEntity
+      }
     }
 
   override suspend fun createNote(noteEntity: NoteEntity): NoteEntity =
     withContext(context = applicationDispatcher + NonCancellable) {
-      val result =
+      queries.transactionWithResult {
         queries.insertNote(
           title = noteEntity.title,
           content = noteEntity.content,
@@ -109,12 +105,8 @@ class NoteMarkLocalDataSourceImpl(
           synced = false,
         )
 
-      return@withContext (if (result == 1L) {
-        noteEntity
-      } else {
-        null
-      })
-        as NoteEntity
+        queries.getNoteByUUID(noteEntity.uuid).executeAsOne()
+      }
     }
 
   override suspend fun insertNote(noteEntity: NoteEntity): Boolean =
