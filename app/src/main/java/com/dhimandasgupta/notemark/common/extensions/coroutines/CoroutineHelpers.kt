@@ -1,7 +1,7 @@
 package com.dhimandasgupta.notemark.common.extensions.coroutines
 
 import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind.EXACTLY_ONCE
+import kotlin.contracts.InvocationKind.AT_MOST_ONCE
 import kotlin.contracts.contract
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -226,7 +226,7 @@ interface SuspendLazy<T> {
 @OptIn(ExperimentalContracts::class)
 inline fun <T> runCatchingCancelable(block: () -> T): Result<T> {
   contract {
-    callsInPlace(block, EXACTLY_ONCE)
+    callsInPlace(block, AT_MOST_ONCE)
   }
   return try {
     Result.success(block())
@@ -236,5 +236,30 @@ inline fun <T> runCatchingCancelable(block: () -> T): Result<T> {
     throw e
   } catch (e: Throwable) {
     Result.failure(e)
+  }
+}
+
+/**
+ * Returns a new [Result] object, recovering from an exception if one occurred by invoking the
+ * specified [transform] function on the exception. If the original [Result] does not contain an
+ * exception, it is returned unchanged. If the exception is of type [CancellationException] or
+ * [InterruptedException], it is rethrown.
+ *
+ * @param transform A function that takes a [Throwable] and returns a value of type [R] to use as
+ *   the recovery result.
+ * @return A new [Result] with the transformed recovery result if an exception occurred, or the
+ *   original [Result] if no exception was present.
+ */
+@OptIn(ExperimentalContracts::class)
+inline fun <R, T : R> Result<T>.recoverCatching(transform: (Throwable) -> R): Result<R> {
+  contract {
+    callsInPlace(transform, AT_MOST_ONCE)
+  }
+
+  return when (val exception = exceptionOrNull()) {
+    is CancellationException -> throw exception
+    is InterruptedException -> throw exception
+    null -> this
+    else -> Result.success(transform(exception))
   }
 }
