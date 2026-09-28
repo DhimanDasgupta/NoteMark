@@ -6,26 +6,27 @@ import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.Flow
 
 @Inject
-class SyncRepositoryImpl(private val noteSyncDataSource: Lazy<NoteSyncDataSource>) :
-  SyncRepository {
-  override fun getSync(): Flow<Sync> = noteSyncDataSource.value.getSync()
+class SyncRepositoryImpl(noteSyncDataSource: Lazy<NoteSyncDataSource>) : SyncRepository {
+  private val noteSyncDataSource by noteSyncDataSource
+
+  override fun getSync(): Flow<Sync> = noteSyncDataSource.getSync()
 
   override suspend fun saveSyncing(isSyncing: Boolean) =
-    noteSyncDataSource.value.saveSyncing(isSyncing = isSyncing)
+    noteSyncDataSource.saveSyncing(isSyncing = isSyncing)
 
   override suspend fun saveSyncDuration(syncDuration: Sync.SyncDuration) =
-    noteSyncDataSource.value.saveSyncDuration(syncDuration = syncDuration)
+    noteSyncDataSource.saveSyncDuration(syncDuration = syncDuration)
 
   override suspend fun saveLastDownloadedTime(downLoadedTime: String) =
-    noteSyncDataSource.value.saveLastDownloadedTime(downLoadedTime = downLoadedTime)
+    noteSyncDataSource.saveLastDownloadedTime(downLoadedTime = downLoadedTime)
 
   override suspend fun saveLastUploadedTime(uploadedTime: String) =
-    noteSyncDataSource.value.saveLastUploadedTime(uploadedTime = uploadedTime)
+    noteSyncDataSource.saveLastUploadedTime(uploadedTime = uploadedTime)
 
   override suspend fun saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout: Boolean) =
-    noteSyncDataSource.value.saveDeleteLocalNotesOnLogout(
+    noteSyncDataSource.saveDeleteLocalNotesOnLogout(
       deleteLocalNotesOnLogout = deleteLocalNotesOnLogout
     )
 
-  override suspend fun reset() = noteSyncDataSource.value.reset()
+  override suspend fun reset() = noteSyncDataSource.reset()
 }

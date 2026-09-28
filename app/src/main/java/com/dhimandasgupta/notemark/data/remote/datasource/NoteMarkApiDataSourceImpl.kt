@@ -6,13 +6,14 @@ import com.dhimandasgupta.notemark.database.NoteEntity
 import dev.zacsweers.metro.Inject
 
 @Inject
-class NoteMarkApiDataSourceImpl(private val noteMarkApi: Lazy<NoteMarkApi>) :
-  NoteMarkApiDataSource {
+class NoteMarkApiDataSourceImpl(noteMarkApi: Lazy<NoteMarkApi>) : NoteMarkApiDataSource {
+  private val noteMarkApi by noteMarkApi
+
   override suspend fun getAllNotes(page: Int, size: Int) =
-    noteMarkApi.value.getNotes(page = page, size = size)
+    noteMarkApi.getNotes(page = page, size = size)
 
   override suspend fun createNote(noteEntity: NoteEntity) =
-    noteMarkApi.value.createNote(noteEntity = noteEntity)
+    noteMarkApi.createNote(noteEntity = noteEntity)
 
   override suspend fun updateNote(
     title: String,
@@ -20,7 +21,7 @@ class NoteMarkApiDataSourceImpl(private val noteMarkApi: Lazy<NoteMarkApi>) :
     lastEditedAt: String,
     noteEntity: NoteEntity,
   ) =
-    noteMarkApi.value.updateNote(
+    noteMarkApi.updateNote(
       title = title,
       content = content,
       lastEditedAt = lastEditedAt,
@@ -28,8 +29,8 @@ class NoteMarkApiDataSourceImpl(private val noteMarkApi: Lazy<NoteMarkApi>) :
     )
 
   override suspend fun deleteNote(noteEntity: NoteEntity) =
-    noteMarkApi.value.deleteNote(noteEntity = noteEntity)
+    noteMarkApi.deleteNote(noteEntity = noteEntity)
 
   override suspend fun logout(request: RefreshRequest): Result<Unit> =
-    noteMarkApi.value.logout(request = request)
+    noteMarkApi.logout(request = request)
 }

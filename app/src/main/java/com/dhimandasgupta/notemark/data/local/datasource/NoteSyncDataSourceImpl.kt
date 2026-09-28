@@ -7,43 +7,44 @@ import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.Flow
 
 @Inject
-class NoteSyncDataSourceImpl(@SyncDataStore private val syncDataStore: Lazy<DataStore<Sync>>) :
+class NoteSyncDataSourceImpl(@SyncDataStore syncDataStore: Lazy<DataStore<Sync>>) :
   NoteSyncDataSource {
+  private val syncDataStore by syncDataStore
 
-  override fun getSync(): Flow<Sync> = syncDataStore.value.data
+  override fun getSync(): Flow<Sync> = syncDataStore.data
 
   override suspend fun saveSyncing(isSyncing: Boolean) {
-    syncDataStore.value.updateData { transform ->
+    syncDataStore.updateData { transform ->
       transform.toBuilder().setSyncing(isSyncing).build()
     }
   }
 
   override suspend fun saveSyncDuration(syncDuration: Sync.SyncDuration) {
-    syncDataStore.value.updateData { transform ->
+    syncDataStore.updateData { transform ->
       transform.toBuilder().setSyncDuration(syncDuration).build()
     }
   }
 
   override suspend fun saveLastDownloadedTime(downLoadedTime: String) {
-    syncDataStore.value.updateData { transform ->
+    syncDataStore.updateData { transform ->
       transform.toBuilder().setLastDownloadedTime(downLoadedTime).build()
     }
   }
 
   override suspend fun saveLastUploadedTime(uploadedTime: String) {
-    syncDataStore.value.updateData { transform ->
+    syncDataStore.updateData { transform ->
       transform.toBuilder().setLastUploadedTime(uploadedTime).build()
     }
   }
 
   override suspend fun saveDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout: Boolean) {
-    syncDataStore.value.updateData { transform ->
+    syncDataStore.updateData { transform ->
       transform.toBuilder().setDeleteLocalNotesOnLogout(deleteLocalNotesOnLogout).build()
     }
   }
 
   override suspend fun reset() {
-    syncDataStore.value.updateData { transform ->
+    syncDataStore.updateData { transform ->
       transform.toBuilder().clear().build()
     }
   }

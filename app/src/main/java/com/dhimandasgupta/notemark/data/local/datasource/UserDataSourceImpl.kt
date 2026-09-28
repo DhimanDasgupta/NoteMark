@@ -10,17 +10,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 @Inject
-class UserDataSourceImpl(@UserDataStore private val userDataStore: Lazy<DataStore<User>>) :
-  UserDataSource {
+class UserDataSourceImpl(@UserDataStore userDataStore: Lazy<DataStore<User>>) : UserDataSource {
+  private val userDataStore by userDataStore
 
   override fun getUser(): Flow<User?> =
-    userDataStore.value.data.map { user ->
+    userDataStore.data.map { user ->
       if (user.userName.isNotEmpty() && user.accessToken.isNotEmpty()) user else null
     }
 
   override suspend fun saveUser(user: User) {
     runCatchingCancelable {
-      userDataStore.value.updateData { transform ->
+      userDataStore.updateData { transform ->
         transform
           .toBuilder()
           .setUserName(user.userName)
@@ -33,7 +33,7 @@ class UserDataSourceImpl(@UserDataStore private val userDataStore: Lazy<DataStor
 
   override suspend fun saveBearToken(token: BearerTokens) {
     runCatchingCancelable {
-      userDataStore.value.updateData { transform ->
+      userDataStore.updateData { transform ->
         transform
           .toBuilder()
           .setAccessToken(token.accessToken)
@@ -45,7 +45,7 @@ class UserDataSourceImpl(@UserDataStore private val userDataStore: Lazy<DataStor
 
   override suspend fun deleteUser() {
     runCatchingCancelable {
-      userDataStore.value.updateData { transform ->
+      userDataStore.updateData { transform ->
         transform.toBuilder().clear().build()
       }
     }
@@ -53,7 +53,7 @@ class UserDataSourceImpl(@UserDataStore private val userDataStore: Lazy<DataStor
 
   override suspend fun reset() {
     runCatchingCancelable {
-      userDataStore.value.updateData { transform ->
+      userDataStore.updateData { transform ->
         transform.toBuilder().clear().build()
       }
     }
