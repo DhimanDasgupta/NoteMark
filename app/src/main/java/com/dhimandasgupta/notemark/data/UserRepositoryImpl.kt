@@ -7,15 +7,17 @@ import io.ktor.client.plugins.auth.providers.BearerTokens
 import kotlinx.coroutines.flow.Flow
 
 @Inject
-class UserRepositoryImpl(private val userDataSource: Lazy<UserDataSource>) : UserRepository {
-  override fun getUser(): Flow<User?> = userDataSource.value.getUser()
+class UserRepositoryImpl(userDataSource: Lazy<UserDataSource>) : UserRepository {
+  private val userDataSource by userDataSource
 
-  override suspend fun saveUser(user: User) = userDataSource.value.saveUser(user = user)
+  override fun getUser(): Flow<User?> = userDataSource.getUser()
+
+  override suspend fun saveUser(user: User) = userDataSource.saveUser(user = user)
 
   override suspend fun saveBearToken(token: BearerTokens) =
-    userDataSource.value.saveBearToken(token = token)
+    userDataSource.saveBearToken(token = token)
 
-  override suspend fun deleteUser() = userDataSource.value.deleteUser()
+  override suspend fun deleteUser() = userDataSource.deleteUser()
 
-  override suspend fun reset() = userDataSource.value.reset()
+  override suspend fun reset() = userDataSource.reset()
 }

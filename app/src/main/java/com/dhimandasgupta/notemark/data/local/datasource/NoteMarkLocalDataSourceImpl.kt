@@ -19,7 +19,7 @@ class NoteMarkLocalDataSourceImpl(
   database: Lazy<NoteMarkDatabase>,
   @AppBackgroundDispatcher private val applicationDispatcher: CoroutineDispatcher,
 ) : NoteMarkLocalDataSource {
-  private val queries = database.value.noteMarkDatabaseQueries
+  private val queries by lazy { database.value.noteMarkDatabaseQueries }
 
   override fun notesPagingSource(): PagingSource<Int, NoteEntity> =
     TopAnchoredPagingSource(

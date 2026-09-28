@@ -15,9 +15,12 @@ import kotlinx.coroutines.flow.Flow
 
 @Inject
 class NoteMarkRepositoryImpl(
-  private val localDataSource: Lazy<NoteMarkLocalDataSource>,
-  private val remoteDataSource: Lazy<NoteMarkApiDataSource>,
+  localDataSource: Lazy<NoteMarkLocalDataSource>,
+  remoteDataSource: Lazy<NoteMarkApiDataSource>,
 ) : NoteMarkRepository {
+  private val localDataSource by localDataSource
+  private val remoteDataSource by remoteDataSource
+
   override fun getPagedNotes(pageSize: Int): Flow<PagingData<NoteEntity>> =
     Pager(
         config =
@@ -26,7 +29,7 @@ class NoteMarkRepositoryImpl(
             enablePlaceholders = true,
             initialLoadSize = pageSize * 2,
           ),
-        pagingSourceFactory = { localDataSource.value.notesPagingSource() },
+        pagingSourceFactory = { localDataSource.notesPagingSource() },
       )
       .flow
 
@@ -34,44 +37,42 @@ class NoteMarkRepositoryImpl(
     limit: Long,
     offset: Long,
   ): List<NoteEntity> =
-    localDataSource.value.getNotesFromOffSetWithLimitAsList(limit = limit, offset = offset)
+    localDataSource.getNotesFromOffSetWithLimitAsList(limit = limit, offset = offset)
 
   override fun getNotesFromOffSetWithLimit(
     limit: Long,
     offset: Long,
   ): Flow<List<NoteEntity>> =
-    localDataSource.value.getNotesFromOffSetWithLimit(limit = limit, offset = offset)
+    localDataSource.getNotesFromOffSetWithLimit(limit = limit, offset = offset)
 
-  override fun getAllNotes(): Flow<List<NoteEntity>> = localDataSource.value.getAllNotes()
+  override fun getAllNotes(): Flow<List<NoteEntity>> = localDataSource.getAllNotes()
 
   override suspend fun getAllNonSyncedNotes(): List<NoteEntity> =
-    localDataSource.value.getAllNonSyncedNotes()
+    localDataSource.getAllNonSyncedNotes()
 
   override suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity> =
-    localDataSource.value.getAllMarkedAsDeletedNotes()
+    localDataSource.getAllMarkedAsDeletedNotes()
 
   override suspend fun getRemoteNotes(page: Int, size: Int): Result<NoteResponse> =
-    remoteDataSource.value.getAllNotes(page = page, size = size)
+    remoteDataSource.getAllNotes(page = page, size = size)
 
   override suspend fun getRemoteNotesAndSaveInDB(page: Int, size: Int): Result<NoteResponse> {
-    val remoteNotes = remoteDataSource.value.getAllNotes(page = page, size = size)
+    val remoteNotes = remoteDataSource.getAllNotes(page = page, size = size)
     remoteNotes.getOrNull()?.notes?.let { note ->
       val notesToBeSavedInDB = note.map { note -> note.toNoteEntity(synced = true) }
-      return if (localDataSource.value.insertNotes(noteEntities = notesToBeSavedInDB)) {
+      return if (localDataSource.insertNotes(noteEntities = notesToBeSavedInDB)) {
         remoteNotes
       } else Result.failure(Exception("Failed to fetch notes from remote"))
     }
     return Result.failure(Exception("Failed to fetch notes from remote"))
   }
 
-  override suspend fun getNoteById(noteId: Long) =
-    localDataSource.value.getNoteById(noteId = noteId)
+  override suspend fun getNoteById(noteId: Long) = localDataSource.getNoteById(noteId = noteId)
 
-  override suspend fun getNoteByUUID(uuid: String) =
-    localDataSource.value.getNoteByUUID(uuid = uuid)
+  override suspend fun getNoteByUUID(uuid: String) = localDataSource.getNoteByUUID(uuid = uuid)
 
   override suspend fun createNote(noteEntity: NoteEntity): NoteEntity? =
-    localDataSource.value.createNote(noteEntity = noteEntity.copy(synced = false))
+    localDataSource.createNote(noteEntity = noteEntity.copy(synced = false))
 
   override suspend fun updateLocalNote(
     title: String,
@@ -79,7 +80,7 @@ class NoteMarkRepositoryImpl(
     lastEditedAt: String,
     noteEntity: NoteEntity,
   ): NoteEntity? =
-    localDataSource.value.updateNote(
+    localDataSource.updateNote(
       title = title,
       content = content,
       lastEditedAt = lastEditedAt,
@@ -88,10 +89,10 @@ class NoteMarkRepositoryImpl(
     )
 
   override suspend fun insertNotes(noteEntities: List<NoteEntity>) =
-    localDataSource.value.insertNotes(noteEntities = noteEntities)
+    localDataSource.insertNotes(noteEntities = noteEntities)
 
   override suspend fun createNewRemoteNote(noteEntity: NoteEntity): Boolean {
-    val noteCreatedRemotely = remoteDataSource.value.createNote(noteEntity = noteEntity)
+    val noteCreatedRemotely = remoteDataSource.createNote(noteEntity = noteEntity)
     return noteCreatedRemotely.getOrNull() != null
   }
 
@@ -102,7 +103,7 @@ class NoteMarkRepositoryImpl(
     noteEntity: NoteEntity,
   ): Boolean {
     val noteUpdatedRemotely =
-      remoteDataSource.value.updateNote(
+      remoteDataSource.updateNote(
         title = title,
         content = content,
         lastEditedAt = lastEditedAt,
@@ -112,26 +113,26 @@ class NoteMarkRepositoryImpl(
   }
 
   override suspend fun deleteRemoteNote(noteEntity: NoteEntity): Boolean {
-    val noteDeletedRemotely = remoteDataSource.value.deleteNote(noteEntity = noteEntity)
+    val noteDeletedRemotely = remoteDataSource.deleteNote(noteEntity = noteEntity)
     return noteDeletedRemotely.getOrNull() == Unit
   }
 
   override suspend fun deleteLocalNote(noteEntity: NoteEntity): Boolean {
-    val noteDeletedLocally = localDataSource.value.deleteNote(noteEntity = noteEntity)
+    val noteDeletedLocally = localDataSource.deleteNote(noteEntity = noteEntity)
     return noteDeletedLocally
   }
 
   override suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean =
-    localDataSource.value.markAsDeleted(noteEntity = noteEntity)
+    localDataSource.markAsDeleted(noteEntity = noteEntity)
 
   override suspend fun deleteAllLocalNotes() =
     try {
-      localDataSource.value.deleteAllNotes()
+      localDataSource.deleteAllNotes()
     } catch (_: Exception) {
       currentCoroutineContext().ensureActive()
       false
     }
 
   override suspend fun logout(request: RefreshRequest): Result<Unit> =
-    remoteDataSource.value.logout(request = request)
+    remoteDataSource.logout(request = request)
 }
