@@ -1,6 +1,5 @@
 package com.dhimandasgupta.notemark.features.settings
 
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -39,7 +38,6 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,7 +57,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.convertNoteTimestampToReadableFormat
-import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
 import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.proto.Sync
@@ -80,9 +77,6 @@ internal fun SettingsPane(
   onBackClicked: () -> Unit = {},
   onLogoutClicked: () -> Unit = {},
 ) {
-  val context = LocalActivity.current ?: return
-  SideEffect { context.setDarkStatusBarIcons(true) }
-
   val updatedSettingsUiModel by rememberUpdatedState(newValue = settingsUiModel)
   val updatedOnLogoutSuccessful by rememberUpdatedState(newValue = onLogoutSuccessful)
 

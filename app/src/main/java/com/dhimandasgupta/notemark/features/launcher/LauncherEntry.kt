@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.retain.retain
@@ -16,6 +17,7 @@ import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
 import com.dhimandasgupta.notemark.app.nav.LauncherNavKey
+import com.dhimandasgupta.notemark.common.extensions.android.setForcedDarkStatusBarIcons
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -44,7 +46,8 @@ private fun LauncherEntry(
   navigateAfterLogin: () -> Unit,
   navigateToLogin: () -> Unit,
 ) {
-  val context = LocalActivity.current ?: return
+  val activity = LocalActivity.current ?: return
+  SideEffect { activity.setForcedDarkStatusBarIcons(true) }
 
   var launcherUiModel by rememberSerializable {
     mutableStateOf(value = LauncherUiModel.defaultOrEmpty)
@@ -66,7 +69,7 @@ private fun LauncherEntry(
     navigateToAfterLogin = {
       if (launcherUiModel.loggedInUser == null) {
         Toast.makeText(
-            context,
+            activity,
             "Oops!!! Please login first to get started",
             Toast.LENGTH_LONG,
           )

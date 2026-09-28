@@ -1,6 +1,5 @@
 package com.dhimandasgupta.notemark.features.editnote
 
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -46,7 +45,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -78,11 +76,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.convertIsoToRelativeTimeFormat
-import com.dhimandasgupta.notemark.common.extensions.android.lockToLandscape
-import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
-import com.dhimandasgupta.notemark.common.extensions.android.turnOffImmersiveMode
-import com.dhimandasgupta.notemark.common.extensions.android.turnOnImmersiveMode
-import com.dhimandasgupta.notemark.common.extensions.android.unlockOrientation
 import com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType
 import com.dhimandasgupta.notemark.common.extensions.compose.alignToSafeDrawing
 import com.dhimandasgupta.notemark.common.extensions.compose.getDeviceLayoutType
@@ -104,9 +97,6 @@ internal fun EditNotePane(
   editNoteAction: (EditNoteAction) -> Unit = {},
   onCloseClicked: () -> Unit = {},
 ) {
-  val context = LocalActivity.current ?: return
-  SideEffect { context.setDarkStatusBarIcons(true) }
-
   val updatedEditNoteUiModel by rememberUpdatedState(newValue = editNoteUiModel)
 
   val keyboardController = LocalSoftwareKeyboardController.current
@@ -123,23 +113,6 @@ internal fun EditNotePane(
         focusManager.clearFocus()
         keyboardController?.hide()
         updatedOnCloseClicked()
-      }
-  }
-
-  LaunchedEffect(key1 = Unit) {
-    snapshotFlow { updatedEditNoteUiModel().isReaderMode }
-      .collect { isReaderMode ->
-        when (isReaderMode) {
-          true -> {
-            context.turnOnImmersiveMode()
-            context.lockToLandscape()
-          }
-
-          false -> {
-            context.turnOffImmersiveMode()
-            context.unlockOrientation()
-          }
-        }
       }
   }
 

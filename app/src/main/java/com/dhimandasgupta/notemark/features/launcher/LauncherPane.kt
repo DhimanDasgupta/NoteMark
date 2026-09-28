@@ -1,6 +1,5 @@
 package com.dhimandasgupta.notemark.features.launcher
 
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,7 +27,6 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -54,7 +52,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.common.extensions.android.setForcedDarkStatusBarIcons
 import com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType
 import com.dhimandasgupta.notemark.common.extensions.compose.getDeviceLayoutType
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
@@ -73,9 +70,6 @@ internal fun LauncherPane(
   navigateToLogin: () -> Unit = {},
   navigateToList: () -> Unit = {},
 ) {
-  val context = LocalActivity.current ?: return
-  SideEffect { context.setForcedDarkStatusBarIcons(true) }
-
   val updatedLauncherUiModel by rememberUpdatedState(newValue = launcherUiModel)
   val updatedNavigateToList by rememberUpdatedState(newValue = navigateToList)
   val updatedNavigateToLogin by rememberUpdatedState(newValue = navigateToLogin)

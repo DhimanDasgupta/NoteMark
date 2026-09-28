@@ -1,7 +1,9 @@
 package com.dhimandasgupta.notemark.features.login
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
@@ -15,6 +17,7 @@ import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
 import com.dhimandasgupta.notemark.app.nav.LoginNavKey
+import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -43,6 +46,9 @@ private fun LoginEntry(
   navigateToRegistration: () -> Unit,
   navigateToAfterLogin: () -> Unit,
 ) {
+  val activity = LocalActivity.current ?: return
+  SideEffect { activity.setDarkStatusBarIcons(false) }
+
   var loginUiModel by rememberSerializable { mutableStateOf(value = LoginUiModel.defaultOrEmpty) }
   val loginEvents by rememberUpdatedState(newValue = loginPresenter::dispatchAction)
 

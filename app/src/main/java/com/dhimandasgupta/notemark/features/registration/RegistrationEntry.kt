@@ -1,7 +1,9 @@
 package com.dhimandasgupta.notemark.features.registration
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
@@ -15,6 +17,7 @@ import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
 import com.dhimandasgupta.notemark.app.nav.RegistrationNavKey
+import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -42,6 +45,9 @@ private fun RegistrationEntry(
   registrationPresenter: RegistrationPresenter,
   navigateToLoginFromRegistration: () -> Unit,
 ) {
+  val activity = LocalActivity.current ?: return
+  SideEffect { activity.setDarkStatusBarIcons(false) }
+
   var registrationUiModel by rememberSerializable {
     mutableStateOf(value = RegistrationUiModel.defaultOrEmpty)
   }

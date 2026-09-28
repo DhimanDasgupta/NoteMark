@@ -1,6 +1,5 @@
 package com.dhimandasgupta.notemark.features.notelist
 
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -47,7 +46,6 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,7 +70,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.convertIsoToRelativeYearFormat
-import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
 import com.dhimandasgupta.notemark.common.extensions.kotlin.formatUserName
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.designsystem.LimitedText
@@ -99,9 +96,6 @@ internal fun NoteListPane(
   onSettingsClicked: () -> Unit = {},
   onProfileClicked: () -> Unit = {},
 ) {
-  val context = LocalActivity.current ?: return
-  SideEffect { context.setDarkStatusBarIcons(true) }
-
   val updateNoteListUiModel by rememberUpdatedState(newValue = noteListUiModel)
   var noteDeleteId by remember { mutableStateOf<String?>(value = null) }
 

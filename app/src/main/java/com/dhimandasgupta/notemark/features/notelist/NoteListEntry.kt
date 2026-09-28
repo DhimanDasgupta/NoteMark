@@ -1,9 +1,11 @@
 package com.dhimandasgupta.notemark.features.notelist
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
@@ -17,6 +19,7 @@ import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
 import com.dhimandasgupta.notemark.app.nav.NoteListNavKey
+import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -57,6 +60,9 @@ private fun NoteListEntry(
   navigateToEdit: (String) -> Unit,
   navigateToSettings: () -> Unit,
 ) {
+  val activity = LocalActivity.current ?: return
+  SideEffect { activity.setDarkStatusBarIcons(true) }
+
   var noteListUiModel by rememberSerializable {
     mutableStateOf(value = NoteListUiModel.defaultOrEmpty)
   }
