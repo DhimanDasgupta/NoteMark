@@ -51,6 +51,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -97,7 +98,7 @@ internal fun NoteListPane(
   onProfileClicked: () -> Unit = {},
 ) {
   val updateNoteListUiModel by rememberUpdatedState(newValue = noteListUiModel)
-  var noteDeleteId by remember { mutableStateOf<String?>(value = null) }
+  var noteDeleteId by rememberSaveable { mutableStateOf<String?>(value = null) }
 
   val userName by remember { derivedStateOf { updateNoteListUiModel().userName } }
 
@@ -526,9 +527,15 @@ private fun NoteGrid(
       key = { note -> note.id },
       contentType = { "notes" },
     ) { noteEntity ->
-      val appearance = remember { Animatable(0f) }
-      LaunchedEffect(Unit) {
-        appearance.animateTo(targetValue = 1f, animationSpec = NoteItemAppearSpec)
+      // Lazy layouts keep rememberSaveable state per item key, so a note that scrolls back into
+      // view starts fully visible instead of replaying its appear animation.
+      var hasAppeared by rememberSaveable { mutableStateOf(false) }
+      val appearance = remember { Animatable(initialValue = if (hasAppeared) 1f else 0f) }
+      if (!hasAppeared) {
+        LaunchedEffect(Unit) {
+          appearance.animateTo(targetValue = 1f, animationSpec = NoteItemAppearSpec)
+          hasAppeared = true
+        }
       }
       NoteItem(
         modifier =

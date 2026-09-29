@@ -495,8 +495,7 @@ private fun BouncingDot(
       modifier
         .graphicsLayer { translationY = -bounceProgress.value * bounceHeight.toPx() / 2 }
         .size(size)
-        .clip(CircleShape)
-        .background(color)
+        .background(color = color, shape = CircleShape)
   )
 }
 
