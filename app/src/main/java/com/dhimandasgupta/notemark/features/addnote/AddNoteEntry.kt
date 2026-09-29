@@ -1,47 +1,22 @@
 package com.dhimandasgupta.notemark.features.addnote
 
 import androidx.activity.compose.LocalActivity
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.navigation3.runtime.EntryProviderScope
-import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
-import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
-import com.dhimandasgupta.notemark.app.nav.NoteCreateNavKey
 import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun EntryProviderScope<NavKey>.NoteCreateEntryBuilder(
-  modifier: Modifier,
-  navigateUp: () -> Unit,
-) {
-  entry<NoteCreateNavKey>(metadata = ListDetailSceneStrategy.detailPane()) {
-    val graph = LocalNoteMarkGraph.current
-    val addNotePresenter: AddNotePresenter = retain { graph.addNotePresenter() }
-
-    AddNoteEntry(
-      modifier = modifier,
-      addNotePresenter = addNotePresenter,
-      navigateUp = navigateUp,
-    )
-  }
-}
-
-@Composable
-private fun AddNoteEntry(
+internal fun AddNoteEntry(
   modifier: Modifier = Modifier,
   addNotePresenter: AddNotePresenter,
   navigateUp: () -> Unit,

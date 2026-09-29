@@ -7,40 +7,16 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.navigation3.runtime.EntryProviderScope
-import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
-import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
-import com.dhimandasgupta.notemark.app.nav.LoginNavKey
 import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun EntryProviderScope<NavKey>.LoginEntryBuilder(
-  modifier: Modifier,
-  navigateToRegistration: () -> Unit,
-  navigateToAfterLogin: () -> Unit,
-) {
-  entry<LoginNavKey> {
-    val graph = LocalNoteMarkGraph.current
-    val loginPresenter: LoginPresenter = retain { graph.loginPresenter() }
-
-    LoginEntry(
-      modifier = modifier,
-      loginPresenter = loginPresenter,
-      navigateToRegistration = navigateToRegistration,
-      navigateToAfterLogin = navigateToAfterLogin,
-    )
-  }
-}
-
-@Composable
-private fun LoginEntry(
+internal fun LoginEntry(
   modifier: Modifier = Modifier,
   loginPresenter: LoginPresenter,
   navigateToRegistration: () -> Unit,

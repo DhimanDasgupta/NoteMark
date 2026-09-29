@@ -1,50 +1,23 @@
 package com.dhimandasgupta.notemark.features.settings
 
 import androidx.activity.compose.LocalActivity
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.navigation3.runtime.EntryProviderScope
-import androidx.navigation3.runtime.NavKey
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
-import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
-import com.dhimandasgupta.notemark.app.nav.SettingsNavKey
 import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun EntryProviderScope<NavKey>.SettingsEntryBuilder(
-  modifier: Modifier,
-  navigateToLauncherAfterLogout: () -> Unit,
-  navigateUp: () -> Unit,
-) {
-  entry<SettingsNavKey>(metadata = ListDetailSceneStrategy.extraPane()) {
-    val graph = LocalNoteMarkGraph.current
-    val settingsPresenter: SettingsPresenter = retain { graph.settingsPresenter() }
-
-    SettingsEntry(
-      modifier = modifier,
-      settingsPresenter = settingsPresenter,
-      navigateToLauncherAfterLogout = navigateToLauncherAfterLogout,
-      navigateUp = navigateUp,
-    )
-  }
-}
-
-@Composable
-private fun SettingsEntry(
+internal fun SettingsEntry(
   modifier: Modifier = Modifier,
   settingsPresenter: SettingsPresenter,
   navigateToLauncherAfterLogout: () -> Unit,
