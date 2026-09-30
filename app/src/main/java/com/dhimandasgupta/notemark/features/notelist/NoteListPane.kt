@@ -43,6 +43,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,6 +66,7 @@ import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -72,6 +76,8 @@ import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.convertIsoToRelativeYearFormat
 import com.dhimandasgupta.notemark.common.extensions.kotlin.formatUserName
+import com.dhimandasgupta.notemark.features.launcher.AppAction
+import com.dhimandasgupta.notemark.features.launcher.AppEvent
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.designsystem.LimitedText
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkFAB
@@ -91,6 +97,7 @@ internal fun NoteListPane(
   modifier: Modifier = Modifier,
   noteListUiModel: () -> NoteListUiModel,
   noteListAction: (NoteListAction) -> Unit = {},
+  appAction: (AppAction) -> Unit = {},
   navigateToLauncherIfLoggedOut: () -> Unit = {},
   onNoteClicked: (String) -> Unit = {},
   onFabClicked: () -> Unit = {},
@@ -107,6 +114,24 @@ internal fun NoteListPane(
     if (updateNoteListUiModel().userName?.isEmpty() == true) {
       navigateToLauncherIfLoggedOut()
     }
+  }
+
+  val appEvent by remember { derivedStateOf { updateNoteListUiModel().appEvent } }
+  val snackbarHostState = remember { SnackbarHostState() }
+  val networkAvailableMessage = stringResource(id = R.string.network_available)
+  val networkUnavailableMessage = stringResource(id = R.string.network_unavailable)
+
+  LaunchedEffect(key1 = appEvent?.id) {
+    val event = appEvent ?: return@LaunchedEffect
+    val message =
+      when (event) {
+        is AppEvent.NetworkAvailable -> networkAvailableMessage
+        is AppEvent.NetworkUnAvailable -> networkUnavailableMessage
+      }
+    snackbarHostState.currentSnackbarData?.dismiss()
+    snackbarHostState.showSnackbar(message = message, duration = SnackbarDuration.Long)
+    // Make sure to mark the event as consumed. Otherwise, the same event will be fired again
+    appAction(AppAction.AppEventConsumed(id = event.id))
   }
 
   Box(
@@ -143,6 +168,17 @@ internal fun NoteListPane(
         },
       )
     }
+
+    SnackbarHost(
+      hostState = snackbarHostState,
+      modifier =
+        Modifier.align(alignment = Alignment.BottomCenter)
+          .windowInsetsPadding(
+            insets = WindowInsets.navigationBars.union(insets = WindowInsets.displayCutout)
+          )
+          // Keep clear of the FAB
+          .padding(bottom = 88.dp),
+    )
   }
 }
 

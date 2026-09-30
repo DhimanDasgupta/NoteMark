@@ -5,4 +5,6 @@
     <string name="shortcut_new_note_short">New Note</string>
     <string name="shortcut_new_note_long">Add a new note</string>
     <string name="shortcut_new_note_disabled">Creating new note is disabled</string>
+    <string name="network_available">Back online</string>
+    <string name="network_unavailable">You\'re offline. Changes will sync later</string>
 </resources>

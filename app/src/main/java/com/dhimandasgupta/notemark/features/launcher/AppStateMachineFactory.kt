@@ -26,10 +26,15 @@ import com.freeletics.flowredux2.initializeWith
 import dev.zacsweers.metro.Inject
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.uuid.Uuid
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.withIndex
 import kotlinx.coroutines.withContext
 
 @Immutable
@@ -42,6 +47,7 @@ sealed interface AppState {
 
   data class LoggedIn(
     override val connectionState: ConnectionState = ConnectionState.Unavailable,
+    val appEvents: ImmutableList<AppEvent> = persistentListOf(),
     val user: User,
     val sync: Sync? = null,
     val isSyncing: Boolean = false,
@@ -57,6 +63,8 @@ sealed interface AppAction {
   object SyncNow : AppAction
 
   data class DeleteLocalNotesOnLogout(val deleteOnLogout: Boolean) : AppAction
+
+  data class AppEventConsumed(val id: Uuid) : AppAction
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -102,9 +110,19 @@ class AppStateMachineFactory(
           applicationContext.addCreateNewNoteShortcut()
         }
         collectWhileInState(
-          flow = applicationContext.observeConnectivityAsFlow().distinctUntilChanged()
-        ) { connected ->
-          mutate { copy(connectionState = connected) }
+          flow = applicationContext.observeConnectivityAsFlow().distinctUntilChanged().withIndex()
+        ) { (index, connected) ->
+          mutate {
+            // The first emission is the current state on entering LoggedIn, not a change
+            if (index == 0 || connected == connectionState)
+              return@mutate copy(connectionState = connected)
+            val event =
+              when (connected) {
+                ConnectionState.Available -> AppEvent.NetworkAvailable(id = Uuid.random())
+                ConnectionState.Unavailable -> AppEvent.NetworkUnAvailable(id = Uuid.random())
+              }
+            copy(connectionState = connected, appEvents = (appEvents + event).toImmutableList())
+          }
         }
         collectWhileInState(flow = syncRepository.getSync()) { sync ->
           mutate { copy(sync = sync) }
@@ -162,6 +180,14 @@ class AppStateMachineFactory(
                 AppState.NotLoggedIn(connectionState = connectionState)
               }
             } ?: noChange()
+        }
+        on<AppAction.AppEventConsumed> { action ->
+          mutate {
+            copy(
+              appEvents =
+                appEvents.filterNot { appEvent -> action.id == appEvent.id }.toImmutableList()
+            )
+          }
         }
       }
     }

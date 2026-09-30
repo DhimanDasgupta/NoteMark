@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.ImmutableListSerializer
 import com.dhimandasgupta.notemark.common.extensions.android.ConnectionState
 import com.dhimandasgupta.notemark.features.launcher.AppAction
+import com.dhimandasgupta.notemark.features.launcher.AppEvent
 import com.dhimandasgupta.notemark.features.launcher.AppState.LoggedIn
 import com.dhimandasgupta.notemark.features.launcher.AppStateMachineFactory
 import dev.zacsweers.metro.Inject
@@ -43,6 +44,7 @@ data class NoteListUiModel(
   val noteLongClickedUuid: String = "",
   val showSyncProgress: Boolean = false,
   val isConnected: Boolean = false,
+  val appEvent: AppEvent? = null,
 ) {
   companion object {
     val defaultOrEmpty = defaultNoteListUiModel
@@ -151,6 +153,7 @@ private fun mapToNoteListUiModel(
       } else {
         persistentListOf()
       },
+    appEvent = loggedIn.appEvents.firstOrNull(),
     noteLongClickedUuid =
       if (noteListState is NoteListState.NoteListStateWithNotes) {
         noteListState.longClickedNoteUuid

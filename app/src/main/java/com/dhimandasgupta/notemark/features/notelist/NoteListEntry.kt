@@ -31,6 +31,7 @@ internal fun NoteListEntry(
     mutableStateOf(value = NoteListUiModel.defaultOrEmpty)
   }
   val noteListAction by rememberUpdatedState(newValue = noteListPresenter::dispatchAction)
+  val appAction by rememberUpdatedState(newValue = noteListPresenter::dispatchAppAction)
 
   LaunchedEffect(key1 = Unit) {
     launchMolecule(mode = RecompositionMode.Immediate) {
@@ -46,6 +47,7 @@ internal fun NoteListEntry(
     modifier = modifier,
     noteListUiModel = { noteListUiModel },
     noteListAction = { action -> noteListAction(action) },
+    appAction = { action -> appAction(action) },
     onNoteClicked = { uuid -> navigateToEdit(uuid) },
     navigateToLauncherIfLoggedOut = { navigateToLauncherIfLoggedOut() },
     onFabClicked = { navigateToAdd() },
