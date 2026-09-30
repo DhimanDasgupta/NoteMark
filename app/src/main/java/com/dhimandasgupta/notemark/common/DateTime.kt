@@ -30,6 +30,24 @@ fun getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString: String): Long {
   }
 }
 
+fun parseIsoOffsetDateTimeOrNull(isoOffsetDateTimeString: String): OffsetDateTime? =
+  try {
+    OffsetDateTime.parse(isoOffsetDateTimeString, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+  } catch (_: Exception) {
+    null
+  }
+
+/**
+ * Whether [first] is a later instant than [second]. Compares the parsed instants, so timestamps
+ * written with different UTC offsets compare correctly. Returns false if either can't be parsed.
+ */
+fun isIsoTimestampAfter(first: String, second: String): Boolean {
+  val firstDateTime = parseIsoOffsetDateTimeOrNull(isoOffsetDateTimeString = first) ?: return false
+  val secondDateTime =
+    parseIsoOffsetDateTimeOrNull(isoOffsetDateTimeString = second) ?: return false
+  return firstDateTime.isAfter(secondDateTime)
+}
+
 fun convertIsoToRelativeYearFormat(
   locale: Locale,
   isoOffsetDateTimeString: String,

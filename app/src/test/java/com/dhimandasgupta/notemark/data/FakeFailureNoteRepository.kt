@@ -1,6 +1,7 @@
 package com.dhimandasgupta.notemark.data
 
 import androidx.paging.PagingData
+import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.database.NoteEntity
@@ -68,6 +69,25 @@ class FakeFailureNoteRepository : NoteMarkRepository {
   override suspend fun deleteLocalNote(noteEntity: NoteEntity): Boolean = false
 
   override suspend fun deleteAllLocalNotes(): Boolean = false
+
+  override suspend fun getAllNotesForSync(): List<NoteEntity> = emptyList()
+
+  override suspend fun insertRemoteNotesIfMissing(remoteNotes: List<Note>): Boolean = false
+
+  override suspend fun replaceWithRemoteNote(
+    remoteNote: Note,
+    expectedLastEditedAt: String,
+  ): Boolean = false
+
+  override suspend fun markSyncedIfUnchanged(
+    uuid: String,
+    lastEditedAt: String,
+  ): Boolean = false
+
+  override suspend fun deleteSyncedNoteIfUnchanged(
+    uuid: String,
+    lastEditedAt: String,
+  ): Boolean = false
 
   override suspend fun logout(request: RefreshRequest): Result<Unit> =
     Result.failure(Exception("Some exception"))

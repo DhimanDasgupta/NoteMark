@@ -1,6 +1,7 @@
 package com.dhimandasgupta.notemark.data
 
 import androidx.paging.PagingData
+import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.database.NoteEntity
@@ -30,6 +31,9 @@ interface NoteMarkRepository {
   suspend fun getAllNonSyncedNotes(): List<NoteEntity>
 
   suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity>
+
+  /** Every local note, including those marked as deleted. */
+  suspend fun getAllNotesForSync(): List<NoteEntity>
 
   suspend fun getNoteById(noteId: Long): NoteEntity?
 
@@ -62,6 +66,19 @@ interface NoteMarkRepository {
   suspend fun deleteLocalNote(noteEntity: NoteEntity): Boolean
 
   suspend fun deleteAllLocalNotes(): Boolean
+
+  /** Stores server notes that don't exist locally yet, as synced. */
+  suspend fun insertRemoteNotesIfMissing(remoteNotes: List<Note>): Boolean
+
+  /**
+   * The methods below only change the local note if its `lastEditedAt` still equals the value the
+   * caller read, so an edit made in the meantime is kept. Each returns whether the note changed.
+   */
+  suspend fun replaceWithRemoteNote(remoteNote: Note, expectedLastEditedAt: String): Boolean
+
+  suspend fun markSyncedIfUnchanged(uuid: String, lastEditedAt: String): Boolean
+
+  suspend fun deleteSyncedNoteIfUnchanged(uuid: String, lastEditedAt: String): Boolean
 
   suspend fun logout(request: RefreshRequest): Result<Unit>
 }

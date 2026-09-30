@@ -13,6 +13,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.await
 import com.dhimandasgupta.notemark.R
@@ -21,6 +22,9 @@ import com.dhimandasgupta.notemark.ui.activity.MainActivity
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 private const val ONE_TIME_SYNC_WORK = "one_time_sync_work"
 private const val PERIODIC_SYNC_WORK = "delayed_sync_work"
@@ -35,41 +39,68 @@ fun Context.getAppVersionName(): String {
     .getOrDefault("Unknown")
 }
 
-fun Context.cancelPreviousAndTriggerNewWork(duration: Duration = Duration.ZERO) {
-  require(value = applicationContext is Application) { "Context must be an Application" }
-  require(value = duration >= Duration.ZERO) { "Duration must be non-negative" }
-
-  val workManager = WorkManager.getInstance(context = this)
-
-  val constraints =
+private val syncConstraints: Constraints
+  get() =
     Constraints.Builder()
       .setRequiredNetworkType(NetworkType.CONNECTED)
       .setRequiresBatteryNotLow(true)
       .setRequiresStorageNotLow(true)
       .build()
 
-  when (duration) {
-    Duration.ZERO -> {
-      workManager.enqueueUniqueWork(
-        uniqueWorkName = ONE_TIME_SYNC_WORK,
-        existingWorkPolicy = ExistingWorkPolicy.REPLACE,
-        request = OneTimeWorkRequestBuilder<NoteSyncWorker>().setConstraints(constraints).build(),
-      )
+/** Queues one sync. Does nothing if a one-time sync is already queued or running. */
+fun Context.triggerOneTimeSync() {
+  require(value = applicationContext is Application) { "Context must be an Application" }
+
+  WorkManager.getInstance(context = this)
+    .enqueueUniqueWork(
+      uniqueWorkName = ONE_TIME_SYNC_WORK,
+      existingWorkPolicy = ExistingWorkPolicy.KEEP,
+      request = OneTimeWorkRequestBuilder<NoteSyncWorker>().setConstraints(syncConstraints).build(),
+    )
+}
+
+/** Syncs every [interval], replacing the interval of an already scheduled periodic sync. */
+fun Context.schedulePeriodicSync(interval: Duration) {
+  require(value = applicationContext is Application) { "Context must be an Application" }
+  require(value = interval >= 5.minutes) { "WorkManager can't repeat more often than 5 minutes" }
+
+  WorkManager.getInstance(context = this)
+    .enqueueUniquePeriodicWork(
+      uniqueWorkName = PERIODIC_SYNC_WORK,
+      existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.UPDATE,
+      request =
+        PeriodicWorkRequestBuilder<NoteSyncWorker>(
+            repeatInterval = interval.toJavaDuration(),
+            flexTimeInterval = 5.minutes.toJavaDuration(), // 5 mins earlier or after the schedule
+          )
+          .setConstraints(syncConstraints)
+          .build(),
+    )
+}
+
+fun Context.cancelPeriodicSync() {
+  require(value = applicationContext is Application) { "Context must be an Application" }
+
+  WorkManager.getInstance(context = this).cancelUniqueWork(uniqueWorkName = PERIODIC_SYNC_WORK)
+}
+
+/**
+ * Whether a one-time or periodic sync is running right now. Read from WorkManager rather than a
+ * stored flag, so a process killed mid-sync can't leave it stuck at true.
+ */
+fun Context.observeSyncRunning(): Flow<Boolean> {
+  require(value = applicationContext is Application) { "Context must be an Application" }
+
+  val workManager = WorkManager.getInstance(context = this)
+  return combine(
+      workManager.getWorkInfosForUniqueWorkFlow(uniqueWorkName = ONE_TIME_SYNC_WORK),
+      workManager.getWorkInfosForUniqueWorkFlow(uniqueWorkName = PERIODIC_SYNC_WORK),
+    ) { oneTimeWorkInfos, periodicWorkInfos ->
+      (oneTimeWorkInfos + periodicWorkInfos).any { workInfo ->
+        workInfo.state == WorkInfo.State.RUNNING
+      }
     }
-    else -> {
-      workManager.enqueueUniquePeriodicWork(
-        uniqueWorkName = PERIODIC_SYNC_WORK,
-        existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE,
-        request =
-          PeriodicWorkRequestBuilder<NoteSyncWorker>(
-              repeatInterval = duration.toJavaDuration(),
-              flexTimeInterval = 5.minutes.toJavaDuration(), // 5 mins earlier or after the schedule
-            )
-            .setConstraints(constraints)
-            .build(),
-      )
-    }
-  }
+    .distinctUntilChanged()
 }
 
 suspend fun Context.cancelSyncWork() {

@@ -5,12 +5,16 @@ import android.content.Context
 import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.extensions.android.ConnectionState
 import com.dhimandasgupta.notemark.common.extensions.android.addCreateNewNoteShortcut
-import com.dhimandasgupta.notemark.common.extensions.android.cancelPreviousAndTriggerNewWork
+import com.dhimandasgupta.notemark.common.extensions.android.cancelPeriodicSync
 import com.dhimandasgupta.notemark.common.extensions.android.cancelSyncWork
 import com.dhimandasgupta.notemark.common.extensions.android.getAppVersionName
 import com.dhimandasgupta.notemark.common.extensions.android.observeConnectivityAsFlow
+import com.dhimandasgupta.notemark.common.extensions.android.observeSyncRunning
 import com.dhimandasgupta.notemark.common.extensions.android.removeCreateNewNoteShortcut
+import com.dhimandasgupta.notemark.common.extensions.android.schedulePeriodicSync
+import com.dhimandasgupta.notemark.common.extensions.android.triggerOneTimeSync
 import com.dhimandasgupta.notemark.common.getDifferenceFromTimestampInMinutes
+import com.dhimandasgupta.notemark.common.parseIsoOffsetDateTimeOrNull
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.SyncRepository
 import com.dhimandasgupta.notemark.data.UserRepository
@@ -20,7 +24,6 @@ import com.dhimandasgupta.notemark.proto.User
 import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory
 import com.freeletics.flowredux2.initializeWith
 import dev.zacsweers.metro.Inject
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,7 +31,6 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 @Immutable
 sealed interface AppState {
@@ -42,6 +44,7 @@ sealed interface AppState {
     override val connectionState: ConnectionState = ConnectionState.Unavailable,
     val user: User,
     val sync: Sync? = null,
+    val isSyncing: Boolean = false,
     val appVersionName: String,
   ) : AppState
 }
@@ -50,6 +53,8 @@ sealed interface AppAction {
   data class UpdateSync(val syncDuration: Sync.SyncDuration) : AppAction
 
   object AppLogout : AppAction
+
+  object SyncNow : AppAction
 
   data class DeleteLocalNotesOnLogout(val deleteOnLogout: Boolean) : AppAction
 }
@@ -104,6 +109,9 @@ class AppStateMachineFactory(
         collectWhileInState(flow = syncRepository.getSync()) { sync ->
           mutate { copy(sync = sync) }
         }
+        collectWhileInState(flow = applicationContext.observeSyncRunning()) { isSyncing ->
+          mutate { copy(isSyncing = isSyncing) }
+        }
         collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user ->
           user?.let {
             noChange()
@@ -112,15 +120,18 @@ class AppStateMachineFactory(
 
         // All the actions valid for app state should be handled here
         on<AppAction.UpdateSync> { action ->
-          val duration =
+          val interval =
             when (action.syncDuration) {
               Sync.SyncDuration.SYNC_DURATION_FIFTEEN_MINUTES -> 15.minutes
               Sync.SyncDuration.SYNC_DURATION_THIRTY_MINUTES -> 30.minutes
               Sync.SyncDuration.SYNC_DURATION_ONE_HOUR -> 1.hours
-              else -> Duration.ZERO
+              else -> null
             }
 
-          applicationContext.cancelPreviousAndTriggerNewWork(duration = duration)
+          when (interval) {
+            null -> applicationContext.cancelPeriodicSync()
+            else -> applicationContext.schedulePeriodicSync(interval = interval)
+          }
           syncRepository.saveSyncDuration(syncDuration = action.syncDuration)
 
           mutate {
@@ -128,6 +139,7 @@ class AppStateMachineFactory(
             copy(sync = sync)
           }
         }
+        onActionEffect<AppAction.SyncNow> { _ -> applicationContext.triggerOneTimeSync() }
         onActionEffect<AppAction.DeleteLocalNotesOnLogout> { action ->
           syncRepository.saveDeleteLocalNotesOnLogout(
             deleteLocalNotesOnLogout = action.deleteOnLogout
@@ -170,17 +182,14 @@ class AppStateMachineFactory(
     }
 
   private suspend fun syncOnEnter() {
-    val sync = syncRepository.getSync().first()
-    Timber.d(
-      "Sync value: ${sync.lastDownloadedTime}, ${sync.lastUploadedTime}, ${sync.syncing}, ${sync.deleteLocalNotesOnLogout}"
-    )
+    val lastUploadedTime = syncRepository.getSync().first().lastUploadedTime
     val neverSynced =
-      sync.lastUploadedTime.isNullOrEmpty() && sync.lastDownloadedTime.isNullOrEmpty()
+      parseIsoOffsetDateTimeOrNull(isoOffsetDateTimeString = lastUploadedTime) == null
     val lastSyncTimeIsMoreThan5Minutes =
-      getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString = sync.lastUploadedTime) > 5L
-    // Start sync if never synced or the last sync time is more than 5 mins and not syncing.
-    if (neverSynced || (lastSyncTimeIsMoreThan5Minutes && !sync.syncing)) {
-      applicationContext.cancelPreviousAndTriggerNewWork()
+      getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString = lastUploadedTime) > 5L
+    // A sync that is already queued or running is kept, so this never starts a second one.
+    if (neverSynced || lastSyncTimeIsMoreThan5Minutes) {
+      applicationContext.triggerOneTimeSync()
     }
   }
 }

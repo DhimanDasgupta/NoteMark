@@ -83,7 +83,7 @@ class EditNoteStateMachineFactory(
                 title = snapshot.title.trim(),
                 content = snapshot.content.trim(),
                 lastEditedAt = getCurrentIso8601Timestamp(),
-                noteEntity = noteEntity,
+                noteEntity = noteEntity.copy(synced = false),
               )
 
             updatedNote?.let {

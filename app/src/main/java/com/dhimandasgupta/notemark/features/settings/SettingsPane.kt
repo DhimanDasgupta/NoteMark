@@ -118,6 +118,7 @@ internal fun SettingsPane(
           )
         )
       },
+      onSyncNowClicked = { settingsAction(AppAction.SyncNow) },
       onDeleteNoteCheckChanged = onDeleteNoteCheckChanged,
       onLogoutClicked = onLogoutClicked,
     )
@@ -182,6 +183,7 @@ private fun SettingsBody(
   showSyncInterval: Boolean = false,
   toggleSyncIntervalVisibility: () -> Unit = {},
   onSyncIntervalSelected: (String) -> Unit = {},
+  onSyncNowClicked: () -> Unit = {},
   onDeleteNoteCheckChanged: () -> Unit = {},
   onLogoutClicked: () -> Unit = {},
 ) {
@@ -223,6 +225,7 @@ private fun SettingsBody(
         modifier = Modifier,
         isSyncing = model.isSyncing,
         lastSynced = model.lastSynced,
+        onSyncNowClicked = onSyncNowClicked,
       )
 
       Divider()
@@ -317,13 +320,14 @@ private fun SyncDataRow(
   modifier: Modifier = Modifier,
   isSyncing: Boolean,
   lastSynced: String,
+  onSyncNowClicked: () -> Unit = {},
 ) {
   Row(
     modifier =
       modifier
         .fillMaxWidth()
         .clip(shape = RoundedCornerShape(size = 8.dp))
-        .combinedClickable(onClick = {})
+        .combinedClickable(enabled = !isSyncing, onClick = onSyncNowClicked)
         .padding(vertical = 16.dp),
     horizontalArrangement = Arrangement.spacedBy(space = 0.dp),
     verticalAlignment = Alignment.CenterVertically,

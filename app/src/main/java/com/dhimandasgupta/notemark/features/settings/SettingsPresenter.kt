@@ -113,7 +113,7 @@ private fun SettingsUiModel.mapToSettingsUiModel(appState: AppState): SettingsUi
         lastSynced = appState.sync?.lastUploadedTime ?: "--",
         selectedSyncInterval = appState.sync?.syncDuration?.toReadableString() ?: "Manual",
         deleteLocalNotesOnLogout = appState.sync?.deleteLocalNotesOnLogout ?: false,
-        isSyncing = appState.sync?.syncing ?: false,
+        isSyncing = appState.isSyncing,
         isConnected = appState.connectionState == ConnectionState.Available,
         appVersionName = appState.appVersionName,
       )

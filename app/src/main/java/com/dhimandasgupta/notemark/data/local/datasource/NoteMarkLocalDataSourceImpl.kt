@@ -62,6 +62,11 @@ class NoteMarkLocalDataSourceImpl(
       return@withContext queries.getAllDeletedNotes().executeAsList()
     }
 
+  override suspend fun getAllNotesForSync(): List<NoteEntity> =
+    withContext(context = applicationDispatcher) {
+      return@withContext queries.getAllNotesForSync().executeAsList()
+    }
+
   override suspend fun getNoteById(noteId: Long): NoteEntity? =
     withContext(context = applicationDispatcher) {
       return@withContext queries.getNoteById(noteId).executeAsOneOrNull()
@@ -118,7 +123,7 @@ class NoteMarkLocalDataSourceImpl(
           createdAt = noteEntity.createdAt,
           lastEditedAt = noteEntity.lastEditedAt,
           uuid = noteEntity.uuid,
-          synced = false,
+          synced = noteEntity.synced,
         )
         return@transactionWithResult true
       }
@@ -135,7 +140,7 @@ class NoteMarkLocalDataSourceImpl(
             createdAt = noteEntity.createdAt,
             lastEditedAt = noteEntity.lastEditedAt,
             uuid = noteEntity.uuid,
-            synced = false,
+            synced = noteEntity.synced,
           )
         }
         return@transactionWithResult true
@@ -152,6 +157,56 @@ class NoteMarkLocalDataSourceImpl(
   override suspend fun deleteNote(noteEntity: NoteEntity) =
     withContext(context = applicationDispatcher + NonCancellable) {
       val result = queries.deleteNoteByUUID(uuid = noteEntity.uuid)
+      return@withContext result == 1L
+    }
+
+  override suspend fun insertRemoteNotesIfMissing(noteEntities: List<NoteEntity>) =
+    withContext(context = applicationDispatcher + NonCancellable) {
+      queries.transactionWithResult {
+        noteEntities.forEach { noteEntity ->
+          queries.insertRemoteNoteIfMissing(
+            title = noteEntity.title,
+            content = noteEntity.content,
+            createdAt = noteEntity.createdAt,
+            lastEditedAt = noteEntity.lastEditedAt,
+            uuid = noteEntity.uuid,
+          )
+        }
+        return@transactionWithResult true
+      }
+    }
+
+  override suspend fun replaceWithRemoteNote(
+    remoteNote: NoteEntity,
+    expectedLastEditedAt: String,
+  ): Boolean =
+    withContext(context = applicationDispatcher + NonCancellable) {
+      val result =
+        queries.replaceWithRemoteNote(
+          title = remoteNote.title,
+          content = remoteNote.content,
+          lastEditedAt = remoteNote.lastEditedAt,
+          uuid = remoteNote.uuid,
+          expectedLastEditedAt = expectedLastEditedAt,
+        )
+      return@withContext result == 1L
+    }
+
+  override suspend fun markSyncedIfUnchanged(
+    uuid: String,
+    lastEditedAt: String,
+  ): Boolean =
+    withContext(context = applicationDispatcher + NonCancellable) {
+      val result = queries.markSyncedIfUnchanged(uuid = uuid, lastEditedAt = lastEditedAt)
+      return@withContext result == 1L
+    }
+
+  override suspend fun deleteSyncedNoteIfUnchanged(
+    uuid: String,
+    lastEditedAt: String,
+  ): Boolean =
+    withContext(context = applicationDispatcher + NonCancellable) {
+      val result = queries.deleteSyncedNoteIfUnchanged(uuid = uuid, lastEditedAt = lastEditedAt)
       return@withContext result == 1L
     }
 

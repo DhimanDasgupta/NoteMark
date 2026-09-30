@@ -22,6 +22,9 @@ interface NoteMarkLocalDataSource {
 
   suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity>
 
+  /** Every row, including those marked as deleted. */
+  suspend fun getAllNotesForSync(): List<NoteEntity>
+
   suspend fun getNoteById(noteId: Long): NoteEntity?
 
   suspend fun getNoteByUUID(uuid: String): NoteEntity?
@@ -43,6 +46,19 @@ interface NoteMarkLocalDataSource {
   suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean
 
   suspend fun deleteNote(noteEntity: NoteEntity): Boolean
+
+  /** Inserts notes as synced, leaving any row that already has the same uuid untouched. */
+  suspend fun insertRemoteNotesIfMissing(noteEntities: List<NoteEntity>): Boolean
+
+  /**
+   * The methods below only change a row whose `lastEditedAt` still equals the value the caller
+   * read, so an edit made in the meantime is kept. Each returns whether a row was changed.
+   */
+  suspend fun replaceWithRemoteNote(remoteNote: NoteEntity, expectedLastEditedAt: String): Boolean
+
+  suspend fun markSyncedIfUnchanged(uuid: String, lastEditedAt: String): Boolean
+
+  suspend fun deleteSyncedNoteIfUnchanged(uuid: String, lastEditedAt: String): Boolean
 
   suspend fun deleteAllNotes(): Boolean
 }

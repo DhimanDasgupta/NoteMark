@@ -5,6 +5,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.dhimandasgupta.notemark.data.local.datasource.NoteMarkLocalDataSource
 import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSource
+import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.database.NoteEntity
@@ -66,6 +67,8 @@ class NoteMarkRepositoryImpl(
     }
     return Result.failure(Exception("Failed to fetch notes from remote"))
   }
+
+  override suspend fun getAllNotesForSync(): List<NoteEntity> = localDataSource.getAllNotesForSync()
 
   override suspend fun getNoteById(noteId: Long) = localDataSource.getNoteById(noteId = noteId)
 
@@ -132,6 +135,30 @@ class NoteMarkRepositoryImpl(
       currentCoroutineContext().ensureActive()
       false
     }
+
+  override suspend fun insertRemoteNotesIfMissing(remoteNotes: List<Note>): Boolean =
+    localDataSource.insertRemoteNotesIfMissing(
+      noteEntities = remoteNotes.map { note -> note.toNoteEntity(synced = true) }
+    )
+
+  override suspend fun replaceWithRemoteNote(
+    remoteNote: Note,
+    expectedLastEditedAt: String,
+  ): Boolean =
+    localDataSource.replaceWithRemoteNote(
+      remoteNote = remoteNote.toNoteEntity(synced = true),
+      expectedLastEditedAt = expectedLastEditedAt,
+    )
+
+  override suspend fun markSyncedIfUnchanged(
+    uuid: String,
+    lastEditedAt: String,
+  ): Boolean = localDataSource.markSyncedIfUnchanged(uuid = uuid, lastEditedAt = lastEditedAt)
+
+  override suspend fun deleteSyncedNoteIfUnchanged(
+    uuid: String,
+    lastEditedAt: String,
+  ): Boolean = localDataSource.deleteSyncedNoteIfUnchanged(uuid = uuid, lastEditedAt = lastEditedAt)
 
   override suspend fun logout(request: RefreshRequest): Result<Unit> =
     remoteDataSource.logout(request = request)
