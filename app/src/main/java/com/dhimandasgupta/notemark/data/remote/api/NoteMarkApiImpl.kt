@@ -248,14 +248,8 @@ class NoteMarkApiImpl(
         setBody(request)
       }
 
-      // HttpResponseValidator should ideally handle non-2xx responses by throwing.
-      // If it doesn't, or you want more specific handling here:
       when (response.status) {
-        HttpStatusCode.OK -> {
-          userDataSource.deleteUser()
-          Result.success(value = Unit)
-        }
-        // Consider handling other specific statuses like BadRequest, Unauthorized, etc.
+        HttpStatusCode.OK -> Result.success(value = Unit)
         else ->
           Result.failure(
             exception =

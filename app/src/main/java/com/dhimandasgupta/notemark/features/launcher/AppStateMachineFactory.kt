@@ -24,8 +24,10 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 @Immutable
@@ -157,14 +159,15 @@ class AppStateMachineFactory(
     val defaultAppState = AppState.NotLoggedIn()
   }
 
-  private suspend fun onLogoutSuccessful(deleteLocalNotesOnLogout: Boolean = false) {
-    applicationContext.cancelSyncWork()
-    if (deleteLocalNotesOnLogout) {
-      noteMarkRepository.deleteAllLocalNotes()
+  private suspend fun onLogoutSuccessful(deleteLocalNotesOnLogout: Boolean = false) =
+    withContext(NonCancellable) {
+      applicationContext.cancelSyncWork()
+      if (deleteLocalNotesOnLogout) {
+        noteMarkRepository.deleteAllLocalNotes()
+      }
+      syncRepository.reset()
+      userRepository.reset()
     }
-    userRepository.reset()
-    syncRepository.reset()
-  }
 
   private suspend fun syncOnEnter() {
     val sync = syncRepository.getSync().first()
