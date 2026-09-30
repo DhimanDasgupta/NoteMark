@@ -6,6 +6,7 @@ import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.extensions.android.ConnectionState
 import com.dhimandasgupta.notemark.common.extensions.android.addCreateNewNoteShortcut
 import com.dhimandasgupta.notemark.common.extensions.android.cancelPreviousAndTriggerNewWork
+import com.dhimandasgupta.notemark.common.extensions.android.cancelSyncWork
 import com.dhimandasgupta.notemark.common.extensions.android.getAppVersionName
 import com.dhimandasgupta.notemark.common.extensions.android.observeConnectivityAsFlow
 import com.dhimandasgupta.notemark.common.extensions.android.removeCreateNewNoteShortcut
@@ -25,6 +26,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import timber.log.Timber
 
 @Immutable
 sealed interface AppState {
@@ -156,6 +158,7 @@ class AppStateMachineFactory(
   }
 
   private suspend fun onLogoutSuccessful(deleteLocalNotesOnLogout: Boolean = false) {
+    applicationContext.cancelSyncWork()
     if (deleteLocalNotesOnLogout) {
       noteMarkRepository.deleteAllLocalNotes()
     }
@@ -165,6 +168,9 @@ class AppStateMachineFactory(
 
   private suspend fun syncOnEnter() {
     val sync = syncRepository.getSync().first()
+    Timber.d(
+      "Sync value: ${sync.lastDownloadedTime}, ${sync.lastUploadedTime}, ${sync.syncing}, ${sync.deleteLocalNotesOnLogout}"
+    )
     val neverSynced =
       sync.lastUploadedTime.isNullOrEmpty() && sync.lastDownloadedTime.isNullOrEmpty()
     val lastSyncTimeIsMoreThan5Minutes =

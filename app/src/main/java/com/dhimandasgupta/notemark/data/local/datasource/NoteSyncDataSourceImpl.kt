@@ -2,6 +2,7 @@ package com.dhimandasgupta.notemark.data.local.datasource
 
 import androidx.datastore.core.DataStore
 import com.dhimandasgupta.notemark.app.di.SyncDataStore
+import com.dhimandasgupta.notemark.common.storage.defaultSyncValue
 import com.dhimandasgupta.notemark.proto.Sync
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.Flow
@@ -44,8 +45,6 @@ class NoteSyncDataSourceImpl(@SyncDataStore syncDataStore: Lazy<DataStore<Sync>>
   }
 
   override suspend fun reset() {
-    syncDataStore.updateData { transform ->
-      transform.toBuilder().clear().build()
-    }
+    syncDataStore.updateData { defaultSyncValue }
   }
 }

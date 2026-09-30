@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.zacsweers.metro.Assisted
-import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -134,8 +133,3 @@ private fun EditNoteUiModel.mapToEditNoteUiModel(editNoteState: EditNoteState) =
     editEnable = editNoteState.mode == Mode.EditMode,
     isReaderMode = editNoteState.mode == Mode.ReaderMode,
   )
-
-@AssistedFactory
-interface EditNotePresenterFactory {
-  fun create(noteId: String): EditNotePresenter
-}

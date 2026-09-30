@@ -32,7 +32,7 @@ import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.data.remote.model.RefreshResponse
 import com.dhimandasgupta.notemark.database.NoteMarkDatabase
 import com.dhimandasgupta.notemark.features.addnote.AddNotePresenter
-import com.dhimandasgupta.notemark.features.editnote.EditNotePresenterFactory
+import com.dhimandasgupta.notemark.features.editnote.EditNotePresenter
 import com.dhimandasgupta.notemark.features.launcher.LauncherPresenter
 import com.dhimandasgupta.notemark.features.login.LoginPresenter
 import com.dhimandasgupta.notemark.features.notelist.NoteListPresenter
@@ -41,6 +41,7 @@ import com.dhimandasgupta.notemark.features.settings.SettingsPresenter
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.proto.User
 import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn
@@ -69,7 +70,9 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -77,6 +80,11 @@ import timber.log.Timber
 
 private const val USER_DATA_STORE_FILE_NAME = "user_store.pb"
 private const val SYNC_DATA_STORE_FILE_NAME = "sync_store.pb"
+
+val LocalNoteMarkGraph =
+  staticCompositionLocalOf<NoteMarkGraph> {
+    error("No NoteMarkGraph provided")
+  }
 
 @DependencyGraph(AppScope::class)
 interface NoteMarkGraph : AppModule {
@@ -102,10 +110,10 @@ interface NoteMarkGraph : AppModule {
   fun workerFactory(): MetroWorkerFactory
 }
 
-val LocalNoteMarkGraph =
-  staticCompositionLocalOf<NoteMarkGraph> {
-    error("No NoteMarkGraph provided")
-  }
+@AssistedFactory
+interface EditNotePresenterFactory {
+  fun create(noteId: String): EditNotePresenter
+}
 
 interface AppModule {
   @Provides
@@ -189,28 +197,28 @@ interface AppModule {
         bearer {
           loadTokens {
             withContext(dispatcher) {
-              val user = userRepository.getUser().first()
-              if (user?.accessToken != null && user.refreshToken != null) {
-                BearerTokens(
-                  accessToken = user.accessToken,
-                  refreshToken = user.refreshToken,
-                )
-              }
-              null
+              val user =
+                userRepository.getUser().firstOrNull().takeIf { user ->
+                  user?.accessToken != null && user.refreshToken != null
+                } ?: return@withContext null
+              BearerTokens(
+                accessToken = user.accessToken,
+                refreshToken = user.refreshToken,
+              )
             }
           }
           refreshTokens {
             withContext(dispatcher) {
-              val user = userRepository.getUser().first()
+              val user =
+                userRepository.getUser().firstOrNull().takeIf { user ->
+                  user?.accessToken != null && user.refreshToken != null
+                } ?: return@withContext null
+
               val currentTokens =
-                if (user?.accessToken != null && user.refreshToken != null) {
-                  BearerTokens(
-                    accessToken = user.accessToken,
-                    refreshToken = user.refreshToken,
-                  )
-                } else {
-                  return@withContext null
-                }
+                BearerTokens(
+                  accessToken = user.accessToken,
+                  refreshToken = user.refreshToken,
+                )
 
               try {
                 val response =
@@ -231,6 +239,7 @@ interface AppModule {
                 userRepository.saveBearToken(token = newTokens)
                 newTokens
               } catch (_: Exception) {
+                currentCoroutineContext().ensureActive()
                 userRepository.deleteUser()
                 null
               }

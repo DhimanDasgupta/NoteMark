@@ -24,12 +24,12 @@ class SyncSerializer : Serializer<Sync> {
   }
 }
 
-private val defaultSyncValue =
+internal val defaultSyncValue: Sync =
   Sync.newBuilder()
     .apply {
       syncing = false
-      lastUploadedTime = "0"
-      lastDownloadedTime = "0"
+      lastUploadedTime = ""
+      lastDownloadedTime = ""
       syncDuration = Sync.SyncDuration.SYNC_DURATION_NONE
       deleteLocalNotesOnLogout = false
     }

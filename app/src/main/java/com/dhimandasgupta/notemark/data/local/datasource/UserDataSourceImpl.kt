@@ -3,6 +3,7 @@ package com.dhimandasgupta.notemark.data.local.datasource
 import androidx.datastore.core.DataStore
 import com.dhimandasgupta.notemark.app.di.UserDataStore
 import com.dhimandasgupta.notemark.common.extensions.coroutines.runCatchingCancelable
+import com.dhimandasgupta.notemark.common.storage.defaultUserValue
 import com.dhimandasgupta.notemark.proto.User
 import dev.zacsweers.metro.Inject
 import io.ktor.client.plugins.auth.providers.BearerTokens
@@ -53,9 +54,7 @@ class UserDataSourceImpl(@UserDataStore userDataStore: Lazy<DataStore<User>>) : 
 
   override suspend fun reset() {
     runCatchingCancelable {
-      userDataStore.updateData { transform ->
-        transform.toBuilder().clear().build()
-      }
+      userDataStore.updateData { defaultUserValue }
     }
   }
 }

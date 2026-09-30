@@ -14,6 +14,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import androidx.work.await
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.app.work.NoteSyncWorker
 import com.dhimandasgupta.notemark.ui.activity.MainActivity
@@ -49,7 +50,6 @@ fun Context.cancelPreviousAndTriggerNewWork(duration: Duration = Duration.ZERO) 
 
   when (duration) {
     Duration.ZERO -> {
-      workManager.cancelAllWorkByTag(tag = ONE_TIME_SYNC_WORK)
       workManager.enqueueUniqueWork(
         uniqueWorkName = ONE_TIME_SYNC_WORK,
         existingWorkPolicy = ExistingWorkPolicy.REPLACE,
@@ -70,6 +70,14 @@ fun Context.cancelPreviousAndTriggerNewWork(duration: Duration = Duration.ZERO) 
       )
     }
   }
+}
+
+suspend fun Context.cancelSyncWork() {
+  require(value = applicationContext is Application) { "Context must be an Application" }
+
+  val workManager = WorkManager.getInstance(context = this)
+  workManager.cancelUniqueWork(uniqueWorkName = ONE_TIME_SYNC_WORK).await()
+  workManager.cancelUniqueWork(uniqueWorkName = PERIODIC_SYNC_WORK).await()
 }
 
 fun Context.addCreateNewNoteShortcut() {

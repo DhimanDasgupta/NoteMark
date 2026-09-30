@@ -7,7 +7,7 @@ import java.io.OutputStream
 import kotlinx.io.IOException
 
 class UserSerializer : Serializer<User> {
-  override val defaultValue: User = User.getDefaultInstance()
+  override val defaultValue: User = defaultUserValue
 
   override suspend fun readFrom(input: InputStream): User =
     try {
@@ -21,3 +21,5 @@ class UserSerializer : Serializer<User> {
     output: OutputStream,
   ) = t.writeTo(output)
 }
+
+internal val defaultUserValue: User = User.getDefaultInstance()
