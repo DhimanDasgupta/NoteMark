@@ -38,15 +38,19 @@ class NoteSyncer(
   private val syncRepository: SyncRepository,
   private val userRepository: UserRepository,
 ) {
+  private val syncMutex = Mutex()
+
   suspend fun sync(): SyncOutcome {
     // The one-time and periodic workers are separate WorkManager jobs; only one may sync at a time.
     if (!syncMutex.tryLock()) return SyncOutcome.Success
+    syncRepository.saveSyncing(true)
     return try {
       syncLocked()
     } catch (_: Exception) {
       currentCoroutineContext().ensureActive()
       SyncOutcome.Retry
     } finally {
+      syncRepository.saveSyncing(false)
       syncMutex.unlock()
     }
   }
@@ -86,6 +90,7 @@ class NoteSyncer(
   ): Boolean {
     var allSucceeded = true
     localNotes
+      .asSequence()
       .filter { note -> note.markAsDeleted }
       .forEach { note ->
         // A note that never reached the server only needs removing here.
@@ -106,6 +111,7 @@ class NoteSyncer(
   ): Boolean {
     var allSucceeded = true
     localNotes
+      .asSequence()
       .filter { note -> !note.synced && !note.markAsDeleted }
       .forEach { note ->
         val remoteNote = remoteNotes[note.uuid]
@@ -159,6 +165,7 @@ class NoteSyncer(
 
     // A note that was synced before but is gone from the server was deleted on another device.
     localNotes
+      .asSequence()
       .filter { note -> note.synced && !note.markAsDeleted && note.uuid !in remoteNotes }
       .forEach { note ->
         noteMarkRepository.deleteSyncedNoteIfUnchanged(
@@ -166,9 +173,5 @@ class NoteSyncer(
           lastEditedAt = note.lastEditedAt,
         )
       }
-  }
-
-  private companion object {
-    val syncMutex = Mutex()
   }
 }
