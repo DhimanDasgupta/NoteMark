@@ -20,6 +20,7 @@ molecule-runtime = "2.2.0"
 ktor = "3.6.0"
 datastore = "1.2.1"
 kotlinxCollectionsImmutable = "0.5.2"
+kotlinxDatetime = "0.8.0"
 gradleProtobufPlugin = "0.10.0"
 protocKotlinLite = "4.36.2"
 turbine = "1.2.1"
@@ -87,6 +88,7 @@ ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging" }
 ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
 
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 
 protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protocKotlinLite" }
 kotlin-protobuf = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protocKotlinLite" }

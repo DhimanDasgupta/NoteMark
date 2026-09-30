@@ -14,7 +14,7 @@ import com.dhimandasgupta.notemark.common.extensions.android.removeCreateNewNote
 import com.dhimandasgupta.notemark.common.extensions.android.schedulePeriodicSync
 import com.dhimandasgupta.notemark.common.extensions.android.triggerOneTimeSync
 import com.dhimandasgupta.notemark.common.getDifferenceFromTimestampInMinutes
-import com.dhimandasgupta.notemark.common.parseIsoOffsetDateTimeOrNull
+import com.dhimandasgupta.notemark.common.parseIsoInstantOrNull
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.SyncRepository
 import com.dhimandasgupta.notemark.data.UserRepository
@@ -183,8 +183,7 @@ class AppStateMachineFactory(
 
   private suspend fun syncOnEnter() {
     val lastUploadedTime = syncRepository.getSync().first().lastUploadedTime
-    val neverSynced =
-      parseIsoOffsetDateTimeOrNull(isoOffsetDateTimeString = lastUploadedTime) == null
+    val neverSynced = parseIsoInstantOrNull(isoOffsetDateTimeString = lastUploadedTime) == null
     val lastSyncTimeIsMoreThan5Minutes =
       getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString = lastUploadedTime) > 5L
     // A sync that is already queued or running is kept, so this never starts a second one.

@@ -180,6 +180,8 @@ dependencies {
 
   // Kotlinx collections
   implementation(libs.kotlinx.collections.immutable)
+  // Kotlinx date time
+  implementation(libs.kotlinx.datetime)
 
   // Nav3
   implementation(libs.androidx.navigation3.runtime)
