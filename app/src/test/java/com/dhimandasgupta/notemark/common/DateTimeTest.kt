@@ -64,7 +64,10 @@ class DateTimeTest {
   @Test
   fun `relative year format shows the year only for earlier years`() {
     assertEquals("05 Jan 2001", convertIsoToRelativeYearFormat(Locale.US, "2001-01-05T08:00:00Z"))
-    assertEquals("Today", convertIsoToRelativeYearFormat(Locale.US, getCurrentIso8601Timestamp()))
+    assertEquals(
+      "Just now",
+      convertIsoToRelativeYearFormat(Locale.US, getCurrentIso8601Timestamp()),
+    )
   }
 
   @Test

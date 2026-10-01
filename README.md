@@ -1,5 +1,29 @@
 # This is an experiment with [FlowRedux](https://github.com/freeletics/FlowRedux) and [Molecule](https://github.com/cashapp/molecule)
 
+## Building the Project
+
+A comprehensive build script `build.sh` is provided in the project root:
+
+```bash
+# Display help and available options
+./build.sh --help
+
+# Run full pipeline: clean, stability check, lint, tests, and assemble
+./build.sh full
+
+# Build debug APK
+./build.sh debug
+
+# Build release APK and App Bundle (AAB)
+./build.sh release
+
+# Run all quality checks (stability, lint, unit tests)
+./build.sh check
+
+# Run unit tests only
+./build.sh test
+```
+
 # App State Machine
 ```
 @Immutable
