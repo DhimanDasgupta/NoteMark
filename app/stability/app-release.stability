@@ -14,12 +14,6 @@ public fun com.dhimandasgupta.notemark.app.nav.NoteMarkRoot(modifier: androidx.c
     - initialKeys: STABLE (stability configuration file type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.common.extensions.android.connectivityState(): androidx.compose.runtime.State<com.dhimandasgupta.notemark.common.extensions.android.ConnectionState>
-  skippable: false
-  restartable: false
-  params:
-
-@Composable
 private fun com.dhimandasgupta.notemark.features.addnote.AddNoteBody(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, addNoteUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.addnote.AddNoteUiModel>, addNoteAction: kotlin.Function1<com.dhimandasgupta.notemark.features.addnote.AddNoteAction, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true

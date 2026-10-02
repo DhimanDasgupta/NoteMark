@@ -1,4 +1,5 @@
 pluginManagement {
+  includeBuild("build-logic")
   repositories {
     google {
       content {
@@ -23,3 +24,9 @@ dependencyResolutionManagement {
 rootProject.name = "NoteMark"
 
 include(":app")
+
+include(":common-core")
+
+include(":common-android")
+
+include(":common-data")

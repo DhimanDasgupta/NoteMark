@@ -2,7 +2,7 @@ package com.dhimandasgupta.notemark.features.notelist
 
 import androidx.paging.PagingDataEvent
 import androidx.paging.PagingDataPresenter
-import com.dhimandasgupta.notemark.data.NoteMarkRepository
+import com.dhimandasgupta.notemark.data.repository.NoteMarkRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject

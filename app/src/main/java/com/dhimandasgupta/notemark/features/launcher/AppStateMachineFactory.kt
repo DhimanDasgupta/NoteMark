@@ -15,10 +15,10 @@ import com.dhimandasgupta.notemark.common.extensions.android.ConnectionState
 import com.dhimandasgupta.notemark.common.extensions.android.observeConnectivityAsFlow
 import com.dhimandasgupta.notemark.common.extensions.kotlin.getDifferenceFromTimestampInMinutes
 import com.dhimandasgupta.notemark.common.extensions.kotlin.parseIsoInstantOrNull
-import com.dhimandasgupta.notemark.data.NoteMarkRepository
-import com.dhimandasgupta.notemark.data.SyncRepository
-import com.dhimandasgupta.notemark.data.UserRepository
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
+import com.dhimandasgupta.notemark.data.repository.NoteMarkRepository
+import com.dhimandasgupta.notemark.data.repository.SyncRepository
+import com.dhimandasgupta.notemark.data.repository.UserRepository
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.proto.User
 import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory

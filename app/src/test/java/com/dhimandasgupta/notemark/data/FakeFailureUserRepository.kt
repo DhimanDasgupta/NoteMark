@@ -1,5 +1,6 @@
 package com.dhimandasgupta.notemark.data
 
+import com.dhimandasgupta.notemark.data.repository.UserRepository
 import com.dhimandasgupta.notemark.proto.User
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import kotlinx.coroutines.flow.Flow

@@ -3,7 +3,7 @@ package com.dhimandasgupta.notemark.app.work
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.dhimandasgupta.notemark.app.di.AppBackgroundDispatcher
+import com.dhimandasgupta.notemark.core.di.AppBackgroundDispatcher
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject

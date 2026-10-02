@@ -4,6 +4,7 @@ import androidx.paging.PagingData
 import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
+import com.dhimandasgupta.notemark.data.repository.NoteMarkRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf

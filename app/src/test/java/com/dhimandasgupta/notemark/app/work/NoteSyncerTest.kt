@@ -2,12 +2,12 @@ package com.dhimandasgupta.notemark.app.work
 
 import com.dhimandasgupta.notemark.data.FakeSuccessfulNoteRepository
 import com.dhimandasgupta.notemark.data.FakeSuccessfulUserRepository
-import com.dhimandasgupta.notemark.data.NoteMarkRepository
-import com.dhimandasgupta.notemark.data.SyncRepository
-import com.dhimandasgupta.notemark.data.UserRepository
 import com.dhimandasgupta.notemark.data.remote.api.AuthenticationException
 import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
+import com.dhimandasgupta.notemark.data.repository.NoteMarkRepository
+import com.dhimandasgupta.notemark.data.repository.SyncRepository
+import com.dhimandasgupta.notemark.data.repository.UserRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.proto.Sync
 import java.io.IOException

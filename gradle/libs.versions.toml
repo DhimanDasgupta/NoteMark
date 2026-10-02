@@ -1,4 +1,8 @@
 [versions]
+minSdk = "28"
+compileSdk = "37"
+targetSdk = "37"
+jvmTarget = "21"
 agp = "9.4.1"
 kotlin = "2.4.20"
 coreKtx = "1.19.1"
@@ -66,6 +70,7 @@ datastore-preferences-android = { module = "androidx.datastore:datastore-prefere
 
 sql-delight-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelight" }
 sql-delight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqlDelight" }
+sql-delight-async-extensions = { module = "app.cash.sqldelight:async-extensions", version.ref = "sqlDelight" }
 sql-delight-coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqlDelight" }
 sql-delight-paging3-extensions = { module = "app.cash.sqldelight:androidx-paging3-extensions", version.ref = "sqlDelight" }
 
@@ -104,9 +109,22 @@ kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "material3AdaptiveNav3" }
 
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore" }
+androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "androidxPaging" }
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core" }
+
+# Gradle plugins used by build-logic convention plugins
+android-gradlePlugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+compose-stability-analyser-gradlePlugin = { module = "com.github.skydoves:compose-stability-gradle", version.ref = "composeStabilityAnalyser" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+android-lint = { id = "com.android.lint", version.ref = "agp" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
@@ -114,6 +132,11 @@ sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
 google-protobuf = { id = "com.google.protobuf", version.ref = "gradleProtobufPlugin" }
 compose-stability-analyser = { id = "com.github.skydoves.compose.stability.analyzer", version.ref = "composeStabilityAnalyser" }
 metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
+
+# Convention plugins (build-logic)
+notemark-jvm-library = { id = "notemark.jvm.library" }
+notemark-android-library = { id = "notemark.android.library" }
+notemark-android-compose = { id = "notemark.android.compose" }
 
 [bundles]
 compose = [

@@ -2,11 +2,11 @@ package com.dhimandasgupta.notemark.app.work
 
 import com.dhimandasgupta.notemark.common.extensions.kotlin.getCurrentIso8601Timestamp
 import com.dhimandasgupta.notemark.common.extensions.kotlin.isIsoTimestampAfter
-import com.dhimandasgupta.notemark.data.NoteMarkRepository
-import com.dhimandasgupta.notemark.data.SyncRepository
-import com.dhimandasgupta.notemark.data.UserRepository
 import com.dhimandasgupta.notemark.data.remote.api.AuthenticationException
 import com.dhimandasgupta.notemark.data.remote.model.Note
+import com.dhimandasgupta.notemark.data.repository.NoteMarkRepository
+import com.dhimandasgupta.notemark.data.repository.SyncRepository
+import com.dhimandasgupta.notemark.data.repository.UserRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.currentCoroutineContext

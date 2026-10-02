@@ -528,19 +528,16 @@ print_summary() {
         fi
     fi
 
-    # Check for test reports
-    local test_reports_dir="${PROJECT_ROOT}/app/build/reports/tests"
-    if [[ -d "$test_reports_dir" ]]; then
-        local reports
-        reports=$(find "$test_reports_dir" -maxdepth 2 -type f -name "index.html" 2>/dev/null || true)
-        if [[ -n "$reports" ]]; then
-            echo -e "\n${BOLD}${CYAN}Test Reports:${RESET}"
-            while IFS= read -r report; do
-                if [[ -n "$report" ]]; then
-                    echo -e "  - ${WHITE}${report#$PROJECT_ROOT/}${RESET}"
-                fi
-            done <<< "$reports"
-        fi
+    # Check for test reports (every module)
+    local reports
+    reports=$(find "$PROJECT_ROOT" -maxdepth 6 -type f -path "*/build/reports/tests/*/index.html" -not -path "*/build-logic/*" 2>/dev/null | sort || true)
+    if [[ -n "$reports" ]]; then
+        echo -e "\n${BOLD}${CYAN}Test Reports:${RESET}"
+        while IFS= read -r report; do
+            if [[ -n "$report" ]]; then
+                echo -e "  - ${WHITE}${report#$PROJECT_ROOT/}${RESET}"
+            fi
+        done <<< "$reports"
     fi
 
     # Check for lint reports
@@ -592,13 +589,13 @@ build_pipeline() {
     if [[ "$COMMAND" == "stability-dump" ]]; then
         case "$VARIANT" in
             debug)
-                run_gradle "Updating Compose stability dump (Debug)" :app:debugStabilityDump
+                run_gradle "Updating Compose stability dump (Debug)" debugStabilityDump
                 ;;
             release)
-                run_gradle "Updating Compose stability dump (Release)" :app:releaseStabilityDump
+                run_gradle "Updating Compose stability dump (Release)" releaseStabilityDump
                 ;;
             *)
-                run_gradle "Updating Compose stability dump (All variants)" :app:stabilityDump
+                run_gradle "Updating Compose stability dump (All variants)" stabilityDump
                 ;;
         esac
         print_summary
@@ -610,13 +607,13 @@ build_pipeline() {
         if [[ $SKIP_STABILITY -eq 0 ]]; then
             case "$VARIANT" in
                 debug)
-                    run_gradle "Running Compose stability check (Debug)" :app:debugStabilityCheck
+                    run_gradle "Running Compose stability check (Debug)" debugStabilityCheck
                     ;;
                 release)
-                    run_gradle "Running Compose stability check (Release)" :app:releaseStabilityCheck
+                    run_gradle "Running Compose stability check (Release)" releaseStabilityCheck
                     ;;
                 *)
-                    run_gradle "Running Compose stability checks" :app:stabilityCheck
+                    run_gradle "Running Compose stability checks" stabilityCheck
                     ;;
             esac
             if [[ "$COMMAND" == "stability" ]]; then
@@ -658,13 +655,13 @@ build_pipeline() {
         if [[ $SKIP_TESTS -eq 0 ]]; then
             case "$VARIANT" in
                 debug)
-                    run_gradle "Running Unit Tests (Debug)" :app:testDebugUnitTest
+                    run_gradle "Running Unit Tests (Debug)" testDebugUnitTest :common-core:test
                     ;;
                 release)
-                    run_gradle "Running Unit Tests (Release)" :app:testReleaseUnitTest
+                    run_gradle "Running Unit Tests (Release)" testReleaseUnitTest :common-core:test
                     ;;
                 *)
-                    run_gradle "Running Unit Tests (All variants)" :app:test
+                    run_gradle "Running Unit Tests (All variants)" test
                     ;;
             esac
             if [[ "$COMMAND" == "test" ]]; then

@@ -7,12 +7,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
   alias(libs.plugins.android.application)
-  alias(libs.plugins.kotlin.compose)
+  alias(libs.plugins.notemark.android.compose)
   alias(libs.plugins.google.devtools.ksp)
   alias(libs.plugins.kotlinx.serialization)
-  alias(libs.plugins.sqlDelight)
-  alias(libs.plugins.google.protobuf)
-  alias(libs.plugins.compose.stability.analyser)
   alias(libs.plugins.metro)
 }
 
@@ -39,31 +36,23 @@ private fun generateVersionName(): String {
   return "$versionNamePrefix-${now.format(formatter)}"
 }
 
+private val jvmTargetVersion = libs.versions.jvmTarget.get()
+
 kotlin {
   compilerOptions {
-    jvmTarget.set(JvmTarget.JVM_21)
+    jvmTarget.set(JvmTarget.fromTarget(jvmTargetVersion))
     freeCompilerArgs.add("-opt-in=androidx.compose.foundation.style.ExperimentalFoundationStyleApi")
   }
 }
 
-private val composeStabilityConfig = layout.projectDirectory.file("compose-stability.conf")
-
-composeCompiler {
-  stabilityConfigurationFiles.add(composeStabilityConfig)
-}
-
-composeStabilityAnalyzer {
-  stabilityConfigurationFiles.add(composeStabilityConfig)
-}
-
 android {
   namespace = applicationId
-  compileSdk = 37
+  compileSdk = libs.versions.compileSdk.get().toInt()
 
   defaultConfig {
     applicationId = applicationId
-    minSdk = 28
-    targetSdk = 37
+    minSdk = libs.versions.minSdk.get().toInt()
+    targetSdk = libs.versions.targetSdk.get().toInt()
     versionCode = 1
     versionName = generateVersionName()
 
@@ -92,50 +81,31 @@ android {
     }
   }
 
-  val javaVersion = JavaVersion.VERSION_21
+  val javaVersion = JavaVersion.toVersion(jvmTargetVersion)
   compileOptions {
     sourceCompatibility = javaVersion
     targetCompatibility = javaVersion
   }
 
   buildFeatures {
-    compose = true
     buildConfig = true
   }
 
   testOptions {
     unitTests.isReturnDefaultValues = true
   }
-}
 
-sqldelight {
-  databases {
-    create("NoteMarkDatabase") {
-      packageName.set("com.dhimandasgupta.notemark.database")
-      generateAsync.set(true)
-    }
-  }
-}
-
-protobuf {
-  protoc {
-    artifact = libs.protobuf.protoc.get().toString()
-  }
-  generateProtoTasks {
-    all().forEach { task ->
-      task.builtins {
-        register("kotlin") {
-          option("lite")
-        }
-        register("java") {
-          option("lite")
-        }
-      }
-    }
+  lint {
+    // One consolidated report that also covers the library modules.
+    checkDependencies = true
   }
 }
 
 dependencies {
+  implementation(project(":common-core"))
+  implementation(project(":common-android"))
+  implementation(project(":common-data"))
+
   implementation(libs.androidx.ui.graphics)
   implementation(libs.androidx.material3.window.size.android)
   implementation(libs.androidx.work.runtime.ktx)
