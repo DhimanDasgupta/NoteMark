@@ -74,7 +74,7 @@ graph TD
     - `app/src/main/java/com/dhimandasgupta/notemark/app/di/MetroWorkerFactory.kt`: Custom `WorkerFactory` for Metro.
 - **Modified**:
     - `app/src/main/java/com/dhimandasgupta/notemark/app/NoteMarkApp.kt`: Initialize Metro graph and WorkManager.
-    - `app/src/main/java/com/dhimandasgupta/notemark/ui/activity/MainActivity.kt`: Provide graph via `CompositionLocalProvider`.
+    - `../../app/src/main/java/com/dhimandasgupta/notemark/app/activity/MainActivity.kt`: Provide graph via `CompositionLocalProvider`.
     - All `Entry.kt` files in `features/`: Retrieve presenters from Metro graph.
     - All Presenters, Repositories, and DataSources: Add `@Inject constructor()` and remove Koin imports.
     - `NoteSyncWorker.kt`: Use constructor injection.

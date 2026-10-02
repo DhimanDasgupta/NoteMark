@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.common.extensions.android
+package com.dhimandasgupta.notemark.app.extension
 
 import android.app.Application
 import android.content.Context
@@ -17,8 +17,8 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.await
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.app.activity.MainActivity
 import com.dhimandasgupta.notemark.app.work.NoteSyncWorker
-import com.dhimandasgupta.notemark.ui.activity.MainActivity
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration

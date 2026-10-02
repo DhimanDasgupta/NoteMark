@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.ui.activity
+package com.dhimandasgupta.notemark.app.activity
 
 import android.content.Intent
 import android.os.Bundle

@@ -21,7 +21,7 @@
             tools:targetApi="29" />
 
         <activity
-            android:name=".ui.activity.MainActivity"
+            android:name=".app.activity.MainActivity"
             android:configChanges="assetsPaths|colorMode|density|fontScale|fontWeightAdjustment|grammaticalGender|keyboard|keyboardHidden|layoutDirection|locale|mcc|mnc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|touchscreen|uiMode|resourcesUnused"
             android:exported="true"
             android:launchMode="singleTop"
