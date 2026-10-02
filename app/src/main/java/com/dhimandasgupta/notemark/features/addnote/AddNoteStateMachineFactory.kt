@@ -1,7 +1,7 @@
 package com.dhimandasgupta.notemark.features.addnote
 
 import androidx.compose.runtime.Immutable
-import com.dhimandasgupta.notemark.common.getCurrentIso8601Timestamp
+import com.dhimandasgupta.notemark.common.extensions.kotlin.getCurrentIso8601Timestamp
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.freeletics.flowredux2.FlowReduxStateMachineFactory as StateMachineFactory

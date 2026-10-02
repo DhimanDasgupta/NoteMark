@@ -3,7 +3,7 @@ package com.dhimandasgupta.notemark.util
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
-import com.dhimandasgupta.notemark.common.extensions.compose.RecompositionCountKey
+import com.dhimandasgupta.notemark.ui.designsystem.compose.RecompositionCountKey
 
 fun SemanticsNodeInteraction.assertRecompositionCount(expected: Int): SemanticsNodeInteraction {
   assert(

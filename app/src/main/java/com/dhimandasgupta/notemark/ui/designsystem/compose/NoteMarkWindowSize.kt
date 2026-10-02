@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.common.extensions.compose
+package com.dhimandasgupta.notemark.ui.designsystem.compose
 
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable

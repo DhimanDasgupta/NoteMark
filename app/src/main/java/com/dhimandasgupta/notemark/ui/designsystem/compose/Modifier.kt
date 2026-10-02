@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.common.extensions.compose
+package com.dhimandasgupta.notemark.ui.designsystem.compose
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource

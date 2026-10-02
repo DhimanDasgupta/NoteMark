@@ -1,7 +1,7 @@
 package com.dhimandasgupta.notemark.app.work
 
-import com.dhimandasgupta.notemark.common.getCurrentIso8601Timestamp
-import com.dhimandasgupta.notemark.common.isIsoTimestampAfter
+import com.dhimandasgupta.notemark.common.extensions.kotlin.getCurrentIso8601Timestamp
+import com.dhimandasgupta.notemark.common.extensions.kotlin.isIsoTimestampAfter
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.SyncRepository
 import com.dhimandasgupta.notemark.data.UserRepository

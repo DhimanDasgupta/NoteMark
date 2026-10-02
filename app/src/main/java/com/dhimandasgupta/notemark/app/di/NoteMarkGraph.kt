@@ -10,8 +10,6 @@ import app.cash.sqldelight.async.coroutines.synchronous
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.dhimandasgupta.notemark.BuildConfig
-import com.dhimandasgupta.notemark.common.storage.SyncSerializer
-import com.dhimandasgupta.notemark.common.storage.UserSerializer
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.NoteMarkRepositoryImpl
 import com.dhimandasgupta.notemark.data.SyncRepository
@@ -30,6 +28,8 @@ import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSource
 import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSourceImpl
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.data.remote.model.RefreshResponse
+import com.dhimandasgupta.notemark.data.storage.SyncSerializer
+import com.dhimandasgupta.notemark.data.storage.UserSerializer
 import com.dhimandasgupta.notemark.database.NoteMarkDatabase
 import com.dhimandasgupta.notemark.features.addnote.AddNotePresenter
 import com.dhimandasgupta.notemark.features.editnote.EditNotePresenter

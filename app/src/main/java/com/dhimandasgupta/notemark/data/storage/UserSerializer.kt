@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.common.storage
+package com.dhimandasgupta.notemark.data.storage
 
 import androidx.datastore.core.Serializer
 import com.dhimandasgupta.notemark.proto.User

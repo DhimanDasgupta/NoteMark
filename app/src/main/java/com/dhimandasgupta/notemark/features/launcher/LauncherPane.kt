@@ -54,12 +54,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType
-import com.dhimandasgupta.notemark.common.extensions.compose.getDeviceLayoutType
-import com.dhimandasgupta.notemark.ui.WindowSizePreviews
-import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
-import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkOutlinedButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
+import com.dhimandasgupta.notemark.ui.designsystem.compose.DeviceLayoutType
+import com.dhimandasgupta.notemark.ui.designsystem.compose.NoteMarkButton
+import com.dhimandasgupta.notemark.ui.designsystem.compose.NoteMarkOutlinedButton
+import com.dhimandasgupta.notemark.ui.designsystem.compose.WindowSizePreviews
+import com.dhimandasgupta.notemark.ui.designsystem.compose.getDeviceLayoutType
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive

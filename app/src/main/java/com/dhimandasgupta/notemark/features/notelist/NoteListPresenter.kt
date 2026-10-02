@@ -8,8 +8,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.dhimandasgupta.notemark.common.ImmutableListSerializer
 import com.dhimandasgupta.notemark.common.extensions.android.ConnectionState
+import com.dhimandasgupta.notemark.common.extensions.kotlinx.ImmutableListSerializer
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppEvent
 import com.dhimandasgupta.notemark.features.launcher.AppState.LoggedIn

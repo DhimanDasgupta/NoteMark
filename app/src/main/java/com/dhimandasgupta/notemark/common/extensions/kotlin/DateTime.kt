@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.common
+package com.dhimandasgupta.notemark.common.extensions.kotlin
 
 import java.text.DateFormatSymbols
 import java.util.Locale

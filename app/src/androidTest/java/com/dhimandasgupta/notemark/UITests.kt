@@ -3,8 +3,8 @@ package com.dhimandasgupta.notemark
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
-import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDotsTag
+import com.dhimandasgupta.notemark.ui.designsystem.compose.ThreeBouncingDots
+import com.dhimandasgupta.notemark.ui.designsystem.compose.ThreeBouncingDotsTag
 import com.dhimandasgupta.notemark.util.assertRecompositionCount
 import org.junit.Rule
 import org.junit.Test

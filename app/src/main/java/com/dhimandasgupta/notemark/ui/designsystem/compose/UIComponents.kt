@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.ui.designsystem
+package com.dhimandasgupta.notemark.ui.designsystem.compose
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -91,8 +91,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dhimandasgupta.notemark.R
-import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
-import com.dhimandasgupta.notemark.common.extensions.compose.trackRecompositions
+import com.dhimandasgupta.notemark.ui.designsystem.DisconnectedStateKey
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
+import com.dhimandasgupta.notemark.ui.designsystem.Shapes
 
 @Composable
 fun NoteMarkButton(

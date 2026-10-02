@@ -23,9 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.SecureFlagPolicy
-import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
-import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
+import com.dhimandasgupta.notemark.ui.designsystem.compose.WindowSizePreviews
+import com.dhimandasgupta.notemark.ui.designsystem.compose.lifecycleAwareDebouncedClickable
 
 @Composable
 fun NoteDeleteDialog(

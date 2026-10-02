@@ -3,7 +3,7 @@ package com.dhimandasgupta.notemark.data.local.datasource
 import androidx.datastore.core.DataStore
 import com.dhimandasgupta.notemark.app.di.UserDataStore
 import com.dhimandasgupta.notemark.common.extensions.coroutines.runCatchingCancelable
-import com.dhimandasgupta.notemark.common.storage.defaultUserValue
+import com.dhimandasgupta.notemark.data.storage.defaultUserValue
 import com.dhimandasgupta.notemark.proto.User
 import dev.zacsweers.metro.Inject
 import io.ktor.client.plugins.auth.providers.BearerTokens

@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.common
+package com.dhimandasgupta.notemark.common.extensions.kotlinx
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap

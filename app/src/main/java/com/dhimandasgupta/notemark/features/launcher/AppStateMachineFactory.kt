@@ -13,8 +13,8 @@ import com.dhimandasgupta.notemark.common.extensions.android.observeSyncRunning
 import com.dhimandasgupta.notemark.common.extensions.android.removeCreateNewNoteShortcut
 import com.dhimandasgupta.notemark.common.extensions.android.schedulePeriodicSync
 import com.dhimandasgupta.notemark.common.extensions.android.triggerOneTimeSync
-import com.dhimandasgupta.notemark.common.getDifferenceFromTimestampInMinutes
-import com.dhimandasgupta.notemark.common.parseIsoInstantOrNull
+import com.dhimandasgupta.notemark.common.extensions.kotlin.getDifferenceFromTimestampInMinutes
+import com.dhimandasgupta.notemark.common.extensions.kotlin.parseIsoInstantOrNull
 import com.dhimandasgupta.notemark.data.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.SyncRepository
 import com.dhimandasgupta.notemark.data.UserRepository

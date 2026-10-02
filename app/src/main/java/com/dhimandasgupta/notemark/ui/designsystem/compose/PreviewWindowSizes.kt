@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.ui
+package com.dhimandasgupta.notemark.ui.designsystem.compose
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES

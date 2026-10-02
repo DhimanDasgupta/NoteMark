@@ -23,9 +23,9 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.dhimandasgupta.notemark.ui.WindowSizePreviews
-import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkDivider
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
+import com.dhimandasgupta.notemark.ui.designsystem.compose.NoteMarkDivider
+import com.dhimandasgupta.notemark.ui.designsystem.compose.WindowSizePreviews
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
