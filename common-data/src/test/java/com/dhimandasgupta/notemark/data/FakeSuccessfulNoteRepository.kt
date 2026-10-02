@@ -1,0 +1,122 @@
+package com.dhimandasgupta.notemark.data
+
+import androidx.paging.PagingData
+import com.dhimandasgupta.notemark.data.remote.model.Note
+import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
+import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
+import com.dhimandasgupta.notemark.data.remote.model.extension.toNote
+import com.dhimandasgupta.notemark.data.repository.NoteMarkRepository
+import com.dhimandasgupta.notemark.database.NoteEntity
+import kotlin.Long
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+
+class FakeSuccessfulNoteRepository : NoteMarkRepository {
+  override fun getPagedNotes(pageSize: Int): Flow<PagingData<NoteEntity>> =
+    flowOf(value = PagingData.from(data = listOf(noteEntity)))
+
+  override fun getNotesFromOffSetWithLimitAsList(
+    limit: Long,
+    offset: Long,
+  ): List<NoteEntity> = listOf(noteEntity)
+
+  override fun getNotesFromOffSetWithLimit(
+    limit: Long,
+    offset: Long,
+  ): Flow<List<NoteEntity>> = flowOf(value = listOf(noteEntity))
+
+  override fun getAllNotes(): Flow<List<NoteEntity>> = flowOf(value = listOf(noteEntity))
+
+  override suspend fun getRemoteNotes(
+    page: Int,
+    size: Int,
+  ): Result<NoteResponse> =
+    Result.success(
+      value =
+        NoteResponse(
+          notes = listOf(noteEntity.toNote()),
+          total = 1,
+        )
+    )
+
+  override suspend fun getRemoteNotesAndSaveInDB(
+    page: Int,
+    size: Int,
+  ): Result<NoteResponse> =
+    Result.success(
+      value =
+        NoteResponse(
+          notes = listOf(noteEntity.toNote()),
+          total = 1,
+        )
+    )
+
+  override suspend fun getAllNonSyncedNotes(): List<NoteEntity> = listOf(noteEntity)
+
+  override suspend fun getAllMarkedAsDeletedNotes(): List<NoteEntity> = listOf(noteEntity)
+
+  override suspend fun getNoteById(noteId: Long): NoteEntity = noteEntity
+
+  override suspend fun getNoteByUUID(uuid: String): NoteEntity = noteEntity
+
+  override suspend fun createNote(noteEntity: NoteEntity): NoteEntity = noteEntity
+
+  override suspend fun updateLocalNote(
+    title: String,
+    content: String,
+    lastEditedAt: String,
+    noteEntity: NoteEntity,
+  ): NoteEntity = noteEntity
+
+  override suspend fun createNewRemoteNote(noteEntity: NoteEntity): Boolean = true
+
+  override suspend fun updateRemoteNote(
+    title: String,
+    content: String,
+    lastEditedAt: String,
+    noteEntity: NoteEntity,
+  ): Boolean = true
+
+  override suspend fun insertNotes(noteEntities: List<NoteEntity>): Boolean = true
+
+  override suspend fun markAsDeleted(noteEntity: NoteEntity): Boolean = true
+
+  override suspend fun deleteRemoteNote(noteEntity: NoteEntity): Boolean = true
+
+  override suspend fun deleteLocalNote(noteEntity: NoteEntity): Boolean = true
+
+  override suspend fun deleteAllLocalNotes(): Boolean = true
+
+  override suspend fun getAllNotesForSync(): List<NoteEntity> = listOf(noteEntity)
+
+  override suspend fun insertRemoteNotesIfMissing(remoteNotes: List<Note>): Boolean = true
+
+  override suspend fun replaceWithRemoteNote(
+    remoteNote: Note,
+    expectedLastEditedAt: String,
+  ): Boolean = true
+
+  override suspend fun markSyncedIfUnchanged(
+    uuid: String,
+    lastEditedAt: String,
+  ): Boolean = true
+
+  override suspend fun deleteSyncedNoteIfUnchanged(
+    uuid: String,
+    lastEditedAt: String,
+  ): Boolean = true
+
+  override suspend fun logout(request: RefreshRequest): Result<Unit> = Result.success(Unit)
+}
+
+private val noteEntity =
+  NoteEntity(
+    id = 1,
+    uuid = "some-uuid",
+    title = "title",
+    content = "content",
+    createdAt = "2025-06-29T19:18:24.369Z",
+    lastEditedAt = "2025-06-29T19:18:24.369Z",
+    synced = true,
+    markAsDeleted = false,
+  )

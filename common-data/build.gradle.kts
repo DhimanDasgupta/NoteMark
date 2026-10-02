@@ -52,4 +52,7 @@ dependencies {
 
   implementation(libs.sql.delight.coroutines.extensions)
   implementation(libs.sql.delight.paging3.extensions)
+
+  // junit and kotlin("test") come from the library convention plugin.
+  testImplementation(libs.kotlinx.coroutines.test)
 }
