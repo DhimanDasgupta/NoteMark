@@ -1,6 +1,7 @@
 package com.dhimandasgupta.notemark.features.addnote
 
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.style.Style
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 internal fun AddNoteEntry(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   addNotePresenter: AddNotePresenter,
   navigateUp: () -> Unit,
 ) {
@@ -41,6 +43,7 @@ internal fun AddNoteEntry(
   // UI data, actions, navigation and events passing to UI
   AddNotePane(
     modifier = modifier,
+    style = style,
     addNoteUiModel = { addNoteUiModel },
     addNoteAction = { action -> addNoteAction(action) },
     onBackClicked = { navigateUp() },

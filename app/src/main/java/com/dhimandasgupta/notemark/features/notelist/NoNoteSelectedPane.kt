@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.styleable
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
@@ -20,10 +22,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun NoNoteSelectedPane(modifier: Modifier = Modifier) {
+fun NoNoteSelectedPane(
+  modifier: Modifier = Modifier,
+  style: Style = Style,
+) {
   Box(
     contentAlignment = Alignment.Center,
-    modifier = modifier.fillMaxSize(),
+    modifier = modifier.styleable(null, style).fillMaxSize(),
   ) {
     Text(
       text = "Please select a note from the list..",

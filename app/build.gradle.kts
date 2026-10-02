@@ -42,7 +42,18 @@ private fun generateVersionName(): String {
 kotlin {
   compilerOptions {
     jvmTarget.set(JvmTarget.JVM_21)
+    freeCompilerArgs.add("-opt-in=androidx.compose.foundation.style.ExperimentalFoundationStyleApi")
   }
+}
+
+private val composeStabilityConfig = layout.projectDirectory.file("compose-stability.conf")
+
+composeCompiler {
+  stabilityConfigurationFiles.add(composeStabilityConfig)
+}
+
+composeStabilityAnalyzer {
+  stabilityConfigurationFiles.add(composeStabilityConfig)
 }
 
 android {

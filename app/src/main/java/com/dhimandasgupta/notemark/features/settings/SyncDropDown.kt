@@ -2,11 +2,11 @@ package com.dhimandasgupta.notemark.features.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.styleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DropdownMenu
@@ -24,6 +24,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkDivider
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -31,6 +32,7 @@ import kotlinx.collections.immutable.persistentListOf
 @Composable
 fun SyncDropDown(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   selectedSyncInterval: String,
   syncIntervals: ImmutableList<String>,
   toggleDropDownVisibility: () -> Unit,
@@ -39,6 +41,7 @@ fun SyncDropDown(
   Box(
     modifier =
       modifier
+        .styleable(null, style)
         .fillMaxWidth()
         .wrapContentSize(Alignment.TopEnd) // Aligns the IconButton and thus the menu
         .padding(all = 16.dp)
@@ -82,12 +85,7 @@ fun SyncDropDown(
         )
 
         if (index != syncIntervals.lastIndex) {
-          Spacer(
-            modifier =
-              Modifier.fillMaxWidth()
-                .height(height = 1.dp)
-                .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
-          )
+          NoteMarkDivider()
         }
       }
     }

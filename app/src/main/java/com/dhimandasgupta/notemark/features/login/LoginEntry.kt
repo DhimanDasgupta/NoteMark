@@ -1,6 +1,7 @@
 package com.dhimandasgupta.notemark.features.login
 
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.style.Style
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 internal fun LoginEntry(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   loginPresenter: LoginPresenter,
   navigateToRegistration: () -> Unit,
   navigateToAfterLogin: () -> Unit,
@@ -40,6 +42,7 @@ internal fun LoginEntry(
   // UI data, actions, navigation and events passing to UI
   LoginPane(
     modifier = modifier,
+    style = style,
     loginUiModel = { loginUiModel },
     loginAction = { action -> loginEvents(action) },
     navigateToRegistration = { navigateToRegistration() },

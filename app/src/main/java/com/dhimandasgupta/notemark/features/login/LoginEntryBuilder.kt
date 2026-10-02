@@ -1,5 +1,6 @@
 package com.dhimandasgupta.notemark.features.login
 
+import androidx.compose.foundation.style.Style
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Modifier
@@ -10,7 +11,8 @@ import com.dhimandasgupta.notemark.app.nav.LoginNavKey
 
 @Composable
 fun EntryProviderScope<NavKey>.LoginEntryBuilder(
-  modifier: Modifier,
+  modifier: Modifier = Modifier,
+  style: Style = Style,
   navigateToRegistration: () -> Unit,
   navigateToAfterLogin: () -> Unit,
 ) {
@@ -20,6 +22,7 @@ fun EntryProviderScope<NavKey>.LoginEntryBuilder(
 
     LoginEntry(
       modifier = modifier,
+      style = style,
       loginPresenter = loginPresenter,
       navigateToRegistration = navigateToRegistration,
       navigateToAfterLogin = navigateToAfterLogin,

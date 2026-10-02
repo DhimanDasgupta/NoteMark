@@ -1,7 +1,5 @@
 package com.dhimandasgupta.notemark.features.notelist
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,14 +10,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.styleable
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -32,6 +30,7 @@ import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 @Composable
 fun NoteDeleteDialog(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   noteId: String,
   onDelete: (String) -> Unit = {},
   onDismiss: () -> Unit = {},
@@ -49,14 +48,7 @@ fun NoteDeleteDialog(
         modifier
           .padding(all = 16.dp)
           .wrapContentSize()
-          .clip(shape = shapes.medium)
-          .border(
-            width = 0.5.dp,
-            color = colorScheme.onSurfaceVariant,
-            shape = shapes.medium,
-          )
-          .background(color = colorScheme.surfaceContainerLowest)
-          .padding(all = 24.dp),
+          .styleable(null, NoteMarkTheme.styles.dialogStyle, style),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center,
     ) {

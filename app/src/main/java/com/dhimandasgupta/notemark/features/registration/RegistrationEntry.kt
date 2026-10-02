@@ -1,6 +1,7 @@
 package com.dhimandasgupta.notemark.features.registration
 
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.style.Style
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 internal fun RegistrationEntry(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   registrationPresenter: RegistrationPresenter,
   navigateToLoginFromRegistration: () -> Unit,
 ) {
@@ -41,6 +43,7 @@ internal fun RegistrationEntry(
   // UI data, actions, navigation and events passing to UI
   RegistrationPane(
     modifier = modifier,
+    style = style,
     registrationUiModel = { registrationUiModel },
     navigateToLogin = { navigateToLoginFromRegistration() },
     registrationAction = { action -> registrationAction(action) },

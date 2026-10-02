@@ -8,10 +8,12 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -19,7 +21,6 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
@@ -27,7 +28,10 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.rememberUpdatedStyleState
+import androidx.compose.foundation.style.styleable
+import androidx.compose.foundation.style.then
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -46,7 +50,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -61,6 +64,7 @@ import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebou
 import com.dhimandasgupta.notemark.features.launcher.AppAction
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkDivider
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
@@ -70,6 +74,7 @@ import kotlinx.coroutines.flow.filter
 @Composable
 internal fun SettingsPane(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   settingsUiModel: () -> SettingsUiModel,
   settingsAction: (AppAction) -> Unit = {},
   onDeleteNoteCheckChanged: () -> Unit = {},
@@ -94,6 +99,7 @@ internal fun SettingsPane(
   Column(
     modifier =
       modifier
+        .styleable(null, style)
         .background(color = colorScheme.surfaceContainerLowest)
         .fillMaxSize()
         .verticalScroll(rememberScrollState()),
@@ -128,12 +134,13 @@ internal fun SettingsPane(
 @Composable
 private fun SettingsToolbar(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   onBackClicked: () -> Unit = {},
 ) {
   Row(
     modifier =
       modifier
-        .background(color = colorScheme.surfaceContainerLowest)
+        .styleable(null, NoteMarkTheme.styles.toolbarStyle, style)
         .fillMaxWidth()
         .padding(
           start =
@@ -179,6 +186,7 @@ private fun SettingsToolbar(
 @Composable
 private fun SettingsBody(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   settingsUiModel: () -> SettingsUiModel,
   showSyncInterval: Boolean = false,
   toggleSyncIntervalVisibility: () -> Unit = {},
@@ -192,7 +200,7 @@ private fun SettingsBody(
   // well. With primitives, only the row whose value changed recomposes.
   val model = settingsUiModel()
 
-  Box(modifier = modifier.fillMaxSize()) {
+  Box(modifier = modifier.styleable(null, style).fillMaxSize()) {
     Column(
       modifier =
         Modifier.background(color = colorScheme.surfaceContainerLowest)
@@ -268,21 +276,41 @@ private fun SettingsBody(
 }
 
 @Composable
-private fun SyncIntervalRow(
+private fun SettingsRow(
   modifier: Modifier = Modifier,
-  selectedSyncInterval: String,
-  toggleSyncIntervalVisibility: () -> Unit,
+  style: Style = Style,
+  enabled: Boolean = true,
+  onClick: () -> Unit,
+  content: @Composable RowScope.() -> Unit,
 ) {
+  val interactionSource = remember { MutableInteractionSource() }
+  val styleState = rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }
+
   Row(
     modifier =
       modifier
         .fillMaxWidth()
-        .clip(shape = RoundedCornerShape(size = 8.dp))
-        .combinedClickable(onClick = toggleSyncIntervalVisibility)
-        .padding(vertical = 16.dp),
+        .combinedClickable(
+          interactionSource = interactionSource,
+          indication = null,
+          enabled = enabled,
+          onClick = onClick,
+        )
+        .styleable(styleState, NoteMarkTheme.styles.settingsRowStyle, style),
     horizontalArrangement = Arrangement.spacedBy(space = 0.dp),
     verticalAlignment = Alignment.CenterVertically,
-  ) {
+    content = content,
+  )
+}
+
+@Composable
+private fun SyncIntervalRow(
+  modifier: Modifier = Modifier,
+  style: Style = Style,
+  selectedSyncInterval: String,
+  toggleSyncIntervalVisibility: () -> Unit,
+) {
+  SettingsRow(modifier = modifier, style = style, onClick = toggleSyncIntervalVisibility) {
     Icon(
       painter = painterResource(id = R.drawable.ic_clock),
       contentDescription = "Sync Interval",
@@ -318,19 +346,16 @@ private fun SyncIntervalRow(
 @Composable
 private fun SyncDataRow(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   isSyncing: Boolean,
   lastSynced: String,
   onSyncNowClicked: () -> Unit = {},
 ) {
-  Row(
-    modifier =
-      modifier
-        .fillMaxWidth()
-        .clip(shape = RoundedCornerShape(size = 8.dp))
-        .combinedClickable(enabled = !isSyncing, onClick = onSyncNowClicked)
-        .padding(vertical = 16.dp),
-    horizontalArrangement = Arrangement.spacedBy(space = 0.dp),
-    verticalAlignment = Alignment.CenterVertically,
+  SettingsRow(
+    modifier = modifier,
+    style = style,
+    enabled = !isSyncing,
+    onClick = onSyncNowClicked,
   ) {
     // The transition is only composed while syncing. Creating it unconditionally would keep the
     // animation clock running for as long as this screen is shown, so the frame loop would never
@@ -376,12 +401,19 @@ private fun SyncDataRow(
 
 /** [modifier] is appended last so it wraps the sized icon, matching the original chain. */
 @Composable
-private fun SyncIcon(modifier: Modifier = Modifier) {
+private fun SyncIcon(
+  modifier: Modifier = Modifier,
+  style: Style = Style,
+) {
   Icon(
     painter = painterResource(id = R.drawable.ic_sync),
     contentDescription = "Sync Data",
     tint = colorScheme.onSurface,
-    modifier = Modifier.padding(horizontal = 8.dp).requiredSize(size = 24.dp).then(modifier),
+    modifier =
+      Modifier.padding(horizontal = 8.dp)
+        .requiredSize(size = 24.dp)
+        .then(modifier)
+        .styleable(null, style),
   )
 }
 
@@ -408,19 +440,11 @@ private fun RotatingSyncIcon() {
 @Composable
 private fun DeleteLocalDataRow(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   deleteLocalNotesOnLogout: Boolean,
   onCheckChange: () -> Unit,
 ) {
-  Row(
-    modifier =
-      modifier
-        .fillMaxWidth()
-        .clip(shape = RoundedCornerShape(size = 8.dp))
-        .combinedClickable(onClick = onCheckChange)
-        .padding(vertical = 16.dp),
-    horizontalArrangement = Arrangement.spacedBy(space = 0.dp),
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
+  SettingsRow(modifier = modifier, style = style, onClick = onCheckChange) {
     Text(
       text = "Delete local notes when logging out?",
       style = typography.titleSmall,
@@ -440,22 +464,16 @@ private fun DeleteLocalDataRow(
 @Composable
 private fun LogoutRow(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   isConnected: Boolean,
   onLogoutClicked: () -> Unit,
 ) {
-  Row(
-    modifier =
-      modifier
-        .fillMaxWidth()
-        .clip(shape = RoundedCornerShape(size = 8.dp))
-        .combinedClickable(
-          onClick = {
-            if (isConnected) onLogoutClicked() else Unit
-          }
-        )
-        .padding(vertical = 16.dp),
-    horizontalArrangement = Arrangement.spacedBy(space = 0.dp),
-    verticalAlignment = Alignment.CenterVertically,
+  SettingsRow(
+    modifier = modifier,
+    style = style,
+    onClick = {
+      if (isConnected) onLogoutClicked() else Unit
+    },
   ) {
     Icon(
       painter = painterResource(id = R.drawable.ic_log_out),
@@ -476,6 +494,7 @@ private fun LogoutRow(
 @Composable
 private fun AppVersion(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   appVersionName: String,
 ) {
   Text(
@@ -485,6 +504,7 @@ private fun AppVersion(
     textAlign = TextAlign.Right,
     modifier =
       modifier
+        .styleable(null, style)
         .padding(all = 16.dp)
         .fillMaxWidth()
         .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
@@ -492,13 +512,13 @@ private fun AppVersion(
 }
 
 @Composable
-private fun Divider(modifier: Modifier = Modifier) {
-  Spacer(
-    modifier =
-      modifier
-        .fillMaxWidth()
-        .height(height = 1.dp)
-        .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
+private fun Divider(
+  modifier: Modifier = Modifier,
+  style: Style = Style,
+) {
+  NoteMarkDivider(
+    modifier = modifier,
+    style = NoteMarkTheme.styles.settingsDividerStyle then style,
   )
 }
 

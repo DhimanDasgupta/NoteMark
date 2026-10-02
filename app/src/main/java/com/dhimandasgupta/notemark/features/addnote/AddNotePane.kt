@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -22,6 +21,8 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.styleable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -60,6 +61,7 @@ import com.dhimandasgupta.notemark.common.extensions.compose.alignToSafeDrawing
 import com.dhimandasgupta.notemark.common.extensions.compose.getDeviceLayoutType
 import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkDivider
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
@@ -69,6 +71,7 @@ import kotlinx.coroutines.flow.filter
 @Composable
 internal fun AddNotePane(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   addNoteUiModel: () -> AddNoteUiModel,
   addNoteAction: (AddNoteAction) -> Unit = {},
   onBackClicked: () -> Unit = {},
@@ -95,6 +98,7 @@ internal fun AddNotePane(
   Column(
     modifier =
       modifier
+        .styleable(null, style)
         .background(color = colorScheme.surfaceContainerLowest)
         .fillMaxWidth()
         .wrapContentHeight(align = Alignment.Top),
@@ -130,13 +134,14 @@ internal fun AddNotePane(
 @Composable
 private fun AddNoteToolbar(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   onBackClicked: () -> Unit = {},
   onSaveClicked: () -> Unit = {},
 ) {
   Row(
     modifier =
       modifier
-        .background(color = colorScheme.surfaceContainerLowest)
+        .styleable(null, NoteMarkTheme.styles.toolbarStyle, style)
         .fillMaxWidth()
         .padding(
           start =
@@ -188,6 +193,7 @@ private fun AddNoteToolbar(
 @Composable
 private fun AddNoteBody(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   addNoteUiModel: () -> AddNoteUiModel,
   addNoteAction: (AddNoteAction) -> Unit = {},
 ) {
@@ -199,6 +205,7 @@ private fun AddNoteBody(
   Box(
     modifier =
       modifier
+        .styleable(null, style)
         .fillMaxSize()
         .padding(
           bottom =
@@ -211,8 +218,7 @@ private fun AddNoteBody(
   ) {
     Column(
       modifier =
-        modifier
-          .fillMaxWidth()
+        Modifier.fillMaxSize()
           .verticalScroll(scrollState)
           .windowInsetsPadding(insets = WindowInsets.ime)
           .padding(vertical = 16.dp),
@@ -229,19 +235,9 @@ private fun AddNoteBody(
         onNextClicked = { focusManager.moveFocus(FocusDirection.Next) },
       )
 
-      Box(
-        modifier =
-          Modifier.fillMaxWidth()
-            .height(height = 1.dp)
-            .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
-      )
+      NoteMarkDivider()
 
-      Box(
-        modifier =
-          Modifier.fillMaxWidth()
-            .height(height = 1.dp)
-            .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
-      )
+      NoteMarkDivider()
 
       AddNoteContentField(
         modifier =
@@ -259,6 +255,7 @@ private fun AddNoteBody(
 @Composable
 private fun AddNoteTitleField(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   initialTitle: String,
   onTitleChanged: (String) -> Unit,
   onNextClicked: () -> Unit,
@@ -276,7 +273,7 @@ private fun AddNoteTitleField(
     value = title,
     onValueChange = { value -> title = value },
     textStyle = typography.titleLarge,
-    modifier = modifier,
+    modifier = modifier.styleable(null, style),
     visualTransformation = VisualTransformation.None,
     placeholder = { Text(text = "Note title", style = typography.titleLarge) },
     colors = addNoteTextFieldColors(),
@@ -293,6 +290,7 @@ private fun AddNoteTitleField(
 @Composable
 private fun AddNoteContentField(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   initialContent: String,
   onContentChanged: (String) -> Unit,
 ) {
@@ -309,7 +307,7 @@ private fun AddNoteContentField(
     value = body,
     onValueChange = { value -> body = value },
     textStyle = typography.bodyLarge,
-    modifier = modifier,
+    modifier = modifier.styleable(null, style),
     visualTransformation = VisualTransformation.None,
     placeholder = {
       Text(

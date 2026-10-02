@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.styleable
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
@@ -65,6 +67,7 @@ import kotlinx.coroutines.isActive
 @Composable
 internal fun LauncherPane(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   launcherUiModel: () -> LauncherUiModel,
   navigateToAfterLogin: () -> Unit = {},
   navigateToLogin: () -> Unit = {},
@@ -106,7 +109,10 @@ internal fun LauncherPane(
 
   Box(
     modifier =
-      modifier.fillMaxSize().background(color = colorResource(id = R.color.splash_blue_background))
+      modifier
+        .styleable(null, style)
+        .fillMaxSize()
+        .background(color = colorResource(id = R.color.splash_blue_background))
   ) {
     when (val layoutType = getDeviceLayoutType()) {
       DeviceLayoutType.PHONE_PORTRAIT -> {
@@ -142,13 +148,14 @@ internal fun LauncherPane(
 @Composable
 private fun LandingPanePortrait(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   deviceLayoutType: DeviceLayoutType,
   navigateToAfterLogin: () -> Unit = {},
   navigateToLogin: () -> Unit = {},
   radius: () -> Float,
 ) {
   Box(
-    modifier = modifier.fillMaxSize(),
+    modifier = modifier.styleable(null, style).fillMaxSize(),
     contentAlignment = Alignment.BottomCenter,
   ) {
     Image(
@@ -156,15 +163,14 @@ private fun LandingPanePortrait(
       contentDescription = null,
       contentScale = ContentScale.FillHeight,
       modifier =
-        modifier.aspectRatio(ratio = 0.8f).align(Alignment.TopCenter).graphicsLayer {
+        Modifier.aspectRatio(ratio = 0.8f).align(Alignment.TopCenter).graphicsLayer {
           applyBlurEffect(radius)
         },
     )
 
     ForegroundPane(
       modifier =
-        modifier
-          .clip(
+        Modifier.clip(
             shape =
               RoundedCornerShape(
                 topStart = 16.dp,
@@ -192,13 +198,14 @@ private fun LandingPanePortrait(
 @Composable
 private fun LandingPaneLandscape(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   deviceLayoutType: DeviceLayoutType,
   navigateToAfterLogin: () -> Unit = {},
   navigateToLogin: () -> Unit = {},
   radius: () -> Float,
 ) {
   Row(
-    modifier = modifier.fillMaxSize(),
+    modifier = modifier.styleable(null, style).fillMaxSize(),
     horizontalArrangement = Arrangement.SpaceBetween,
     verticalAlignment = Alignment.CenterVertically,
   ) {
@@ -207,15 +214,14 @@ private fun LandingPaneLandscape(
       contentDescription = null,
       contentScale = ContentScale.FillHeight,
       modifier =
-        modifier.fillMaxHeight(0.65f).graphicsLayer {
+        Modifier.fillMaxHeight(0.65f).graphicsLayer {
           applyBlurEffect(radius)
         },
     )
 
     ForegroundPane(
       modifier =
-        modifier
-          .wrapContentSize(align = Alignment.Center)
+        Modifier.wrapContentSize(align = Alignment.Center)
           .clip(
             shape =
               RoundedCornerShape(
@@ -245,13 +251,14 @@ private fun LandingPaneLandscape(
 @Composable
 private fun LandingPaneTablet(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   deviceLayoutType: DeviceLayoutType,
   navigateToAfterLogin: () -> Unit = {},
   navigateToLogin: () -> Unit = {},
   radius: () -> Float,
 ) {
   Column(
-    modifier = modifier.fillMaxSize(),
+    modifier = modifier.styleable(null, style).fillMaxSize(),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Center,
   ) {
@@ -267,8 +274,7 @@ private fun LandingPaneTablet(
 
     ForegroundPane(
       modifier =
-        modifier
-          .fillMaxWidth(fraction = 0.85f)
+        Modifier.fillMaxWidth(fraction = 0.85f)
           .clip(
             shape =
               RoundedCornerShape(
@@ -297,12 +303,13 @@ private fun LandingPaneTablet(
 @Composable
 private fun ForegroundPane(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   navigateToAfterLogin: () -> Unit = {},
   navigateToLogin: () -> Unit = {},
   deviceLayoutType: DeviceLayoutType,
 ) {
   Column(
-    modifier = modifier.padding(top = 8.dp, bottom = 16.dp),
+    modifier = modifier.styleable(null, style).padding(top = 8.dp, bottom = 16.dp),
     verticalArrangement = Arrangement.Center,
     horizontalAlignment =
       when (deviceLayoutType) {

@@ -1,5 +1,6 @@
 package com.dhimandasgupta.notemark.features.addnote
 
+import androidx.compose.foundation.style.Style
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
@@ -13,7 +14,8 @@ import com.dhimandasgupta.notemark.app.nav.NoteCreateNavKey
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun EntryProviderScope<NavKey>.NoteCreateEntryBuilder(
-  modifier: Modifier,
+  modifier: Modifier = Modifier,
+  style: Style = Style,
   navigateUp: () -> Unit,
 ) {
   entry<NoteCreateNavKey>(metadata = ListDetailSceneStrategy.detailPane()) {
@@ -22,6 +24,7 @@ fun EntryProviderScope<NavKey>.NoteCreateEntryBuilder(
 
     AddNoteEntry(
       modifier = modifier,
+      style = style,
       addNotePresenter = addNotePresenter,
       navigateUp = navigateUp,
     )

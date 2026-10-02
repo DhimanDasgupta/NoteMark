@@ -1,6 +1,7 @@
 package com.dhimandasgupta.notemark.features.notelist
 
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.style.Style
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 internal fun NoteListEntry(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   noteListPresenter: NoteListPresenter,
   navigateToLauncherIfLoggedOut: () -> Unit,
   navigateToAdd: () -> Unit,
@@ -45,6 +47,7 @@ internal fun NoteListEntry(
   // UI data, actions, navigation and events passing to UI
   NoteListPane(
     modifier = modifier,
+    style = style,
     noteListUiModel = { noteListUiModel },
     noteListAction = { action -> noteListAction(action) },
     appAction = { action -> appAction(action) },

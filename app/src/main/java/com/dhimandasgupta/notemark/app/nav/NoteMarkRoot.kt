@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.styleable
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
@@ -30,6 +32,7 @@ import kotlinx.collections.immutable.persistentListOf
 @Composable
 fun NoteMarkRoot(
   modifier: Modifier,
+  style: Style = Style,
   initialKeys: PersistentList<NavKey> = persistentListOf(LauncherNavKey),
 ) {
   val backStack = rememberNavBackStack(*initialKeys.toTypedArray())
@@ -43,9 +46,9 @@ fun NoteMarkRoot(
     }
   }
 
-  SharedTransitionLayout(modifier = modifier) {
+  SharedTransitionLayout(modifier = modifier.styleable(null, style)) {
     NavDisplay(
-      modifier = modifier.fillMaxSize(),
+      modifier = Modifier.fillMaxSize(),
       backStack = backStack,
       entryDecorators = decorators,
       sceneStrategies = listOf(sceneStrategy),
@@ -84,7 +87,6 @@ fun NoteMarkRoot(
       entryProvider =
         entryProvider {
           LauncherEntryBuilder(
-            modifier = modifier,
             navigateAfterLogin = {
               backStack.apply {
                 clearPreLoginKeys()
@@ -96,7 +98,6 @@ fun NoteMarkRoot(
             },
           )
           LoginEntryBuilder(
-            modifier = modifier,
             navigateToRegistration = {
               backStack.add(RegistrationNavKey)
             },
@@ -108,13 +109,11 @@ fun NoteMarkRoot(
             },
           )
           RegistrationEntryBuilder(
-            modifier = modifier,
             navigateToLoginFromRegistration = {
               backStack.removeLastOrNull()
-            },
+            }
           )
           NoteListEntryBuilder(
-            modifier = modifier,
             navigateToLauncherIfLoggedOut = {
               backStack.apply {
                 clearPostLoginNavKeys()
@@ -137,19 +136,16 @@ fun NoteMarkRoot(
             },
           )
           NoteCreateEntryBuilder(
-            modifier = modifier,
             navigateUp = {
               backStack.removeLastOrNull()
-            },
+            }
           )
           NoteEditEntryBuilder(
-            modifier = modifier,
             navigateUp = {
               backStack.clearNoteEditNavKeys()
-            },
+            }
           )
           SettingsEntryBuilder(
-            modifier = modifier,
             navigateToLauncherAfterLogout = {
               backStack.apply {
                 clearPostLoginNavKeys()

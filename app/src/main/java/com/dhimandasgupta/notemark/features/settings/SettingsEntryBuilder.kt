@@ -1,5 +1,6 @@
 package com.dhimandasgupta.notemark.features.settings
 
+import androidx.compose.foundation.style.Style
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
@@ -13,7 +14,8 @@ import com.dhimandasgupta.notemark.app.nav.SettingsNavKey
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun EntryProviderScope<NavKey>.SettingsEntryBuilder(
-  modifier: Modifier,
+  modifier: Modifier = Modifier,
+  style: Style = Style,
   navigateToLauncherAfterLogout: () -> Unit,
   navigateUp: () -> Unit,
 ) {
@@ -23,6 +25,7 @@ fun EntryProviderScope<NavKey>.SettingsEntryBuilder(
 
     SettingsEntry(
       modifier = modifier,
+      style = style,
       settingsPresenter = settingsPresenter,
       navigateToLauncherAfterLogout = navigateToLauncherAfterLogout,
       navigateUp = navigateUp,

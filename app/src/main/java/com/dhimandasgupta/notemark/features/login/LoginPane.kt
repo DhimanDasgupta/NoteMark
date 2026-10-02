@@ -20,7 +20,10 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.contentPadding
+import androidx.compose.foundation.style.styleable
+import androidx.compose.foundation.style.then
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
@@ -36,7 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -61,6 +63,7 @@ import com.dhimandasgupta.notemark.features.login.LoginAction.PasswordEntered
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkPasswordTextField
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkStyles
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTextField
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.coroutines.FlowPreview
@@ -71,6 +74,7 @@ import kotlinx.coroutines.flow.filterNotNull
 @Composable
 internal fun LoginPane(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   loginUiModel: () -> LoginUiModel,
   loginAction: (LoginAction) -> Unit = {},
   navigateToAfterLogin: () -> Unit = {},
@@ -95,7 +99,11 @@ internal fun LoginPane(
   }
 
   Box(
-    modifier = modifier.background(color = colorResource(id = R.color.splash_blue)).fillMaxSize()
+    modifier =
+      modifier
+        .styleable(null, style)
+        .background(color = colorResource(id = R.color.splash_blue))
+        .fillMaxSize()
   ) {
     val layoutType = getDeviceLayoutType()
 
@@ -130,6 +138,7 @@ internal fun LoginPane(
 @Composable
 private fun PhoneLandscapeLayout(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   loginUiModel: () -> LoginUiModel,
   loginAction: (LoginAction) -> Unit = {},
   navigateToRegistration: () -> Unit = {},
@@ -138,16 +147,8 @@ private fun PhoneLandscapeLayout(
     modifier =
       modifier
         .padding(top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding() + 8.dp)
-        .clip(
-          shape =
-            RoundedCornerShape(
-              topStart = 16.dp,
-              topEnd = 16.dp,
-            )
-        )
-        .background(color = colorScheme.surfaceContainerLowest)
         .fillMaxSize()
-        .padding(all = 16.dp),
+        .styleable(null, NoteMarkTheme.styles.authSheetStyle, style),
     horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
     verticalAlignment = Alignment.Top,
   ) {
@@ -181,9 +182,15 @@ private fun PhoneLandscapeLayout(
   }
 }
 
+/** Auth sheet with the wider tablet gutters and no bottom padding. */
+private val TabletAuthSheetStyle =
+  NoteMarkStyles.authSheetStyle then
+    Style { contentPadding(start = 64.dp, top = 64.dp, end = 64.dp, bottom = 0.dp) }
+
 @Composable
 private fun TabletLayout(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   loginUiModel: () -> LoginUiModel,
   loginAction: (LoginAction) -> Unit = {},
   navigateToRegistration: () -> Unit = {},
@@ -198,16 +205,8 @@ private fun TabletLayout(
           end =
             WindowInsets.systemBars.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
         )
-        .clip(
-          shape =
-            RoundedCornerShape(
-              topStart = 16.dp,
-              topEnd = 16.dp,
-            )
-        )
-        .background(color = colorScheme.surfaceContainerLowest)
         .fillMaxSize()
-        .padding(start = 64.dp, end = 64.dp, top = 64.dp)
+        .styleable(null, TabletAuthSheetStyle, style)
         .verticalScroll(state = rememberScrollState()),
     verticalArrangement = Arrangement.spacedBy(space = 8.dp),
   ) {
@@ -227,6 +226,7 @@ private fun TabletLayout(
 @Composable
 private fun PhonePortraitLayout(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   loginUiModel: () -> LoginUiModel,
   loginAction: (LoginAction) -> Unit = {},
   navigateToRegistration: () -> Unit = {},
@@ -241,16 +241,8 @@ private fun PhonePortraitLayout(
           end =
             WindowInsets.systemBars.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
         )
-        .clip(
-          shape =
-            RoundedCornerShape(
-              topStart = 16.dp,
-              topEnd = 16.dp,
-            )
-        )
-        .background(color = colorScheme.surfaceContainerLowest)
         .fillMaxSize()
-        .padding(all = 16.dp)
+        .styleable(null, NoteMarkTheme.styles.authSheetStyle, style)
         .verticalScroll(state = rememberScrollState()),
     verticalArrangement = Arrangement.spacedBy(space = 8.dp),
   ) {
@@ -267,10 +259,11 @@ private fun PhonePortraitLayout(
 @Composable
 private fun LeftPane(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   horizontalAlignment: Alignment.Horizontal = Alignment.Start,
 ) {
   Column(
-    modifier = modifier,
+    modifier = modifier.styleable(null, style),
     verticalArrangement = Arrangement.spacedBy(space = 8.dp),
     horizontalAlignment = horizontalAlignment,
   ) {
@@ -290,6 +283,7 @@ private fun LeftPane(
 @Composable
 private fun RightPane(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   loginUiModel: () -> LoginUiModel,
   navigateToRegistration: () -> Unit = {},
   loginAction: (LoginAction) -> Unit = {},
@@ -300,7 +294,7 @@ private fun RightPane(
   LaunchedEffect(key1 = Unit) { focusManager.clearFocus() }
 
   Column(
-    modifier = modifier,
+    modifier = modifier.styleable(null, style),
     verticalArrangement = Arrangement.Center,
   ) {
     LoginEmailField(
@@ -338,6 +332,7 @@ private fun RightPane(
 @Composable
 private fun LoginEmailField(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   loginUiModel: () -> LoginUiModel,
   loginAction: (LoginAction) -> Unit = {},
 ) {
@@ -352,6 +347,7 @@ private fun LoginEmailField(
 
   NoteMarkTextField(
     modifier = modifier.fillMaxWidth().alignToSafeDrawing(),
+    style = style,
     label = "Email",
     enteredText = email,
     hintText = "john.doe@gmail.com",
@@ -364,6 +360,7 @@ private fun LoginEmailField(
 @Composable
 private fun LoginPasswordField(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   loginUiModel: () -> LoginUiModel,
   loginAction: (LoginAction) -> Unit = {},
   keyboardController: SoftwareKeyboardController?,
@@ -379,6 +376,7 @@ private fun LoginPasswordField(
 
   NoteMarkPasswordTextField(
     modifier = modifier.fillMaxWidth().alignToSafeDrawing(),
+    style = style,
     label = "Password",
     enteredText = password,
     hintText = "Password",
@@ -399,6 +397,7 @@ private fun LoginPasswordField(
 @Composable
 private fun LoginButton(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   loginUiModel: () -> LoginUiModel,
   loginAction: (LoginAction) -> Unit = {},
   keyboardController: SoftwareKeyboardController?,
@@ -417,6 +416,7 @@ private fun LoginButton(
       loginAction(LoginClicked)
     },
     modifier = modifier.fillMaxWidth(),
+    style = style,
     enabled = loginEnabled,
   ) {
     Text(
@@ -429,6 +429,7 @@ private fun LoginButton(
 @Composable
 private fun LoginFooterField(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   navigateToRegistration: () -> Unit = {},
 ) {
   Text(
@@ -436,7 +437,7 @@ private fun LoginFooterField(
     style = typography.titleSmall,
     fontWeight = FontWeight.Normal,
     modifier =
-      modifier.fillMaxSize().lifecycleAwareDebouncedClickable {
+      modifier.styleable(null, style).fillMaxSize().lifecycleAwareDebouncedClickable {
         navigateToRegistration()
       },
     textAlign = TextAlign.Center,

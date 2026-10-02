@@ -26,19 +26,19 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.styleable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -55,7 +55,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layout
@@ -81,6 +80,7 @@ import com.dhimandasgupta.notemark.common.extensions.compose.alignToSafeDrawing
 import com.dhimandasgupta.notemark.common.extensions.compose.getDeviceLayoutType
 import com.dhimandasgupta.notemark.common.extensions.compose.lifecycleAwareDebouncedClickable
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkDivider
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton
 import com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots
@@ -93,6 +93,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun EditNotePane(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   editNoteUiModel: () -> EditNoteUiModel,
   editNoteAction: (EditNoteAction) -> Unit = {},
   onCloseClicked: () -> Unit = {},
@@ -128,6 +129,7 @@ internal fun EditNotePane(
   Column(
     modifier =
       modifier
+        .styleable(null, style)
         .background(color = colorScheme.surfaceContainerLowest)
         .fillMaxWidth()
         .wrapContentHeight(align = Alignment.Top)
@@ -197,6 +199,7 @@ internal fun EditNotePane(
 @Composable
 private fun EditNoteToolbar(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   editEnabled: Boolean = false,
   onCloseClicked: () -> Unit = {},
   onCrossClicked: () -> Unit = {},
@@ -210,7 +213,7 @@ private fun EditNoteToolbar(
     Row(
       modifier =
         modifier
-          .background(color = colorScheme.surfaceContainerLowest)
+          .styleable(null, NoteMarkTheme.styles.toolbarStyle, style)
           .fillMaxWidth()
           .padding(
             start =
@@ -258,7 +261,7 @@ private fun EditNoteToolbar(
     Row(
       modifier =
         modifier
-          .background(color = colorScheme.surfaceContainerLowest)
+          .styleable(null, NoteMarkTheme.styles.toolbarStyle, style)
           .fillMaxWidth()
           .padding(
             start =
@@ -305,6 +308,7 @@ private fun EditNoteToolbar(
 @Composable
 private fun EditNoteBody(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   editNoteUiModel: () -> EditNoteUiModel,
   editNoteAction: (EditNoteAction) -> Unit = {},
 ) {
@@ -369,6 +373,7 @@ private fun EditNoteBody(
   Box(
     modifier =
       modifier
+        .styleable(null, style)
         .fillMaxSize()
         .padding(
           bottom =
@@ -381,19 +386,13 @@ private fun EditNoteBody(
   ) {
     Column(
       modifier =
-        modifier
-          .fillMaxWidth()
+        Modifier.fillMaxSize()
           .verticalScroll(scrollState)
           .windowInsetsPadding(insets = WindowInsets.ime)
           .padding(vertical = 16.dp),
       verticalArrangement = Arrangement.Top,
       horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-      val lineModifier =
-        Modifier.fillMaxWidth()
-          .height(height = 1.dp)
-          .background(color = colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
-
       TextField(
         enabled = editEnabled,
         value = title,
@@ -424,7 +423,7 @@ private fun EditNoteBody(
         keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Next) }),
       )
 
-      Box(modifier = lineModifier)
+      NoteMarkDivider()
 
       AnimatedVisibility(visible = !editEnabled) {
         NoteDateTime(
@@ -434,7 +433,7 @@ private fun EditNoteBody(
         )
       }
 
-      Box(modifier = lineModifier)
+      NoteMarkDivider()
 
       TextField(
         enabled = editEnabled,
@@ -484,7 +483,7 @@ private fun EditNoteBody(
           ),
       )
 
-      Box(modifier = lineModifier)
+      NoteMarkDivider()
     }
 
     Box(
@@ -513,6 +512,7 @@ private fun EditNoteBody(
 @Composable
 private fun NoteDateTime(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   dateCreated: String,
   lastEdited: String,
 ) {
@@ -523,7 +523,8 @@ private fun NoteDateTime(
     }
 
   Row(
-    modifier = modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 16.dp),
+    modifier =
+      modifier.styleable(null, style).fillMaxWidth().padding(vertical = 8.dp, horizontal = 16.dp),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(space = 16.dp),
   ) {
@@ -564,17 +565,18 @@ private fun NoteDateTime(
 @Composable
 private fun EditAndViewMode(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   onEditClicked: () -> Unit,
   onViewClicked: () -> Unit,
 ) {
   Row(
-    modifier = modifier.clip(shape = shapes.medium).background(color = colorScheme.surfaceVariant),
+    modifier = modifier.styleable(null, NoteMarkTheme.styles.segmentedControlStyle, style),
     horizontalArrangement = Arrangement.Center,
     verticalAlignment = Alignment.CenterVertically,
   ) {
     SafeIconButton(
       onClick = onEditClicked,
-      modifier = Modifier.clip(shape = shapes.medium).size(size = 56.dp),
+      style = NoteMarkTheme.styles.segmentedControlButtonStyle,
     ) {
       Icon(
         painter = painterResource(id = R.drawable.ic_edit),
@@ -585,7 +587,7 @@ private fun EditAndViewMode(
 
     SafeIconButton(
       onClick = onViewClicked,
-      modifier = Modifier.clip(shape = shapes.medium).size(size = 56.dp),
+      style = NoteMarkTheme.styles.segmentedControlButtonStyle,
     ) {
       Icon(
         painter = painterResource(id = R.drawable.ic_view),

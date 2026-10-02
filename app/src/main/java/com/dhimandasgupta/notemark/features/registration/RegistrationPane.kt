@@ -19,7 +19,10 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.contentPadding
+import androidx.compose.foundation.style.styleable
+import androidx.compose.foundation.style.then
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
@@ -35,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -65,6 +67,7 @@ import com.dhimandasgupta.notemark.features.registration.RegistrationAction.User
 import com.dhimandasgupta.notemark.ui.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkPasswordTextField
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkStyles
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTextField
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.coroutines.FlowPreview
@@ -75,6 +78,7 @@ import kotlinx.coroutines.flow.filterNotNull
 @Composable
 internal fun RegistrationPane(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   registrationUiModel: () -> RegistrationUiModel,
   navigateToLogin: () -> Unit = {},
   registrationAction: (RegistrationAction) -> Unit = {},
@@ -82,7 +86,11 @@ internal fun RegistrationPane(
   val updatedRegistrationUiModel by rememberUpdatedState(newValue = registrationUiModel)
 
   Box(
-    modifier = modifier.background(color = colorResource(id = R.color.splash_blue)).fillMaxSize()
+    modifier =
+      modifier
+        .styleable(null, style)
+        .background(color = colorResource(id = R.color.splash_blue))
+        .fillMaxSize()
   ) {
     val layoutType = getDeviceLayoutType()
 
@@ -115,6 +123,7 @@ internal fun RegistrationPane(
 @Composable
 private fun PhoneLandscapeLayout(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   registrationUiModel: () -> RegistrationUiModel,
   registrationAction: (RegistrationAction) -> Unit = {},
   navigateToLogin: () -> Unit = {},
@@ -123,16 +132,8 @@ private fun PhoneLandscapeLayout(
     modifier =
       modifier
         .padding(top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding())
-        .clip(
-          shape =
-            RoundedCornerShape(
-              topStart = 16.dp,
-              topEnd = 16.dp,
-            )
-        )
-        .background(color = colorScheme.surfaceContainerLowest)
         .fillMaxSize()
-        .padding(all = 16.dp),
+        .styleable(null, NoteMarkTheme.styles.authSheetStyle, style),
     horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
     verticalAlignment = Alignment.Top,
   ) {
@@ -165,9 +166,15 @@ private fun PhoneLandscapeLayout(
   }
 }
 
+/** Auth sheet with the wider tablet gutters and no bottom padding. */
+private val TabletAuthSheetStyle =
+  NoteMarkStyles.authSheetStyle then
+    Style { contentPadding(start = 128.dp, top = 128.dp, end = 128.dp, bottom = 0.dp) }
+
 @Composable
 private fun TabletLayout(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   registrationUiModel: () -> RegistrationUiModel,
   registrationAction: (RegistrationAction) -> Unit = {},
   navigateToLogin: () -> Unit = {},
@@ -182,16 +189,8 @@ private fun TabletLayout(
           end =
             WindowInsets.systemBars.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
         )
-        .clip(
-          shape =
-            RoundedCornerShape(
-              topStart = 16.dp,
-              topEnd = 16.dp,
-            )
-        )
-        .background(color = colorScheme.surfaceContainerLowest)
         .fillMaxSize()
-        .padding(start = 128.dp, end = 128.dp, top = 128.dp)
+        .styleable(null, TabletAuthSheetStyle, style)
         .verticalScroll(state = rememberScrollState()),
     verticalArrangement = Arrangement.spacedBy(space = 8.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
@@ -210,6 +209,7 @@ private fun TabletLayout(
 @Composable
 private fun PhonePortraitLayout(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   registrationUiModel: () -> RegistrationUiModel,
   registrationAction: (RegistrationAction) -> Unit = {},
   navigateToLogin: () -> Unit = {},
@@ -224,16 +224,8 @@ private fun PhonePortraitLayout(
           end =
             WindowInsets.systemBars.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
         )
-        .clip(
-          shape =
-            RoundedCornerShape(
-              topStart = 16.dp,
-              topEnd = 16.dp,
-            )
-        )
-        .background(color = colorScheme.surfaceContainerLowest)
         .fillMaxSize()
-        .padding(all = 16.dp)
+        .styleable(null, NoteMarkTheme.styles.authSheetStyle, style)
         .verticalScroll(state = rememberScrollState()),
     verticalArrangement = Arrangement.spacedBy(space = 8.dp),
   ) {
@@ -248,9 +240,12 @@ private fun PhonePortraitLayout(
 }
 
 @Composable
-private fun LeftPane(modifier: Modifier = Modifier) {
+private fun LeftPane(
+  modifier: Modifier = Modifier,
+  style: Style = Style,
+) {
   Column(
-    modifier = modifier,
+    modifier = modifier.styleable(null, style),
     verticalArrangement = Arrangement.spacedBy(space = 8.dp),
   ) {
     Text(
@@ -269,6 +264,7 @@ private fun LeftPane(modifier: Modifier = Modifier) {
 @Composable
 private fun RightPane(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   navigateToLogin: () -> Unit = {},
   registrationUiModel: () -> RegistrationUiModel,
   registrationAction: (RegistrationAction) -> Unit,
@@ -300,7 +296,7 @@ private fun RightPane(
   }
 
   Column(
-    modifier = modifier,
+    modifier = modifier.styleable(null, style),
     verticalArrangement = Arrangement.spacedBy(space = 16.dp),
   ) {
     RegistrationUsernameField(
@@ -348,6 +344,7 @@ private fun RightPane(
 @Composable
 private fun RegistrationUsernameField(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   registrationUiModel: () -> RegistrationUiModel,
   registrationAction: (RegistrationAction) -> Unit = {},
 ) {
@@ -370,6 +367,7 @@ private fun RegistrationUsernameField(
 
   NoteMarkTextField(
     modifier = modifier.fillMaxWidth().alignToSafeDrawing(),
+    style = style,
     label = "Username",
     enteredText = userName,
     hintText = "John.doe",
@@ -390,6 +388,7 @@ private fun RegistrationUsernameField(
 @Composable
 private fun RegistrationEmailField(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   registrationUiModel: () -> RegistrationUiModel,
   registrationAction: (RegistrationAction) -> Unit = {},
 ) {
@@ -407,6 +406,7 @@ private fun RegistrationEmailField(
 
   NoteMarkTextField(
     modifier = modifier.fillMaxWidth().alignToSafeDrawing(),
+    style = style,
     label = "Email",
     enteredText = email,
     hintText = "john.doe@gmail.com",
@@ -420,6 +420,7 @@ private fun RegistrationEmailField(
 @Composable
 private fun RegistrationPasswordField(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   registrationUiModel: () -> RegistrationUiModel,
   registrationAction: (RegistrationAction) -> Unit = {},
 ) {
@@ -441,6 +442,7 @@ private fun RegistrationPasswordField(
 
   NoteMarkPasswordTextField(
     modifier = modifier.fillMaxWidth().alignToSafeDrawing(),
+    style = style,
     label = "Password",
     enteredText = password,
     hintText = "Password",
@@ -458,6 +460,7 @@ private fun RegistrationPasswordField(
 @Composable
 private fun RegistrationRepeatPasswordField(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   registrationUiModel: () -> RegistrationUiModel,
   registrationAction: (RegistrationAction) -> Unit = {},
   keyboardController: SoftwareKeyboardController? = null,
@@ -478,6 +481,7 @@ private fun RegistrationRepeatPasswordField(
 
   NoteMarkPasswordTextField(
     modifier = modifier.fillMaxWidth().alignToSafeDrawing(),
+    style = style,
     label = "Repeat password",
     enteredText = repeatPassword,
     hintText = "Password",
@@ -497,6 +501,7 @@ private fun RegistrationRepeatPasswordField(
 @Composable
 private fun RegistrationButton(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   registrationUiModel: () -> RegistrationUiModel,
   registrationAction: (RegistrationAction) -> Unit = {},
   keyboardController: SoftwareKeyboardController? = null,
@@ -513,6 +518,7 @@ private fun RegistrationButton(
       registrationAction(RegisterClicked)
     },
     modifier = modifier.fillMaxWidth(),
+    style = style,
     enabled = registrationEnabled,
   ) {
     Text(
@@ -525,6 +531,7 @@ private fun RegistrationButton(
 @Composable
 private fun RegistrationFooterField(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   navigateToLogin: () -> Unit = {},
 ) {
   Text(
@@ -532,7 +539,7 @@ private fun RegistrationFooterField(
     style = typography.titleSmall,
     fontWeight = FontWeight.Normal,
     modifier =
-      modifier.fillMaxSize().lifecycleAwareDebouncedClickable {
+      modifier.styleable(null, style).fillMaxSize().lifecycleAwareDebouncedClickable {
         navigateToLogin()
       },
     textAlign = TextAlign.Center,

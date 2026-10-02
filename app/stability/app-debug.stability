@@ -5,12 +5,13 @@
 //   ./gradlew :app:stabilityDump
 
 @Composable
-public fun com.dhimandasgupta.notemark.app.nav.NoteMarkRoot(modifier: androidx.compose.ui.Modifier, initialKeys: kotlinx.collections.immutable.PersistentList<androidx.navigation3.runtime.NavKey>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.app.nav.NoteMarkRoot(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, initialKeys: kotlinx.collections.immutable.PersistentList<androidx.navigation3.runtime.NavKey>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
-    - initialKeys: UNKNOWN (interface or non-final class; concrete implementation unknown)
+    - style: STABLE (stability configuration file type)
+    - initialKeys: STABLE (stability configuration file type)
 
 @Composable
 public fun com.dhimandasgupta.notemark.common.extensions.android.connectivityState(): androidx.compose.runtime.State<com.dhimandasgupta.notemark.common.extensions.android.ConnectionState>
@@ -44,38 +45,42 @@ public fun com.dhimandasgupta.notemark.common.extensions.compose.trackRecomposit
   params:
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.addnote.AddNoteBody(modifier: androidx.compose.ui.Modifier, addNoteUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.addnote.AddNoteUiModel>, addNoteAction: kotlin.Function1<com.dhimandasgupta.notemark.features.addnote.AddNoteAction, kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.addnote.AddNoteBody(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, addNoteUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.addnote.AddNoteUiModel>, addNoteAction: kotlin.Function1<com.dhimandasgupta.notemark.features.addnote.AddNoteAction, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - addNoteUiModel: STABLE (function type)
     - addNoteAction: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.addnote.AddNoteContentField(modifier: androidx.compose.ui.Modifier, initialContent: kotlin.String, onContentChanged: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.addnote.AddNoteContentField(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, initialContent: kotlin.String, onContentChanged: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - initialContent: STABLE (String is immutable)
     - onContentChanged: STABLE (function type)
 
 @Composable
-internal fun com.dhimandasgupta.notemark.features.addnote.AddNoteEntry(modifier: androidx.compose.ui.Modifier, addNotePresenter: com.dhimandasgupta.notemark.features.addnote.AddNotePresenter, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun com.dhimandasgupta.notemark.features.addnote.AddNoteEntry(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, addNotePresenter: com.dhimandasgupta.notemark.features.addnote.AddNotePresenter, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - addNotePresenter: STABLE (marked @Stable or @Immutable)
     - navigateUp: STABLE (function type)
 
 @Composable
-internal fun com.dhimandasgupta.notemark.features.addnote.AddNotePane(modifier: androidx.compose.ui.Modifier, addNoteUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.addnote.AddNoteUiModel>, addNoteAction: kotlin.Function1<com.dhimandasgupta.notemark.features.addnote.AddNoteAction, kotlin.Unit>, onBackClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun com.dhimandasgupta.notemark.features.addnote.AddNotePane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, addNoteUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.addnote.AddNoteUiModel>, addNoteAction: kotlin.Function1<com.dhimandasgupta.notemark.features.addnote.AddNoteAction, kotlin.Unit>, onBackClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - addNoteUiModel: STABLE (function type)
     - addNoteAction: STABLE (function type)
     - onBackClicked: STABLE (function type)
@@ -87,30 +92,33 @@ public fun com.dhimandasgupta.notemark.features.addnote.AddNotePresenter.uiModel
   params:
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.addnote.AddNoteTitleField(modifier: androidx.compose.ui.Modifier, initialTitle: kotlin.String, onTitleChanged: kotlin.Function1<kotlin.String, kotlin.Unit>, onNextClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.addnote.AddNoteTitleField(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, initialTitle: kotlin.String, onTitleChanged: kotlin.Function1<kotlin.String, kotlin.Unit>, onNextClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - initialTitle: STABLE (String is immutable)
     - onTitleChanged: STABLE (function type)
     - onNextClicked: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.addnote.AddNoteToolbar(modifier: androidx.compose.ui.Modifier, onBackClicked: kotlin.Function0<kotlin.Unit>, onSaveClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.addnote.AddNoteToolbar(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, onBackClicked: kotlin.Function0<kotlin.Unit>, onSaveClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - onBackClicked: STABLE (function type)
     - onSaveClicked: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.addnote.NoteCreateEntryBuilder(modifier: androidx.compose.ui.Modifier, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.features.addnote.NoteCreateEntryBuilder(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - navigateUp: STABLE (function type)
 
 @Composable
@@ -120,38 +128,42 @@ private fun com.dhimandasgupta.notemark.features.addnote.addNoteTextFieldColors(
   params:
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.editnote.EditAndViewMode(modifier: androidx.compose.ui.Modifier, onEditClicked: kotlin.Function0<kotlin.Unit>, onViewClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.editnote.EditAndViewMode(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, onEditClicked: kotlin.Function0<kotlin.Unit>, onViewClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - onEditClicked: STABLE (function type)
     - onViewClicked: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.editnote.EditNoteBody(modifier: androidx.compose.ui.Modifier, editNoteUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.editnote.EditNoteUiModel>, editNoteAction: kotlin.Function1<com.dhimandasgupta.notemark.features.editnote.EditNoteAction, kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.editnote.EditNoteBody(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, editNoteUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.editnote.EditNoteUiModel>, editNoteAction: kotlin.Function1<com.dhimandasgupta.notemark.features.editnote.EditNoteAction, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - editNoteUiModel: STABLE (function type)
     - editNoteAction: STABLE (function type)
 
 @Composable
-internal fun com.dhimandasgupta.notemark.features.editnote.EditNoteEntry(modifier: androidx.compose.ui.Modifier, editNotePresenter: com.dhimandasgupta.notemark.features.editnote.EditNotePresenter, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun com.dhimandasgupta.notemark.features.editnote.EditNoteEntry(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, editNotePresenter: com.dhimandasgupta.notemark.features.editnote.EditNotePresenter, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - editNotePresenter: STABLE (marked @Stable or @Immutable)
     - navigateUp: STABLE (function type)
 
 @Composable
-internal fun com.dhimandasgupta.notemark.features.editnote.EditNotePane(modifier: androidx.compose.ui.Modifier, editNoteUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.editnote.EditNoteUiModel>, editNoteAction: kotlin.Function1<com.dhimandasgupta.notemark.features.editnote.EditNoteAction, kotlin.Unit>, onCloseClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun com.dhimandasgupta.notemark.features.editnote.EditNotePane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, editNoteUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.editnote.EditNoteUiModel>, editNoteAction: kotlin.Function1<com.dhimandasgupta.notemark.features.editnote.EditNoteAction, kotlin.Unit>, onCloseClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - editNoteUiModel: STABLE (function type)
     - editNoteAction: STABLE (function type)
     - onCloseClicked: STABLE (function type)
@@ -163,31 +175,34 @@ public fun com.dhimandasgupta.notemark.features.editnote.EditNotePresenter.uiMod
   params:
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.editnote.EditNoteToolbar(modifier: androidx.compose.ui.Modifier, editEnabled: kotlin.Boolean, onCloseClicked: kotlin.Function0<kotlin.Unit>, onCrossClicked: kotlin.Function0<kotlin.Unit>, onSaveClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.editnote.EditNoteToolbar(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, editEnabled: kotlin.Boolean, onCloseClicked: kotlin.Function0<kotlin.Unit>, onCrossClicked: kotlin.Function0<kotlin.Unit>, onSaveClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - editEnabled: STABLE (primitive type)
     - onCloseClicked: STABLE (function type)
     - onCrossClicked: STABLE (function type)
     - onSaveClicked: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.editnote.NoteDateTime(modifier: androidx.compose.ui.Modifier, dateCreated: kotlin.String, lastEdited: kotlin.String): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.editnote.NoteDateTime(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, dateCreated: kotlin.String, lastEdited: kotlin.String): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - dateCreated: STABLE (String is immutable)
     - lastEdited: STABLE (String is immutable)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.editnote.NoteEditEntryBuilder(modifier: androidx.compose.ui.Modifier, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.features.editnote.NoteEditEntryBuilder(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - navigateUp: STABLE (function type)
 
 @Composable
@@ -197,73 +212,80 @@ public fun com.dhimandasgupta.notemark.features.launcher.AppPresenter.uiModel():
   params:
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.launcher.ForegroundPane(modifier: androidx.compose.ui.Modifier, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, deviceLayoutType: com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.launcher.ForegroundPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, deviceLayoutType: com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - navigateToAfterLogin: STABLE (function type)
     - navigateToLogin: STABLE (function type)
     - deviceLayoutType: STABLE (class with no mutable properties)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.launcher.LandingPaneLandscape(modifier: androidx.compose.ui.Modifier, deviceLayoutType: com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, radius: kotlin.Function0<kotlin.Float>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.launcher.LandingPaneLandscape(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, deviceLayoutType: com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, radius: kotlin.Function0<kotlin.Float>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
-    - deviceLayoutType: STABLE (class with no mutable properties)
-    - navigateToAfterLogin: STABLE (function type)
-    - navigateToLogin: STABLE (function type)
-    - radius: STABLE (function type)
-
-@Composable
-private fun com.dhimandasgupta.notemark.features.launcher.LandingPanePortrait(modifier: androidx.compose.ui.Modifier, deviceLayoutType: com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, radius: kotlin.Function0<kotlin.Float>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - deviceLayoutType: STABLE (class with no mutable properties)
     - navigateToAfterLogin: STABLE (function type)
     - navigateToLogin: STABLE (function type)
     - radius: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.launcher.LandingPaneTablet(modifier: androidx.compose.ui.Modifier, deviceLayoutType: com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, radius: kotlin.Function0<kotlin.Float>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.launcher.LandingPanePortrait(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, deviceLayoutType: com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, radius: kotlin.Function0<kotlin.Float>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - deviceLayoutType: STABLE (class with no mutable properties)
     - navigateToAfterLogin: STABLE (function type)
     - navigateToLogin: STABLE (function type)
     - radius: STABLE (function type)
 
 @Composable
-internal fun com.dhimandasgupta.notemark.features.launcher.LauncherEntry(modifier: androidx.compose.ui.Modifier, launcherPresenter: com.dhimandasgupta.notemark.features.launcher.LauncherPresenter, navigateAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.launcher.LandingPaneTablet(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, deviceLayoutType: com.dhimandasgupta.notemark.common.extensions.compose.DeviceLayoutType, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, radius: kotlin.Function0<kotlin.Float>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
+    - deviceLayoutType: STABLE (class with no mutable properties)
+    - navigateToAfterLogin: STABLE (function type)
+    - navigateToLogin: STABLE (function type)
+    - radius: STABLE (function type)
+
+@Composable
+internal fun com.dhimandasgupta.notemark.features.launcher.LauncherEntry(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, launcherPresenter: com.dhimandasgupta.notemark.features.launcher.LauncherPresenter, navigateAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - launcherPresenter: STABLE (marked @Stable or @Immutable)
     - navigateAfterLogin: STABLE (function type)
     - navigateToLogin: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.launcher.LauncherEntryBuilder(modifier: androidx.compose.ui.Modifier, navigateAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.features.launcher.LauncherEntryBuilder(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, navigateAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - navigateAfterLogin: STABLE (function type)
     - navigateToLogin: STABLE (function type)
 
 @Composable
-internal fun com.dhimandasgupta.notemark.features.launcher.LauncherPane(modifier: androidx.compose.ui.Modifier, launcherUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.launcher.LauncherUiModel>, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, navigateToList: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun com.dhimandasgupta.notemark.features.launcher.LauncherPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, launcherUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.launcher.LauncherUiModel>, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, navigateToList: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - launcherUiModel: STABLE (function type)
     - navigateToAfterLogin: STABLE (function type)
     - navigateToLogin: STABLE (function type)
@@ -276,76 +298,84 @@ public fun com.dhimandasgupta.notemark.features.launcher.LauncherPresenter.uiMod
   params:
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.login.LeftPane(modifier: androidx.compose.ui.Modifier, horizontalAlignment: androidx.compose.ui.Alignment.Horizontal): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.login.LeftPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, horizontalAlignment: androidx.compose.ui.Alignment.Horizontal): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - horizontalAlignment: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.login.LoginButton(modifier: androidx.compose.ui.Modifier, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>, keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.login.LoginButton(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>, keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - loginUiModel: STABLE (function type)
     - loginAction: STABLE (function type)
     - keyboardController: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.login.LoginEmailField(modifier: androidx.compose.ui.Modifier, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.login.LoginEmailField(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - loginUiModel: STABLE (function type)
     - loginAction: STABLE (function type)
 
 @Composable
-internal fun com.dhimandasgupta.notemark.features.login.LoginEntry(modifier: androidx.compose.ui.Modifier, loginPresenter: com.dhimandasgupta.notemark.features.login.LoginPresenter, navigateToRegistration: kotlin.Function0<kotlin.Unit>, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun com.dhimandasgupta.notemark.features.login.LoginEntry(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, loginPresenter: com.dhimandasgupta.notemark.features.login.LoginPresenter, navigateToRegistration: kotlin.Function0<kotlin.Unit>, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - loginPresenter: STABLE (marked @Stable or @Immutable)
     - navigateToRegistration: STABLE (function type)
     - navigateToAfterLogin: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.login.LoginEntryBuilder(modifier: androidx.compose.ui.Modifier, navigateToRegistration: kotlin.Function0<kotlin.Unit>, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.features.login.LoginEntryBuilder(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, navigateToRegistration: kotlin.Function0<kotlin.Unit>, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - navigateToRegistration: STABLE (function type)
     - navigateToAfterLogin: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.login.LoginFooterField(modifier: androidx.compose.ui.Modifier, navigateToRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.login.LoginFooterField(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, navigateToRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - navigateToRegistration: STABLE (function type)
 
 @Composable
-internal fun com.dhimandasgupta.notemark.features.login.LoginPane(modifier: androidx.compose.ui.Modifier, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun com.dhimandasgupta.notemark.features.login.LoginPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - loginUiModel: STABLE (function type)
     - loginAction: STABLE (function type)
     - navigateToAfterLogin: STABLE (function type)
     - navigateToRegistration: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.login.LoginPasswordField(modifier: androidx.compose.ui.Modifier, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>, keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.login.LoginPasswordField(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>, keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - loginUiModel: STABLE (function type)
     - loginAction: STABLE (function type)
     - keyboardController: STABLE (marked @Stable or @Immutable)
@@ -357,66 +387,73 @@ public fun com.dhimandasgupta.notemark.features.login.LoginPresenter.uiModel(): 
   params:
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.login.PhoneLandscapeLayout(modifier: androidx.compose.ui.Modifier, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>, navigateToRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.login.PhoneLandscapeLayout(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>, navigateToRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - loginUiModel: STABLE (function type)
     - loginAction: STABLE (function type)
     - navigateToRegistration: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.login.PhonePortraitLayout(modifier: androidx.compose.ui.Modifier, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>, navigateToRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.login.PhonePortraitLayout(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>, navigateToRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - loginUiModel: STABLE (function type)
     - loginAction: STABLE (function type)
     - navigateToRegistration: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.login.RightPane(modifier: androidx.compose.ui.Modifier, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, navigateToRegistration: kotlin.Function0<kotlin.Unit>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.login.RightPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, navigateToRegistration: kotlin.Function0<kotlin.Unit>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - loginUiModel: STABLE (function type)
     - navigateToRegistration: STABLE (function type)
     - loginAction: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.login.TabletLayout(modifier: androidx.compose.ui.Modifier, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>, navigateToRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.login.TabletLayout(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, loginUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginUiModel>, loginAction: kotlin.Function1<com.dhimandasgupta.notemark.features.login.LoginAction, kotlin.Unit>, navigateToRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - loginUiModel: STABLE (function type)
     - loginAction: STABLE (function type)
     - navigateToRegistration: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.notelist.LoadingPane(modifier: androidx.compose.ui.Modifier, showLoading: kotlin.Boolean): kotlin.Unit
+public fun com.dhimandasgupta.notemark.features.notelist.LoadingPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, showLoading: kotlin.Boolean): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - showLoading: STABLE (primitive type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.notelist.NoNoteSelectedPane(modifier: androidx.compose.ui.Modifier): kotlin.Unit
+public fun com.dhimandasgupta.notemark.features.notelist.NoNoteSelectedPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.notelist.NoNotes(modifier: androidx.compose.ui.Modifier, toolbarTitle: kotlin.String, userName: kotlin.String, loading: kotlin.Boolean, isConnected: kotlin.Boolean, showSyncProgress: kotlin.Boolean, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>, onFabClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.notelist.NoNotes(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, toolbarTitle: kotlin.String, userName: kotlin.String, loading: kotlin.Boolean, isConnected: kotlin.Boolean, showSyncProgress: kotlin.Boolean, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>, onFabClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - toolbarTitle: STABLE (String is immutable)
     - userName: STABLE (String is immutable)
     - loading: STABLE (primitive type)
@@ -427,21 +464,23 @@ private fun com.dhimandasgupta.notemark.features.notelist.NoNotes(modifier: andr
     - onFabClicked: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.notelist.NoteDeleteDialog(modifier: androidx.compose.ui.Modifier, noteId: kotlin.String, onDelete: kotlin.Function1<kotlin.String, kotlin.Unit>, onDismiss: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.features.notelist.NoteDeleteDialog(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, noteId: kotlin.String, onDelete: kotlin.Function1<kotlin.String, kotlin.Unit>, onDismiss: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - noteId: STABLE (String is immutable)
     - onDelete: STABLE (function type)
     - onDismiss: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.notelist.NoteGrid(modifier: androidx.compose.ui.Modifier, columnCount: kotlin.Int, maxLength: kotlin.Int, state: androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState, noteListUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.notelist.NoteListUiModel>, userName: kotlin.String, onNoteClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onNoteLongClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.notelist.NoteGrid(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, columnCount: kotlin.Int, maxLength: kotlin.Int, state: androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState, noteListUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.notelist.NoteListUiModel>, userName: kotlin.String, onNoteClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onNoteLongClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - columnCount: STABLE (primitive type)
     - maxLength: STABLE (primitive type)
     - state: STABLE (marked @Stable or @Immutable)
@@ -453,11 +492,12 @@ private fun com.dhimandasgupta.notemark.features.notelist.NoteGrid(modifier: and
     - onProfileClicked: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.notelist.NoteItem(modifier: androidx.compose.ui.Modifier, note: com.dhimandasgupta.notemark.features.notelist.NoteEntityUiModel, maxLength: kotlin.Int, locale: java.util.Locale, onNoteClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onNoteLongClicked: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.notelist.NoteItem(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, note: com.dhimandasgupta.notemark.features.notelist.NoteEntityUiModel, maxLength: kotlin.Int, locale: java.util.Locale, onNoteClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onNoteLongClicked: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - note: STABLE (marked @Stable or @Immutable)
     - maxLength: STABLE (primitive type)
     - locale: STABLE (known stable type)
@@ -465,11 +505,12 @@ private fun com.dhimandasgupta.notemark.features.notelist.NoteItem(modifier: and
     - onNoteLongClicked: STABLE (function type)
 
 @Composable
-internal fun com.dhimandasgupta.notemark.features.notelist.NoteListEntry(modifier: androidx.compose.ui.Modifier, noteListPresenter: com.dhimandasgupta.notemark.features.notelist.NoteListPresenter, navigateToLauncherIfLoggedOut: kotlin.Function0<kotlin.Unit>, navigateToAdd: kotlin.Function0<kotlin.Unit>, navigateToEdit: kotlin.Function1<kotlin.String, kotlin.Unit>, navigateToSettings: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun com.dhimandasgupta.notemark.features.notelist.NoteListEntry(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, noteListPresenter: com.dhimandasgupta.notemark.features.notelist.NoteListPresenter, navigateToLauncherIfLoggedOut: kotlin.Function0<kotlin.Unit>, navigateToAdd: kotlin.Function0<kotlin.Unit>, navigateToEdit: kotlin.Function1<kotlin.String, kotlin.Unit>, navigateToSettings: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - noteListPresenter: STABLE (marked @Stable or @Immutable)
     - navigateToLauncherIfLoggedOut: STABLE (function type)
     - navigateToAdd: STABLE (function type)
@@ -477,11 +518,12 @@ internal fun com.dhimandasgupta.notemark.features.notelist.NoteListEntry(modifie
     - navigateToSettings: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.notelist.NoteListEntryBuilder(modifier: androidx.compose.ui.Modifier, navigateToLauncherIfLoggedOut: kotlin.Function0<kotlin.Unit>, navigateToAdd: kotlin.Function0<kotlin.Unit>, navigateToEdit: kotlin.Function1<kotlin.String, kotlin.Unit>, navigateToSettings: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.features.notelist.NoteListEntryBuilder(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, navigateToLauncherIfLoggedOut: kotlin.Function0<kotlin.Unit>, navigateToAdd: kotlin.Function0<kotlin.Unit>, navigateToEdit: kotlin.Function1<kotlin.String, kotlin.Unit>, navigateToSettings: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - navigateToLauncherIfLoggedOut: STABLE (function type)
     - navigateToAdd: STABLE (function type)
     - navigateToEdit: STABLE (function type)
@@ -496,11 +538,12 @@ private fun com.dhimandasgupta.notemark.features.notelist.NoteListFab(scrollStat
     - onFabClicked: STABLE (function type)
 
 @Composable
-internal fun com.dhimandasgupta.notemark.features.notelist.NoteListPane(modifier: androidx.compose.ui.Modifier, noteListUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.notelist.NoteListUiModel>, noteListAction: kotlin.Function1<com.dhimandasgupta.notemark.features.notelist.NoteListAction, kotlin.Unit>, appAction: kotlin.Function1<com.dhimandasgupta.notemark.features.launcher.AppAction, kotlin.Unit>, navigateToLauncherIfLoggedOut: kotlin.Function0<kotlin.Unit>, onNoteClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onFabClicked: kotlin.Function0<kotlin.Unit>, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun com.dhimandasgupta.notemark.features.notelist.NoteListPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, noteListUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.notelist.NoteListUiModel>, noteListAction: kotlin.Function1<com.dhimandasgupta.notemark.features.notelist.NoteListAction, kotlin.Unit>, appAction: kotlin.Function1<com.dhimandasgupta.notemark.features.launcher.AppAction, kotlin.Unit>, navigateToLauncherIfLoggedOut: kotlin.Function0<kotlin.Unit>, onNoteClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onFabClicked: kotlin.Function0<kotlin.Unit>, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - noteListUiModel: STABLE (function type)
     - noteListAction: STABLE (function type)
     - appAction: STABLE (function type)
@@ -511,11 +554,12 @@ internal fun com.dhimandasgupta.notemark.features.notelist.NoteListPane(modifier
     - onProfileClicked: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.notelist.NoteListPaneToolbar(modifier: androidx.compose.ui.Modifier, toolbarTitle: kotlin.String, userName: kotlin.String, isConnected: kotlin.Boolean, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.notelist.NoteListPaneToolbar(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, toolbarTitle: kotlin.String, userName: kotlin.String, isConnected: kotlin.Boolean, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - toolbarTitle: STABLE (String is immutable)
     - userName: STABLE (String is immutable)
     - isConnected: STABLE (primitive type)
@@ -529,11 +573,12 @@ public fun com.dhimandasgupta.notemark.features.notelist.NoteListPresenter.uiMod
   params:
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.notelist.NoteListValidPane(modifier: androidx.compose.ui.Modifier, userName: kotlin.String, noteListUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.notelist.NoteListUiModel>, loadNotes: kotlin.Function0<kotlin.Unit>, onNoteClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onNoteLongClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onFabClicked: kotlin.Function0<kotlin.Unit>, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.notelist.NoteListValidPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, userName: kotlin.String, noteListUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.notelist.NoteListUiModel>, loadNotes: kotlin.Function0<kotlin.Unit>, onNoteClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onNoteLongClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onFabClicked: kotlin.Function0<kotlin.Unit>, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - userName: STABLE (String is immutable)
     - noteListUiModel: STABLE (function type)
     - loadNotes: STABLE (function type)
@@ -544,11 +589,12 @@ private fun com.dhimandasgupta.notemark.features.notelist.NoteListValidPane(modi
     - onProfileClicked: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.notelist.NoteListWithEmptyNotes(modifier: androidx.compose.ui.Modifier, userName: kotlin.String, loading: kotlin.Boolean, isConnected: kotlin.Boolean, showSyncProgress: kotlin.Boolean, onFabClicked: kotlin.Function0<kotlin.Unit>, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.notelist.NoteListWithEmptyNotes(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, userName: kotlin.String, loading: kotlin.Boolean, isConnected: kotlin.Boolean, showSyncProgress: kotlin.Boolean, onFabClicked: kotlin.Function0<kotlin.Unit>, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - userName: STABLE (String is immutable)
     - loading: STABLE (primitive type)
     - isConnected: STABLE (primitive type)
@@ -558,11 +604,12 @@ private fun com.dhimandasgupta.notemark.features.notelist.NoteListWithEmptyNotes
     - onProfileClicked: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.notelist.NoteListWithNotes(modifier: androidx.compose.ui.Modifier, userName: kotlin.String, loading: kotlin.Boolean, noteListState: kotlin.Function0<com.dhimandasgupta.notemark.features.notelist.NoteListUiModel>, loadNotes: kotlin.Function0<kotlin.Unit>, onNoteClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onNoteLongClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onFabClicked: kotlin.Function0<kotlin.Unit>, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.notelist.NoteListWithNotes(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, userName: kotlin.String, loading: kotlin.Boolean, noteListState: kotlin.Function0<com.dhimandasgupta.notemark.features.notelist.NoteListUiModel>, loadNotes: kotlin.Function0<kotlin.Unit>, onNoteClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onNoteLongClicked: kotlin.Function1<kotlin.String, kotlin.Unit>, onFabClicked: kotlin.Function0<kotlin.Unit>, onSettingsClicked: kotlin.Function0<kotlin.Unit>, onProfileClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - userName: STABLE (String is immutable)
     - loading: STABLE (primitive type)
     - noteListState: STABLE (function type)
@@ -574,92 +621,102 @@ private fun com.dhimandasgupta.notemark.features.notelist.NoteListWithNotes(modi
     - onProfileClicked: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.registration.LeftPane(modifier: androidx.compose.ui.Modifier): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.registration.LeftPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.registration.PhoneLandscapeLayout(modifier: androidx.compose.ui.Modifier, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.registration.PhoneLandscapeLayout(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - registrationUiModel: STABLE (function type)
     - registrationAction: STABLE (function type)
     - navigateToLogin: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.registration.PhonePortraitLayout(modifier: androidx.compose.ui.Modifier, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.registration.PhonePortraitLayout(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - registrationUiModel: STABLE (function type)
     - registrationAction: STABLE (function type)
     - navigateToLogin: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.registration.RegistrationButton(modifier: androidx.compose.ui.Modifier, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>, keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.registration.RegistrationButton(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>, keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - registrationUiModel: STABLE (function type)
     - registrationAction: STABLE (function type)
     - keyboardController: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.registration.RegistrationEmailField(modifier: androidx.compose.ui.Modifier, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.registration.RegistrationEmailField(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - registrationUiModel: STABLE (function type)
     - registrationAction: STABLE (function type)
 
 @Composable
-internal fun com.dhimandasgupta.notemark.features.registration.RegistrationEntry(modifier: androidx.compose.ui.Modifier, registrationPresenter: com.dhimandasgupta.notemark.features.registration.RegistrationPresenter, navigateToLoginFromRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun com.dhimandasgupta.notemark.features.registration.RegistrationEntry(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, registrationPresenter: com.dhimandasgupta.notemark.features.registration.RegistrationPresenter, navigateToLoginFromRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - registrationPresenter: STABLE (marked @Stable or @Immutable)
     - navigateToLoginFromRegistration: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.registration.RegistrationEntryBuilder(modifier: androidx.compose.ui.Modifier, navigateToLoginFromRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.features.registration.RegistrationEntryBuilder(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, navigateToLoginFromRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - navigateToLoginFromRegistration: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.registration.RegistrationFooterField(modifier: androidx.compose.ui.Modifier, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.registration.RegistrationFooterField(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - navigateToLogin: STABLE (function type)
 
 @Composable
-internal fun com.dhimandasgupta.notemark.features.registration.RegistrationPane(modifier: androidx.compose.ui.Modifier, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, navigateToLogin: kotlin.Function0<kotlin.Unit>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>): kotlin.Unit
+internal fun com.dhimandasgupta.notemark.features.registration.RegistrationPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, navigateToLogin: kotlin.Function0<kotlin.Unit>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - registrationUiModel: STABLE (function type)
     - navigateToLogin: STABLE (function type)
     - registrationAction: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.registration.RegistrationPasswordField(modifier: androidx.compose.ui.Modifier, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.registration.RegistrationPasswordField(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - registrationUiModel: STABLE (function type)
     - registrationAction: STABLE (function type)
 
@@ -670,74 +727,82 @@ public fun com.dhimandasgupta.notemark.features.registration.RegistrationPresent
   params:
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.registration.RegistrationRepeatPasswordField(modifier: androidx.compose.ui.Modifier, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>, keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.registration.RegistrationRepeatPasswordField(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>, keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - registrationUiModel: STABLE (function type)
     - registrationAction: STABLE (function type)
     - keyboardController: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.registration.RegistrationUsernameField(modifier: androidx.compose.ui.Modifier, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.registration.RegistrationUsernameField(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - registrationUiModel: STABLE (function type)
     - registrationAction: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.registration.RightPane(modifier: androidx.compose.ui.Modifier, navigateToLogin: kotlin.Function0<kotlin.Unit>, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.registration.RightPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, navigateToLogin: kotlin.Function0<kotlin.Unit>, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - navigateToLogin: STABLE (function type)
     - registrationUiModel: STABLE (function type)
     - registrationAction: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.registration.TabletLayout(modifier: androidx.compose.ui.Modifier, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.registration.TabletLayout(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, registrationUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationUiModel>, registrationAction: kotlin.Function1<com.dhimandasgupta.notemark.features.registration.RegistrationAction, kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - registrationUiModel: STABLE (function type)
     - registrationAction: STABLE (function type)
     - navigateToLogin: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.settings.AppVersion(modifier: androidx.compose.ui.Modifier, appVersionName: kotlin.String): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.settings.AppVersion(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, appVersionName: kotlin.String): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - appVersionName: STABLE (String is immutable)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.settings.DeleteLocalDataRow(modifier: androidx.compose.ui.Modifier, deleteLocalNotesOnLogout: kotlin.Boolean, onCheckChange: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.settings.DeleteLocalDataRow(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, deleteLocalNotesOnLogout: kotlin.Boolean, onCheckChange: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - deleteLocalNotesOnLogout: STABLE (primitive type)
     - onCheckChange: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.settings.Divider(modifier: androidx.compose.ui.Modifier): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.settings.Divider(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.settings.LogoutRow(modifier: androidx.compose.ui.Modifier, isConnected: kotlin.Boolean, onLogoutClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.settings.LogoutRow(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, isConnected: kotlin.Boolean, onLogoutClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - isConnected: STABLE (primitive type)
     - onLogoutClicked: STABLE (function type)
 
@@ -748,11 +813,12 @@ private fun com.dhimandasgupta.notemark.features.settings.RotatingSyncIcon(): ko
   params:
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.settings.SettingsBody(modifier: androidx.compose.ui.Modifier, settingsUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.settings.SettingsUiModel>, showSyncInterval: kotlin.Boolean, toggleSyncIntervalVisibility: kotlin.Function0<kotlin.Unit>, onSyncIntervalSelected: kotlin.Function1<kotlin.String, kotlin.Unit>, onSyncNowClicked: kotlin.Function0<kotlin.Unit>, onDeleteNoteCheckChanged: kotlin.Function0<kotlin.Unit>, onLogoutClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.settings.SettingsBody(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, settingsUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.settings.SettingsUiModel>, showSyncInterval: kotlin.Boolean, toggleSyncIntervalVisibility: kotlin.Function0<kotlin.Unit>, onSyncIntervalSelected: kotlin.Function1<kotlin.String, kotlin.Unit>, onSyncNowClicked: kotlin.Function0<kotlin.Unit>, onDeleteNoteCheckChanged: kotlin.Function0<kotlin.Unit>, onLogoutClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - settingsUiModel: STABLE (function type)
     - showSyncInterval: STABLE (primitive type)
     - toggleSyncIntervalVisibility: STABLE (function type)
@@ -762,30 +828,33 @@ private fun com.dhimandasgupta.notemark.features.settings.SettingsBody(modifier:
     - onLogoutClicked: STABLE (function type)
 
 @Composable
-internal fun com.dhimandasgupta.notemark.features.settings.SettingsEntry(modifier: androidx.compose.ui.Modifier, settingsPresenter: com.dhimandasgupta.notemark.features.settings.SettingsPresenter, navigateToLauncherAfterLogout: kotlin.Function0<kotlin.Unit>, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun com.dhimandasgupta.notemark.features.settings.SettingsEntry(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, settingsPresenter: com.dhimandasgupta.notemark.features.settings.SettingsPresenter, navigateToLauncherAfterLogout: kotlin.Function0<kotlin.Unit>, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - settingsPresenter: STABLE (marked @Stable or @Immutable)
     - navigateToLauncherAfterLogout: STABLE (function type)
     - navigateUp: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.settings.SettingsEntryBuilder(modifier: androidx.compose.ui.Modifier, navigateToLauncherAfterLogout: kotlin.Function0<kotlin.Unit>, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.features.settings.SettingsEntryBuilder(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, navigateToLauncherAfterLogout: kotlin.Function0<kotlin.Unit>, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - navigateToLauncherAfterLogout: STABLE (function type)
     - navigateUp: STABLE (function type)
 
 @Composable
-internal fun com.dhimandasgupta.notemark.features.settings.SettingsPane(modifier: androidx.compose.ui.Modifier, settingsUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.settings.SettingsUiModel>, settingsAction: kotlin.Function1<com.dhimandasgupta.notemark.features.launcher.AppAction, kotlin.Unit>, onDeleteNoteCheckChanged: kotlin.Function0<kotlin.Unit>, onLogoutSuccessful: kotlin.Function0<kotlin.Unit>, onBackClicked: kotlin.Function0<kotlin.Unit>, onLogoutClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun com.dhimandasgupta.notemark.features.settings.SettingsPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, settingsUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.settings.SettingsUiModel>, settingsAction: kotlin.Function1<com.dhimandasgupta.notemark.features.launcher.AppAction, kotlin.Unit>, onDeleteNoteCheckChanged: kotlin.Function0<kotlin.Unit>, onLogoutSuccessful: kotlin.Function0<kotlin.Unit>, onBackClicked: kotlin.Function0<kotlin.Unit>, onLogoutClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - settingsUiModel: STABLE (function type)
     - settingsAction: STABLE (function type)
     - onDeleteNoteCheckChanged: STABLE (function type)
@@ -800,56 +869,73 @@ public fun com.dhimandasgupta.notemark.features.settings.SettingsPresenter.uiMod
   params:
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.settings.SettingsToolbar(modifier: androidx.compose.ui.Modifier, onBackClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.settings.SettingsRow(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, enabled: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.RowScope, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
+    - enabled: STABLE (primitive type)
+    - onClick: STABLE (function type)
+    - content: STABLE (composable function type)
+
+@Composable
+private fun com.dhimandasgupta.notemark.features.settings.SettingsToolbar(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, onBackClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - onBackClicked: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.settings.SyncDataRow(modifier: androidx.compose.ui.Modifier, isSyncing: kotlin.Boolean, lastSynced: kotlin.String, onSyncNowClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.settings.SyncDataRow(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, isSyncing: kotlin.Boolean, lastSynced: kotlin.String, onSyncNowClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - isSyncing: STABLE (primitive type)
     - lastSynced: STABLE (String is immutable)
     - onSyncNowClicked: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.settings.SyncDropDown(modifier: androidx.compose.ui.Modifier, selectedSyncInterval: kotlin.String, syncIntervals: kotlinx.collections.immutable.ImmutableList<kotlin.String>, toggleDropDownVisibility: kotlin.Function0<kotlin.Unit>, onDropDownItemSelected: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.features.settings.SyncDropDown(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, selectedSyncInterval: kotlin.String, syncIntervals: kotlinx.collections.immutable.ImmutableList<kotlin.String>, toggleDropDownVisibility: kotlin.Function0<kotlin.Unit>, onDropDownItemSelected: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - selectedSyncInterval: STABLE (String is immutable)
     - syncIntervals: STABLE (known stable type)
     - toggleDropDownVisibility: STABLE (function type)
     - onDropDownItemSelected: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.settings.SyncIcon(modifier: androidx.compose.ui.Modifier): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.settings.SyncIcon(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.features.settings.SyncIntervalRow(modifier: androidx.compose.ui.Modifier, selectedSyncInterval: kotlin.String, toggleSyncIntervalVisibility: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun com.dhimandasgupta.notemark.features.settings.SyncIntervalRow(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, selectedSyncInterval: kotlin.String, toggleSyncIntervalVisibility: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - selectedSyncInterval: STABLE (String is immutable)
     - toggleSyncIntervalVisibility: STABLE (function type)
 
 @Composable
-private fun com.dhimandasgupta.notemark.ui.designsystem.BouncingDot(modifier: androidx.compose.ui.Modifier, color: androidx.compose.ui.graphics.Color, size: androidx.compose.ui.unit.Dp, bounceHeight: androidx.compose.ui.unit.Dp, animationDurationMillis: kotlin.Int, delayMillis: kotlin.Int): kotlin.Unit
+private fun com.dhimandasgupta.notemark.ui.designsystem.BouncingDot(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, color: androidx.compose.ui.graphics.Color, size: androidx.compose.ui.unit.Dp, bounceHeight: androidx.compose.ui.unit.Dp, animationDurationMillis: kotlin.Int, delayMillis: kotlin.Int): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - color: STABLE (marked @Stable or @Immutable)
     - size: STABLE (marked @Stable or @Immutable)
     - bounceHeight: STABLE (marked @Stable or @Immutable)
@@ -867,39 +953,51 @@ public fun com.dhimandasgupta.notemark.ui.designsystem.LimitedText(fullText: kot
     - targetCharacterCount: STABLE (primitive type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton(modifier: androidx.compose.ui.Modifier, enabled: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.RowScope, kotlin.Unit>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkButton(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, enabled: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.RowScope, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - enabled: STABLE (primitive type)
     - onClick: STABLE (function type)
     - content: STABLE (composable function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkFAB(modifier: androidx.compose.ui.Modifier, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkDivider(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
+
+@Composable
+public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkFAB(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - onClick: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkOutlinedButton(modifier: androidx.compose.ui.Modifier, enabled: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.RowScope, kotlin.Unit>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkOutlinedButton(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, enabled: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.RowScope, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - enabled: STABLE (primitive type)
     - onClick: STABLE (function type)
     - content: STABLE (composable function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkPasswordTextField(modifier: androidx.compose.ui.Modifier, enabled: kotlin.Boolean, label: kotlin.String?, enteredText: kotlin.String, hintText: kotlin.String, explanationText: kotlin.String, errorText: kotlin.String, onTextChanged: kotlin.Function1<kotlin.String, kotlin.Unit>, onFocusGained: kotlin.Function0<kotlin.Unit>, onFocusLost: kotlin.Function0<kotlin.Unit>, onNextClicked: kotlin.Function0<kotlin.Unit>?, onDoneClicked: kotlin.Function0<kotlin.Unit>?): kotlin.Unit
+public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkPasswordTextField(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, enabled: kotlin.Boolean, label: kotlin.String?, enteredText: kotlin.String, hintText: kotlin.String, explanationText: kotlin.String, errorText: kotlin.String, onTextChanged: kotlin.Function1<kotlin.String, kotlin.Unit>, onFocusGained: kotlin.Function0<kotlin.Unit>, onFocusLost: kotlin.Function0<kotlin.Unit>, onNextClicked: kotlin.Function0<kotlin.Unit>?, onDoneClicked: kotlin.Function0<kotlin.Unit>?): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - enabled: STABLE (primitive type)
     - label: STABLE (class with no mutable properties)
     - enteredText: STABLE (String is immutable)
@@ -913,11 +1011,12 @@ public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkPasswordTextField
     - onDoneClicked: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTextField(modifier: androidx.compose.ui.Modifier, enabled: kotlin.Boolean, label: kotlin.String?, enteredText: kotlin.String, hintText: kotlin.String, explanationText: kotlin.String, errorText: kotlin.String, onTextChanged: kotlin.Function1<kotlin.String, kotlin.Unit>, onFocusGained: kotlin.Function0<kotlin.Unit>, onFocusLost: kotlin.Function0<kotlin.Unit>, onNextClicked: kotlin.Function0<kotlin.Unit>?, onDoneClicked: kotlin.Function0<kotlin.Unit>?): kotlin.Unit
+public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTextField(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, enabled: kotlin.Boolean, label: kotlin.String?, enteredText: kotlin.String, hintText: kotlin.String, explanationText: kotlin.String, errorText: kotlin.String, onTextChanged: kotlin.Function1<kotlin.String, kotlin.Unit>, onFocusGained: kotlin.Function0<kotlin.Unit>, onFocusLost: kotlin.Function0<kotlin.Unit>, onNextClicked: kotlin.Function0<kotlin.Unit>?, onDoneClicked: kotlin.Function0<kotlin.Unit>?): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - enabled: STABLE (primitive type)
     - label: STABLE (class with no mutable properties)
     - enteredText: STABLE (String is immutable)
@@ -940,22 +1039,24 @@ public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme(darkTheme: 
     - content: STABLE (composable function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkToolbarButton(modifier: androidx.compose.ui.Modifier, title: kotlin.String, isConnected: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.ui.designsystem.NoteMarkToolbarButton(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, title: kotlin.String, isConnected: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - title: STABLE (String is immutable)
     - isConnected: STABLE (primitive type)
     - onClick: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton(onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, enabled: kotlin.Boolean, colors: androidx.compose.material3.IconButtonColors, activeState: androidx.lifecycle.Lifecycle.State, debounceIntervalMs: kotlin.Long, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton(onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, enabled: kotlin.Boolean, colors: androidx.compose.material3.IconButtonColors, activeState: androidx.lifecycle.Lifecycle.State, debounceIntervalMs: kotlin.Long, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - onClick: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - enabled: STABLE (primitive type)
     - colors: STABLE (marked @Stable or @Immutable)
     - activeState: STABLE (class with no mutable properties)
@@ -963,11 +1064,12 @@ public fun com.dhimandasgupta.notemark.ui.designsystem.SafeIconButton(onClick: k
     - content: STABLE (composable function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots(modifier: androidx.compose.ui.Modifier, dotColor1: androidx.compose.ui.graphics.Color, dotColor2: androidx.compose.ui.graphics.Color, dotColor3: androidx.compose.ui.graphics.Color, dotSize: androidx.compose.ui.unit.Dp, bounceHeight: androidx.compose.ui.unit.Dp, animationDurationMillis: kotlin.Int, spaceBetweenDots: androidx.compose.ui.unit.Dp, dotStartDelayMillis: kotlin.Int): kotlin.Unit
+public fun com.dhimandasgupta.notemark.ui.designsystem.ThreeBouncingDots(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, dotColor1: androidx.compose.ui.graphics.Color, dotColor2: androidx.compose.ui.graphics.Color, dotColor3: androidx.compose.ui.graphics.Color, dotSize: androidx.compose.ui.unit.Dp, bounceHeight: androidx.compose.ui.unit.Dp, animationDurationMillis: kotlin.Int, spaceBetweenDots: androidx.compose.ui.unit.Dp, dotStartDelayMillis: kotlin.Int): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - modifier: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (stability configuration file type)
     - dotColor1: STABLE (marked @Stable or @Immutable)
     - dotColor2: STABLE (marked @Stable or @Immutable)
     - dotColor3: STABLE (marked @Stable or @Immutable)

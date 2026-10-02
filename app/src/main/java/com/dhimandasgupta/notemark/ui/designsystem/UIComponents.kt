@@ -11,6 +11,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.rememberUpdatedStyleState
+import androidx.compose.foundation.style.styleable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -93,12 +97,13 @@ import com.dhimandasgupta.notemark.common.extensions.compose.trackRecompositions
 @Composable
 fun NoteMarkButton(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   enabled: Boolean = false,
   onClick: () -> Unit = {},
   content: @Composable RowScope.() -> Unit,
 ) {
   Button(
-    modifier = modifier,
+    modifier = modifier.styleable(null, style),
     onClick = onClick,
     shape = RoundedCornerShape(size = 8.dp),
     colors =
@@ -115,12 +120,13 @@ fun NoteMarkButton(
 @Composable
 fun NoteMarkOutlinedButton(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   enabled: Boolean = false,
   onClick: () -> Unit = {},
   content: @Composable RowScope.() -> Unit,
 ) {
   OutlinedButton(
-    modifier = modifier,
+    modifier = modifier.styleable(null, style),
     onClick = onClick,
     shape = RoundedCornerShape(size = 8.dp),
     border = BorderStroke(width = 1.dp, color = colorScheme.primary),
@@ -133,6 +139,7 @@ fun NoteMarkOutlinedButton(
 @Composable
 fun NoteMarkTextField(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   enabled: Boolean = true,
   label: String? = "",
   enteredText: String = "",
@@ -146,7 +153,7 @@ fun NoteMarkTextField(
   onDoneClicked: (() -> Unit)? = null,
 ) {
   Column(
-    modifier = modifier,
+    modifier = modifier.styleable(null, style),
     verticalArrangement = Arrangement.spacedBy(space = 4.dp),
     horizontalAlignment = Alignment.Start,
   ) {
@@ -226,6 +233,7 @@ fun NoteMarkTextField(
 @Composable
 fun NoteMarkPasswordTextField(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   enabled: Boolean = true,
   label: String? = "",
   enteredText: String = "",
@@ -242,7 +250,7 @@ fun NoteMarkPasswordTextField(
   var showPassword by retain { mutableStateOf(value = false) }
 
   Column(
-    modifier = modifier,
+    modifier = modifier.styleable(null, style),
     verticalArrangement = Arrangement.spacedBy(space = 4.dp),
     horizontalAlignment = Alignment.Start,
   ) {
@@ -346,26 +354,25 @@ fun NoteMarkPasswordTextField(
 @Composable
 fun NoteMarkToolbarButton(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   title: String,
   isConnected: Boolean,
   onClick: () -> Unit = {},
 ) {
+  val interactionSource = remember { MutableInteractionSource() }
+  val styleState =
+    rememberUpdatedStyleState(interactionSource) { it[DisconnectedStateKey] = !isConnected }
+
   Box(
     modifier =
       modifier
-        .clip(shape = shapes.extraSmall)
-        .background(
-          color = if (isConnected) colorScheme.primary else colorScheme.primary.copy(alpha = 0.5f)
-        )
-        .lifecycleAwareDebouncedClickable {
-          onClick()
-        }
+        .lifecycleAwareDebouncedClickable(interactionSource = interactionSource) { onClick() }
+        .styleable(styleState, NoteMarkTheme.styles.toolbarButtonStyle, style)
   ) {
     Text(
       text = title.uppercase(),
       style = typography.titleMedium,
       color = if (isConnected) colorScheme.onPrimary else colorScheme.error,
-      modifier = modifier.padding(all = 4.dp),
     )
   }
 }
@@ -373,6 +380,7 @@ fun NoteMarkToolbarButton(
 @Composable
 fun NoteMarkFAB(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   onClick: () -> Unit = {},
 ) {
   FloatingActionButton(
@@ -380,6 +388,7 @@ fun NoteMarkFAB(
     shape = shapes.medium,
     modifier =
       modifier
+        .styleable(null, style)
         .padding(
           end =
             WindowInsets.navigationBars
@@ -437,6 +446,14 @@ fun NoteMarkFAB(
 }
 
 @Composable
+fun NoteMarkDivider(
+  modifier: Modifier = Modifier,
+  style: Style = Style,
+) {
+  Spacer(modifier = modifier.styleable(null, NoteMarkTheme.styles.dividerStyle, style))
+}
+
+@Composable
 fun LimitedText(
   fullText: String,
   style: TextStyle,
@@ -463,6 +480,7 @@ fun LimitedText(
 @Composable
 private fun BouncingDot(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   color: Color = Color.Blue,
   size: Dp = 10.dp,
   bounceHeight: Dp = 2.dp,
@@ -493,6 +511,7 @@ private fun BouncingDot(
   Box(
     modifier =
       modifier
+        .styleable(null, style)
         .graphicsLayer { translationY = -bounceProgress.value * bounceHeight.toPx() / 2 }
         .size(size)
         .background(color = color, shape = CircleShape)
@@ -502,6 +521,7 @@ private fun BouncingDot(
 @Composable
 fun ThreeBouncingDots(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   dotColor1: Color = Color.Red,
   dotColor2: Color = Color.Green,
   dotColor3: Color = Color.Blue,
@@ -513,7 +533,10 @@ fun ThreeBouncingDots(
 ) {
   Row(
     modifier =
-      modifier.testTag(tag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS).trackRecompositions(),
+      modifier
+        .styleable(null, style)
+        .testTag(tag = ThreeBouncingDotsTag.THREE_BOUNCING_DOTS)
+        .trackRecompositions(),
     verticalAlignment = Alignment.Bottom, // Align to bottom so they bounce from the same baseline
     horizontalArrangement = Arrangement.spacedBy(space = spaceBetweenDots),
   ) {
@@ -549,6 +572,7 @@ object ThreeBouncingDotsTag {
 fun SafeIconButton(
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
+  style: Style = Style,
   enabled: Boolean = true,
   colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
   activeState: Lifecycle.State = Lifecycle.State.RESUMED,
@@ -585,7 +609,7 @@ fun SafeIconButton(
         }
       }
     },
-    modifier = modifier,
+    modifier = modifier.styleable(null, style),
     enabled = isButtonEnabled, // Pass the combined enabled state to the actual IconButton
     colors = colors,
   ) {

@@ -10,6 +10,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -39,9 +40,11 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.style.MutableStyleState
+import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.styleable
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -59,10 +62,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -95,6 +95,7 @@ import kotlinx.coroutines.flow.filter
 @Composable
 internal fun NoteListPane(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   noteListUiModel: () -> NoteListUiModel,
   noteListAction: (NoteListAction) -> Unit = {},
   appAction: (AppAction) -> Unit = {},
@@ -135,7 +136,11 @@ internal fun NoteListPane(
   }
 
   Box(
-    modifier = modifier.background(color = colorScheme.surfaceContainerLow).fillMaxSize(),
+    modifier =
+      modifier
+        .styleable(null, style)
+        .background(color = colorScheme.surfaceContainerLow)
+        .fillMaxSize(),
     contentAlignment = Alignment.Center,
   ) {
     NoteListValidPane(
@@ -185,6 +190,7 @@ internal fun NoteListPane(
 @Composable
 private fun NoteListValidPane(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   userName: String,
   noteListUiModel: () -> NoteListUiModel,
   loadNotes: () -> Unit,
@@ -198,6 +204,7 @@ private fun NoteListValidPane(
     true ->
       NoteListWithEmptyNotes(
         modifier = modifier,
+        style = style,
         userName = userName,
         loading = noteListUiModel().loading,
         isConnected = noteListUiModel().isConnected,
@@ -226,6 +233,7 @@ private fun NoteListValidPane(
 @Composable
 private fun NoteListWithEmptyNotes(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   userName: String,
   loading: Boolean,
   isConnected: Boolean,
@@ -236,6 +244,7 @@ private fun NoteListWithEmptyNotes(
 ) {
   NoNotes(
     modifier = modifier,
+    style = style,
     userName = userName,
     loading = loading,
     isConnected = isConnected,
@@ -249,6 +258,7 @@ private fun NoteListWithEmptyNotes(
 @Composable
 private fun NoteListWithNotes(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   userName: String,
   loading: Boolean,
   noteListState: () -> NoteListUiModel,
@@ -281,7 +291,7 @@ private fun NoteListWithNotes(
   // detail pane), so it is resolved from the incoming constraints during layout. Deriving it from
   // `onSizeChanged` instead would write measured size back into composition and recompose the whole
   // grid a second time on the first frame and after every size change.
-  BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+  BoxWithConstraints(modifier = modifier.styleable(null, style).fillMaxSize()) {
     val columnCount =
       when {
         maxWidth < 600.dp -> 2
@@ -352,6 +362,7 @@ private fun NoteListFab(
 @Composable
 fun LoadingPane(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   showLoading: Boolean,
 ) {
   AnimatedVisibility(
@@ -360,7 +371,7 @@ fun LoadingPane(
     exit = scaleOut() + fadeOut(),
   ) {
     Box(
-      modifier = modifier.fillMaxSize(),
+      modifier = modifier.styleable(null, style).fillMaxSize(),
       contentAlignment = Alignment.Center,
     ) {
       ThreeBouncingDots(
@@ -376,6 +387,7 @@ fun LoadingPane(
 @Composable
 private fun NoteListPaneToolbar(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   toolbarTitle: String,
   userName: String,
   isConnected: Boolean,
@@ -385,7 +397,7 @@ private fun NoteListPaneToolbar(
   Row(
     modifier =
       modifier
-        .background(color = colorScheme.surfaceContainerLowest)
+        .styleable(null, NoteMarkTheme.styles.toolbarStyle, style)
         .fillMaxWidth()
         .padding(
           top =
@@ -434,6 +446,7 @@ private fun NoteListPaneToolbar(
 @Composable
 private fun NoNotes(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   toolbarTitle: String = "NoteMark",
   userName: String = "",
   loading: Boolean,
@@ -443,7 +456,7 @@ private fun NoNotes(
   onProfileClicked: () -> Unit,
   onFabClicked: () -> Unit = {},
 ) {
-  Box(modifier = modifier.fillMaxSize()) {
+  Box(modifier = modifier.styleable(null, style).fillMaxSize()) {
     NoteListPaneToolbar(
       modifier = Modifier,
       toolbarTitle = toolbarTitle,
@@ -471,8 +484,7 @@ private fun NoNotes(
           color = colorScheme.onSurfaceVariant,
           textAlign = TextAlign.Center,
           modifier =
-            modifier
-              .fillMaxWidth()
+            Modifier.fillMaxWidth()
               .padding(
                 paddingValues =
                   WindowInsets.displayCutout
@@ -494,6 +506,7 @@ private fun NoNotes(
 @Composable
 private fun NoteGrid(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   columnCount: Int,
   maxLength: Int,
   state: LazyStaggeredGridState,
@@ -526,7 +539,7 @@ private fun NoteGrid(
       ),
     verticalItemSpacing = 8.dp,
     horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-    modifier = modifier.fillMaxSize(),
+    modifier = modifier.styleable(null, style).fillMaxSize(),
   ) {
     item(
       span = StaggeredGridItemSpan.FullLine,
@@ -611,32 +624,26 @@ private val NoteItemFadeOutSpec =
 @Composable
 private fun NoteItem(
   modifier: Modifier = Modifier,
+  style: Style = Style,
   note: NoteEntityUiModel,
   maxLength: Int,
   locale: Locale,
   onNoteClicked: (String) -> Unit = {},
   onNoteLongClicked: (String) -> Unit = {},
 ) {
+  val interactionSource = remember { MutableInteractionSource() }
+  val styleState = remember(interactionSource) { MutableStyleState(interactionSource) }
+
   Column(
     modifier =
       modifier
-        .clip(shape = shapes.medium)
-        .background(color = colorScheme.surfaceContainerLowest)
         .combinedClickable(
+          interactionSource = interactionSource,
+          indication = null,
           onClick = { onNoteClicked(note.uuid) },
           onLongClick = { onNoteLongClicked(note.uuid) },
         )
-        .innerShadow(
-          shape = shapes.medium,
-          shadow =
-            Shadow(
-              radius = 12.dp,
-              color = colorScheme.primary,
-              spread = 4.dp,
-              alpha = 0.4f,
-            ),
-        )
-        .padding(all = 16.dp)
+        .styleable(styleState, NoteMarkTheme.styles.noteCardStyle, style)
   ) {
     val lastEditedLabel =
       remember(key1 = note.lastEditedAt, key2 = locale) {
