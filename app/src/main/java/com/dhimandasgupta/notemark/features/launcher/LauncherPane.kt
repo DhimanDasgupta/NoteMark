@@ -1,7 +1,6 @@
 package com.dhimandasgupta.notemark.features.launcher
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +22,9 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.contentPadding
 import androidx.compose.foundation.style.styleable
+import androidx.compose.foundation.style.then
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
@@ -37,13 +38,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -54,6 +53,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkStyles
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.compose.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.designsystem.compose.NoteMarkButton
@@ -109,10 +109,7 @@ internal fun LauncherPane(
 
   Box(
     modifier =
-      modifier
-        .styleable(null, style)
-        .fillMaxSize()
-        .background(color = colorResource(id = R.color.splash_blue_background))
+      modifier.styleable(null, NoteMarkTheme.styles.landingBackgroundStyle, style).fillMaxSize()
   ) {
     when (val layoutType = getDeviceLayoutType()) {
       DeviceLayoutType.PHONE_PORTRAIT -> {
@@ -170,23 +167,13 @@ private fun LandingPanePortrait(
 
     ForegroundPane(
       modifier =
-        Modifier.clip(
-            shape =
-              RoundedCornerShape(
-                topStart = 16.dp,
-                topEnd = 16.dp,
-              )
-          )
-          .background(color = colorScheme.surface)
+        Modifier.styleable(null, NoteMarkTheme.styles.landingSheetStyle)
           .padding(
-            start = 16.dp,
-            top = 16.dp,
-            end = 16.dp,
             bottom =
               WindowInsets.displayCutout
                 .union(insets = WindowInsets.navigationBars)
                 .asPaddingValues()
-                .calculateBottomPadding(),
+                .calculateBottomPadding()
           ),
       navigateToLogin = navigateToLogin,
       deviceLayoutType = deviceLayoutType,
@@ -194,6 +181,14 @@ private fun LandingPanePortrait(
     )
   }
 }
+
+/** Landing sheet docked to the end edge, with the end gutter left to window insets. */
+private val LandscapeLandingSheetStyle =
+  NoteMarkStyles.landingSheetStyle then
+    Style {
+      shape(RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp))
+      contentPadding(start = 32.dp, top = 32.dp, end = 0.dp, bottom = 32.dp)
+    }
 
 @Composable
 private fun LandingPaneLandscape(
@@ -222,23 +217,13 @@ private fun LandingPaneLandscape(
     ForegroundPane(
       modifier =
         Modifier.wrapContentSize(align = Alignment.Center)
-          .clip(
-            shape =
-              RoundedCornerShape(
-                topStart = 16.dp,
-                bottomStart = 16.dp,
-              )
-          )
-          .background(color = colorScheme.surface)
+          .styleable(null, LandscapeLandingSheetStyle)
           .padding(
-            start = 32.dp,
-            top = 32.dp,
             end =
               WindowInsets.displayCutout
                 .union(insets = WindowInsets.navigationBars)
                 .asPaddingValues()
-                .calculateRightPadding(LayoutDirection.Ltr),
-            bottom = 32.dp,
+                .calculateRightPadding(LayoutDirection.Ltr)
           )
           .fillMaxHeight(fraction = 0.85f),
       navigateToLogin = navigateToLogin,
@@ -275,23 +260,13 @@ private fun LandingPaneTablet(
     ForegroundPane(
       modifier =
         Modifier.fillMaxWidth(fraction = 0.85f)
-          .clip(
-            shape =
-              RoundedCornerShape(
-                topStart = 16.dp,
-                topEnd = 16.dp,
-              )
-          )
-          .background(color = colorScheme.surface)
+          .styleable(null, NoteMarkTheme.styles.landingSheetStyle)
           .padding(
-            start = 16.dp,
-            top = 16.dp,
-            end = 16.dp,
             bottom =
               WindowInsets.navigationBars
                 .union(insets = WindowInsets.displayCutout)
                 .asPaddingValues()
-                .calculateBottomPadding(),
+                .calculateBottomPadding()
           ),
       navigateToLogin = navigateToLogin,
       deviceLayoutType = deviceLayoutType,

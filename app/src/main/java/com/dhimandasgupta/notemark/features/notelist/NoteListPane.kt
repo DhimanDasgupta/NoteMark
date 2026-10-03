@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -64,7 +63,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -137,10 +135,7 @@ internal fun NoteListPane(
 
   Box(
     modifier =
-      modifier
-        .styleable(null, style)
-        .background(color = colorScheme.surfaceContainerLow)
-        .fillMaxSize(),
+      modifier.styleable(null, NoteMarkTheme.styles.noteListScreenStyle, style).fillMaxSize(),
     contentAlignment = Alignment.Center,
   ) {
     NoteListValidPane(
@@ -374,12 +369,7 @@ fun LoadingPane(
       modifier = modifier.styleable(null, style).fillMaxSize(),
       contentAlignment = Alignment.Center,
     ) {
-      ThreeBouncingDots(
-        modifier = Modifier.padding(all = 16.dp).wrapContentSize(),
-        dotColor1 = colorResource(id = R.color.splash_blue).copy(alpha = 0.5f),
-        dotColor2 = colorResource(id = R.color.splash_blue).copy(alpha = 0.75f),
-        dotColor3 = colorResource(id = R.color.splash_blue).copy(alpha = 1.0f),
-      )
+      ThreeBouncingDots(modifier = Modifier.padding(all = 16.dp).wrapContentSize())
     }
   }
 }
@@ -469,12 +459,7 @@ private fun NoNotes(
     when (showSyncProgress || loading) {
       true ->
         Box(modifier = Modifier.align(Alignment.Center).wrapContentSize().padding(all = 16.dp)) {
-          ThreeBouncingDots(
-            modifier = Modifier.padding(all = 16.dp).wrapContentSize(),
-            dotColor1 = colorResource(id = R.color.splash_blue).copy(alpha = 0.5f),
-            dotColor2 = colorResource(id = R.color.splash_blue).copy(alpha = 0.75f),
-            dotColor3 = colorResource(id = R.color.splash_blue).copy(alpha = 1.0f),
-          )
+          ThreeBouncingDots(modifier = Modifier.padding(all = 16.dp).wrapContentSize())
         }
 
       else ->
@@ -562,12 +547,7 @@ private fun NoteGrid(
         key = "sync_progress",
         contentType = "sync_progress",
       ) {
-        ThreeBouncingDots(
-          modifier = Modifier.padding(all = 16.dp).wrapContentSize(),
-          dotColor1 = colorResource(id = R.color.splash_blue).copy(alpha = 0.5f),
-          dotColor2 = colorResource(id = R.color.splash_blue).copy(alpha = 0.75f),
-          dotColor3 = colorResource(id = R.color.splash_blue).copy(alpha = 1.0f),
-        )
+        ThreeBouncingDots(modifier = Modifier.padding(all = 16.dp).wrapContentSize())
       }
     }
 

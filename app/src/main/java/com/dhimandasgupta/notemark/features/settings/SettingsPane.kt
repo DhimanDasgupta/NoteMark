@@ -6,7 +6,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -99,8 +98,7 @@ internal fun SettingsPane(
   Column(
     modifier =
       modifier
-        .styleable(null, style)
-        .background(color = colorScheme.surfaceContainerLowest)
+        .styleable(null, NoteMarkTheme.styles.screenStyle, style)
         .fillMaxSize()
         .verticalScroll(rememberScrollState()),
     verticalArrangement = Arrangement.spacedBy(space = 16.dp),
@@ -203,7 +201,7 @@ private fun SettingsBody(
   Box(modifier = modifier.styleable(null, style).fillMaxSize()) {
     Column(
       modifier =
-        Modifier.background(color = colorScheme.surfaceContainerLowest)
+        Modifier.styleable(null, NoteMarkTheme.styles.screenStyle)
           .fillMaxWidth()
           .padding(
             start =

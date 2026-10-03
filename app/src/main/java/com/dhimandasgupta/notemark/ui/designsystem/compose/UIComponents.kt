@@ -9,8 +9,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,7 +26,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.style.Style
 import androidx.compose.foundation.style.rememberUpdatedStyleState
@@ -61,14 +58,10 @@ import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
@@ -93,7 +86,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.ui.designsystem.DisconnectedStateKey
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
-import com.dhimandasgupta.notemark.ui.designsystem.Shapes
 
 @Composable
 fun NoteMarkButton(
@@ -167,22 +159,18 @@ fun NoteMarkTextField(
       }
     }
 
-    var hasFocus by retain { mutableStateOf(value = false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val fieldStyleState = rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }
 
     TextField(
       enabled = enabled,
       value = enteredText,
       onValueChange = onTextChanged,
+      interactionSource = interactionSource,
       modifier =
         Modifier.fillMaxWidth()
-          .clip(Shapes.medium)
-          .border(
-            width = if (hasFocus) 1.dp else 0.dp,
-            color = if (hasFocus) colorScheme.primary else colorScheme.surface,
-            shape = Shapes.medium,
-          )
+          .styleable(fieldStyleState, NoteMarkTheme.styles.textFieldStyle)
           .onFocusChanged { focusState ->
-            hasFocus = focusState.hasFocus
             if (focusState.hasFocus) onFocusGained() else onFocusLost()
           },
       visualTransformation = VisualTransformation.None,
@@ -247,8 +235,9 @@ fun NoteMarkPasswordTextField(
   onNextClicked: (() -> Unit)? = null,
   onDoneClicked: (() -> Unit)? = null,
 ) {
-  var hasFocus by retain { mutableStateOf(value = false) }
   var showPassword by retain { mutableStateOf(value = false) }
+  val interactionSource = remember { MutableInteractionSource() }
+  val fieldStyleState = rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }
 
   Column(
     modifier = modifier.styleable(null, style),
@@ -291,16 +280,11 @@ fun NoteMarkPasswordTextField(
           )
         }
       },
+      interactionSource = interactionSource,
       modifier =
         Modifier.fillMaxWidth()
-          .clip(Shapes.medium)
-          .border(
-            width = if (hasFocus) 1.dp else 0.dp,
-            color = if (hasFocus) colorScheme.primary else colorScheme.surface,
-            shape = Shapes.medium,
-          )
+          .styleable(fieldStyleState, NoteMarkTheme.styles.textFieldStyle)
           .onFocusChanged { focusState ->
-            hasFocus = focusState.hasFocus
             if (focusState.hasFocus) onFocusGained() else onFocusLost()
           },
       visualTransformation =
@@ -389,7 +373,6 @@ fun NoteMarkFAB(
     shape = shapes.medium,
     modifier =
       modifier
-        .styleable(null, style)
         .padding(
           end =
             WindowInsets.navigationBars
@@ -402,31 +385,12 @@ fun NoteMarkFAB(
               .asPaddingValues()
               .calculateBottomPadding(),
         )
+        // Elevation shadows have no Style equivalent; dropShadow renders differently.
         .shadow(
           elevation = 8.dp,
           shape = shapes.medium,
         )
-        .background(
-          brush =
-            Brush.verticalGradient(
-              colors =
-                listOf(
-                  Color(color = 0XFF58A1F8),
-                  Color(color = 0xFF5A4CF7),
-                )
-            ),
-          shape = shapes.medium,
-        )
-        .innerShadow(
-          shape = shapes.medium,
-          shadow =
-            Shadow(
-              radius = 2.dp,
-              color = colorScheme.onPrimary,
-              spread = 2.dp,
-              alpha = 0.5f,
-            ),
-        ),
+        .styleable(null, NoteMarkTheme.styles.fabStyle, style),
     elevation =
       FloatingActionButtonDefaults.elevation(
         defaultElevation = 0.dp,
@@ -482,8 +446,6 @@ fun LimitedText(
 private fun BouncingDot(
   modifier: Modifier = Modifier,
   style: Style = Style,
-  color: Color = Color.Blue,
-  size: Dp = 10.dp,
   bounceHeight: Dp = 2.dp,
   animationDurationMillis: Int = 500,
   delayMillis: Int = 0, // Delay before this specific dot starts its animation
@@ -512,10 +474,8 @@ private fun BouncingDot(
   Box(
     modifier =
       modifier
-        .styleable(null, style)
         .graphicsLayer { translationY = -bounceProgress.value * bounceHeight.toPx() / 2 }
-        .size(size)
-        .background(color = color, shape = CircleShape)
+        .styleable(null, NoteMarkTheme.styles.loadingDotStyle, style)
   )
 }
 
@@ -523,10 +483,9 @@ private fun BouncingDot(
 fun ThreeBouncingDots(
   modifier: Modifier = Modifier,
   style: Style = Style,
-  dotColor1: Color = Color.Red,
-  dotColor2: Color = Color.Green,
-  dotColor3: Color = Color.Blue,
-  dotSize: Dp = 12.dp,
+  dotStyle1: Style = LeadingDotStyle,
+  dotStyle2: Style = MiddleDotStyle,
+  dotStyle3: Style = Style,
   bounceHeight: Dp = 40.dp,
   animationDurationMillis: Int = 600,
   spaceBetweenDots: Dp = 8.dp,
@@ -542,28 +501,29 @@ fun ThreeBouncingDots(
     horizontalArrangement = Arrangement.spacedBy(space = spaceBetweenDots),
   ) {
     BouncingDot(
-      color = dotColor1,
-      size = dotSize,
+      style = dotStyle1,
       bounceHeight = bounceHeight,
       animationDurationMillis = animationDurationMillis,
       delayMillis = 0, // First dot starts immediately
     )
     BouncingDot(
-      color = dotColor2,
-      size = dotSize,
+      style = dotStyle2,
       bounceHeight = bounceHeight,
       animationDurationMillis = animationDurationMillis,
       delayMillis = dotStartDelayMillis, // Second dot is delayed
     )
     BouncingDot(
-      color = dotColor3,
-      size = dotSize,
+      style = dotStyle3,
       bounceHeight = bounceHeight,
       animationDurationMillis = animationDurationMillis,
       delayMillis = dotStartDelayMillis * 2, // Third dot is further delayed
     )
   }
 }
+
+/** The trailing dot is fully opaque; the two before it fade in towards it. */
+private val LeadingDotStyle = Style { alpha(0.5f) }
+private val MiddleDotStyle = Style { alpha(0.75f) }
 
 object ThreeBouncingDotsTag {
   const val THREE_BOUNCING_DOTS = "ThreeBouncingDots"

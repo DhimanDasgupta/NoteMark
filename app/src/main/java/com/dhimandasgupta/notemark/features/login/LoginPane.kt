@@ -1,7 +1,6 @@
 package com.dhimandasgupta.notemark.features.login
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,14 +43,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.features.login.LoginAction.EmailEntered
 import com.dhimandasgupta.notemark.features.login.LoginAction.HideLoginButton
 import com.dhimandasgupta.notemark.features.login.LoginAction.LoginClicked
@@ -100,10 +97,7 @@ internal fun LoginPane(
 
   Box(
     modifier =
-      modifier
-        .styleable(null, style)
-        .background(color = colorResource(id = R.color.splash_blue))
-        .fillMaxSize()
+      modifier.styleable(null, NoteMarkTheme.styles.authBackgroundStyle, style).fillMaxSize()
   ) {
     val layoutType = getDeviceLayoutType()
 

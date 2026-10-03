@@ -17,3 +17,6 @@ val SurfaceLowestDark = Color(0xFF000000)
 
 val Error = Color(0xFFB3261E)
 val ErrorDark = Color(0xFFFFB4AB)
+
+val SplashBlue = Color(0xFF5977F7)
+val SplashBlueBackground = Color(0xFFE0EAFF)

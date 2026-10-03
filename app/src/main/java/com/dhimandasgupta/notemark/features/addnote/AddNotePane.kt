@@ -1,6 +1,5 @@
 package com.dhimandasgupta.notemark.features.addnote
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -98,8 +97,7 @@ internal fun AddNotePane(
   Column(
     modifier =
       modifier
-        .styleable(null, style)
-        .background(color = colorScheme.surfaceContainerLowest)
+        .styleable(null, NoteMarkTheme.styles.screenStyle, style)
         .fillMaxWidth()
         .wrapContentHeight(align = Alignment.Top),
     horizontalAlignment = Alignment.CenterHorizontally,

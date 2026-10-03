@@ -9,7 +9,6 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,7 +60,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -128,8 +126,7 @@ internal fun EditNotePane(
   Column(
     modifier =
       modifier
-        .styleable(null, style)
-        .background(color = colorScheme.surfaceContainerLowest)
+        .styleable(null, NoteMarkTheme.styles.screenStyle, style)
         .fillMaxWidth()
         .wrapContentHeight(align = Alignment.Top)
         .padding(horizontal = 16.dp),
@@ -156,12 +153,7 @@ internal fun EditNotePane(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
       ) {
-        ThreeBouncingDots(
-          modifier = Modifier.padding(all = 16.dp).wrapContentSize(),
-          dotColor1 = colorResource(id = R.color.splash_blue).copy(alpha = 0.5f),
-          dotColor2 = colorResource(id = R.color.splash_blue).copy(alpha = 0.75f),
-          dotColor3 = colorResource(id = R.color.splash_blue).copy(alpha = 1.0f),
-        )
+        ThreeBouncingDots(modifier = Modifier.padding(all = 16.dp).wrapContentSize())
       }
     }
 
