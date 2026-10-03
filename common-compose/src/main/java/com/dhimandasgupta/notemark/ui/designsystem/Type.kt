@@ -8,7 +8,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontLoadingStrategy
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.common.compose.R
 
 private val SpaceGrotesk =
   FontFamily(

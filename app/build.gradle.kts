@@ -41,7 +41,6 @@ private val jvmTargetVersion = libs.versions.jvmTarget.get()
 kotlin {
   compilerOptions {
     jvmTarget.set(JvmTarget.fromTarget(jvmTargetVersion))
-    freeCompilerArgs.add("-opt-in=androidx.compose.foundation.style.ExperimentalFoundationStyleApi")
   }
 }
 
@@ -104,6 +103,7 @@ android {
 dependencies {
   implementation(project(":common-core"))
   implementation(project(":common-android"))
+  implementation(project(":common-compose"))
   implementation(project(":common-data"))
 
   implementation(libs.androidx.ui.graphics)

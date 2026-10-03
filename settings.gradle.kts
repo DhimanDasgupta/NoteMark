@@ -29,4 +29,6 @@ include(":common-core")
 
 include(":common-android")
 
+include(":common-compose")
+
 include(":common-data")

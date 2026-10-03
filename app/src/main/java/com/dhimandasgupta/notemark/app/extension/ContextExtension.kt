@@ -19,6 +19,7 @@ import androidx.work.await
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.app.activity.MainActivity
 import com.dhimandasgupta.notemark.app.work.NoteSyncWorker
+import com.dhimandasgupta.notemark.common.compose.R as ComposeR
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
@@ -121,7 +122,7 @@ fun Context.addCreateNewNoteShortcut() {
         .setShortLabel(getString(R.string.shortcut_new_note_short))
         .setLongLabel(getString(R.string.shortcut_new_note_long))
         .setDisabledMessage(getString(R.string.shortcut_new_note_disabled))
-        .setIcon(IconCompat.createWithResource(this, R.drawable.ic_plus_icon))
+        .setIcon(IconCompat.createWithResource(this, ComposeR.drawable.ic_plus_icon))
         .setIntent(
           Intent(Intent.ACTION_VIEW, "notemark://notes/new".toUri()).apply {
             setClass(this@addCreateNewNoteShortcut, MainActivity::class.java)

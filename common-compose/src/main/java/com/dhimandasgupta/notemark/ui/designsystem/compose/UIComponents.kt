@@ -83,7 +83,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.common.compose.R
 import com.dhimandasgupta.notemark.ui.designsystem.DisconnectedStateKey
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 
