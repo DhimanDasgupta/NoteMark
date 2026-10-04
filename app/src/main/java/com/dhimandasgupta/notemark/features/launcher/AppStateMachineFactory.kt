@@ -2,7 +2,6 @@ package com.dhimandasgupta.notemark.features.launcher
 
 import android.app.Application
 import android.content.Context
-import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.app.extension.addCreateNewNoteShortcut
 import com.dhimandasgupta.notemark.app.extension.cancelPeriodicSync
 import com.dhimandasgupta.notemark.app.extension.cancelSyncWork
@@ -15,6 +14,8 @@ import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
 import com.dhimandasgupta.notemark.common.extensions.kotlin.getDifferenceFromTimestampInMinutes
 import com.dhimandasgupta.notemark.common.extensions.kotlin.parseIsoInstantOrNull
+import com.dhimandasgupta.notemark.common.state.AppAction
+import com.dhimandasgupta.notemark.common.state.AppState
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.data.repository.NoteMarkRepository
 import com.dhimandasgupta.notemark.data.repository.SyncRepository
@@ -37,35 +38,28 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.withIndex
 import kotlinx.coroutines.withContext
 
-@Immutable
-sealed interface AppState {
-  val connectionState: ConnectionState
+data class NotLoggedIn(
+  override val connectionState: ConnectionState = ConnectionState.Unavailable
+) : AppState
 
-  data class NotLoggedIn(
-    override val connectionState: ConnectionState = ConnectionState.Unavailable
-  ) : AppState
+data class LoggedIn(
+  override val connectionState: ConnectionState = ConnectionState.Unavailable,
+  val appEvents: ImmutableList<AppEvent> = persistentListOf(),
+  val user: User,
+  val sync: Sync? = null,
+  val isSyncing: Boolean = false,
+  val appVersionName: String,
+) : AppState
 
-  data class LoggedIn(
-    override val connectionState: ConnectionState = ConnectionState.Unavailable,
-    val appEvents: ImmutableList<AppEvent> = persistentListOf(),
-    val user: User,
-    val sync: Sync? = null,
-    val isSyncing: Boolean = false,
-    val appVersionName: String,
-  ) : AppState
-}
+data class UpdateSync(val syncDuration: Sync.SyncDuration) : AppAction
 
-sealed interface AppAction {
-  data class UpdateSync(val syncDuration: Sync.SyncDuration) : AppAction
+object AppLogout : AppAction
 
-  object AppLogout : AppAction
+object SyncNow : AppAction
 
-  object SyncNow : AppAction
+data class DeleteLocalNotesOnLogout(val deleteOnLogout: Boolean) : AppAction
 
-  data class DeleteLocalNotesOnLogout(val deleteOnLogout: Boolean) : AppAction
-
-  data class AppEventConsumed(val id: Uuid) : AppAction
-}
+data class AppEventConsumed(val id: Uuid) : AppAction
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Inject
@@ -81,12 +75,12 @@ class AppStateMachineFactory(
     spec {
       initializeWith { defaultAppState }
 
-      inState<AppState.NotLoggedIn> {
+      inState<NotLoggedIn> {
         onEnterEffect { applicationContext.removeCreateNewNoteShortcut() }
         collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user ->
           user?.let {
             override {
-              AppState.LoggedIn(
+              LoggedIn(
                 connectionState = connectionState,
                 user = user,
                 appVersionName = applicationContext.getAppVersionName(),
@@ -104,7 +98,7 @@ class AppStateMachineFactory(
         }
       }
 
-      inState<AppState.LoggedIn> {
+      inState<LoggedIn> {
         onEnterEffect {
           syncOnEnter()
           applicationContext.addCreateNewNoteShortcut()
@@ -133,11 +127,11 @@ class AppStateMachineFactory(
         collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user ->
           user?.let {
             noChange()
-          } ?: override { AppState.NotLoggedIn(connectionState = connectionState) }
+          } ?: override { NotLoggedIn(connectionState = connectionState) }
         }
 
         // All the actions valid for app state should be handled here
-        on<AppAction.UpdateSync> { action ->
+        on<UpdateSync> { action ->
           val interval =
             when (action.syncDuration) {
               Sync.SyncDuration.SYNC_DURATION_FIFTEEN_MINUTES -> 15.minutes
@@ -157,13 +151,13 @@ class AppStateMachineFactory(
             copy(sync = sync)
           }
         }
-        onActionEffect<AppAction.SyncNow> { _ -> applicationContext.triggerOneTimeSync() }
-        onActionEffect<AppAction.DeleteLocalNotesOnLogout> { action ->
+        onActionEffect<SyncNow> { _ -> applicationContext.triggerOneTimeSync() }
+        onActionEffect<DeleteLocalNotesOnLogout> { action ->
           syncRepository.saveDeleteLocalNotesOnLogout(
             deleteLocalNotesOnLogout = action.deleteOnLogout
           )
         }
-        on<AppAction.AppLogout> { _ ->
+        on<AppLogout> { _ ->
           if (snapshot.connectionState == ConnectionState.Unavailable) return@on noChange()
 
           noteMarkRepository
@@ -177,11 +171,11 @@ class AppStateMachineFactory(
                 deleteLocalNotesOnLogout = syncRepository.getSync().first().deleteLocalNotesOnLogout
               )
               override {
-                AppState.NotLoggedIn(connectionState = connectionState)
+                NotLoggedIn(connectionState = connectionState)
               }
             } ?: noChange()
         }
-        on<AppAction.AppEventConsumed> { action ->
+        on<AppEventConsumed> { action ->
           mutate {
             copy(
               appEvents =
@@ -194,7 +188,7 @@ class AppStateMachineFactory(
   }
 
   companion object Companion {
-    val defaultAppState = AppState.NotLoggedIn()
+    val defaultAppState = NotLoggedIn()
   }
 
   private suspend fun onLogoutSuccessful(deleteLocalNotesOnLogout: Boolean = false) =

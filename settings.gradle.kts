@@ -32,3 +32,5 @@ include(":common-android")
 include(":common-compose")
 
 include(":common-data")
+
+include(":common-state-event-api")

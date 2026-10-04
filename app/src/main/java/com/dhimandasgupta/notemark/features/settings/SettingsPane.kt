@@ -59,7 +59,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.extensions.kotlin.convertNoteTimestampToReadableFormat
-import com.dhimandasgupta.notemark.features.launcher.AppAction
+import com.dhimandasgupta.notemark.common.state.AppAction
+import com.dhimandasgupta.notemark.features.launcher.SyncNow
+import com.dhimandasgupta.notemark.features.launcher.UpdateSync
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.compose.NoteMarkDivider
@@ -111,7 +113,7 @@ internal fun SettingsPane(
       toggleSyncIntervalVisibility = { showSyncInterval = !showSyncInterval },
       onSyncIntervalSelected = { label ->
         settingsAction(
-          AppAction.UpdateSync(
+          UpdateSync(
             syncDuration =
               when (label) {
                 "15 Minutes" -> Sync.SyncDuration.SYNC_DURATION_FIFTEEN_MINUTES
@@ -122,7 +124,7 @@ internal fun SettingsPane(
           )
         )
       },
-      onSyncNowClicked = { settingsAction(AppAction.SyncNow) },
+      onSyncNowClicked = { settingsAction(SyncNow) },
       onDeleteNoteCheckChanged = onDeleteNoteCheckChanged,
       onLogoutClicked = onLogoutClicked,
     )

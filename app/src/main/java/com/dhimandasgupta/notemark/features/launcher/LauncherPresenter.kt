@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.android.ConnectionState
+import com.dhimandasgupta.notemark.common.state.AppAction
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -66,13 +67,13 @@ class LauncherPresenter(private val appStateMachineFactory: AppStateMachineFacto
                 connectionState = appState.connectionState,
                 loggedInUser =
                   when (appState) {
-                    is AppState.NotLoggedIn -> null
-                    is AppState.LoggedIn ->
+                    is LoggedIn ->
                       UiUser(
                         userName = appState.user.userName,
                         accessToken = appState.user.accessToken,
                         refreshToken = appState.user.refreshToken,
                       )
+                    else -> null
                   },
               )
           }

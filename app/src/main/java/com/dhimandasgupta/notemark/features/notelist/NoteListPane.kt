@@ -74,8 +74,9 @@ import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.extensions.kotlin.convertIsoToRelativeYearFormat
 import com.dhimandasgupta.notemark.common.extensions.kotlin.formatUserName
-import com.dhimandasgupta.notemark.features.launcher.AppAction
+import com.dhimandasgupta.notemark.common.state.AppAction
 import com.dhimandasgupta.notemark.features.launcher.AppEvent
+import com.dhimandasgupta.notemark.features.launcher.AppEventConsumed
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.compose.LimitedText
 import com.dhimandasgupta.notemark.ui.designsystem.compose.NoteMarkFAB
@@ -130,7 +131,7 @@ internal fun NoteListPane(
     snackbarHostState.currentSnackbarData?.dismiss()
     snackbarHostState.showSnackbar(message = message, duration = SnackbarDuration.Long)
     // Make sure to mark the event as consumed. Otherwise, the same event will be fired again
-    appAction(AppAction.AppEventConsumed(id = event.id))
+    appAction(AppEventConsumed(id = event.id))
   }
 
   Box(

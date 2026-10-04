@@ -105,6 +105,7 @@ dependencies {
   implementation(project(":common-android"))
   implementation(project(":common-compose"))
   implementation(project(":common-data"))
+  implementation(project(":common-state-event-api"))
 
   implementation(libs.androidx.ui.graphics)
   implementation(libs.androidx.material3.window.size.android)

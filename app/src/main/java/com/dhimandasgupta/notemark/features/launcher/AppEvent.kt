@@ -1,12 +1,8 @@
 package com.dhimandasgupta.notemark.features.launcher
 
 import androidx.compose.runtime.Immutable
+import com.dhimandasgupta.notemark.common.state.Event
 import kotlin.uuid.Uuid
-
-@Immutable
-sealed interface Event {
-  val id: Uuid
-}
 
 @Immutable
 sealed interface AppEvent : Event {

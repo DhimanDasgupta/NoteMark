@@ -9,9 +9,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.android.ConnectionState
-import com.dhimandasgupta.notemark.features.launcher.AppAction
-import com.dhimandasgupta.notemark.features.launcher.AppState
+import com.dhimandasgupta.notemark.common.state.AppAction
+import com.dhimandasgupta.notemark.common.state.AppState
 import com.dhimandasgupta.notemark.features.launcher.AppStateMachineFactory
+import com.dhimandasgupta.notemark.features.launcher.LoggedIn
+import com.dhimandasgupta.notemark.features.launcher.NotLoggedIn
 import com.dhimandasgupta.notemark.proto.Sync
 import dev.zacsweers.metro.Inject
 import kotlinx.collections.immutable.ImmutableList
@@ -74,8 +76,7 @@ class SettingsPresenter(private val appStateMachineFactory: AppStateMachineFacto
             emit(value = AppStateMachineFactory.defaultAppState)
           } // Do not emit the default state as data will come from State Machine
           .filter { appState ->
-            (appState is AppState.LoggedIn && appState.sync != null) ||
-              appState is AppState.NotLoggedIn
+            (appState is LoggedIn && appState.sync != null) || appState is NotLoggedIn
           }
           .mapLatest { appState ->
             settingsUiModel = settingsUiModel.mapToSettingsUiModel(appState = appState)
@@ -107,7 +108,7 @@ class SettingsPresenter(private val appStateMachineFactory: AppStateMachineFacto
 
 private fun SettingsUiModel.mapToSettingsUiModel(appState: AppState): SettingsUiModel {
   when (appState) {
-    is AppState.LoggedIn -> {
+    is LoggedIn -> {
       return copy(
         logoutStatus = null,
         lastSynced = appState.sync?.lastUploadedTime ?: "--",
