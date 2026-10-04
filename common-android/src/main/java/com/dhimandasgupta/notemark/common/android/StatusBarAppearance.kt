@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.common.extensions.android
+package com.dhimandasgupta.notemark.common.android
 
 import android.app.Activity
 import android.content.Context
@@ -7,12 +7,7 @@ import androidx.core.view.WindowCompat
 
 fun Activity.setDarkStatusBarIcons(isLight: Boolean) =
   WindowCompat.getInsetsController(window, window.decorView).apply {
-    isAppearanceLightStatusBars =
-      if (isSystemInDarkTheme()) {
-        false
-      } else {
-        isLight
-      }
+    isAppearanceLightStatusBars = !isSystemInDarkTheme() && isLight
   }
 
 fun Activity.setForcedDarkStatusBarIcons(isLight: Boolean) =

@@ -13,7 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
-import com.dhimandasgupta.notemark.common.extensions.android.setForcedDarkStatusBarIcons
+import com.dhimandasgupta.notemark.common.android.setForcedDarkStatusBarIcons
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable

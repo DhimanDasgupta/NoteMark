@@ -11,8 +11,8 @@ import com.dhimandasgupta.notemark.app.extension.observeSyncRunning
 import com.dhimandasgupta.notemark.app.extension.removeCreateNewNoteShortcut
 import com.dhimandasgupta.notemark.app.extension.schedulePeriodicSync
 import com.dhimandasgupta.notemark.app.extension.triggerOneTimeSync
-import com.dhimandasgupta.notemark.common.extensions.android.ConnectionState
-import com.dhimandasgupta.notemark.common.extensions.android.observeConnectivityAsFlow
+import com.dhimandasgupta.notemark.common.android.ConnectionState
+import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
 import com.dhimandasgupta.notemark.common.extensions.kotlin.getDifferenceFromTimestampInMinutes
 import com.dhimandasgupta.notemark.common.extensions.kotlin.parseIsoInstantOrNull
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest

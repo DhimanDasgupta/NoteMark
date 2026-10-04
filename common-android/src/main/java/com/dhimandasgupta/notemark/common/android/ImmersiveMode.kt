@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.common.extensions.android
+package com.dhimandasgupta.notemark.common.android
 
 import android.app.Activity
 import android.content.pm.ActivityInfo

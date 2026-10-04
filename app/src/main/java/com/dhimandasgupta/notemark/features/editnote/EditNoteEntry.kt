@@ -14,11 +14,11 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
-import com.dhimandasgupta.notemark.common.extensions.android.lockToLandscape
-import com.dhimandasgupta.notemark.common.extensions.android.setDarkStatusBarIcons
-import com.dhimandasgupta.notemark.common.extensions.android.turnOffImmersiveMode
-import com.dhimandasgupta.notemark.common.extensions.android.turnOnImmersiveMode
-import com.dhimandasgupta.notemark.common.extensions.android.unlockOrientation
+import com.dhimandasgupta.notemark.common.android.lockToLandscape
+import com.dhimandasgupta.notemark.common.android.setDarkStatusBarIcons
+import com.dhimandasgupta.notemark.common.android.turnOffImmersiveMode
+import com.dhimandasgupta.notemark.common.android.turnOnImmersiveMode
+import com.dhimandasgupta.notemark.common.android.unlockOrientation
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
