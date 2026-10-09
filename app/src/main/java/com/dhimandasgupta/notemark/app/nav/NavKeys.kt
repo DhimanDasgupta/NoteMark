@@ -1,12 +1,9 @@
 package com.dhimandasgupta.notemark.app.nav
 
 import androidx.annotation.Keep
-import androidx.navigation3.runtime.NavKey
+import com.dhimandasgupta.notemark.common.navigation.PostLoginNavKey
+import com.dhimandasgupta.notemark.common.navigation.PreLoginNavKey
 import kotlinx.serialization.Serializable
-
-interface PreLoginNavKey : NavKey
-
-interface PostLoginNavKey : NavKey
 
 @Keep @Serializable data object LauncherNavKey : PreLoginNavKey
 

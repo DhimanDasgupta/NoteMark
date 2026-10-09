@@ -34,3 +34,5 @@ include(":common-compose")
 include(":common-data")
 
 include(":common-state-event-api")
+
+include(":common-navigation-api")

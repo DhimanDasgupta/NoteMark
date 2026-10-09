@@ -18,6 +18,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.dhimandasgupta.notemark.common.navigation.clearPostLoginNavKeys
+import com.dhimandasgupta.notemark.common.navigation.clearPreLoginKeys
 import com.dhimandasgupta.notemark.features.addnote.NoteCreateEntryBuilder
 import com.dhimandasgupta.notemark.features.editnote.NoteEditEntryBuilder
 import com.dhimandasgupta.notemark.features.launcher.LauncherEntryBuilder
