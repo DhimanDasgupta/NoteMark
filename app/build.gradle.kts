@@ -80,10 +80,9 @@ android {
     }
   }
 
-  val javaVersion: JavaVersion = JavaVersion.toVersion(jvmTargetVersion)
   compileOptions {
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
+    sourceCompatibility = JavaVersion.toVersion(jvmTargetVersion)
+    targetCompatibility = JavaVersion.toVersion(jvmTargetVersion)
   }
 
   buildFeatures {
