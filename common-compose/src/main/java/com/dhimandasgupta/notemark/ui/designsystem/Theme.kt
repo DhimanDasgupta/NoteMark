@@ -13,8 +13,8 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
@@ -56,7 +56,7 @@ class NoteMarkThemeTokens(
   val shapes: Shapes,
 )
 
-val LocalNoteMarkTheme = staticCompositionLocalOf {
+val LocalNoteMarkTheme = compositionLocalOf {
   NoteMarkThemeTokens(colorScheme = LightColorScheme, shapes = Shapes)
 }
 
