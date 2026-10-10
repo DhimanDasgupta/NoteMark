@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.data
+package com.dhimandasgupta.notemark.app.work
 
 import com.dhimandasgupta.notemark.data.repository.UserRepository
 import com.dhimandasgupta.notemark.proto.User

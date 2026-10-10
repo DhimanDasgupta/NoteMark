@@ -1,7 +1,6 @@
 package com.dhimandasgupta.notemark.app.work
 
 import com.dhimandasgupta.notemark.data.FakeSuccessfulNoteRepository
-import com.dhimandasgupta.notemark.data.FakeSuccessfulUserRepository
 import com.dhimandasgupta.notemark.data.remote.api.AuthenticationException
 import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
