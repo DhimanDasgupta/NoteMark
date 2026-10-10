@@ -8,25 +8,24 @@ import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
-import com.dhimandasgupta.notemark.app.nav.SettingsNavKey
+import com.dhimandasgupta.notemark.common.navigation.SettingsNavKey
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun EntryProviderScope<NavKey>.SettingsEntryBuilder(
   modifier: Modifier = Modifier,
   style: Style = Style,
+  settingsPresenter: () -> SettingsPresenter,
   navigateToLauncherAfterLogout: () -> Unit,
   navigateUp: () -> Unit,
 ) {
   entry<SettingsNavKey>(metadata = ListDetailSceneStrategy.extraPane()) {
-    val graph = LocalNoteMarkGraph.current
-    val settingsPresenter: SettingsPresenter = retain { graph.settingsPresenter() }
+    val presenter: SettingsPresenter = retain { settingsPresenter() }
 
     SettingsEntry(
       modifier = modifier,
       style = style,
-      settingsPresenter = settingsPresenter,
+      settingsPresenter = presenter,
       navigateToLauncherAfterLogout = navigateToLauncherAfterLogout,
       navigateUp = navigateUp,
     )

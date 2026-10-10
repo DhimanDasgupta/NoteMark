@@ -25,10 +25,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -72,9 +72,9 @@ class SettingsPresenter(private val appStateMachineFactory: AppStateMachineFacto
 
       launch {
         appStateMachine.state
-          .onStart {
-            emit(value = AppStateMachineFactory.defaultAppState)
-          } // Do not emit the default state as data will come from State Machine
+          // The machine starts in NotLoggedIn before it has read the stored user, so NotLoggedIn
+          // only means a logout once LoggedIn has been seen.
+          .dropWhile { appState -> appState !is LoggedIn }
           .filter { appState ->
             (appState is LoggedIn && appState.sync != null) || appState is NotLoggedIn
           }

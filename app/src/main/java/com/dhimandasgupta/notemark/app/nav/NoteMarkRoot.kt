@@ -25,6 +25,7 @@ import com.dhimandasgupta.notemark.common.navigation.NoteCreateNavKey
 import com.dhimandasgupta.notemark.common.navigation.NoteEditNavKey
 import com.dhimandasgupta.notemark.common.navigation.NoteListNavKey
 import com.dhimandasgupta.notemark.common.navigation.RegistrationNavKey
+import com.dhimandasgupta.notemark.common.navigation.SettingsNavKey
 import com.dhimandasgupta.notemark.common.navigation.clearPostLoginNavKeys
 import com.dhimandasgupta.notemark.common.navigation.clearPreLoginKeys
 import com.dhimandasgupta.notemark.features.addnote.NoteCreateEntryBuilder
@@ -162,6 +163,7 @@ fun NoteMarkRoot(
             },
           )
           SettingsEntryBuilder(
+            settingsPresenter = { graph.settingsPresenter() },
             navigateToLauncherAfterLogout = {
               backStack.apply {
                 clearPostLoginNavKeys()

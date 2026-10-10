@@ -57,7 +57,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.compose.R as ComposeR
 import com.dhimandasgupta.notemark.common.extensions.kotlin.convertNoteTimestampToReadableFormat
 import com.dhimandasgupta.notemark.common.state.AppAction
@@ -68,11 +67,8 @@ import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.compose.NoteMarkDivider
 import com.dhimandasgupta.notemark.ui.designsystem.compose.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.designsystem.compose.lifecycleAwareDebouncedClickable
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 
-@OptIn(FlowPreview::class)
 @Composable
 internal fun SettingsPane(
   modifier: Modifier = Modifier,
@@ -91,7 +87,6 @@ internal fun SettingsPane(
 
   LaunchedEffect(key1 = Unit) {
     snapshotFlow { updatedSettingsUiModel().logoutStatus }
-      .debounce(timeoutMillis = 100)
       .filter { status -> status == true }
       .collect { _ ->
         updatedOnLogoutSuccessful()

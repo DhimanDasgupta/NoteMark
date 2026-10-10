@@ -114,6 +114,7 @@ dependencies {
   implementation(project(":feat-notelist"))
   implementation(project(":feat-addnote"))
   implementation(project(":feat-editnote"))
+  implementation(project(":feat-settings"))
 
   implementation(libs.androidx.ui.graphics)
   implementation(libs.androidx.material3.window.size.android)

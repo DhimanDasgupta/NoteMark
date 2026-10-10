@@ -52,3 +52,5 @@ include(":feat-notelist")
 include(":feat-addnote")
 
 include(":feat-editnote")
+
+include(":feat-settings")
