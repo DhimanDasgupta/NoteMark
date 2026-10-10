@@ -44,3 +44,7 @@ include(":common-presenter")
 include(":feat-launcher")
 
 include(":feat-login")
+
+include(":feat-registration")
+
+include(":feat-notelist")

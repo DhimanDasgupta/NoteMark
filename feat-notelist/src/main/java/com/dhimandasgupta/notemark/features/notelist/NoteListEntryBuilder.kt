@@ -8,14 +8,14 @@ import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
-import com.dhimandasgupta.notemark.app.nav.NoteListNavKey
+import com.dhimandasgupta.notemark.common.navigation.NoteListNavKey
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun EntryProviderScope<NavKey>.NoteListEntryBuilder(
   modifier: Modifier = Modifier,
   style: Style = Style,
+  noteListPresenter: () -> NoteListPresenter,
   navigateToLauncherIfLoggedOut: () -> Unit,
   navigateToAdd: () -> Unit,
   navigateToEdit: (String) -> Unit,
@@ -27,13 +27,12 @@ fun EntryProviderScope<NavKey>.NoteListEntryBuilder(
         NoNoteSelectedPane()
       }
   ) {
-    val graph = LocalNoteMarkGraph.current
-    val noteListPresenter: NoteListPresenter = retain { graph.noteListPresenter() }
+    val presenter: NoteListPresenter = retain { noteListPresenter() }
 
     NoteListEntry(
       modifier = modifier,
       style = style,
-      noteListPresenter = noteListPresenter,
+      noteListPresenter = presenter,
       navigateToLauncherIfLoggedOut = navigateToLauncherIfLoggedOut,
       navigateToAdd = navigateToAdd,
       navigateToEdit = navigateToEdit,

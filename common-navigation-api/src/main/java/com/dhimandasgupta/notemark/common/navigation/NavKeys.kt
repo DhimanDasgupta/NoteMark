@@ -11,3 +11,7 @@ interface PostLoginNavKey : NavKey
 @Keep @Serializable data object LauncherNavKey : PreLoginNavKey
 
 @Keep @Serializable data object LoginNavKey : PreLoginNavKey
+
+@Keep @Serializable data object RegistrationNavKey : PreLoginNavKey
+
+@Keep @Serializable data object NoteListNavKey : PostLoginNavKey

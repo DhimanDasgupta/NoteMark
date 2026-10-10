@@ -71,7 +71,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.extensions.kotlin.convertIsoToRelativeYearFormat
 import com.dhimandasgupta.notemark.common.extensions.kotlin.formatUserName
 import com.dhimandasgupta.notemark.common.state.AppAction

@@ -1,0 +1,4 @@
+<resources>
+    <string name="network_available">Back online</string>
+    <string name="network_unavailable">You\'re offline. Changes will sync later</string>
+</resources>
