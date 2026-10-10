@@ -41,20 +41,24 @@ protobuf {
 }
 
 dependencies {
-  // Types exposed in this module's public API (repositories, data sources, DI bindings).
-  api(project(":common-core"))
-  api(libs.kotlin.protobuf)
-  api(libs.sql.delight.runtime)
-  api(libs.sql.delight.async.extensions)
-  api(libs.androidx.paging.common)
-  api(libs.datastore.core)
-  api(platform(libs.ktor.bom))
-  api(libs.ktor.client.core)
-  api(libs.ktor.client.auth)
-  api(libs.kotlinx.serialization.json)
+  implementation(project(":common-core"))
 
+  implementation(libs.kotlinx.coroutines.core)
+  implementation(libs.kotlinx.serialization.core)
+  implementation(libs.kotlin.protobuf)
+  implementation(libs.sql.delight.runtime)
+  implementation(libs.sql.delight.async.extensions)
   implementation(libs.sql.delight.coroutines.extensions)
   implementation(libs.sql.delight.paging3.extensions)
+  implementation(libs.androidx.paging.common)
+  implementation(libs.datastore.core)
+  implementation(platform(libs.ktor.bom))
+  implementation(libs.ktor.client.core)
+  implementation(libs.ktor.client.auth)
+
+  testFixturesImplementation(libs.kotlinx.coroutines.core)
+  testFixturesImplementation(libs.kotlin.protobuf)
+  testFixturesImplementation(libs.androidx.paging.common)
 
   // junit and kotlin("test") come from the library convention plugin.
   testImplementation(libs.kotlinx.coroutines.test)

@@ -9,7 +9,6 @@ android {
 }
 
 dependencies {
-  // NavKey is part of this module's public API.
-  api(libs.androidx.navigation3.runtime)
+  implementation(libs.androidx.navigation3.runtime)
   implementation(libs.kotlinx.serialization.core)
 }

@@ -8,14 +8,19 @@ android {
 }
 
 dependencies {
-  // AppPresenter takes an AppStateMachineFactory and returns AppState.
-  api(project(":common-state-event-impl"))
+  implementation(project(":common-state-event-api"))
+  implementation(project(":common-state-event-impl"))
 
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.ui)
+  implementation(libs.kotlinx.coroutines.core)
+  implementation(libs.flow.redux)
 
   // junit and kotlin("test") come from the library convention plugin.
+  testImplementation(project(":common-android"))
+  testImplementation(project(":common-data"))
   testImplementation(testFixtures(project(":common-state-event-impl")))
+  testImplementation(libs.kotlin.protobuf)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.molecule)
   testImplementation(libs.turbine)

@@ -5,11 +5,10 @@ plugins {
 }
 
 dependencies {
-  api(libs.kotlinx.coroutines.core)
-  api(libs.kotlinx.datetime)
-  api(libs.kotlinx.collections.immutable)
-  api(libs.kotlinx.serialization.core)
+  implementation(libs.kotlinx.coroutines.core)
+  implementation(libs.kotlinx.datetime)
+  implementation(libs.kotlinx.collections.immutable)
+  implementation(libs.kotlinx.serialization.core)
 
   testImplementation(libs.kotlinx.coroutines.test)
-  testImplementation(libs.turbine)
 }

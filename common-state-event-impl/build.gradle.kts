@@ -12,18 +12,26 @@ android {
 }
 
 dependencies {
-  api(project(":common-state-event-api"))
-  // AppStateMachineFactory extends FlowReduxStateMachineFactory.
-  api(libs.flow.redux)
-
   implementation(project(":common-android"))
+  implementation(project(":common-core"))
   implementation(project(":common-data"))
+  implementation(project(":common-state-event-api"))
 
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.ui)
+  implementation(libs.kotlinx.coroutines.core)
+  implementation(libs.kotlinx.collections.immutable)
+  implementation(libs.kotlin.protobuf)
+  implementation(libs.flow.redux)
 
   testFixturesImplementation(project(":common-android"))
   testFixturesImplementation(project(":common-data"))
+  testFixturesImplementation(platform(libs.androidx.compose.bom))
+  testFixturesImplementation(libs.androidx.ui)
+  testFixturesImplementation(libs.kotlinx.coroutines.core)
+  testFixturesImplementation(libs.kotlin.protobuf)
+  testFixturesImplementation(platform(libs.ktor.bom))
+  testFixturesImplementation(libs.ktor.client.auth)
   testFixturesImplementation(libs.mockito.core)
   testFixturesImplementation(libs.mockito.kotlin)
 

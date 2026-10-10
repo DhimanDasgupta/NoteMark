@@ -104,10 +104,10 @@ dependencies {
   implementation(project(":common-android"))
   implementation(project(":common-compose"))
   implementation(project(":common-data"))
+  // The Metro graph builds the presenters, which take an AppStateMachineFactory.
   implementation(project(":common-state-event-api"))
   implementation(project(":common-state-event-impl"))
   implementation(project(":common-navigation-api"))
-  implementation(project(":common-presenter"))
   implementation(project(":feat-launcher"))
   implementation(project(":feat-login"))
   implementation(project(":feat-registration"))
@@ -116,13 +116,10 @@ dependencies {
   implementation(project(":feat-editnote"))
   implementation(project(":feat-settings"))
 
-  implementation(libs.androidx.ui.graphics)
-  implementation(libs.androidx.material3.window.size.android)
   implementation(libs.androidx.work.runtime.ktx)
   coreLibraryDesugaring(libs.desugar.jdk)
 
   implementation(libs.androidx.core.ktx)
-  implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.splash.screen)
 
   // Jetpack Compose
@@ -131,38 +128,32 @@ dependencies {
   androidTestImplementation(composeBom)
   debugImplementation(composeBom)
   implementation(libs.androidx.activity.compose)
-  implementation(libs.androidx.lifecycle.viewmodel.compose)
-  implementation(libs.bundles.compose)
+  implementation(libs.androidx.material3)
+  implementation(libs.androidx.ui)
   debugImplementation(libs.bundles.compose.debug)
   implementation(libs.androidx.performance.tracing)
   androidTestImplementation(libs.androidx.ui.test.junit4)
 
   // Flow Redux
   implementation(libs.flow.redux)
-  implementation(libs.flow.redux.extension.jvm)
 
-  // Molecule
-  implementation(libs.molecule)
+  // Kotlinx Coroutines
+  implementation(libs.kotlinx.coroutines.core)
 
   // Kotlinx Serialization JSON
   implementation(libs.kotlinx.serialization.json)
 
   // SQL Delight
   implementation(libs.sql.delight.runtime)
+  implementation(libs.sql.delight.async.extensions)
   implementation(libs.sql.delight.android.driver)
-  implementation(libs.sql.delight.coroutines.extensions)
-  implementation(libs.sql.delight.paging3.extensions)
-
-  // Paging 3
-  implementation(libs.androidx.paging.runtime)
-  implementation(libs.androidx.paging.compose)
 
   // Datastore
   implementation(libs.datastore.preferences)
-  implementation(libs.datastore.preferences.android)
 
   // Ktor
   implementation(platform(libs.ktor.bom))
+  implementation(libs.ktor.client.core)
   implementation(libs.ktor.client.android)
   implementation(libs.ktor.client.contentNegotiation)
   implementation(libs.ktor.serialization.kotlinx.json)
@@ -171,28 +162,21 @@ dependencies {
 
   // Kotlinx collections
   implementation(libs.kotlinx.collections.immutable)
-  // Kotlinx date time
-  implementation(libs.kotlinx.datetime)
 
   // Nav3
   implementation(libs.androidx.navigation3.runtime)
   implementation(libs.androidx.navigation3.ui)
-  implementation(libs.kotlinx.serialization.core)
   implementation(libs.androidx.material3.adaptive.navigation3)
 
   implementation(libs.timber)
 
   // Protobuf
   implementation(libs.kotlin.protobuf)
-  implementation(libs.protobuf.protoc)
 
   // Test dependencies
   testImplementation(testFixtures(project(":common-data")))
   testImplementation(libs.junit)
   testImplementation(libs.kotlinx.coroutines.test)
-  testImplementation(libs.turbine)
-  testImplementation(libs.mockito.core)
-  testImplementation(libs.mockito.kotlin)
 
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)

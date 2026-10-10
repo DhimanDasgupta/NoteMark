@@ -10,20 +10,22 @@ android {
 }
 
 dependencies {
-  // EditNoteStateMachineFactory takes a NoteMarkRepository.
-  api(project(":common-data"))
-
   implementation(project(":common-android"))
   implementation(project(":common-compose"))
+  implementation(project(":common-core"))
+  implementation(project(":common-data"))
   implementation(project(":common-navigation-api"))
 
   implementation(platform(libs.androidx.compose.bom))
-  implementation(libs.bundles.compose)
+  implementation(libs.androidx.material3)
+  implementation(libs.androidx.ui)
+  implementation(libs.androidx.ui.graphics)
+  implementation(libs.androidx.ui.tooling.preview)
   debugImplementation(libs.androidx.ui.tooling)
   implementation(libs.androidx.activity.compose)
-  implementation(libs.androidx.lifecycle.runtime.compose)
   implementation(libs.androidx.navigation3.runtime)
   implementation(libs.androidx.material3.adaptive.navigation3)
+  implementation(libs.kotlinx.coroutines.core)
   implementation(libs.kotlinx.serialization.core)
   implementation(libs.flow.redux)
   implementation(libs.molecule)
@@ -31,6 +33,5 @@ dependencies {
   // junit and kotlin("test") come from the library convention plugin.
   testImplementation(testFixtures(project(":common-data")))
   testImplementation(libs.kotlinx.coroutines.test)
-  testImplementation(libs.molecule)
   testImplementation(libs.turbine)
 }

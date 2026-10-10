@@ -8,9 +8,7 @@ android {
 }
 
 dependencies {
-  // ConnectionState is part of AppState's public API.
-  api(project(":common-android"))
-  api(project(":common-data"))
+  implementation(project(":common-android"))
 
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.ui)
