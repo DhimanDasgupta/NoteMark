@@ -5,10 +5,6 @@ import com.dhimandasgupta.notemark.common.navigation.PostLoginNavKey
 import com.dhimandasgupta.notemark.common.navigation.PreLoginNavKey
 import kotlinx.serialization.Serializable
 
-@Keep @Serializable data object LauncherNavKey : PreLoginNavKey
-
-@Keep @Serializable data object LoginNavKey : PreLoginNavKey
-
 @Keep @Serializable data object RegistrationNavKey : PreLoginNavKey
 
 @Keep @Serializable data object NoteListNavKey : PostLoginNavKey

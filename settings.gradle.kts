@@ -40,3 +40,7 @@ include(":common-navigation-api")
 include(":common-state-event-impl")
 
 include(":common-presenter")
+
+include(":feat-launcher")
+
+include(":feat-login")

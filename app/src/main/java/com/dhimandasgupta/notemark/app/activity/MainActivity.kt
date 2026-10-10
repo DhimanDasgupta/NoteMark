@@ -20,8 +20,8 @@ import androidx.navigation3.runtime.NavKey
 import com.dhimandasgupta.notemark.app.NoteMarkApp
 import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
 import com.dhimandasgupta.notemark.app.nav.DeepLinkParser
-import com.dhimandasgupta.notemark.app.nav.LauncherNavKey
 import com.dhimandasgupta.notemark.app.nav.NoteMarkRoot
+import com.dhimandasgupta.notemark.common.navigation.LauncherNavKey
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf

@@ -8,6 +8,9 @@ plugins {
 
 android {
   namespace = "com.dhimandasgupta.notemark.data"
+
+  // NoteMarkApi fakes shared with the tests of feature modules.
+  testFixtures { enable = true }
 }
 
 sqldelight {

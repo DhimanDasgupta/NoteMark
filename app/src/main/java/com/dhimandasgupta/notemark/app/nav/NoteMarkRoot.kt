@@ -18,6 +18,9 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
+import com.dhimandasgupta.notemark.common.navigation.LauncherNavKey
+import com.dhimandasgupta.notemark.common.navigation.LoginNavKey
 import com.dhimandasgupta.notemark.common.navigation.clearPostLoginNavKeys
 import com.dhimandasgupta.notemark.common.navigation.clearPreLoginKeys
 import com.dhimandasgupta.notemark.features.addnote.NoteCreateEntryBuilder
@@ -37,6 +40,7 @@ fun NoteMarkRoot(
   style: Style = Style,
   initialKeys: PersistentList<NavKey> = persistentListOf(LauncherNavKey),
 ) {
+  val graph = LocalNoteMarkGraph.current
   val backStack = rememberNavBackStack(*initialKeys.toTypedArray())
   val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
   val decorators = listOf(rememberSaveableStateHolderNavEntryDecorator<NavKey>())
@@ -89,6 +93,7 @@ fun NoteMarkRoot(
       entryProvider =
         entryProvider {
           LauncherEntryBuilder(
+            launcherPresenter = { graph.launcherPresenter() },
             navigateAfterLogin = {
               backStack.apply {
                 clearPreLoginKeys()
@@ -100,6 +105,7 @@ fun NoteMarkRoot(
             },
           )
           LoginEntryBuilder(
+            loginPresenter = { graph.loginPresenter() },
             navigateToRegistration = {
               backStack.add(RegistrationNavKey)
             },

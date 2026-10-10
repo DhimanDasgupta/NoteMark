@@ -108,6 +108,8 @@ dependencies {
   implementation(project(":common-state-event-impl"))
   implementation(project(":common-navigation-api"))
   implementation(project(":common-presenter"))
+  implementation(project(":feat-launcher"))
+  implementation(project(":feat-login"))
 
   implementation(libs.androidx.ui.graphics)
   implementation(libs.androidx.material3.window.size.android)
@@ -180,6 +182,7 @@ dependencies {
   implementation(libs.protobuf.protoc)
 
   // Test dependencies
+  testImplementation(testFixtures(project(":common-data")))
   testImplementation(libs.junit)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.turbine)

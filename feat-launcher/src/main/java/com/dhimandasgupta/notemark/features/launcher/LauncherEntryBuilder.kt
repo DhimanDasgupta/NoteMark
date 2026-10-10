@@ -6,24 +6,23 @@ import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
-import com.dhimandasgupta.notemark.app.nav.LauncherNavKey
+import com.dhimandasgupta.notemark.common.navigation.LauncherNavKey
 
 @Composable
 fun EntryProviderScope<NavKey>.LauncherEntryBuilder(
   modifier: Modifier = Modifier,
   style: Style = Style,
+  launcherPresenter: () -> LauncherPresenter,
   navigateAfterLogin: () -> Unit,
   navigateToLogin: () -> Unit,
 ) {
   entry<LauncherNavKey> {
-    val graph = LocalNoteMarkGraph.current
-    val launcherPresenter: LauncherPresenter = retain { graph.launcherPresenter() }
+    val presenter: LauncherPresenter = retain { launcherPresenter() }
 
     LauncherEntry(
       modifier = modifier,
       style = style,
-      launcherPresenter = launcherPresenter,
+      launcherPresenter = presenter,
       navigateAfterLogin = navigateAfterLogin,
       navigateToLogin = navigateToLogin,
     )
