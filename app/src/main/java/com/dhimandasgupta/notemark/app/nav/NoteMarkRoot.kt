@@ -21,6 +21,8 @@ import androidx.navigation3.ui.NavDisplay
 import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
 import com.dhimandasgupta.notemark.common.navigation.LauncherNavKey
 import com.dhimandasgupta.notemark.common.navigation.LoginNavKey
+import com.dhimandasgupta.notemark.common.navigation.NoteCreateNavKey
+import com.dhimandasgupta.notemark.common.navigation.NoteEditNavKey
 import com.dhimandasgupta.notemark.common.navigation.NoteListNavKey
 import com.dhimandasgupta.notemark.common.navigation.RegistrationNavKey
 import com.dhimandasgupta.notemark.common.navigation.clearPostLoginNavKeys
@@ -148,14 +150,16 @@ fun NoteMarkRoot(
             },
           )
           NoteCreateEntryBuilder(
+            addNotePresenter = { graph.addNotePresenter() },
             navigateUp = {
               backStack.removeLastOrNull()
-            }
+            },
           )
           NoteEditEntryBuilder(
+            editNotePresenter = { noteId -> graph.editNotePresenterFactory().create(noteId) },
             navigateUp = {
               backStack.clearNoteEditNavKeys()
-            }
+            },
           )
           SettingsEntryBuilder(
             navigateToLauncherAfterLogout = {

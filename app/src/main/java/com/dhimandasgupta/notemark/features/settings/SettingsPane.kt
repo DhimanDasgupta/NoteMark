@@ -58,6 +58,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.common.compose.R as ComposeR
 import com.dhimandasgupta.notemark.common.extensions.kotlin.convertNoteTimestampToReadableFormat
 import com.dhimandasgupta.notemark.common.state.AppAction
 import com.dhimandasgupta.notemark.common.state.impl.SyncNow
@@ -168,7 +169,7 @@ private fun SettingsToolbar(
     verticalAlignment = Alignment.CenterVertically,
   ) {
     Icon(
-      painter = painterResource(id = R.drawable.ic_back_arrow),
+      painter = painterResource(id = ComposeR.drawable.ic_back_arrow),
       contentDescription = "Back",
       tint = colorScheme.onSurface,
       modifier = Modifier.requiredSize(size = 32.dp),

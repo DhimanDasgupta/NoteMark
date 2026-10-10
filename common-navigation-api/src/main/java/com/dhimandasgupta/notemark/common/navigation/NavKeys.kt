@@ -15,3 +15,7 @@ interface PostLoginNavKey : NavKey
 @Keep @Serializable data object RegistrationNavKey : PreLoginNavKey
 
 @Keep @Serializable data object NoteListNavKey : PostLoginNavKey
+
+@Keep @Serializable data object NoteCreateNavKey : PostLoginNavKey
+
+@Keep @Serializable data class NoteEditNavKey(val noteId: String) : PostLoginNavKey

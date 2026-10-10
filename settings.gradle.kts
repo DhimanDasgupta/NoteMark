@@ -48,3 +48,7 @@ include(":feat-login")
 include(":feat-registration")
 
 include(":feat-notelist")
+
+include(":feat-addnote")
+
+include(":feat-editnote")

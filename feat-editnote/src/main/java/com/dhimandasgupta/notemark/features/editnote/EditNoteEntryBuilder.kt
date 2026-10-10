@@ -11,27 +11,24 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
-import com.dhimandasgupta.notemark.app.nav.NoteEditNavKey
+import com.dhimandasgupta.notemark.common.navigation.NoteEditNavKey
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun EntryProviderScope<NavKey>.NoteEditEntryBuilder(
   modifier: Modifier = Modifier,
   style: Style = Style,
+  editNotePresenter: (noteId: String) -> EditNotePresenter,
   navigateUp: () -> Unit,
 ) {
   entry<NoteEditNavKey>(metadata = ListDetailSceneStrategy.detailPane()) { noteEditNavKey ->
     val noteId by rememberSaveable { mutableStateOf(noteEditNavKey.noteId) }
-    val graph = LocalNoteMarkGraph.current
-    val editNotePresenter: EditNotePresenter = retain {
-      graph.editNotePresenterFactory().create(noteId)
-    }
+    val presenter: EditNotePresenter = retain { editNotePresenter(noteId) }
 
     EditNoteEntry(
       modifier = modifier,
       style = style,
-      editNotePresenter = editNotePresenter,
+      editNotePresenter = presenter,
       navigateUp = navigateUp,
     )
   }

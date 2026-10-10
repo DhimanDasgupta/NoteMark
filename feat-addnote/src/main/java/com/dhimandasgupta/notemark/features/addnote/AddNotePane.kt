@@ -54,7 +54,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.common.compose.R
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.compose.DeviceLayoutType
 import com.dhimandasgupta.notemark.ui.designsystem.compose.NoteMarkDivider

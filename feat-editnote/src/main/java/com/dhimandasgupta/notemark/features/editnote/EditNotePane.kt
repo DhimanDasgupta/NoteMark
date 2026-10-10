@@ -70,7 +70,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
-import com.dhimandasgupta.notemark.R
+import com.dhimandasgupta.notemark.common.compose.R as ComposeR
 import com.dhimandasgupta.notemark.common.extensions.kotlin.convertIsoToRelativeTimeFormat
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.compose.DeviceLayoutType
@@ -279,7 +279,7 @@ private fun EditNoteToolbar(
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Icon(
-          painter = painterResource(id = R.drawable.ic_back_arrow),
+          painter = painterResource(id = ComposeR.drawable.ic_back_arrow),
           contentDescription = "Settings",
           tint = colorScheme.primary,
           modifier = Modifier.requiredSize(size = 32.dp),

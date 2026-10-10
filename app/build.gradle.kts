@@ -112,6 +112,8 @@ dependencies {
   implementation(project(":feat-login"))
   implementation(project(":feat-registration"))
   implementation(project(":feat-notelist"))
+  implementation(project(":feat-addnote"))
+  implementation(project(":feat-editnote"))
 
   implementation(libs.androidx.ui.graphics)
   implementation(libs.androidx.material3.window.size.android)
@@ -184,6 +186,7 @@ dependencies {
   implementation(libs.protobuf.protoc)
 
   // Test dependencies
+  testImplementation(testFixtures(project(":common-data")))
   testImplementation(libs.junit)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.turbine)
