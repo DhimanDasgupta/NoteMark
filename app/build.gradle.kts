@@ -105,6 +105,7 @@ dependencies {
   implementation(project(":common-compose"))
   implementation(project(":common-data"))
   implementation(project(":common-state-event-api"))
+  implementation(project(":common-state-event-impl"))
   implementation(project(":common-navigation-api"))
 
   implementation(libs.androidx.ui.graphics)

@@ -10,6 +10,12 @@ import app.cash.sqldelight.async.coroutines.synchronous
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.dhimandasgupta.notemark.BuildConfig
+import com.dhimandasgupta.notemark.app.extension.ShortcutManagerAppShortcuts
+import com.dhimandasgupta.notemark.app.extension.WorkManagerSyncScheduler
+import com.dhimandasgupta.notemark.common.android.AppShortcuts
+import com.dhimandasgupta.notemark.common.android.ConnectivityObserver
+import com.dhimandasgupta.notemark.common.android.SyncScheduler
+import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
 import com.dhimandasgupta.notemark.core.di.AppBackgroundDispatcher
 import com.dhimandasgupta.notemark.core.di.AppBackgroundScope
 import com.dhimandasgupta.notemark.core.di.SyncDataStore
@@ -341,4 +347,18 @@ interface AppModule {
   @Provides
   @SingleIn(AppScope::class)
   fun provideNoteMarkRepository(impl: NoteMarkRepositoryImpl): NoteMarkRepository = impl
+
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideSyncScheduler(impl: WorkManagerSyncScheduler): SyncScheduler = impl
+
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideAppShortcuts(impl: ShortcutManagerAppShortcuts): AppShortcuts = impl
+
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideConnectivityObserver(context: Context): ConnectivityObserver = ConnectivityObserver {
+    context.observeConnectivityAsFlow()
+  }
 }

@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import com.dhimandasgupta.notemark.common.android.setDarkStatusBarIcons
-import com.dhimandasgupta.notemark.features.launcher.AppLogout
-import com.dhimandasgupta.notemark.features.launcher.DeleteLocalNotesOnLogout
+import com.dhimandasgupta.notemark.common.state.impl.AppLogout
+import com.dhimandasgupta.notemark.common.state.impl.DeleteLocalNotesOnLogout
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable

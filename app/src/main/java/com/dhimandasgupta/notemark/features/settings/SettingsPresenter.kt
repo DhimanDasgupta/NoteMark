@@ -11,9 +11,9 @@ import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.state.AppAction
 import com.dhimandasgupta.notemark.common.state.AppState
-import com.dhimandasgupta.notemark.features.launcher.AppStateMachineFactory
-import com.dhimandasgupta.notemark.features.launcher.LoggedIn
-import com.dhimandasgupta.notemark.features.launcher.NotLoggedIn
+import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
+import com.dhimandasgupta.notemark.common.state.impl.LoggedIn
+import com.dhimandasgupta.notemark.common.state.impl.NotLoggedIn
 import com.dhimandasgupta.notemark.proto.Sync
 import dev.zacsweers.metro.Inject
 import kotlinx.collections.immutable.ImmutableList

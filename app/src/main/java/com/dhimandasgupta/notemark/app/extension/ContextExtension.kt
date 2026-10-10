@@ -31,15 +31,6 @@ private const val ONE_TIME_SYNC_WORK = "one_time_sync_work"
 private const val PERIODIC_SYNC_WORK = "delayed_sync_work"
 private const val SHORTCUT_ID_NEW_NOTE = "new_note"
 
-fun Context.getAppVersionName(): String {
-  require(value = applicationContext is Application) { "Context must be an Application" }
-  return runCatching {
-      val packageInfo = packageManager.getPackageInfo(packageName, 0)
-      packageInfo.versionName ?: "Unknown"
-    }
-    .getOrDefault("Unknown")
-}
-
 private val syncConstraints: Constraints
   get() =
     Constraints.Builder()

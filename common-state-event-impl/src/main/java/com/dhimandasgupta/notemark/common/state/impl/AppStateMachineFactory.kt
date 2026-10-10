@@ -1,17 +1,12 @@
-package com.dhimandasgupta.notemark.features.launcher
+package com.dhimandasgupta.notemark.common.state.impl
 
 import android.app.Application
 import android.content.Context
-import com.dhimandasgupta.notemark.app.extension.addCreateNewNoteShortcut
-import com.dhimandasgupta.notemark.app.extension.cancelPeriodicSync
-import com.dhimandasgupta.notemark.app.extension.cancelSyncWork
-import com.dhimandasgupta.notemark.app.extension.getAppVersionName
-import com.dhimandasgupta.notemark.app.extension.observeSyncRunning
-import com.dhimandasgupta.notemark.app.extension.removeCreateNewNoteShortcut
-import com.dhimandasgupta.notemark.app.extension.schedulePeriodicSync
-import com.dhimandasgupta.notemark.app.extension.triggerOneTimeSync
+import com.dhimandasgupta.notemark.common.android.AppShortcuts
 import com.dhimandasgupta.notemark.common.android.ConnectionState
-import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
+import com.dhimandasgupta.notemark.common.android.ConnectivityObserver
+import com.dhimandasgupta.notemark.common.android.SyncScheduler
+import com.dhimandasgupta.notemark.common.android.getAppVersionName
 import com.dhimandasgupta.notemark.common.extensions.kotlin.getDifferenceFromTimestampInMinutes
 import com.dhimandasgupta.notemark.common.extensions.kotlin.parseIsoInstantOrNull
 import com.dhimandasgupta.notemark.common.state.AppAction
@@ -68,6 +63,9 @@ class AppStateMachineFactory(
   private val userRepository: UserRepository,
   private val syncRepository: SyncRepository,
   private val noteMarkRepository: NoteMarkRepository,
+  private val syncScheduler: SyncScheduler,
+  private val appShortcuts: AppShortcuts,
+  private val connectivityObserver: ConnectivityObserver,
 ) : StateMachineFactory<AppState, AppAction>() {
   init {
     require(value = applicationContext is Application) { "Context must be an Application" }
@@ -76,7 +74,7 @@ class AppStateMachineFactory(
       initializeWith { defaultAppState }
 
       inState<NotLoggedIn> {
-        onEnterEffect { applicationContext.removeCreateNewNoteShortcut() }
+        onEnterEffect { appShortcuts.removeCreateNewNoteShortcut() }
         collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user ->
           user?.let {
             override {
@@ -91,9 +89,8 @@ class AppStateMachineFactory(
               noChange()
             }
         }
-        collectWhileInState(
-          flow = applicationContext.observeConnectivityAsFlow().distinctUntilChanged()
-        ) { connected ->
+        collectWhileInState(flow = connectivityObserver.observe().distinctUntilChanged()) {
+          connected ->
           mutate { copy(connectionState = connected) }
         }
       }
@@ -101,10 +98,10 @@ class AppStateMachineFactory(
       inState<LoggedIn> {
         onEnterEffect {
           syncOnEnter()
-          applicationContext.addCreateNewNoteShortcut()
+          appShortcuts.addCreateNewNoteShortcut()
         }
         collectWhileInState(
-          flow = applicationContext.observeConnectivityAsFlow().distinctUntilChanged().withIndex()
+          flow = connectivityObserver.observe().distinctUntilChanged().withIndex()
         ) { (index, connected) ->
           mutate {
             // The first emission is the current state on entering LoggedIn, not a change
@@ -121,7 +118,7 @@ class AppStateMachineFactory(
         collectWhileInState(flow = syncRepository.getSync()) { sync ->
           mutate { copy(sync = sync) }
         }
-        collectWhileInState(flow = applicationContext.observeSyncRunning()) { isSyncing ->
+        collectWhileInState(flow = syncScheduler.observeSyncRunning()) { isSyncing ->
           mutate { copy(isSyncing = isSyncing) }
         }
         collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user ->
@@ -141,8 +138,8 @@ class AppStateMachineFactory(
             }
 
           when (interval) {
-            null -> applicationContext.cancelPeriodicSync()
-            else -> applicationContext.schedulePeriodicSync(interval = interval)
+            null -> syncScheduler.cancelPeriodicSync()
+            else -> syncScheduler.schedulePeriodicSync(interval = interval)
           }
           syncRepository.saveSyncDuration(syncDuration = action.syncDuration)
 
@@ -151,7 +148,7 @@ class AppStateMachineFactory(
             copy(sync = sync)
           }
         }
-        onActionEffect<SyncNow> { _ -> applicationContext.triggerOneTimeSync() }
+        onActionEffect<SyncNow> { _ -> syncScheduler.triggerOneTimeSync() }
         onActionEffect<DeleteLocalNotesOnLogout> { action ->
           syncRepository.saveDeleteLocalNotesOnLogout(
             deleteLocalNotesOnLogout = action.deleteOnLogout
@@ -193,7 +190,7 @@ class AppStateMachineFactory(
 
   private suspend fun onLogoutSuccessful(deleteLocalNotesOnLogout: Boolean = false) =
     withContext(NonCancellable) {
-      applicationContext.cancelSyncWork()
+      syncScheduler.cancelSyncWork()
       if (deleteLocalNotesOnLogout) {
         noteMarkRepository.deleteAllLocalNotes()
       }
@@ -208,7 +205,7 @@ class AppStateMachineFactory(
       getDifferenceFromTimestampInMinutes(isoOffsetDateTimeString = lastUploadedTime) > 5L
     // A sync that is already queued or running is kept, so this never starts a second one.
     if (neverSynced || lastSyncTimeIsMoreThan5Minutes) {
-      applicationContext.triggerOneTimeSync()
+      syncScheduler.triggerOneTimeSync()
     }
   }
 }

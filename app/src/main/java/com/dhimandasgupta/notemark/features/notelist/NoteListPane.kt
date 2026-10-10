@@ -75,8 +75,8 @@ import com.dhimandasgupta.notemark.R
 import com.dhimandasgupta.notemark.common.extensions.kotlin.convertIsoToRelativeYearFormat
 import com.dhimandasgupta.notemark.common.extensions.kotlin.formatUserName
 import com.dhimandasgupta.notemark.common.state.AppAction
-import com.dhimandasgupta.notemark.features.launcher.AppEvent
-import com.dhimandasgupta.notemark.features.launcher.AppEventConsumed
+import com.dhimandasgupta.notemark.common.state.impl.AppEvent
+import com.dhimandasgupta.notemark.common.state.impl.AppEventConsumed
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.compose.LimitedText
 import com.dhimandasgupta.notemark.ui.designsystem.compose.NoteMarkFAB

@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.features.launcher
+package com.dhimandasgupta.notemark.common.state.impl
 
 import androidx.compose.runtime.Immutable
 import com.dhimandasgupta.notemark.common.state.Event

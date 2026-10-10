@@ -36,3 +36,5 @@ include(":common-data")
 include(":common-state-event-api")
 
 include(":common-navigation-api")
+
+include(":common-state-event-impl")
