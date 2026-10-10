@@ -1,9 +1,6 @@
 package com.dhimandasgupta.notemark.common.state.impl
 
-import android.app.Application
 import android.content.Context
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.state.AppAction
 import com.dhimandasgupta.notemark.common.state.AppState
@@ -27,10 +24,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AppStateMachineTest {
@@ -313,7 +307,7 @@ class AppStateMachineTest {
   }
 
   private fun createFactory(
-    context: Context = applicationContext(),
+    context: Context = fakeApplication(versionName = APP_VERSION_NAME),
     noteMarkRepository: FakeNoteMarkRepository =
       FakeNoteMarkRepository(logoutResult = Result.success(Unit)),
   ) =
@@ -345,19 +339,6 @@ class AppStateMachineTest {
   ) {
     stateMachine.dispatch(action = action)
     runCurrent()
-  }
-
-  /** An Application whose package manager reports [APP_VERSION_NAME]. */
-  private fun applicationContext(): Application {
-    val packageManager = mock<PackageManager>()
-    whenever(packageManager.getPackageInfo(any<String>(), any<Int>()))
-      .doReturn(PackageInfo().apply { versionName = APP_VERSION_NAME })
-
-    val application = mock<Application>()
-    whenever(application.applicationContext).doReturn(application)
-    whenever(application.packageManager).doReturn(packageManager)
-    whenever(application.packageName).doReturn("com.dhimandasgupta.notemark")
-    return application
   }
 
   private fun syncUploadedMinutesAgo(minutes: Long): Sync =

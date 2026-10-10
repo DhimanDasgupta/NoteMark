@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import org.mockito.kotlin.mock
 
-internal class FakeUserRepository(user: User? = null) : UserRepository {
+class FakeUserRepository(user: User? = null) : UserRepository {
   val user = MutableStateFlow(value = user)
   var resetCount = 0
     private set
@@ -38,7 +38,7 @@ internal class FakeUserRepository(user: User? = null) : UserRepository {
   }
 }
 
-internal class FakeSyncRepository(sync: Sync = Sync.getDefaultInstance()) : SyncRepository {
+class FakeSyncRepository(sync: Sync = Sync.getDefaultInstance()) : SyncRepository {
   val sync = MutableStateFlow(value = sync)
   var resetCount = 0
     private set
@@ -74,7 +74,7 @@ internal class FakeSyncRepository(sync: Sync = Sync.getDefaultInstance()) : Sync
 }
 
 /** Only logout and local note deletion are used by the app state machine. */
-internal class FakeNoteMarkRepository(private val logoutResult: Result<Unit>) :
+class FakeNoteMarkRepository(private val logoutResult: Result<Unit>) :
   NoteMarkRepository by mock<NoteMarkRepository>() {
   val logoutRequests = mutableListOf<RefreshRequest>()
   var deleteAllLocalNotesCount = 0
@@ -91,7 +91,7 @@ internal class FakeNoteMarkRepository(private val logoutResult: Result<Unit>) :
   }
 }
 
-internal class FakeSyncScheduler : SyncScheduler {
+class FakeSyncScheduler : SyncScheduler {
   val isSyncing = MutableStateFlow(value = false)
   val periodicIntervals = mutableListOf<Duration>()
   var oneTimeSyncCount = 0
@@ -122,7 +122,7 @@ internal class FakeSyncScheduler : SyncScheduler {
   }
 }
 
-internal class FakeAppShortcuts : AppShortcuts {
+class FakeAppShortcuts : AppShortcuts {
   var addCount = 0
     private set
 

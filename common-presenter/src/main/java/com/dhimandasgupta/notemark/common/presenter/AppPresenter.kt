@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.features.launcher
+package com.dhimandasgupta.notemark.common.presenter
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

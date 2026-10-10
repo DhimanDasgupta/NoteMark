@@ -107,6 +107,7 @@ dependencies {
   implementation(project(":common-state-event-api"))
   implementation(project(":common-state-event-impl"))
   implementation(project(":common-navigation-api"))
+  implementation(project(":common-presenter"))
 
   implementation(libs.androidx.ui.graphics)
   implementation(libs.androidx.material3.window.size.android)
