@@ -35,7 +35,8 @@ dependencies {
   implementation(libs.androidx.paging.common)
 
   // junit and kotlin("test") come from the library convention plugin.
-  testImplementation(testFixtures(project(":common-state-event-impl")))
+  testImplementation(platform(libs.ktor.bom))
+  testImplementation(libs.ktor.client.auth)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.turbine)
   testImplementation(libs.mockito.core)

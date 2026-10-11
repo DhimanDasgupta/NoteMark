@@ -1,4 +1,4 @@
-package com.dhimandasgupta.notemark.data
+package com.dhimandasgupta.notemark.app.work
 
 import androidx.paging.PagingData
 import com.dhimandasgupta.notemark.data.remote.model.Note

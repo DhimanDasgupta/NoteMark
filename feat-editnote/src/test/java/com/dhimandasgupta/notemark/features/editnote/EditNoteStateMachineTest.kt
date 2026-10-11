@@ -2,8 +2,6 @@ package com.dhimandasgupta.notemark.features.editnote
 
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
-import com.dhimandasgupta.notemark.data.FakeFailureNoteRepository
-import com.dhimandasgupta.notemark.data.FakeSuccessfulNoteRepository
 import com.dhimandasgupta.notemark.database.NoteEntity
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*

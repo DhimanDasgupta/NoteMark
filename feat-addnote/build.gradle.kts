@@ -30,7 +30,7 @@ dependencies {
   implementation(libs.molecule)
 
   // junit and kotlin("test") come from the library convention plugin.
-  testImplementation(testFixtures(project(":common-data")))
+  testImplementation(libs.androidx.paging.common)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.turbine)
 }

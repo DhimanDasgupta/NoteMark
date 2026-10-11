@@ -150,7 +150,7 @@ dependencies {
 
   // Test dependencies
   // junit and kotlin("test") come from the application convention plugin.
-  testImplementation(testFixtures(project(":common-data")))
+  testImplementation(libs.androidx.paging.common)
   testImplementation(libs.kotlinx.coroutines.test)
 
   androidTestImplementation(libs.androidx.junit)

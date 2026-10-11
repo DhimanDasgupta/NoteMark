@@ -2,7 +2,6 @@ package com.dhimandasgupta.notemark.features.registration
 
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
-import com.dhimandasgupta.notemark.data.remote.api.FakeSuccessfulNoteMarkApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test

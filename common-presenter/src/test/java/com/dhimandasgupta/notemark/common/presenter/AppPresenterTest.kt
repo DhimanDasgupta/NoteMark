@@ -9,14 +9,8 @@ import com.dhimandasgupta.notemark.common.state.AppState
 import com.dhimandasgupta.notemark.common.state.impl.AppLogout
 import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
 import com.dhimandasgupta.notemark.common.state.impl.DeleteLocalNotesOnLogout
-import com.dhimandasgupta.notemark.common.state.impl.FakeAppShortcuts
-import com.dhimandasgupta.notemark.common.state.impl.FakeNoteMarkRepository
-import com.dhimandasgupta.notemark.common.state.impl.FakeSyncRepository
-import com.dhimandasgupta.notemark.common.state.impl.FakeSyncScheduler
-import com.dhimandasgupta.notemark.common.state.impl.FakeUserRepository
 import com.dhimandasgupta.notemark.common.state.impl.LoggedIn
 import com.dhimandasgupta.notemark.common.state.impl.NotLoggedIn
-import com.dhimandasgupta.notemark.common.state.impl.fakeApplication
 import com.dhimandasgupta.notemark.proto.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest

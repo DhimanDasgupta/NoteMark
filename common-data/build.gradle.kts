@@ -8,9 +8,6 @@ plugins {
 
 android {
   namespace = "com.dhimandasgupta.notemark.data"
-
-  // NoteMarkApi fakes shared with the tests of feature modules.
-  testFixtures { enable = true }
 }
 
 sqldelight {
@@ -55,10 +52,6 @@ dependencies {
   implementation(platform(libs.ktor.bom))
   implementation(libs.ktor.client.core)
   implementation(libs.ktor.client.auth)
-
-  testFixturesImplementation(libs.kotlinx.coroutines.core)
-  testFixturesImplementation(libs.kotlin.protobuf)
-  testFixturesImplementation(libs.androidx.paging.common)
 
   // junit and kotlin("test") come from the library convention plugin.
   testImplementation(libs.kotlinx.coroutines.test)

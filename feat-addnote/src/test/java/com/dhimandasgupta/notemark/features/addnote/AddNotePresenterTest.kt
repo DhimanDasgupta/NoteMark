@@ -4,8 +4,6 @@ import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
-import com.dhimandasgupta.notemark.data.FakeFailureNoteRepository
-import com.dhimandasgupta.notemark.data.FakeSuccessfulNoteRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test

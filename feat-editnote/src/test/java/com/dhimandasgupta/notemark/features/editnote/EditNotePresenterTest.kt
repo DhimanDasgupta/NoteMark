@@ -4,7 +4,6 @@ import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
-import com.dhimandasgupta.notemark.data.FakeSuccessfulNoteRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
@@ -38,6 +37,8 @@ class EditNotePresenterTest {
       flow.test {
         val editNoteUiModel = awaitItem()
         assertEquals(EditNoteUiModel.defaultOrEmpty, editNoteUiModel)
+        // The note loads on Dispatchers.Default and may or may not land before the block ends.
+        cancelAndIgnoreRemainingEvents()
       }
     }
   }

@@ -35,7 +35,10 @@ dependencies {
   implementation(libs.molecule)
 
   // junit and kotlin("test") come from the library convention plugin.
-  testImplementation(testFixtures(project(":common-state-event-impl")))
+  testImplementation(platform(libs.ktor.bom))
+  testImplementation(libs.ktor.client.auth)
+  testImplementation(libs.mockito.core)
+  testImplementation(libs.mockito.kotlin)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.turbine)
 }

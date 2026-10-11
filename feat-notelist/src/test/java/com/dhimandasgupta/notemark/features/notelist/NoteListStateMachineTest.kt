@@ -1,6 +1,5 @@
 package com.dhimandasgupta.notemark.features.notelist
 
-import com.dhimandasgupta.notemark.common.state.impl.FakeUserRepository
 import com.dhimandasgupta.notemark.features.notelist.NoteListState.NoteListStateWithNoNotes
 import com.dhimandasgupta.notemark.features.notelist.NoteListState.NoteListStateWithNotes
 import com.dhimandasgupta.notemark.proto.User

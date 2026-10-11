@@ -18,7 +18,10 @@ dependencies {
   // junit and kotlin("test") come from the library convention plugin.
   testImplementation(project(":common-android"))
   testImplementation(project(":common-data"))
-  testImplementation(testFixtures(project(":common-state-event-impl")))
+  testImplementation(platform(libs.ktor.bom))
+  testImplementation(libs.ktor.client.auth)
+  testImplementation(libs.mockito.core)
+  testImplementation(libs.mockito.kotlin)
   testImplementation(libs.kotlin.protobuf)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.molecule)

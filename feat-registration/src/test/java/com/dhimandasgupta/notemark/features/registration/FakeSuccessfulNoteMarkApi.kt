@@ -1,5 +1,6 @@
-package com.dhimandasgupta.notemark.data.remote.api
+package com.dhimandasgupta.notemark.features.registration
 
+import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
 import com.dhimandasgupta.notemark.data.remote.model.LoginRequest
 import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.data.remote.model.NoteResponse

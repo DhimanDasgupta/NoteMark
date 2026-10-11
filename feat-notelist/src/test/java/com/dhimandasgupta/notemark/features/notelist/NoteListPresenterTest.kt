@@ -8,12 +8,6 @@ import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.state.impl.AppEvent
 import com.dhimandasgupta.notemark.common.state.impl.AppEventConsumed
 import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
-import com.dhimandasgupta.notemark.common.state.impl.FakeAppShortcuts
-import com.dhimandasgupta.notemark.common.state.impl.FakeNoteMarkRepository
-import com.dhimandasgupta.notemark.common.state.impl.FakeSyncRepository
-import com.dhimandasgupta.notemark.common.state.impl.FakeSyncScheduler
-import com.dhimandasgupta.notemark.common.state.impl.FakeUserRepository
-import com.dhimandasgupta.notemark.common.state.impl.fakeApplication
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.proto.User
 import kotlinx.collections.immutable.persistentListOf
