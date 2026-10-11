@@ -130,10 +130,6 @@ dependencies {
   implementation(platform(libs.ktor.bom))
   implementation(libs.ktor.client.core)
   implementation(libs.ktor.client.android)
-  implementation(libs.ktor.client.contentNegotiation)
-  implementation(libs.ktor.serialization.kotlinx.json)
-  implementation(libs.ktor.client.logging)
-  implementation(libs.ktor.client.auth)
 
   // Kotlinx collections
   implementation(libs.kotlinx.collections.immutable)
@@ -150,6 +146,7 @@ dependencies {
 
   // Test dependencies
   // junit and kotlin("test") come from the application convention plugin.
+  testImplementation(libs.ktor.client.auth)
   testImplementation(libs.androidx.paging.common)
   testImplementation(libs.kotlinx.coroutines.test)
 

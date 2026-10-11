@@ -52,7 +52,11 @@ dependencies {
   implementation(platform(libs.ktor.bom))
   implementation(libs.ktor.client.core)
   implementation(libs.ktor.client.auth)
+  implementation(libs.ktor.client.contentNegotiation)
+  implementation(libs.ktor.serialization.kotlinx.json)
+  implementation(libs.ktor.client.logging)
 
   // junit and kotlin("test") come from the library convention plugin.
   testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation(libs.ktor.client.mock)
 }
