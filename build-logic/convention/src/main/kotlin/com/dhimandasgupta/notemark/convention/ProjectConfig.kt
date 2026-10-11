@@ -18,6 +18,9 @@ internal val Project.compileSdk: Int
 internal val Project.minSdk: Int
   get() = libs.intVersion("minSdk")
 
+internal val Project.targetSdk: Int
+  get() = libs.intVersion("targetSdk")
+
 internal val Project.javaVersion: JavaVersion
   get() = JavaVersion.toVersion(libs.version("jvmTarget"))
 

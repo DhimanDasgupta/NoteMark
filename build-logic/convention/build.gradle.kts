@@ -6,16 +6,16 @@ plugins {
 
 group = "com.dhimandasgupta.notemark.buildlogic"
 
-val jvmTargetVersion = libs.versions.jvmTarget.get()
+val jvmTargetVersion = JavaVersion.VERSION_21
 
 java {
-  sourceCompatibility = JavaVersion.toVersion(libs.versions.jvmTarget.get())
-  targetCompatibility = JavaVersion.toVersion(libs.versions.jvmTarget.get())
+  sourceCompatibility = JavaVersion.toVersion(jvmTargetVersion)
+  targetCompatibility = JavaVersion.toVersion(jvmTargetVersion)
 }
 
 kotlin {
   compilerOptions {
-    jvmTarget.set(JvmTarget.fromTarget(libs.versions.jvmTarget.get()))
+    jvmTarget.set(JvmTarget.JVM_21)
   }
 }
 
@@ -31,6 +31,11 @@ gradlePlugin {
     register("jvmLibrary") {
       id = libs.plugins.notemark.jvm.library.get().pluginId
       implementationClass = "com.dhimandasgupta.notemark.convention.JvmLibraryConventionPlugin"
+    }
+    register("androidApplication") {
+      id = libs.plugins.notemark.android.application.get().pluginId
+      implementationClass =
+        "com.dhimandasgupta.notemark.convention.AndroidApplicationConventionPlugin"
     }
     register("androidLibrary") {
       id = libs.plugins.notemark.android.library.get().pluginId

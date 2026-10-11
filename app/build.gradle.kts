@@ -3,12 +3,10 @@ import java.io.FileNotFoundException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Properties
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  alias(libs.plugins.android.application)
+  alias(libs.plugins.notemark.android.application)
   alias(libs.plugins.notemark.android.compose)
-  alias(libs.plugins.google.devtools.ksp)
   alias(libs.plugins.kotlinx.serialization)
   alias(libs.plugins.metro)
 }
@@ -36,22 +34,11 @@ private fun generateVersionName(): String {
   return "$versionNamePrefix-${now.format(formatter)}"
 }
 
-private val jvmTargetVersion = libs.versions.jvmTarget.get()
-
-kotlin {
-  compilerOptions {
-    jvmTarget.set(JvmTarget.fromTarget(jvmTargetVersion))
-  }
-}
-
 android {
   namespace = applicationId
-  compileSdk = libs.versions.compileSdk.get().toInt()
 
   defaultConfig {
     applicationId = applicationId
-    minSdk = libs.versions.minSdk.get().toInt()
-    targetSdk = libs.versions.targetSdk.get().toInt()
     versionCode = 1
     versionName = generateVersionName()
 
@@ -80,17 +67,8 @@ android {
     }
   }
 
-  compileOptions {
-    sourceCompatibility = JavaVersion.toVersion(jvmTargetVersion)
-    targetCompatibility = JavaVersion.toVersion(jvmTargetVersion)
-  }
-
   buildFeatures {
     buildConfig = true
-  }
-
-  testOptions {
-    unitTests.isReturnDefaultValues = true
   }
 
   lint {
@@ -122,11 +100,8 @@ dependencies {
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.splash.screen)
 
-  // Jetpack Compose
-  val composeBom = platform(libs.androidx.compose.bom)
-  implementation(composeBom)
-  androidTestImplementation(composeBom)
-  debugImplementation(composeBom)
+  // Jetpack Compose (the BOM on implementation comes from the compose convention plugin)
+  androidTestImplementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.activity.compose)
   implementation(libs.androidx.material3)
   implementation(libs.androidx.ui)
@@ -174,11 +149,10 @@ dependencies {
   implementation(libs.kotlin.protobuf)
 
   // Test dependencies
+  // junit and kotlin("test") come from the application convention plugin.
   testImplementation(testFixtures(project(":common-data")))
-  testImplementation(libs.junit)
   testImplementation(libs.kotlinx.coroutines.test)
 
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)
-  testImplementation(kotlin("test"))
 }

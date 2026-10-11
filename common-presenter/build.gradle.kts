@@ -11,7 +11,6 @@ dependencies {
   implementation(project(":common-state-event-api"))
   implementation(project(":common-state-event-impl"))
 
-  implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.ui)
   implementation(libs.kotlinx.coroutines.core)
   implementation(libs.flow.redux)

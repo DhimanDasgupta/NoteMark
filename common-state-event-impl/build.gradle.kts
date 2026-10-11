@@ -17,7 +17,6 @@ dependencies {
   implementation(project(":common-data"))
   implementation(project(":common-state-event-api"))
 
-  implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.ui)
   implementation(libs.kotlinx.coroutines.core)
   implementation(libs.kotlinx.collections.immutable)

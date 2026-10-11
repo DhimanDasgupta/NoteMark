@@ -6,6 +6,7 @@ import com.skydoves.compose.stability.gradle.StabilityAnalyzerExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.dependencies
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 
@@ -37,6 +38,11 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
 
       extensions.configure<StabilityAnalyzerExtension> {
         stabilityConfigurationFiles.add(stabilityConfig)
+      }
+
+      // Aligns every Compose artifact the module declares, including debug-only tooling.
+      dependencies {
+        add("implementation", platform(libs.findLibrary("androidx-compose-bom").get()))
       }
     }
 

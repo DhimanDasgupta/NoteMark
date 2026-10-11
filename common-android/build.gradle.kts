@@ -12,6 +12,5 @@ dependencies {
   implementation(libs.androidx.core.ktx)
   implementation(libs.kotlinx.coroutines.core)
   implementation(libs.kotlinx.serialization.core)
-  implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.ui)
 }

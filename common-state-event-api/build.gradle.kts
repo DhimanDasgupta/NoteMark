@@ -10,6 +10,5 @@ android {
 dependencies {
   implementation(project(":common-android"))
 
-  implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.ui)
 }
