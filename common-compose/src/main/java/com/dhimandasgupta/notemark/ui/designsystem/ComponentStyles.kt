@@ -120,6 +120,7 @@ object NoteMarkStyles {
       )
     )
     contentPadding(16.dp)
+    foreground(colorScheme.onSurface.copy(alpha = 0f))
     // Pressed state layer, matching the Material 3 pressed overlay opacity.
     pressed {
       animate {
@@ -133,6 +134,7 @@ object NoteMarkStyles {
     shape(RoundedCornerShape(size = 8.dp))
     clip()
     contentPaddingVertical(16.dp)
+    foreground(colorScheme.onSurface.copy(alpha = 0f))
     pressed {
       animate {
         foreground(colorScheme.onSurface.copy(alpha = 0.1f))
