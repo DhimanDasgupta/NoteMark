@@ -127,6 +127,11 @@ object NoteMarkStyles {
         foreground(colorScheme.onSurface.copy(alpha = 0.1f))
       }
     }
+    focused {
+      animate {
+        foreground(colorScheme.onSurface.copy(alpha = 0.25f))
+      }
+    }
   }
 
   /** Tappable row on the settings screen. */
