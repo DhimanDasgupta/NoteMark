@@ -27,17 +27,6 @@
 # Keep Kotlin metadata. Useful for libraries that inspect Kotlin declarations.
 -keep class kotlin.Metadata { *; }
 
-# Keep kotlinx.serialization generated serializers used by reflective lookup/fallback paths.
--keepclassmembers class ** {
-    *** Companion;
-}
--keepclasseswithmembers class ** {
-    kotlinx.serialization.KSerializer serializer(...);
-}
--keepclassmembers class **$Companion {
-    kotlinx.serialization.KSerializer serializer(...);
-}
-
 # Ktor/OkHttp/Android networking stacks can reference optional platform classes.
 -dontwarn org.slf4j.**
 -dontwarn javax.naming.**
