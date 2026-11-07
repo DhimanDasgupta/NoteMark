@@ -154,7 +154,7 @@ class AppStateMachineTest {
     runCurrent()
     val event = assertIs<LoggedIn>(stateMachine.state.value).appEvents.single()
 
-    dispatchAndRun(stateMachine = stateMachine, action = AppEventConsumed(id = event.id))
+    dispatchAndRun(stateMachine = stateMachine, action = AppEventConsumed(appEvent = event))
 
     assertTrue(assertIs<LoggedIn>(stateMachine.state.value).appEvents.isEmpty())
   }

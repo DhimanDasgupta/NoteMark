@@ -112,7 +112,7 @@ class NoteListPresenterTest {
       connectivity.value = ConnectionState.Unavailable
       val event = awaitUiModel { model -> model.appEvent != null }.appEvent!!
 
-      presenter.dispatchAppAction(action = AppEventConsumed(id = event.id))
+      presenter.dispatchAppAction(action = AppEventConsumed(appEvent = event))
 
       assertNull(awaitUiModel { model -> model.appEvent == null }.appEvent)
       cancelAndIgnoreRemainingEvents()

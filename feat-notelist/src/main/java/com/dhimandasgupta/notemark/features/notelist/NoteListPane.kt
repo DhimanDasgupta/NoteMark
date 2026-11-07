@@ -130,7 +130,7 @@ internal fun NoteListPane(
     snackbarHostState.currentSnackbarData?.dismiss()
     snackbarHostState.showSnackbar(message = message, duration = SnackbarDuration.Long)
     // Make sure to mark the event as consumed. Otherwise, the same event will be fired again
-    appAction(AppEventConsumed(id = event.id))
+    appAction(AppEventConsumed(appEvent = event))
   }
 
   Box(

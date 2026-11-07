@@ -54,7 +54,7 @@ object SyncNow : AppAction
 
 data class DeleteLocalNotesOnLogout(val deleteOnLogout: Boolean) : AppAction
 
-data class AppEventConsumed(val id: Uuid) : AppAction
+data class AppEventConsumed(val appEvent: AppEvent) : AppAction
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Inject
@@ -176,7 +176,7 @@ class AppStateMachineFactory(
           mutate {
             copy(
               appEvents =
-                appEvents.filterNot { appEvent -> action.id == appEvent.id }.toImmutableList()
+                appEvents.filterNot { event -> event.id == action.appEvent.id }.toImmutableList()
             )
           }
         }
