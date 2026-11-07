@@ -60,6 +60,9 @@ import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.notemark.common.compose.R as ComposeR
 import com.dhimandasgupta.notemark.common.extensions.kotlin.convertNoteTimestampToReadableFormat
 import com.dhimandasgupta.notemark.common.state.AppAction
+import com.dhimandasgupta.notemark.common.state.impl.AppEventConsumed
+import com.dhimandasgupta.notemark.common.state.impl.AppLogout
+import com.dhimandasgupta.notemark.common.state.impl.DeleteLocalNotesOnLogout
 import com.dhimandasgupta.notemark.common.state.impl.SyncNow
 import com.dhimandasgupta.notemark.common.state.impl.UpdateSync
 import com.dhimandasgupta.notemark.proto.Sync
@@ -68,6 +71,7 @@ import com.dhimandasgupta.notemark.ui.designsystem.compose.NoteMarkDivider
 import com.dhimandasgupta.notemark.ui.designsystem.compose.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.designsystem.compose.lifecycleAwareDebouncedClickable
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
 internal fun SettingsPane(
@@ -75,13 +79,12 @@ internal fun SettingsPane(
   style: Style = Style,
   settingsUiModel: () -> SettingsUiModel,
   settingsAction: (AppAction) -> Unit = {},
-  onDeleteNoteCheckChanged: () -> Unit = {},
   onLogoutSuccessful: () -> Unit = {},
   onBackClicked: () -> Unit = {},
-  onLogoutClicked: () -> Unit = {},
 ) {
   val updatedSettingsUiModel by rememberUpdatedState(newValue = settingsUiModel)
   val updatedOnLogoutSuccessful by rememberUpdatedState(newValue = onLogoutSuccessful)
+  val updatedSettingsAction by rememberUpdatedState(newValue = settingsAction)
 
   var showSyncInterval by remember { mutableStateOf(value = false) }
 
@@ -90,6 +93,15 @@ internal fun SettingsPane(
       .filter { status -> status == true }
       .collect { _ ->
         updatedOnLogoutSuccessful()
+      }
+  }
+
+  // The app only moves to NotLoggedIn, and so reports the logout, once the logout is consumed
+  LaunchedEffect(key1 = Unit) {
+    snapshotFlow { updatedSettingsUiModel().appEvent }
+      .filterNotNull()
+      .collect { appEvent ->
+        updatedSettingsAction(AppEventConsumed(appEvent = appEvent))
       }
   }
 
@@ -121,8 +133,12 @@ internal fun SettingsPane(
         )
       },
       onSyncNowClicked = { settingsAction(SyncNow) },
-      onDeleteNoteCheckChanged = onDeleteNoteCheckChanged,
-      onLogoutClicked = onLogoutClicked,
+      onDeleteNoteCheckChanged = {
+        settingsAction(
+          DeleteLocalNotesOnLogout(deleteOnLogout = !settingsUiModel().deleteLocalNotesOnLogout)
+        )
+      },
+      onLogoutClicked = { settingsAction(AppLogout) },
     )
   }
 }

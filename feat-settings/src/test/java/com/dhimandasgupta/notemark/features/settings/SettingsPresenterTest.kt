@@ -5,12 +5,15 @@ import app.cash.molecule.moleculeFlow
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.dhimandasgupta.notemark.common.android.ConnectionState
+import com.dhimandasgupta.notemark.common.state.impl.AppEvent
+import com.dhimandasgupta.notemark.common.state.impl.AppEventConsumed
 import com.dhimandasgupta.notemark.common.state.impl.AppLogout
 import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
 import com.dhimandasgupta.notemark.common.state.impl.DeleteLocalNotesOnLogout
 import com.dhimandasgupta.notemark.common.state.impl.UpdateSync
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.proto.User
+import kotlin.test.assertIs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -83,11 +86,12 @@ class SettingsPresenterTest {
   }
 
   @Test
-  fun `reports a logout when the stored user is removed`() = runTest {
+  fun `reports a logout once the Logout event of a removed user is consumed`() = runTest {
     uiModels.test {
       awaitUiModel(expected = loggedInUiModel)
 
       userRepository.user.value = null
+      consumeLogoutEvent()
 
       awaitUiModel(expected = SettingsUiModel.defaultOrEmpty.copy(logoutStatus = true))
       cancelAndIgnoreRemainingEvents()
@@ -169,10 +173,36 @@ class SettingsPresenterTest {
       awaitUiModel(expected = loggedInUiModel)
 
       presenter.dispatchAction(action = AppLogout)
+      consumeLogoutEvent()
 
       awaitUiModel(expected = SettingsUiModel.defaultOrEmpty.copy(logoutStatus = true))
       cancelAndIgnoreRemainingEvents()
     }
+  }
+
+  @Test
+  fun `does not report a logout before the Logout event is consumed`() = runTest {
+    uiModels.test {
+      awaitUiModel(expected = loggedInUiModel)
+
+      presenter.dispatchAction(action = AppLogout)
+
+      val uiModel = awaitLogoutEvent()
+      assertEquals(null, uiModel.logoutStatus)
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  private suspend fun ReceiveTurbine<SettingsUiModel>.awaitLogoutEvent(): SettingsUiModel {
+    while (true) {
+      val uiModel = awaitItem()
+      if (uiModel.appEvent != null) return uiModel
+    }
+  }
+
+  private suspend fun ReceiveTurbine<SettingsUiModel>.consumeLogoutEvent() {
+    val logout = assertIs<AppEvent.Logout>(awaitLogoutEvent().appEvent)
+    presenter.dispatchAction(action = AppEventConsumed(appEvent = logout))
   }
 
   /**

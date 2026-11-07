@@ -26,6 +26,7 @@ dependencies {
   implementation(libs.androidx.lifecycle.runtime.compose)
   implementation(libs.androidx.navigation3.runtime)
   implementation(libs.kotlinx.coroutines.core)
+  implementation(libs.kotlinx.collections.immutable)
   implementation(libs.kotlinx.serialization.core)
   implementation(libs.kotlin.protobuf)
   implementation(libs.flow.redux)

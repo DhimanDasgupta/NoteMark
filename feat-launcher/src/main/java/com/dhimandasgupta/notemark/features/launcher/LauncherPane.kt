@@ -52,6 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import com.dhimandasgupta.notemark.common.state.AppAction
+import com.dhimandasgupta.notemark.common.state.impl.AppEventConsumed
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkStyles
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import com.dhimandasgupta.notemark.ui.designsystem.compose.DeviceLayoutType
@@ -61,6 +63,7 @@ import com.dhimandasgupta.notemark.ui.designsystem.compose.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.designsystem.compose.getDeviceLayoutType
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.isActive
 
 @Composable
@@ -71,8 +74,10 @@ internal fun LauncherPane(
   navigateToAfterLogin: () -> Unit = {},
   navigateToLogin: () -> Unit = {},
   navigateToList: () -> Unit = {},
+  launcherAction: (AppAction) -> Unit = {},
 ) {
   val updatedLauncherUiModel by rememberUpdatedState(newValue = launcherUiModel)
+  val updatedLauncherAction by rememberUpdatedState(newValue = launcherAction)
   val updatedNavigateToList by rememberUpdatedState(newValue = navigateToList)
   val updatedNavigateToLogin by rememberUpdatedState(newValue = navigateToLogin)
 
@@ -82,6 +87,15 @@ internal fun LauncherPane(
         if (loggedInUser != null) {
           updatedNavigateToList()
         }
+      }
+  }
+
+  // The app only moves to LoggedIn, and so navigates to the list, once the login is consumed
+  LaunchedEffect(key1 = Unit) {
+    snapshotFlow { updatedLauncherUiModel().appEvent }
+      .filterNotNull()
+      .collect { appEvent ->
+        updatedLauncherAction(AppEventConsumed(appEvent = appEvent))
       }
   }
 

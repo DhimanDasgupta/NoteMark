@@ -71,6 +71,11 @@ android {
     buildConfig = true
   }
 
+  testOptions {
+    // The Compose Preview tasks behind stabilityCheck need compiled resources in unit tests.
+    unitTests.isIncludeAndroidResources = true
+  }
+
   lint {
     // One consolidated report that also covers the library modules.
     checkDependencies = true

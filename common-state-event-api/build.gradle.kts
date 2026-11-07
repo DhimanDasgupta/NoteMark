@@ -11,4 +11,5 @@ dependencies {
   implementation(project(":common-android"))
 
   implementation(libs.androidx.ui)
+  implementation(libs.kotlinx.collections.immutable)
 }

@@ -5,9 +5,11 @@ import app.cash.molecule.moleculeFlow
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.dhimandasgupta.notemark.common.android.ConnectionState
-import com.dhimandasgupta.notemark.common.state.impl.AppLogout
+import com.dhimandasgupta.notemark.common.state.impl.AppEvent
+import com.dhimandasgupta.notemark.common.state.impl.AppEventConsumed
 import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
 import com.dhimandasgupta.notemark.proto.User
+import kotlin.test.assertIs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -30,7 +32,6 @@ class LauncherPresenterTest {
 
   private val connectivity = MutableStateFlow<ConnectionState>(value = ConnectionState.Available)
   private val userRepository = FakeUserRepository()
-  private val noteMarkRepository = FakeNoteMarkRepository(logoutResult = Result.success(Unit))
 
   private val presenter =
     LauncherPresenter(
@@ -39,7 +40,7 @@ class LauncherPresenterTest {
           applicationContext = fakeApplication(versionName = "1.2.3"),
           userRepository = userRepository,
           syncRepository = FakeSyncRepository(),
-          noteMarkRepository = noteMarkRepository,
+          noteMarkRepository = FakeNoteMarkRepository(logoutResult = Result.success(Unit)),
           syncScheduler = FakeSyncScheduler(),
           appShortcuts = FakeAppShortcuts(),
           connectivityObserver = { connectivity },
@@ -69,12 +70,42 @@ class LauncherPresenterTest {
   }
 
   @Test
-  fun `maps the logged in user`() = runTest {
+  fun `maps the logged in user once the Login event is consumed`() = runTest {
     uiModels.test {
       awaitUiModel(LauncherUiModel(connectionState = ConnectionState.Available))
+      userRepository.awaitObserved()
+
+      userRepository.user.value = user
+      val login = awaitLoginUiModel().appEvent!!
+      presenter.dispatchAction(action = AppEventConsumed(appEvent = login))
+
+      awaitUiModel(
+        LauncherUiModel(connectionState = ConnectionState.Available, loggedInUser = uiUser)
+      )
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test
+  fun `exposes a login as a Login event without the user`() = runTest {
+    uiModels.test {
+      awaitUiModel(LauncherUiModel(connectionState = ConnectionState.Available))
+      userRepository.awaitObserved()
 
       userRepository.user.value = user
 
+      val uiModel = awaitLoginUiModel()
+      assertIs<AppEvent.Login>(uiModel.appEvent)
+      assertEquals(null, uiModel.loggedInUser)
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test
+  fun `restores a stored user without a Login event`() = runTest {
+    userRepository.user.value = user
+
+    uiModels.test {
       awaitUiModel(
         LauncherUiModel(connectionState = ConnectionState.Available, loggedInUser = uiUser)
       )
@@ -82,36 +113,10 @@ class LauncherPresenterTest {
     }
   }
 
-  @Test
-  fun `clears the user when the stored user is removed`() = runTest {
-    userRepository.user.value = user
-
-    uiModels.test {
-      awaitUiModel(
-        LauncherUiModel(connectionState = ConnectionState.Available, loggedInUser = uiUser)
-      )
-
-      userRepository.user.value = null
-
-      awaitUiModel(LauncherUiModel(connectionState = ConnectionState.Available))
-      cancelAndIgnoreRemainingEvents()
-    }
-  }
-
-  @Test
-  fun `dispatchAction sends the action to the state machine`() = runTest {
-    userRepository.user.value = user
-
-    uiModels.test {
-      awaitUiModel(
-        LauncherUiModel(connectionState = ConnectionState.Available, loggedInUser = uiUser)
-      )
-
-      presenter.dispatchAction(action = AppLogout)
-
-      awaitUiModel(LauncherUiModel(connectionState = ConnectionState.Available))
-      assertEquals(user.refreshToken, noteMarkRepository.logoutRequests.single().refreshToken)
-      cancelAndIgnoreRemainingEvents()
+  private suspend fun ReceiveTurbine<LauncherUiModel>.awaitLoginUiModel(): LauncherUiModel {
+    while (true) {
+      val uiModel = awaitItem()
+      if (uiModel.appEvent != null) return uiModel
     }
   }
 
@@ -119,6 +124,13 @@ class LauncherPresenterTest {
    * The presenter collects the state machine on [kotlinx.coroutines.Dispatchers.Default], so
    * intermediate ui models can be skipped or repeated. Waits until [expected] is emitted.
    */
+  private suspend fun ReceiveTurbine<LauncherUiModel>.awaitLoginEvent(): AppEvent {
+    while (true) {
+      val appEvent = awaitItem().appEvent
+      if (appEvent != null) return assertIs<AppEvent.Login>(appEvent)
+    }
+  }
+
   private suspend fun ReceiveTurbine<LauncherUiModel>.awaitUiModel(expected: LauncherUiModel) {
     while (awaitItem() != expected) Unit
   }

@@ -6,6 +6,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.state.AppState
+import com.dhimandasgupta.notemark.common.state.impl.AppEventConsumed
 import com.dhimandasgupta.notemark.common.state.impl.AppLogout
 import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
 import com.dhimandasgupta.notemark.common.state.impl.DeleteLocalNotesOnLogout
@@ -71,11 +72,18 @@ class AppPresenterTest {
   }
 
   @Test
-  fun `emits LoggedIn once a user is stored`() = runTest {
+  fun `emits LoggedIn once the Login event of a stored user is consumed`() = runTest {
     uiModels.test {
       awaitState { state -> state is NotLoggedIn }
+      userRepository.awaitObserved()
 
       userRepository.user.value = user
+      val login =
+        (awaitState { state -> (state as? NotLoggedIn)?.appEvents?.isNotEmpty() == true }
+            as NotLoggedIn)
+          .appEvents
+          .single()
+      presenter.dispatchAction(action = AppEventConsumed(appEvent = login))
 
       val loggedIn = awaitState { state -> state is LoggedIn } as LoggedIn
       assertEquals(user, loggedIn.user)
@@ -100,13 +108,18 @@ class AppPresenterTest {
   }
 
   @Test
-  fun `dispatching AppLogout emits NotLoggedIn`() = runTest {
+  fun `dispatching AppLogout emits NotLoggedIn once the Logout event is consumed`() = runTest {
     userRepository.user.value = user
 
     uiModels.test {
       awaitState { state -> state is LoggedIn }
 
       presenter.dispatchAction(action = AppLogout)
+      val logout =
+        (awaitState { state -> (state as? LoggedIn)?.appEvents?.isNotEmpty() == true } as LoggedIn)
+          .appEvents
+          .single()
+      presenter.dispatchAction(action = AppEventConsumed(appEvent = logout))
 
       assertEquals(
         NotLoggedIn(connectionState = ConnectionState.Available),

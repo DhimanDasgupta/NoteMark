@@ -34,12 +34,13 @@ import kotlinx.coroutines.flow.withIndex
 import kotlinx.coroutines.withContext
 
 data class NotLoggedIn(
-  override val connectionState: ConnectionState = ConnectionState.Unavailable
+  override val connectionState: ConnectionState = ConnectionState.Unavailable,
+  override val appEvents: ImmutableList<AppEvent> = persistentListOf(),
 ) : AppState
 
 data class LoggedIn(
   override val connectionState: ConnectionState = ConnectionState.Unavailable,
-  val appEvents: ImmutableList<AppEvent> = persistentListOf(),
+  override val appEvents: ImmutableList<AppEvent> = persistentListOf(),
   val user: User,
   val sync: Sync? = null,
   val isSyncing: Boolean = false,
@@ -75,23 +76,34 @@ class AppStateMachineFactory(
 
       inState<NotLoggedIn> {
         onEnterEffect { appShortcuts.removeCreateNewNoteShortcut() }
-        collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user ->
-          user?.let {
-            override {
-              LoggedIn(
-                connectionState = connectionState,
-                user = user,
-                appVersionName = applicationContext.getAppVersionName(),
-              )
-            }
+        collectWhileInState(flow = userRepository.getUser().distinctUntilChanged().withIndex()) {
+          (index, user) ->
+          when {
+            // A login that has not been consumed yet is withdrawn once the user is gone again
+            user == null -> mutate { copy(appEvents = appEvents.withoutPending<AppEvent.Login>()) }
+            // The first emission is the session stored before this machine started, not a login
+            index == 0 -> override { loggedIn(user = user, connectionState = connectionState) }
+            else ->
+              mutate {
+                copy(appEvents = appEvents.withPending { AppEvent.Login(id = Uuid.random()) })
+              }
           }
-            ?: run {
-              noChange()
-            }
         }
         collectWhileInState(flow = connectivityObserver.observe().distinctUntilChanged()) {
           connected ->
           mutate { copy(connectionState = connected) }
+        }
+
+        on<AppEventConsumed> { action ->
+          val event = action.appEvent
+          when {
+            snapshot.appEvents.none { appEvent -> appEvent.id == event.id } -> noChange()
+            event is AppEvent.Login ->
+              userRepository.getUser().first()?.let { user ->
+                override { loggedIn(user = user, connectionState = connectionState) }
+              } ?: mutate { copy(appEvents = appEvents.without(event = event)) }
+            else -> mutate { copy(appEvents = appEvents.without(event = event)) }
+          }
         }
       }
 
@@ -122,9 +134,16 @@ class AppStateMachineFactory(
           mutate { copy(isSyncing = isSyncing) }
         }
         collectWhileInState(flow = userRepository.getUser().distinctUntilChanged()) { user ->
-          user?.let {
-            noChange()
-          } ?: override { NotLoggedIn(connectionState = connectionState) }
+          mutate {
+            copy(
+              appEvents =
+                when (user) {
+                  null -> appEvents.withPending { AppEvent.Logout(id = Uuid.random()) }
+                  // A logout that has not been consumed yet is withdrawn once a user is back
+                  else -> appEvents.withoutPending<AppEvent.Logout>()
+                }
+            )
+          }
         }
 
         // All the actions valid for app state should be handled here
@@ -167,17 +186,18 @@ class AppStateMachineFactory(
               onLogoutSuccessful(
                 deleteLocalNotesOnLogout = syncRepository.getSync().first().deleteLocalNotesOnLogout
               )
-              override {
-                NotLoggedIn(connectionState = connectionState)
+              // The cleared user also adds the Logout event, this only covers a slow emission
+              mutate {
+                copy(appEvents = appEvents.withPending { AppEvent.Logout(id = Uuid.random()) })
               }
             } ?: noChange()
         }
         on<AppEventConsumed> { action ->
-          mutate {
-            copy(
-              appEvents =
-                appEvents.filterNot { event -> event.id == action.appEvent.id }.toImmutableList()
-            )
+          val event = action.appEvent
+          when {
+            snapshot.appEvents.none { appEvent -> appEvent.id == event.id } -> noChange()
+            event is AppEvent.Logout -> override { NotLoggedIn(connectionState = connectionState) }
+            else -> mutate { copy(appEvents = appEvents.without(event = event)) }
           }
         }
       }
@@ -187,6 +207,13 @@ class AppStateMachineFactory(
   companion object Companion {
     val defaultAppState = NotLoggedIn()
   }
+
+  private fun loggedIn(user: User, connectionState: ConnectionState) =
+    LoggedIn(
+      connectionState = connectionState,
+      user = user,
+      appVersionName = applicationContext.getAppVersionName(),
+    )
 
   private suspend fun onLogoutSuccessful(deleteLocalNotesOnLogout: Boolean = false) =
     withContext(NonCancellable) {
@@ -209,3 +236,19 @@ class AppStateMachineFactory(
     }
   }
 }
+
+/**
+ * Adds the event made by [create] unless an event of type [T] is already waiting to be consumed.
+ */
+private inline fun <reified T : AppEvent> ImmutableList<AppEvent>.withPending(
+  create: () -> T
+): ImmutableList<AppEvent> =
+  if (any { appEvent -> appEvent is T }) this else (this + create()).toImmutableList()
+
+private inline fun <reified T : AppEvent> ImmutableList<AppEvent>.withoutPending():
+  ImmutableList<AppEvent> =
+  if (none { appEvent -> appEvent is T }) this
+  else filterNot { appEvent -> appEvent is T }.toImmutableList()
+
+private fun ImmutableList<AppEvent>.without(event: AppEvent): ImmutableList<AppEvent> =
+  filterNot { appEvent -> appEvent.id == event.id }.toImmutableList()

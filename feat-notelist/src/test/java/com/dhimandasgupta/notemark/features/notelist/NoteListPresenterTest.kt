@@ -120,6 +120,20 @@ class NoteListPresenterTest {
   }
 
   @Test
+  fun `a logout is shown ahead of pending network events`() = runTest {
+    uiModels.test {
+      awaitUiModel { model -> model == loadedUiModel }
+      connectivity.value = ConnectionState.Unavailable
+      awaitUiModel { model -> model.appEvent is AppEvent.NetworkUnAvailable }
+
+      userRepository.user.value = null
+
+      awaitUiModel { model -> model.appEvent is AppEvent.Logout }
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test
   fun `shows sync progress while syncing`() = runTest {
     uiModels.test {
       awaitUiModel { model -> model == loadedUiModel }

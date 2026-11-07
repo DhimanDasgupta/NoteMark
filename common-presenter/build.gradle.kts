@@ -23,6 +23,7 @@ dependencies {
   testImplementation(libs.mockito.core)
   testImplementation(libs.mockito.kotlin)
   testImplementation(libs.kotlin.protobuf)
+  testImplementation(libs.kotlinx.collections.immutable)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.molecule)
   testImplementation(libs.turbine)

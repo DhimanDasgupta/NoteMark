@@ -130,9 +130,10 @@ fun NoteMarkRoot(
           NoteListEntryBuilder(
             noteListPresenter = { graph.noteListPresenter() },
             navigateToLauncherIfLoggedOut = {
-              backStack.apply {
-                clearPostLoginNavKeys()
-                add(LauncherNavKey)
+              // The note list and settings can both handle the same logout, so only the first one
+              // to clear the logged in screens adds the launcher
+              if (backStack.clearPostLoginNavKeys()) {
+                backStack.add(LauncherNavKey)
               }
             },
             navigateToAdd = {
@@ -165,9 +166,10 @@ fun NoteMarkRoot(
           SettingsEntryBuilder(
             settingsPresenter = { graph.settingsPresenter() },
             navigateToLauncherAfterLogout = {
-              backStack.apply {
-                clearPostLoginNavKeys()
-                add(LauncherNavKey)
+              // The note list and settings can both handle the same logout, so only the first one
+              // to clear the logged in screens adds the launcher
+              if (backStack.clearPostLoginNavKeys()) {
+                backStack.add(LauncherNavKey)
               }
             },
             navigateUp = {

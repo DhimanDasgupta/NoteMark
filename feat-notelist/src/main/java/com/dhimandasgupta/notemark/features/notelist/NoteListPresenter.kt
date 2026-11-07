@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 private object NoteEntityUiModelImmutableListSerializer :
   ImmutableListSerializer<NoteEntityUiModel>(elementSerializer = NoteEntityUiModel.serializer())
@@ -44,7 +45,8 @@ data class NoteListUiModel(
   val noteLongClickedUuid: String = "",
   val showSyncProgress: Boolean = false,
   val isConnected: Boolean = false,
-  val appEvent: AppEvent? = null,
+  // Events are only meaningful to the running state machine, so they are not saved with the model
+  @Transient val appEvent: AppEvent? = null,
 ) {
   companion object {
     val defaultOrEmpty = defaultNoteListUiModel
@@ -153,7 +155,12 @@ private fun mapToNoteListUiModel(
       } else {
         persistentListOf()
       },
-    appEvent = loggedIn.appEvents.firstOrNull(),
+    // A logout goes first, so it is not held back by network snackbars that are still pending
+    appEvent =
+      loggedIn.appEvents.firstOrNull { appEvent -> appEvent is AppEvent.Logout }
+        ?: loggedIn.appEvents.firstOrNull { appEvent ->
+          appEvent is AppEvent.NetworkAvailable || appEvent is AppEvent.NetworkUnAvailable
+        },
     noteLongClickedUuid =
       if (noteListState is NoteListState.NoteListStateWithNotes) {
         noteListState.longClickedNoteUuid

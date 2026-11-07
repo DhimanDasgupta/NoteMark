@@ -30,7 +30,11 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
           sourceCompatibility = javaVersionTarget
           targetCompatibility = javaVersionTarget
         }
-        testOptions { unitTests.isReturnDefaultValues = true }
+        testOptions {
+          unitTests.isReturnDefaultValues = true
+          // The Compose Preview tasks behind stabilityCheck need compiled resources in unit tests.
+          unitTests.isIncludeAndroidResources = true
+        }
       }
 
       extensions.configure<KotlinAndroidProjectExtension> {

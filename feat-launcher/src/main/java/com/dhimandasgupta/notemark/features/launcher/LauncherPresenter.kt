@@ -10,8 +10,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.state.AppAction
+import com.dhimandasgupta.notemark.common.state.impl.AppEvent
 import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
 import com.dhimandasgupta.notemark.common.state.impl.LoggedIn
+import com.dhimandasgupta.notemark.common.state.impl.NotLoggedIn
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -25,12 +27,15 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 @Immutable
 data class LauncherUiModel(
   val connectionState: ConnectionState? = ConnectionState.Unavailable,
   val loggedInUser: UiUser? = null,
+  /** A [AppEvent.Login] waiting to be consumed, which moves the app to [LoggedIn]. */
+  @Transient val appEvent: AppEvent? = null,
 ) {
   companion object {
     val defaultOrEmpty = LauncherUiModel()
@@ -76,6 +81,10 @@ class LauncherPresenter(private val appStateMachineFactory: AppStateMachineFacto
                         refreshToken = appState.user.refreshToken,
                       )
                     else -> null
+                  },
+                appEvent =
+                  (appState as? NotLoggedIn)?.appEvents?.firstOrNull { appEvent ->
+                    appEvent is AppEvent.Login
                   },
               )
           }

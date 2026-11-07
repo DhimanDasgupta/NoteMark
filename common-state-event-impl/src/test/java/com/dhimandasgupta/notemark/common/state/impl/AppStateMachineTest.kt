@@ -72,11 +72,57 @@ class AppStateMachineTest {
   }
 
   @Test
-  fun `moves to LoggedIn when a user is stored`() = runTest {
+  fun `a login adds a Login event and stays NotLoggedIn`() = runTest {
     val stateMachine = launchStateMachine()
 
     userRepository.user.value = user
     runCurrent()
+
+    val notLoggedIn = assertIs<NotLoggedIn>(stateMachine.state.value)
+    assertIs<AppEvent.Login>(notLoggedIn.appEvents.single())
+    assertEquals(0, appShortcuts.addCount)
+  }
+
+  @Test
+  fun `a repeated user emission does not add a second Login event`() = runTest {
+    val stateMachine = launchStateMachine()
+
+    userRepository.user.value = user
+    runCurrent()
+    userRepository.user.value = user.toBuilder().setAccessToken("Another access token").build()
+    runCurrent()
+
+    assertEquals(1, assertIs<NotLoggedIn>(stateMachine.state.value).appEvents.size)
+  }
+
+  @Test
+  fun `a Login event is withdrawn when the user is removed before it is consumed`() = runTest {
+    val stateMachine = launchStateMachine()
+
+    userRepository.user.value = user
+    runCurrent()
+    userRepository.user.value = null
+    runCurrent()
+
+    assertEquals(NotLoggedIn(connectionState = ConnectionState.Available), stateMachine.state.value)
+  }
+
+  @Test
+  fun `a stored session is restored to LoggedIn without a Login event`() = runTest {
+    userRepository.user.value = user
+    val stateMachine = launchStateMachine()
+
+    assertTrue(assertIs<LoggedIn>(stateMachine.state.value).appEvents.isEmpty())
+  }
+
+  @Test
+  fun `consuming the Login event moves to LoggedIn`() = runTest {
+    val stateMachine = launchStateMachine()
+    userRepository.user.value = user
+    runCurrent()
+    val login = assertIs<NotLoggedIn>(stateMachine.state.value).appEvents.single()
+
+    dispatchAndRun(stateMachine = stateMachine, action = AppEventConsumed(appEvent = login))
 
     assertEquals(
       LoggedIn(
@@ -261,7 +307,34 @@ class AppStateMachineTest {
     assertEquals(1, syncRepository.resetCount)
     assertEquals(1, userRepository.resetCount)
     assertEquals(0, noteMarkRepository.deleteAllLocalNotesCount)
+    assertIs<AppEvent.Logout>(assertIs<LoggedIn>(stateMachine.state.value).appEvents.single())
+  }
+
+  @Test
+  fun `consuming the Logout event moves to NotLoggedIn`() = runTest {
+    userRepository.user.value = user
+    val stateMachine = launchStateMachine()
+    dispatchAndRun(stateMachine = stateMachine, action = AppLogout)
+    val logout = assertIs<LoggedIn>(stateMachine.state.value).appEvents.single()
+
+    dispatchAndRun(stateMachine = stateMachine, action = AppEventConsumed(appEvent = logout))
+
     assertEquals(NotLoggedIn(connectionState = ConnectionState.Available), stateMachine.state.value)
+  }
+
+  @Test
+  fun `consuming a network event does not log out`() = runTest {
+    userRepository.user.value = user
+    val stateMachine = launchStateMachine()
+    connectivity.value = ConnectionState.Unavailable
+    runCurrent()
+    userRepository.user.value = null
+    runCurrent()
+    val network = assertIs<LoggedIn>(stateMachine.state.value).appEvents.first()
+
+    dispatchAndRun(stateMachine = stateMachine, action = AppEventConsumed(appEvent = network))
+
+    assertIs<AppEvent.Logout>(assertIs<LoggedIn>(stateMachine.state.value).appEvents.single())
   }
 
   @Test
@@ -292,19 +365,24 @@ class AppStateMachineTest {
   }
 
   @Test
-  fun `removing the stored user moves to NotLoggedIn and keeps connectivity`() = runTest {
-    connectivity.value = ConnectionState.Unavailable
-    userRepository.user.value = user
-    val stateMachine = launchStateMachine()
+  fun `removing the stored user moves to NotLoggedIn once consumed and keeps connectivity`() =
+    runTest {
+      connectivity.value = ConnectionState.Unavailable
+      userRepository.user.value = user
+      val stateMachine = launchStateMachine()
 
-    userRepository.user.value = null
-    runCurrent()
+      userRepository.user.value = null
+      runCurrent()
+      val logout = assertIs<LoggedIn>(stateMachine.state.value).appEvents.single()
+      assertIs<AppEvent.Logout>(logout)
 
-    assertEquals(
-      NotLoggedIn(connectionState = ConnectionState.Unavailable),
-      stateMachine.state.value,
-    )
-  }
+      dispatchAndRun(stateMachine = stateMachine, action = AppEventConsumed(appEvent = logout))
+
+      assertEquals(
+        NotLoggedIn(connectionState = ConnectionState.Unavailable),
+        stateMachine.state.value,
+      )
+    }
 
   private fun createFactory(
     context: Context = fakeApplication(versionName = APP_VERSION_NAME),

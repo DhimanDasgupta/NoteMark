@@ -86,7 +86,6 @@ import com.dhimandasgupta.notemark.ui.designsystem.compose.WindowSizePreviews
 import com.dhimandasgupta.notemark.ui.designsystem.compose.bleedHorizontally
 import java.util.Locale
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 
@@ -108,13 +107,6 @@ internal fun NoteListPane(
 
   val userName by remember { derivedStateOf { updateNoteListUiModel().userName } }
 
-  LaunchedEffect(key1 = userName) {
-    delay(timeMillis = 100)
-    if (updateNoteListUiModel().userName?.isEmpty() == true) {
-      navigateToLauncherIfLoggedOut()
-    }
-  }
-
   val appEvent by remember { derivedStateOf { updateNoteListUiModel().appEvent } }
   val snackbarHostState = remember { SnackbarHostState() }
   val networkAvailableMessage = stringResource(id = R.string.network_available)
@@ -126,6 +118,14 @@ internal fun NoteListPane(
       when (event) {
         is AppEvent.NetworkAvailable -> networkAvailableMessage
         is AppEvent.NetworkUnAvailable -> networkUnavailableMessage
+        is AppEvent.Logout -> {
+          // Consuming the logout moves the app to NotLoggedIn, so the list is left for the launcher
+          appAction(AppEventConsumed(appEvent = event))
+          navigateToLauncherIfLoggedOut()
+          return@LaunchedEffect
+        }
+        // A logged in app never holds a Login event, the launcher consumes it
+        is AppEvent.Login -> return@LaunchedEffect
       }
     snackbarHostState.currentSnackbarData?.dismiss()
     snackbarHostState.showSnackbar(message = message, duration = SnackbarDuration.Long)

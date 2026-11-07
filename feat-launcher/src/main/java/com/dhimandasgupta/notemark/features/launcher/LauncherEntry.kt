@@ -59,5 +59,6 @@ internal fun LauncherEntry(
     },
     navigateToLogin = { navigateToLogin() },
     navigateToList = { navigateAfterLogin() },
+    launcherAction = { action -> launcherPresenter.dispatchAction(action = action) },
   )
 }

@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.state.AppAction
 import com.dhimandasgupta.notemark.common.state.AppState
+import com.dhimandasgupta.notemark.common.state.impl.AppEvent
 import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
 import com.dhimandasgupta.notemark.common.state.impl.LoggedIn
 import com.dhimandasgupta.notemark.common.state.impl.NotLoggedIn
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 @Immutable
@@ -42,6 +44,8 @@ data class SettingsUiModel(
   val isSyncing: Boolean = false,
   val isConnected: Boolean = false,
   val appVersionName: String? = null,
+  /** A [AppEvent.Logout] waiting to be consumed, which moves the app to [NotLoggedIn]. */
+  @Transient val appEvent: AppEvent? = null,
 ) {
   companion object {
     val defaultOrEmpty = SettingsUiModel()
@@ -117,6 +121,7 @@ private fun SettingsUiModel.mapToSettingsUiModel(appState: AppState): SettingsUi
         isSyncing = appState.isSyncing,
         isConnected = appState.connectionState == ConnectionState.Available,
         appVersionName = appState.appVersionName,
+        appEvent = appState.appEvents.firstOrNull { appEvent -> appEvent is AppEvent.Logout },
       )
     }
 
