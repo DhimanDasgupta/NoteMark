@@ -72,57 +72,11 @@ class AppStateMachineTest {
   }
 
   @Test
-  fun `a login adds a Login event and stays NotLoggedIn`() = runTest {
+  fun `a login moves straight to LoggedIn`() = runTest {
     val stateMachine = launchStateMachine()
 
     userRepository.user.value = user
     runCurrent()
-
-    val notLoggedIn = assertIs<NotLoggedIn>(stateMachine.state.value)
-    assertIs<AppEvent.Login>(notLoggedIn.appEvents.single())
-    assertEquals(0, appShortcuts.addCount)
-  }
-
-  @Test
-  fun `a repeated user emission does not add a second Login event`() = runTest {
-    val stateMachine = launchStateMachine()
-
-    userRepository.user.value = user
-    runCurrent()
-    userRepository.user.value = user.toBuilder().setAccessToken("Another access token").build()
-    runCurrent()
-
-    assertEquals(1, assertIs<NotLoggedIn>(stateMachine.state.value).appEvents.size)
-  }
-
-  @Test
-  fun `a Login event is withdrawn when the user is removed before it is consumed`() = runTest {
-    val stateMachine = launchStateMachine()
-
-    userRepository.user.value = user
-    runCurrent()
-    userRepository.user.value = null
-    runCurrent()
-
-    assertEquals(NotLoggedIn(connectionState = ConnectionState.Available), stateMachine.state.value)
-  }
-
-  @Test
-  fun `a stored session is restored to LoggedIn without a Login event`() = runTest {
-    userRepository.user.value = user
-    val stateMachine = launchStateMachine()
-
-    assertTrue(assertIs<LoggedIn>(stateMachine.state.value).appEvents.isEmpty())
-  }
-
-  @Test
-  fun `consuming the Login event moves to LoggedIn`() = runTest {
-    val stateMachine = launchStateMachine()
-    userRepository.user.value = user
-    runCurrent()
-    val login = assertIs<NotLoggedIn>(stateMachine.state.value).appEvents.single()
-
-    dispatchAndRun(stateMachine = stateMachine, action = AppEventConsumed(appEvent = login))
 
     assertEquals(
       LoggedIn(
@@ -135,6 +89,31 @@ class AppStateMachineTest {
       ),
       stateMachine.state.value,
     )
+    assertEquals(1, appShortcuts.addCount)
+  }
+
+  @Test
+  fun `a stored session is restored to LoggedIn without events`() = runTest {
+    userRepository.user.value = user
+    val stateMachine = launchStateMachine()
+
+    assertTrue(assertIs<LoggedIn>(stateMachine.state.value).appEvents.isEmpty())
+  }
+
+  @Test
+  fun `logging in again after a consumed logout moves back to LoggedIn`() = runTest {
+    userRepository.user.value = user
+    val stateMachine = launchStateMachine()
+    userRepository.user.value = null
+    runCurrent()
+    val logout = assertIs<LoggedIn>(stateMachine.state.value).appEvents.single()
+    dispatchAndRun(stateMachine = stateMachine, action = AppEventConsumed(appEvent = logout))
+    assertIs<NotLoggedIn>(stateMachine.state.value)
+
+    userRepository.user.value = user
+    runCurrent()
+
+    assertEquals(user, assertIs<LoggedIn>(stateMachine.state.value).user)
   }
 
   @Test

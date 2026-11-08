@@ -8,6 +8,7 @@ import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.state.impl.AppEvent
 import com.dhimandasgupta.notemark.common.state.impl.AppEventConsumed
 import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
+import com.dhimandasgupta.notemark.common.state.impl.AppStateStore
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.proto.User
 import kotlinx.collections.immutable.persistentListOf
@@ -15,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -35,17 +37,24 @@ class NoteListPresenterTest {
   private val syncRepository = FakeSyncRepository()
   private val noteListRepository = FakeNoteListRepository(notes = notes)
 
-  private val presenter =
+  // Created on first use, after setUp, so the test scope shares the main dispatcher's scheduler
+  private val testScope by lazy { TestScope() }
+
+  private val presenter by lazy {
     NoteListPresenter(
-      appStateMachineFactory =
-        AppStateMachineFactory(
-          applicationContext = fakeApplication(versionName = "1.2.3"),
-          userRepository = userRepository,
-          syncRepository = syncRepository,
-          noteMarkRepository = FakeNoteMarkRepository(logoutResult = Result.success(Unit)),
-          syncScheduler = FakeSyncScheduler(),
-          appShortcuts = FakeAppShortcuts(),
-          connectivityObserver = { connectivity },
+      appStateStore =
+        AppStateStore(
+          appStateMachineFactory =
+            AppStateMachineFactory(
+              applicationContext = fakeApplication(versionName = "1.2.3"),
+              userRepository = userRepository,
+              syncRepository = syncRepository,
+              noteMarkRepository = FakeNoteMarkRepository(logoutResult = Result.success(Unit)),
+              syncScheduler = FakeSyncScheduler(),
+              appShortcuts = FakeAppShortcuts(),
+              connectivityObserver = { connectivity },
+            ),
+          scope = testScope.backgroundScope,
         ),
       noteListStateMachineFactory =
         NoteListStateMachineFactory(
@@ -54,6 +63,7 @@ class NoteListPresenterTest {
           pagedNotes = PagedNotes(noteMarkRepository = noteListRepository),
         ),
     )
+  }
 
   private val uiModels = moleculeFlow(mode = RecompositionMode.Immediate) { presenter.uiModel() }
 
@@ -77,7 +87,7 @@ class NoteListPresenterTest {
   }
 
   @Test
-  fun `starts with the default ui model`() = runTest {
+  fun `starts with the default ui model`() = testScope.runTest {
     uiModels.test {
       assertEquals(NoteListUiModel.defaultOrEmpty, awaitItem())
       cancelAndIgnoreRemainingEvents()
@@ -85,7 +95,7 @@ class NoteListPresenterTest {
   }
 
   @Test
-  fun `shows the logged in user's notes`() = runTest {
+  fun `shows the logged in user's notes`() = testScope.runTest {
     uiModels.test {
       awaitUiModel { model -> model == loadedUiModel }
       cancelAndIgnoreRemainingEvents()
@@ -93,7 +103,7 @@ class NoteListPresenterTest {
   }
 
   @Test
-  fun `losing connectivity shows a network event`() = runTest {
+  fun `losing connectivity shows a network event`() = testScope.runTest {
     uiModels.test {
       awaitUiModel { model -> model == loadedUiModel }
 
@@ -106,7 +116,7 @@ class NoteListPresenterTest {
   }
 
   @Test
-  fun `dispatchAppAction consumes the network event`() = runTest {
+  fun `dispatchAppAction consumes the network event`() = testScope.runTest {
     uiModels.test {
       awaitUiModel { model -> model == loadedUiModel }
       connectivity.value = ConnectionState.Unavailable
@@ -120,7 +130,7 @@ class NoteListPresenterTest {
   }
 
   @Test
-  fun `a logout is shown ahead of pending network events`() = runTest {
+  fun `a logout is shown ahead of pending network events`() = testScope.runTest {
     uiModels.test {
       awaitUiModel { model -> model == loadedUiModel }
       connectivity.value = ConnectionState.Unavailable
@@ -134,7 +144,7 @@ class NoteListPresenterTest {
   }
 
   @Test
-  fun `shows sync progress while syncing`() = runTest {
+  fun `shows sync progress while syncing`() = testScope.runTest {
     uiModels.test {
       awaitUiModel { model -> model == loadedUiModel }
 
@@ -146,7 +156,7 @@ class NoteListPresenterTest {
   }
 
   @Test
-  fun `dispatchAction deletes the note`() = runTest {
+  fun `dispatchAction deletes the note`() = testScope.runTest {
     uiModels.test {
       awaitUiModel { model -> model == loadedUiModel }
 

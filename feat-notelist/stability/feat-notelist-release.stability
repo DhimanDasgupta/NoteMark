@@ -92,19 +92,6 @@ internal fun com.dhimandasgupta.notemark.features.notelist.NoteListEntry(modifie
     - navigateToSettings: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.notelist.NoteListEntryBuilder(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, noteListPresenter: kotlin.Function0<com.dhimandasgupta.notemark.features.notelist.NoteListPresenter>, navigateToLauncherIfLoggedOut: kotlin.Function0<kotlin.Unit>, navigateToAdd: kotlin.Function0<kotlin.Unit>, navigateToEdit: kotlin.Function1<kotlin.String, kotlin.Unit>, navigateToSettings: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - modifier: STABLE (marked @Stable or @Immutable)
-    - style: STABLE (stability configuration file type)
-    - noteListPresenter: STABLE (function type)
-    - navigateToLauncherIfLoggedOut: STABLE (function type)
-    - navigateToAdd: STABLE (function type)
-    - navigateToEdit: STABLE (function type)
-    - navigateToSettings: STABLE (function type)
-
-@Composable
 private fun com.dhimandasgupta.notemark.features.notelist.NoteListFab(scrollState: androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState, onFabClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true

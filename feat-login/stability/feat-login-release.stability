@@ -46,17 +46,6 @@ internal fun com.dhimandasgupta.notemark.features.login.LoginEntry(modifier: and
     - navigateToAfterLogin: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.login.LoginEntryBuilder(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, loginPresenter: kotlin.Function0<com.dhimandasgupta.notemark.features.login.LoginPresenter>, navigateToRegistration: kotlin.Function0<kotlin.Unit>, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - modifier: STABLE (marked @Stable or @Immutable)
-    - style: STABLE (stability configuration file type)
-    - loginPresenter: STABLE (function type)
-    - navigateToRegistration: STABLE (function type)
-    - navigateToAfterLogin: STABLE (function type)
-
-@Composable
 private fun com.dhimandasgupta.notemark.features.login.LoginFooterField(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, navigateToRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true

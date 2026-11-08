@@ -18,34 +18,20 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
+import com.dhimandasgupta.notemark.common.navigation.EntryInstaller
 import com.dhimandasgupta.notemark.common.navigation.LauncherNavKey
-import com.dhimandasgupta.notemark.common.navigation.LoginNavKey
-import com.dhimandasgupta.notemark.common.navigation.NoteCreateNavKey
-import com.dhimandasgupta.notemark.common.navigation.NoteEditNavKey
-import com.dhimandasgupta.notemark.common.navigation.NoteListNavKey
-import com.dhimandasgupta.notemark.common.navigation.RegistrationNavKey
-import com.dhimandasgupta.notemark.common.navigation.SettingsNavKey
-import com.dhimandasgupta.notemark.common.navigation.clearPostLoginNavKeys
-import com.dhimandasgupta.notemark.common.navigation.clearPreLoginKeys
-import com.dhimandasgupta.notemark.features.addnote.NoteCreateEntryBuilder
-import com.dhimandasgupta.notemark.features.editnote.NoteEditEntryBuilder
-import com.dhimandasgupta.notemark.features.launcher.LauncherEntryBuilder
-import com.dhimandasgupta.notemark.features.login.LoginEntryBuilder
-import com.dhimandasgupta.notemark.features.notelist.NoteListEntryBuilder
-import com.dhimandasgupta.notemark.features.registration.RegistrationEntryBuilder
-import com.dhimandasgupta.notemark.features.settings.SettingsEntryBuilder
 import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.PersistentSet
 import kotlinx.collections.immutable.persistentListOf
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun NoteMarkRoot(
+  entryInstallers: PersistentSet<EntryInstaller>,
   modifier: Modifier,
   style: Style = Style,
   initialKeys: PersistentList<NavKey> = persistentListOf(LauncherNavKey),
 ) {
-  val graph = LocalNoteMarkGraph.current
   val backStack = rememberNavBackStack(*initialKeys.toTypedArray())
   val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
   val decorators = listOf(rememberSaveableStateHolderNavEntryDecorator<NavKey>())
@@ -97,85 +83,7 @@ fun NoteMarkRoot(
       },
       entryProvider =
         entryProvider {
-          LauncherEntryBuilder(
-            launcherPresenter = { graph.launcherPresenter() },
-            navigateAfterLogin = {
-              backStack.apply {
-                clearPreLoginKeys()
-                add(NoteListNavKey)
-              }
-            },
-            navigateToLogin = {
-              backStack.add(LoginNavKey)
-            },
-          )
-          LoginEntryBuilder(
-            loginPresenter = { graph.loginPresenter() },
-            navigateToRegistration = {
-              backStack.add(RegistrationNavKey)
-            },
-            navigateToAfterLogin = {
-              backStack.apply {
-                clearPreLoginKeys()
-                add(NoteListNavKey)
-              }
-            },
-          )
-          RegistrationEntryBuilder(
-            registrationPresenter = { graph.registrationPresenter() },
-            navigateToLoginFromRegistration = {
-              backStack.removeLastOrNull()
-            },
-          )
-          NoteListEntryBuilder(
-            noteListPresenter = { graph.noteListPresenter() },
-            navigateToLauncherIfLoggedOut = {
-              // The note list and settings can both handle the same logout, so only the first one
-              // to clear the logged in screens adds the launcher
-              if (backStack.clearPostLoginNavKeys()) {
-                backStack.add(LauncherNavKey)
-              }
-            },
-            navigateToAdd = {
-              backStack.add(NoteCreateNavKey)
-            },
-            navigateToEdit = { uuid ->
-              backStack.apply {
-                clearNoteEditNavKeys()
-                add(NoteEditNavKey(uuid))
-              }
-            },
-            navigateToSettings = {
-              if (!backStack.isSettingsOpen()) {
-                backStack.add(SettingsNavKey)
-              }
-            },
-          )
-          NoteCreateEntryBuilder(
-            addNotePresenter = { graph.addNotePresenter() },
-            navigateUp = {
-              backStack.removeLastOrNull()
-            },
-          )
-          NoteEditEntryBuilder(
-            editNotePresenter = { noteId -> graph.editNotePresenterFactory().create(noteId) },
-            navigateUp = {
-              backStack.clearNoteEditNavKeys()
-            },
-          )
-          SettingsEntryBuilder(
-            settingsPresenter = { graph.settingsPresenter() },
-            navigateToLauncherAfterLogout = {
-              // The note list and settings can both handle the same logout, so only the first one
-              // to clear the logged in screens adds the launcher
-              if (backStack.clearPostLoginNavKeys()) {
-                backStack.add(LauncherNavKey)
-              }
-            },
-            navigateUp = {
-              backStack.removeSettingsKey()
-            },
-          )
+          entryInstallers.forEach { installer -> with(installer) { install(backStack) } }
         },
     )
   }

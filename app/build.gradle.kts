@@ -87,7 +87,7 @@ dependencies {
   implementation(project(":common-android"))
   implementation(project(":common-compose"))
   implementation(project(":common-data"))
-  // The Metro graph builds the presenters, which take an AppStateMachineFactory.
+  // The Metro graph builds the presenters, which take the app-wide AppStateStore.
   implementation(project(":common-state-event-api"))
   implementation(project(":common-state-event-impl"))
   implementation(project(":common-navigation-api"))

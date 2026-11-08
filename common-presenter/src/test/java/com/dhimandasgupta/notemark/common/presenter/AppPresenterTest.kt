@@ -9,11 +9,13 @@ import com.dhimandasgupta.notemark.common.state.AppState
 import com.dhimandasgupta.notemark.common.state.impl.AppEventConsumed
 import com.dhimandasgupta.notemark.common.state.impl.AppLogout
 import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
+import com.dhimandasgupta.notemark.common.state.impl.AppStateStore
 import com.dhimandasgupta.notemark.common.state.impl.DeleteLocalNotesOnLogout
 import com.dhimandasgupta.notemark.common.state.impl.LoggedIn
 import com.dhimandasgupta.notemark.common.state.impl.NotLoggedIn
 import com.dhimandasgupta.notemark.proto.User
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -32,24 +34,30 @@ class AppPresenterTest {
   private val syncRepository = FakeSyncRepository()
   private val noteMarkRepository = FakeNoteMarkRepository(logoutResult = Result.success(Unit))
 
+  private val testScope = TestScope()
+
   private val presenter =
     AppPresenter(
-      appStateMachineFactory =
-        AppStateMachineFactory(
-          applicationContext = fakeApplication(versionName = "1.2.3"),
-          userRepository = userRepository,
-          syncRepository = syncRepository,
-          noteMarkRepository = noteMarkRepository,
-          syncScheduler = FakeSyncScheduler(),
-          appShortcuts = FakeAppShortcuts(),
-          connectivityObserver = { connectivity },
+      appStateStore =
+        AppStateStore(
+          appStateMachineFactory =
+            AppStateMachineFactory(
+              applicationContext = fakeApplication(versionName = "1.2.3"),
+              userRepository = userRepository,
+              syncRepository = syncRepository,
+              noteMarkRepository = noteMarkRepository,
+              syncScheduler = FakeSyncScheduler(),
+              appShortcuts = FakeAppShortcuts(),
+              connectivityObserver = { connectivity },
+            ),
+          scope = testScope.backgroundScope,
         )
     )
 
   private val uiModels = moleculeFlow(mode = RecompositionMode.Immediate) { presenter.uiModel() }
 
   @Test
-  fun `starts with the default app state`() = runTest {
+  fun `starts with the default app state`() = testScope.runTest {
     uiModels.test {
       assertEquals(AppStateMachineFactory.defaultAppState, awaitItem())
       cancelAndIgnoreRemainingEvents()
@@ -57,7 +65,7 @@ class AppPresenterTest {
   }
 
   @Test
-  fun `emits the state machine state`() = runTest {
+  fun `emits the state machine state`() = testScope.runTest {
     uiModels.test {
       assertEquals(
         NotLoggedIn(connectionState = ConnectionState.Available),
@@ -72,18 +80,11 @@ class AppPresenterTest {
   }
 
   @Test
-  fun `emits LoggedIn once the Login event of a stored user is consumed`() = runTest {
+  fun `emits LoggedIn after a login`() = testScope.runTest {
     uiModels.test {
       awaitState { state -> state is NotLoggedIn }
-      userRepository.awaitObserved()
 
       userRepository.user.value = user
-      val login =
-        (awaitState { state -> (state as? NotLoggedIn)?.appEvents?.isNotEmpty() == true }
-            as NotLoggedIn)
-          .appEvents
-          .single()
-      presenter.dispatchAction(action = AppEventConsumed(appEvent = login))
 
       val loggedIn = awaitState { state -> state is LoggedIn } as LoggedIn
       assertEquals(user, loggedIn.user)
@@ -93,7 +94,7 @@ class AppPresenterTest {
   }
 
   @Test
-  fun `dispatchAction sends the action to the state machine`() = runTest {
+  fun `dispatchAction sends the action to the state machine`() = testScope.runTest {
     userRepository.user.value = user
 
     uiModels.test {
@@ -108,27 +109,29 @@ class AppPresenterTest {
   }
 
   @Test
-  fun `dispatching AppLogout emits NotLoggedIn once the Logout event is consumed`() = runTest {
-    userRepository.user.value = user
+  fun `dispatching AppLogout emits NotLoggedIn once the Logout event is consumed`() =
+    testScope.runTest {
+      userRepository.user.value = user
 
-    uiModels.test {
-      awaitState { state -> state is LoggedIn }
+      uiModels.test {
+        awaitState { state -> state is LoggedIn }
 
-      presenter.dispatchAction(action = AppLogout)
-      val logout =
-        (awaitState { state -> (state as? LoggedIn)?.appEvents?.isNotEmpty() == true } as LoggedIn)
-          .appEvents
-          .single()
-      presenter.dispatchAction(action = AppEventConsumed(appEvent = logout))
+        presenter.dispatchAction(action = AppLogout)
+        val logout =
+          (awaitState { state -> (state as? LoggedIn)?.appEvents?.isNotEmpty() == true }
+              as LoggedIn)
+            .appEvents
+            .single()
+        presenter.dispatchAction(action = AppEventConsumed(appEvent = logout))
 
-      assertEquals(
-        NotLoggedIn(connectionState = ConnectionState.Available),
-        awaitState { state -> state is NotLoggedIn },
-      )
-      assertEquals(user.refreshToken, noteMarkRepository.logoutRequests.single().refreshToken)
-      cancelAndIgnoreRemainingEvents()
+        assertEquals(
+          NotLoggedIn(connectionState = ConnectionState.Available),
+          awaitState { state -> state is NotLoggedIn },
+        )
+        assertEquals(user.refreshToken, noteMarkRepository.logoutRequests.single().refreshToken)
+        cancelAndIgnoreRemainingEvents()
+      }
     }
-  }
 
   /**
    * The presenter collects the state machine on [kotlinx.coroutines.Dispatchers.Default], so

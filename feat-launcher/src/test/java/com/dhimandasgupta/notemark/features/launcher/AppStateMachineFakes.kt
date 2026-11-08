@@ -12,7 +12,6 @@ import io.ktor.client.plugins.auth.providers.BearerTokens
 import kotlin.time.Duration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import org.mockito.kotlin.mock
 
@@ -22,14 +21,6 @@ class FakeUserRepository(user: User? = null) : UserRepository {
     private set
 
   override fun getUser(): Flow<User?> = user
-
-  /**
-   * Waits until a state machine observes the user, so a user stored afterwards is a login rather
-   * than the session the machine restores on start.
-   */
-  suspend fun awaitObserved() {
-    user.subscriptionCount.first { count -> count > 0 }
-  }
 
   override suspend fun saveUser(user: User) {
     this.user.value = user

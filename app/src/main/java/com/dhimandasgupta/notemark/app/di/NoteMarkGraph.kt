@@ -1,7 +1,6 @@
 package com.dhimandasgupta.notemark.app.di
 
 import android.content.Context
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.dataStoreFile
@@ -16,6 +15,7 @@ import com.dhimandasgupta.notemark.common.android.AppShortcuts
 import com.dhimandasgupta.notemark.common.android.ConnectivityObserver
 import com.dhimandasgupta.notemark.common.android.SyncScheduler
 import com.dhimandasgupta.notemark.common.android.observeConnectivityAsFlow
+import com.dhimandasgupta.notemark.common.navigation.EntryInstaller
 import com.dhimandasgupta.notemark.core.di.AppBackgroundDispatcher
 import com.dhimandasgupta.notemark.core.di.AppBackgroundScope
 import com.dhimandasgupta.notemark.core.di.SyncDataStore
@@ -41,17 +41,9 @@ import com.dhimandasgupta.notemark.data.repository.UserRepositoryImpl
 import com.dhimandasgupta.notemark.data.storage.SyncSerializer
 import com.dhimandasgupta.notemark.data.storage.UserSerializer
 import com.dhimandasgupta.notemark.database.NoteMarkDatabase
-import com.dhimandasgupta.notemark.features.addnote.AddNotePresenter
-import com.dhimandasgupta.notemark.features.editnote.EditNotePresenter
-import com.dhimandasgupta.notemark.features.launcher.LauncherPresenter
-import com.dhimandasgupta.notemark.features.login.LoginPresenter
-import com.dhimandasgupta.notemark.features.notelist.NoteListPresenter
-import com.dhimandasgupta.notemark.features.registration.RegistrationPresenter
-import com.dhimandasgupta.notemark.features.settings.SettingsPresenter
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.proto.User
 import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn
@@ -70,11 +62,6 @@ import timber.log.Timber
 private const val USER_DATA_STORE_FILE_NAME = "user_store.pb"
 private const val SYNC_DATA_STORE_FILE_NAME = "sync_store.pb"
 
-val LocalNoteMarkGraph =
-  staticCompositionLocalOf<NoteMarkGraph> {
-    error("No NoteMarkGraph provided")
-  }
-
 @DependencyGraph(AppScope::class)
 interface NoteMarkGraph : AppModule {
   @DependencyGraph.Factory
@@ -82,26 +69,12 @@ interface NoteMarkGraph : AppModule {
     fun create(@Provides context: Context): NoteMarkGraph
   }
 
-  fun launcherPresenter(): LauncherPresenter
-
-  fun loginPresenter(): LoginPresenter
-
-  fun registrationPresenter(): RegistrationPresenter
-
-  fun noteListPresenter(): NoteListPresenter
-
-  fun addNotePresenter(): AddNotePresenter
-
-  fun settingsPresenter(): SettingsPresenter
-
-  fun editNotePresenterFactory(): EditNotePresenterFactory
+  /**
+   * Every feature's navigation entries, contributed with `@ContributesIntoSet(AppScope::class)`.
+   */
+  val entryInstallers: Set<EntryInstaller>
 
   fun workerFactory(): MetroWorkerFactory
-}
-
-@AssistedFactory
-interface EditNotePresenterFactory {
-  fun create(noteId: String): EditNotePresenter
 }
 
 interface AppModule {

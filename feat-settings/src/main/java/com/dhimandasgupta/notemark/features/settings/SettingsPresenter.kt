@@ -12,7 +12,7 @@ import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.state.AppAction
 import com.dhimandasgupta.notemark.common.state.AppState
 import com.dhimandasgupta.notemark.common.state.impl.AppEvent
-import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
+import com.dhimandasgupta.notemark.common.state.impl.AppStateStore
 import com.dhimandasgupta.notemark.common.state.impl.LoggedIn
 import com.dhimandasgupta.notemark.common.state.impl.NotLoggedIn
 import com.dhimandasgupta.notemark.proto.Sync
@@ -62,7 +62,7 @@ data class SettingsUiModel(
 
 @Inject
 @Stable
-class SettingsPresenter(private val appStateMachineFactory: AppStateMachineFactory) {
+class SettingsPresenter(private val appStateStore: AppStateStore) {
   private val actions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
 
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -72,12 +72,10 @@ class SettingsPresenter(private val appStateMachineFactory: AppStateMachineFacto
 
     // Receives the State from the StateMachine
     LaunchedEffect(key1 = Unit) {
-      val appStateMachine = appStateMachineFactory.launchIn(this)
-
       launch {
-        appStateMachine.state
-          // The machine starts in NotLoggedIn before it has read the stored user, so NotLoggedIn
-          // only means a logout once LoggedIn has been seen.
+        appStateStore.state
+          // On a cold start the app-wide machine is still in NotLoggedIn until it has read the
+          // stored user, so NotLoggedIn only means a logout once LoggedIn has been seen.
           .dropWhile { appState -> appState !is LoggedIn }
           .filter { appState ->
             (appState is LoggedIn && appState.sync != null) || appState is NotLoggedIn
@@ -97,7 +95,7 @@ class SettingsPresenter(private val appStateMachineFactory: AppStateMachineFacto
       // Send the Events to the State Machine through Actions
       launch {
         actions.collect { loginAction ->
-          appStateMachine.dispatch(loginAction)
+          appStateStore.dispatch(action = loginAction)
         }
       }
     }

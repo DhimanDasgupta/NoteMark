@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.state.AppAction
 import com.dhimandasgupta.notemark.common.state.AppState
 import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
+import com.dhimandasgupta.notemark.common.state.impl.AppStateStore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,10 +19,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
-class AppPresenter(private val appStateMachineFactory: AppStateMachineFactory) {
+class AppPresenter(private val appStateStore: AppStateStore) {
   private val actions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
 
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -32,11 +32,8 @@ class AppPresenter(private val appStateMachineFactory: AppStateMachineFactory) {
 
     // Receives the State from the StateMachine
     LaunchedEffect(key1 = Unit) {
-      val appStateMachine = appStateMachineFactory.launchIn(this)
-
       launch {
-        appStateMachine.state
-          .onStart { emit(value = AppStateMachineFactory.defaultAppState) }
+        appStateStore.state
           .mapLatest { appState ->
             applicationState = appState
           }
@@ -52,7 +49,7 @@ class AppPresenter(private val appStateMachineFactory: AppStateMachineFactory) {
       // Send the Events to the State Machine through Actions
       launch {
         actions.collect { event ->
-          appStateMachine.dispatch(event)
+          appStateStore.dispatch(action = event)
         }
       }
     }

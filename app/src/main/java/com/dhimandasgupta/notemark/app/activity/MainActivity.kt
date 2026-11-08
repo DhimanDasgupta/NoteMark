@@ -10,7 +10,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,13 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation3.runtime.NavKey
 import com.dhimandasgupta.notemark.app.NoteMarkApp
-import com.dhimandasgupta.notemark.app.di.LocalNoteMarkGraph
 import com.dhimandasgupta.notemark.app.nav.DeepLinkParser
 import com.dhimandasgupta.notemark.app.nav.NoteMarkRoot
 import com.dhimandasgupta.notemark.common.navigation.LauncherNavKey
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentSet
 
 class MainActivity : ComponentActivity() {
   private var initialNavKeys by mutableStateOf<PersistentList<NavKey>?>(null)
@@ -38,17 +37,17 @@ class MainActivity : ComponentActivity() {
 
     initialNavKeys = DeepLinkParser.parse(intent?.data)
 
+    val entryInstallers = (application as NoteMarkApp).getGraph().entryInstallers.toPersistentSet()
+
     setContent {
-      val graph = (applicationContext as NoteMarkApp).getGraph()
       val initialKeys = initialNavKeys ?: persistentListOf(LauncherNavKey)
       NoteMarkTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-          CompositionLocalProvider(LocalNoteMarkGraph provides graph) {
-            NoteMarkRoot(
-              modifier = Modifier.consumeWindowInsets(paddingValues = innerPadding),
-              initialKeys = initialKeys,
-            )
-          }
+          NoteMarkRoot(
+            entryInstallers = entryInstallers,
+            modifier = Modifier.consumeWindowInsets(paddingValues = innerPadding),
+            initialKeys = initialKeys,
+          )
         }
       }
     }

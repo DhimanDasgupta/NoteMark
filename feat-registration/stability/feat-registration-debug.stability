@@ -66,16 +66,6 @@ internal fun com.dhimandasgupta.notemark.features.registration.RegistrationEntry
     - navigateToLoginFromRegistration: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.registration.RegistrationEntryBuilder(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, registrationPresenter: kotlin.Function0<com.dhimandasgupta.notemark.features.registration.RegistrationPresenter>, navigateToLoginFromRegistration: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - modifier: STABLE (marked @Stable or @Immutable)
-    - style: STABLE (stability configuration file type)
-    - registrationPresenter: STABLE (function type)
-    - navigateToLoginFromRegistration: STABLE (function type)
-
-@Composable
 private fun com.dhimandasgupta.notemark.features.registration.RegistrationFooterField(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true

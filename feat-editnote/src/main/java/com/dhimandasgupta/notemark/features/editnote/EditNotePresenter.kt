@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -66,6 +67,11 @@ class EditNotePresenter(
   @Assisted private val noteId: String,
   editNoteStateMachineFactoryBuilder: EditNoteStateMachineFactoryBuilder,
 ) {
+  @AssistedFactory
+  fun interface Factory {
+    fun create(noteId: String): EditNotePresenter
+  }
+
   private val editNoteStateMachineFactory = editNoteStateMachineFactoryBuilder.create(noteId)
   private val actions = MutableSharedFlow<EditNoteAction>(extraBufferCapacity = 10)
 

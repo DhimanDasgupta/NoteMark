@@ -12,7 +12,7 @@ import com.dhimandasgupta.notemark.common.android.ConnectionState
 import com.dhimandasgupta.notemark.common.extensions.kotlinx.ImmutableListSerializer
 import com.dhimandasgupta.notemark.common.state.AppAction
 import com.dhimandasgupta.notemark.common.state.impl.AppEvent
-import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
+import com.dhimandasgupta.notemark.common.state.impl.AppStateStore
 import com.dhimandasgupta.notemark.common.state.impl.LoggedIn
 import dev.zacsweers.metro.Inject
 import kotlinx.collections.immutable.ImmutableList
@@ -71,7 +71,7 @@ private val defaultNoteListUiModel = NoteListUiModel(noteEntities = persistentLi
 @Inject
 @Stable
 class NoteListPresenter(
-  private val appStateMachineFactory: AppStateMachineFactory,
+  private val appStateStore: AppStateStore,
   private val noteListStateMachineFactory: NoteListStateMachineFactory,
 ) {
   private val appActions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
@@ -83,12 +83,11 @@ class NoteListPresenter(
 
     // Receives the State from the StateMachine
     LaunchedEffect(key1 = Unit) {
-      val appStateMachine = appStateMachineFactory.launchIn(this)
       val noteListStateMachine = noteListStateMachineFactory.launchIn(this)
 
       launch {
         combine(
-            flow = appStateMachine.state.filterIsInstance<LoggedIn>(),
+            flow = appStateStore.state.filterIsInstance<LoggedIn>(),
             flow2 = noteListStateMachine.state,
           ) { appState, noteListState ->
             mapToNoteListUiModel(
@@ -110,7 +109,7 @@ class NoteListPresenter(
 
       launch {
         appActions.collect { appAction ->
-          appStateMachine.dispatch(appAction)
+          appStateStore.dispatch(action = appAction)
         }
       }
 

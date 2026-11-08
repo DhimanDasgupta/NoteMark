@@ -29,6 +29,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.withIndex
 import kotlinx.coroutines.withContext
@@ -76,34 +77,14 @@ class AppStateMachineFactory(
 
       inState<NotLoggedIn> {
         onEnterEffect { appShortcuts.removeCreateNewNoteShortcut() }
-        collectWhileInState(flow = userRepository.getUser().distinctUntilChanged().withIndex()) {
-          (index, user) ->
-          when {
-            // A login that has not been consumed yet is withdrawn once the user is gone again
-            user == null -> mutate { copy(appEvents = appEvents.withoutPending<AppEvent.Login>()) }
-            // The first emission is the session stored before this machine started, not a login
-            index == 0 -> override { loggedIn(user = user, connectionState = connectionState) }
-            else ->
-              mutate {
-                copy(appEvents = appEvents.withPending { AppEvent.Login(id = Uuid.random()) })
-              }
-          }
+        // A stored user, whether restored on start or just logged in, moves straight to LoggedIn.
+        // The machine is shared app-wide, so a login can't wait for one screen to consume it.
+        collectWhileInState(flow = userRepository.getUser().filterNotNull()) { user ->
+          override { loggedIn(user = user, connectionState = connectionState) }
         }
         collectWhileInState(flow = connectivityObserver.observe().distinctUntilChanged()) {
           connected ->
           mutate { copy(connectionState = connected) }
-        }
-
-        on<AppEventConsumed> { action ->
-          val event = action.appEvent
-          when {
-            snapshot.appEvents.none { appEvent -> appEvent.id == event.id } -> noChange()
-            event is AppEvent.Login ->
-              userRepository.getUser().first()?.let { user ->
-                override { loggedIn(user = user, connectionState = connectionState) }
-              } ?: mutate { copy(appEvents = appEvents.without(event = event)) }
-            else -> mutate { copy(appEvents = appEvents.without(event = event)) }
-          }
         }
       }
 

@@ -9,12 +9,14 @@ import com.dhimandasgupta.notemark.common.state.impl.AppEvent
 import com.dhimandasgupta.notemark.common.state.impl.AppEventConsumed
 import com.dhimandasgupta.notemark.common.state.impl.AppLogout
 import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
+import com.dhimandasgupta.notemark.common.state.impl.AppStateStore
 import com.dhimandasgupta.notemark.common.state.impl.DeleteLocalNotesOnLogout
 import com.dhimandasgupta.notemark.common.state.impl.UpdateSync
 import com.dhimandasgupta.notemark.proto.Sync
 import com.dhimandasgupta.notemark.proto.User
 import kotlin.test.assertIs
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -36,17 +38,23 @@ class SettingsPresenterTest {
     )
   private val syncScheduler = FakeSyncScheduler()
 
+  private val testScope = TestScope()
+
   private val presenter =
     SettingsPresenter(
-      appStateMachineFactory =
-        AppStateMachineFactory(
-          applicationContext = fakeApplication(versionName = "1.2.3"),
-          userRepository = userRepository,
-          syncRepository = syncRepository,
-          noteMarkRepository = FakeNoteMarkRepository(logoutResult = Result.success(Unit)),
-          syncScheduler = syncScheduler,
-          appShortcuts = FakeAppShortcuts(),
-          connectivityObserver = { connectivity },
+      appStateStore =
+        AppStateStore(
+          appStateMachineFactory =
+            AppStateMachineFactory(
+              applicationContext = fakeApplication(versionName = "1.2.3"),
+              userRepository = userRepository,
+              syncRepository = syncRepository,
+              noteMarkRepository = FakeNoteMarkRepository(logoutResult = Result.success(Unit)),
+              syncScheduler = syncScheduler,
+              appShortcuts = FakeAppShortcuts(),
+              connectivityObserver = { connectivity },
+            ),
+          scope = testScope.backgroundScope,
         )
     )
 
@@ -64,7 +72,7 @@ class SettingsPresenterTest {
     )
 
   @Test
-  fun `starts with the default ui model`() = runTest {
+  fun `starts with the default ui model`() = testScope.runTest {
     uiModels.test {
       assertEquals(SettingsUiModel.defaultOrEmpty, awaitItem())
       cancelAndIgnoreRemainingEvents()
@@ -72,7 +80,7 @@ class SettingsPresenterTest {
   }
 
   @Test
-  fun `does not report a logout while the logged in state loads`() = runTest {
+  fun `does not report a logout while the logged in state loads`() = testScope.runTest {
     uiModels.test {
       val uiModelsUntilLoggedIn = mutableListOf<SettingsUiModel>()
       do {
@@ -86,7 +94,7 @@ class SettingsPresenterTest {
   }
 
   @Test
-  fun `reports a logout once the Logout event of a removed user is consumed`() = runTest {
+  fun `reports a logout once the Logout event of a removed user is consumed`() = testScope.runTest {
     uiModels.test {
       awaitUiModel(expected = loggedInUiModel)
 
@@ -99,7 +107,7 @@ class SettingsPresenterTest {
   }
 
   @Test
-  fun `shows the stored sync settings of the logged in user`() = runTest {
+  fun `shows the stored sync settings of the logged in user`() = testScope.runTest {
     uiModels.test {
       awaitUiModel(expected = loggedInUiModel)
       cancelAndIgnoreRemainingEvents()
@@ -107,7 +115,7 @@ class SettingsPresenterTest {
   }
 
   @Test
-  fun `shows Manual when no sync interval is stored`() = runTest {
+  fun `shows Manual when no sync interval is stored`() = testScope.runTest {
     syncRepository.sync.value = Sync.getDefaultInstance()
 
     uiModels.test {
@@ -119,7 +127,7 @@ class SettingsPresenterTest {
   }
 
   @Test
-  fun `UpdateSync changes the selected interval`() = runTest {
+  fun `UpdateSync changes the selected interval`() = testScope.runTest {
     uiModels.test {
       awaitUiModel(expected = loggedInUiModel)
 
@@ -142,7 +150,7 @@ class SettingsPresenterTest {
   }
 
   @Test
-  fun `DeleteLocalNotesOnLogout updates the toggle`() = runTest {
+  fun `DeleteLocalNotesOnLogout updates the toggle`() = testScope.runTest {
     uiModels.test {
       awaitUiModel(expected = loggedInUiModel)
 
@@ -154,7 +162,7 @@ class SettingsPresenterTest {
   }
 
   @Test
-  fun `shows connectivity and running syncs`() = runTest {
+  fun `shows connectivity and running syncs`() = testScope.runTest {
     uiModels.test {
       awaitUiModel(expected = loggedInUiModel)
 
@@ -168,7 +176,7 @@ class SettingsPresenterTest {
   }
 
   @Test
-  fun `AppLogout reports a successful logout`() = runTest {
+  fun `AppLogout reports a successful logout`() = testScope.runTest {
     uiModels.test {
       awaitUiModel(expected = loggedInUiModel)
 
@@ -181,7 +189,7 @@ class SettingsPresenterTest {
   }
 
   @Test
-  fun `does not report a logout before the Logout event is consumed`() = runTest {
+  fun `does not report a logout before the Logout event is consumed`() = testScope.runTest {
     uiModels.test {
       awaitUiModel(expected = loggedInUiModel)
 

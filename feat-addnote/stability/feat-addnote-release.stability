@@ -73,16 +73,6 @@ private fun com.dhimandasgupta.notemark.features.addnote.AddNoteToolbar(modifier
     - onSaveClicked: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.addnote.NoteCreateEntryBuilder(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, addNotePresenter: kotlin.Function0<com.dhimandasgupta.notemark.features.addnote.AddNotePresenter>, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - modifier: STABLE (marked @Stable or @Immutable)
-    - style: STABLE (stability configuration file type)
-    - addNotePresenter: STABLE (function type)
-    - navigateUp: STABLE (function type)
-
-@Composable
 private fun com.dhimandasgupta.notemark.features.addnote.addNoteTextFieldColors(): androidx.compose.material3.TextFieldColors
   skippable: false
   restartable: false

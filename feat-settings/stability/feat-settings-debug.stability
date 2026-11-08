@@ -74,17 +74,6 @@ internal fun com.dhimandasgupta.notemark.features.settings.SettingsEntry(modifie
     - navigateUp: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.settings.SettingsEntryBuilder(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, settingsPresenter: kotlin.Function0<com.dhimandasgupta.notemark.features.settings.SettingsPresenter>, navigateToLauncherAfterLogout: kotlin.Function0<kotlin.Unit>, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - modifier: STABLE (marked @Stable or @Immutable)
-    - style: STABLE (stability configuration file type)
-    - settingsPresenter: STABLE (function type)
-    - navigateToLauncherAfterLogout: STABLE (function type)
-    - navigateUp: STABLE (function type)
-
-@Composable
 internal fun com.dhimandasgupta.notemark.features.settings.SettingsPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, settingsUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.settings.SettingsUiModel>, settingsAction: kotlin.Function1<com.dhimandasgupta.notemark.common.state.AppAction, kotlin.Unit>, onLogoutSuccessful: kotlin.Function0<kotlin.Unit>, onBackClicked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true

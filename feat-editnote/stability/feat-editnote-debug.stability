@@ -73,13 +73,3 @@ private fun com.dhimandasgupta.notemark.features.editnote.NoteDateTime(modifier:
     - dateCreated: STABLE (String is immutable)
     - lastEdited: STABLE (String is immutable)
 
-@Composable
-public fun com.dhimandasgupta.notemark.features.editnote.NoteEditEntryBuilder(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, editNotePresenter: kotlin.Function1<@[ParameterName(name = \, navigateUp: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - modifier: STABLE (marked @Stable or @Immutable)
-    - style: STABLE (stability configuration file type)
-    - editNotePresenter: STABLE (function type)
-    - navigateUp: STABLE (function type)
-

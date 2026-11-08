@@ -124,8 +124,6 @@ internal fun NoteListPane(
           navigateToLauncherIfLoggedOut()
           return@LaunchedEffect
         }
-        // A logged in app never holds a Login event, the launcher consumes it
-        is AppEvent.Login -> return@LaunchedEffect
       }
     snackbarHostState.currentSnackbarData?.dismiss()
     snackbarHostState.showSnackbar(message = message, duration = SnackbarDuration.Long)

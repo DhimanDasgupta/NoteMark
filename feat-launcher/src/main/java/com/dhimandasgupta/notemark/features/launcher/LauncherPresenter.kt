@@ -9,33 +9,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.dhimandasgupta.notemark.common.android.ConnectionState
-import com.dhimandasgupta.notemark.common.state.AppAction
-import com.dhimandasgupta.notemark.common.state.impl.AppEvent
-import com.dhimandasgupta.notemark.common.state.impl.AppStateMachineFactory
+import com.dhimandasgupta.notemark.common.state.impl.AppStateStore
 import com.dhimandasgupta.notemark.common.state.impl.LoggedIn
-import com.dhimandasgupta.notemark.common.state.impl.NotLoggedIn
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 @Serializable
 @Immutable
 data class LauncherUiModel(
   val connectionState: ConnectionState? = ConnectionState.Unavailable,
   val loggedInUser: UiUser? = null,
-  /** A [AppEvent.Login] waiting to be consumed, which moves the app to [LoggedIn]. */
-  @Transient val appEvent: AppEvent? = null,
 ) {
   companion object {
     val defaultOrEmpty = LauncherUiModel()
@@ -52,61 +43,41 @@ data class UiUser(
 
 @Stable
 @Inject
-class LauncherPresenter(private val appStateMachineFactory: AppStateMachineFactory) {
-  private val actions = MutableSharedFlow<AppAction>(extraBufferCapacity = 10)
-
+class LauncherPresenter(private val appStateStore: AppStateStore) {
   @OptIn(ExperimentalCoroutinesApi::class)
   @Composable
   fun uiModel(): LauncherUiModel {
     var launcherUiModel by
       remember(key1 = Unit) { mutableStateOf(value = LauncherUiModel.defaultOrEmpty) }
 
-    // Receives the State from the StateMachine
+    // Receives the State from the app-wide StateMachine
     LaunchedEffect(key1 = Unit) {
-      val appStateMachine = appStateMachineFactory.launchIn(this)
-
-      launch {
-        appStateMachine.state
-          .onStart { emit(value = AppStateMachineFactory.defaultAppState) }
-          .mapLatest { appState ->
-            launcherUiModel =
-              launcherUiModel.copy(
-                connectionState = appState.connectionState,
-                loggedInUser =
-                  when (appState) {
-                    is LoggedIn ->
-                      UiUser(
-                        userName = appState.user.userName,
-                        accessToken = appState.user.accessToken,
-                        refreshToken = appState.user.refreshToken,
-                      )
-                    else -> null
-                  },
-                appEvent =
-                  (appState as? NotLoggedIn)?.appEvents?.firstOrNull { appEvent ->
-                    appEvent is AppEvent.Login
-                  },
-              )
-          }
-          .cancellable()
-          .catch { throwable ->
-            if (throwable is CancellationException) throw throwable
-            // else can can be something like page level error etc.
-          }
-          .flowOn(context = Dispatchers.Default)
-          .collect()
-      }
-
-      // Send the Events to the State Machine through Actions
-      launch {
-        actions.collect { event ->
-          appStateMachine.dispatch(action = event)
+      appStateStore.state
+        .mapLatest { appState ->
+          launcherUiModel =
+            launcherUiModel.copy(
+              connectionState = appState.connectionState,
+              loggedInUser =
+                when (appState) {
+                  is LoggedIn ->
+                    UiUser(
+                      userName = appState.user.userName,
+                      accessToken = appState.user.accessToken,
+                      refreshToken = appState.user.refreshToken,
+                    )
+                  else -> null
+                },
+            )
         }
-      }
+        .cancellable()
+        .catch { throwable ->
+          if (throwable is CancellationException) throw throwable
+          // else can can be something like page level error etc.
+        }
+        .flowOn(context = Dispatchers.Default)
+        .collect()
     }
 
     return launcherUiModel
   }
-
-  fun dispatchAction(action: AppAction) = actions.tryEmit(value = action)
 }

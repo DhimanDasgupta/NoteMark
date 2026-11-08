@@ -63,18 +63,7 @@ internal fun com.dhimandasgupta.notemark.features.launcher.LauncherEntry(modifie
     - navigateToLogin: STABLE (function type)
 
 @Composable
-public fun com.dhimandasgupta.notemark.features.launcher.LauncherEntryBuilder(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, launcherPresenter: kotlin.Function0<com.dhimandasgupta.notemark.features.launcher.LauncherPresenter>, navigateAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - modifier: STABLE (marked @Stable or @Immutable)
-    - style: STABLE (stability configuration file type)
-    - launcherPresenter: STABLE (function type)
-    - navigateAfterLogin: STABLE (function type)
-    - navigateToLogin: STABLE (function type)
-
-@Composable
-internal fun com.dhimandasgupta.notemark.features.launcher.LauncherPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, launcherUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.launcher.LauncherUiModel>, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, navigateToList: kotlin.Function0<kotlin.Unit>, launcherAction: kotlin.Function1<com.dhimandasgupta.notemark.common.state.AppAction, kotlin.Unit>): kotlin.Unit
+internal fun com.dhimandasgupta.notemark.features.launcher.LauncherPane(modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, launcherUiModel: kotlin.Function0<com.dhimandasgupta.notemark.features.launcher.LauncherUiModel>, navigateToAfterLogin: kotlin.Function0<kotlin.Unit>, navigateToLogin: kotlin.Function0<kotlin.Unit>, navigateToList: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -84,7 +73,6 @@ internal fun com.dhimandasgupta.notemark.features.launcher.LauncherPane(modifier
     - navigateToAfterLogin: STABLE (function type)
     - navigateToLogin: STABLE (function type)
     - navigateToList: STABLE (function type)
-    - launcherAction: STABLE (function type)
 
 @Composable
 public fun com.dhimandasgupta.notemark.features.launcher.LauncherPresenter.uiModel(): com.dhimandasgupta.notemark.features.launcher.LauncherUiModel
