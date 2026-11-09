@@ -11,12 +11,10 @@ import com.dhimandasgupta.notemark.common.navigation.NoteCreateNavKey
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.Provider
 
 @ContributesIntoSet(AppScope::class)
 @Inject
-class AddNoteEntryInstaller(private val addNotePresenter: Provider<AddNotePresenter>) :
-  EntryInstaller {
+class AddNoteEntryInstaller(private val addNotePresenter: () -> AddNotePresenter) : EntryInstaller {
   @OptIn(ExperimentalMaterial3AdaptiveApi::class)
   override fun EntryProviderScope<NavKey>.install(backStack: NavBackStack<NavKey>) {
     entry<NoteCreateNavKey>(metadata = ListDetailSceneStrategy.detailPane()) {

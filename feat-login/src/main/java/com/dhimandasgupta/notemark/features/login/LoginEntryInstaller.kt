@@ -11,11 +11,10 @@ import com.dhimandasgupta.notemark.common.navigation.goToNoteListAfterLogin
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.Provider
 
 @ContributesIntoSet(AppScope::class)
 @Inject
-class LoginEntryInstaller(private val loginPresenter: Provider<LoginPresenter>) : EntryInstaller {
+class LoginEntryInstaller(private val loginPresenter: () -> LoginPresenter) : EntryInstaller {
   override fun EntryProviderScope<NavKey>.install(backStack: NavBackStack<NavKey>) {
     entry<LoginNavKey> {
       val presenter: LoginPresenter = retain { loginPresenter() }

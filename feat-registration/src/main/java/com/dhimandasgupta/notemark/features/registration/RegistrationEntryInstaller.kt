@@ -9,13 +9,11 @@ import com.dhimandasgupta.notemark.common.navigation.RegistrationNavKey
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.Provider
 
 @ContributesIntoSet(AppScope::class)
 @Inject
-class RegistrationEntryInstaller(
-  private val registrationPresenter: Provider<RegistrationPresenter>
-) : EntryInstaller {
+class RegistrationEntryInstaller(private val registrationPresenter: () -> RegistrationPresenter) :
+  EntryInstaller {
   override fun EntryProviderScope<NavKey>.install(backStack: NavBackStack<NavKey>) {
     entry<RegistrationNavKey> {
       val presenter: RegistrationPresenter = retain { registrationPresenter() }

@@ -13,11 +13,10 @@ import com.dhimandasgupta.notemark.common.navigation.resetToLauncherAfterLogout
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.Provider
 
 @ContributesIntoSet(AppScope::class)
 @Inject
-class SettingsEntryInstaller(private val settingsPresenter: Provider<SettingsPresenter>) :
+class SettingsEntryInstaller(private val settingsPresenter: () -> SettingsPresenter) :
   EntryInstaller {
   @OptIn(ExperimentalMaterial3AdaptiveApi::class)
   override fun EntryProviderScope<NavKey>.install(backStack: NavBackStack<NavKey>) {
