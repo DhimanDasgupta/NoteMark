@@ -24,6 +24,83 @@ A comprehensive build script `build.sh` is provided in the project root:
 ./build.sh test
 ```
 
+## Screenshots (Foldable)
+
+Captured on a foldable emulator (`foldable_4_3` profile) in user-flow order. **Folded** is the outer cover screen; **Unfolded** is the inner screen, where the adaptive list-detail layout kicks in.
+
+<table>
+  <tr>
+    <th>Screen</th>
+    <th>Light · Folded</th>
+    <th>Light · Unfolded</th>
+    <th>Dark · Folded</th>
+    <th>Dark · Unfolded</th>
+  </tr>
+  <tr>
+    <td><b>1. Launcher</b><br/><sub>Entry screen for logged-out users.</sub></td>
+    <td align="center"><img src="docs/screenshots/foldable/01_launcher_light_folded.png" height="240" alt="Launcher, light, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/01_launcher_light_unfolded.png" height="240" alt="Launcher, light, unfolded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/01_launcher_dark_folded.png" height="240" alt="Launcher, dark, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/01_launcher_dark_unfolded.png" height="240" alt="Launcher, dark, unfolded"/></td>
+  </tr>
+  <tr>
+    <td><b>2. Login</b><br/><sub>Email/password login; two-pane layout when unfolded.</sub></td>
+    <td align="center"><img src="docs/screenshots/foldable/02_login_light_folded.png" height="240" alt="Login, light, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/02_login_light_unfolded.png" height="240" alt="Login, light, unfolded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/02_login_dark_folded.png" height="240" alt="Login, dark, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/02_login_dark_unfolded.png" height="240" alt="Login, dark, unfolded"/></td>
+  </tr>
+  <tr>
+    <td><b>3. Registration</b><br/><sub>Reached from Login via "Don't have an account?".</sub></td>
+    <td align="center"><img src="docs/screenshots/foldable/03_registration_light_folded.png" height="240" alt="Registration, light, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/03_registration_light_unfolded.png" height="240" alt="Registration, light, unfolded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/03_registration_dark_folded.png" height="240" alt="Registration, dark, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/03_registration_dark_unfolded.png" height="240" alt="Registration, dark, unfolded"/></td>
+  </tr>
+  <tr>
+    <td><b>4. Note list</b><br/><sub>Staggered grid; unfolded shows the list-detail layout.</sub></td>
+    <td align="center"><img src="docs/screenshots/foldable/04_notelist_light_folded.png" height="240" alt="Note list, light, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/04_notelist_light_unfolded.png" height="240" alt="Note list, light, unfolded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/04_notelist_dark_folded.png" height="240" alt="Note list, dark, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/04_notelist_dark_unfolded.png" height="240" alt="Note list, dark, unfolded"/></td>
+  </tr>
+  <tr>
+    <td><b>5. Note detail</b><br/><sub>Selected note opens in the detail pane.</sub></td>
+    <td align="center"><img src="docs/screenshots/foldable/05_note_detail_light_folded.png" height="240" alt="Note detail, light, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/05_note_detail_light_unfolded.png" height="240" alt="Note detail, light, unfolded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/05_note_detail_dark_folded.png" height="240" alt="Note detail, dark, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/05_note_detail_dark_unfolded.png" height="240" alt="Note detail, dark, unfolded"/></td>
+  </tr>
+  <tr>
+    <td><b>6. Edit note</b><br/><sub>Edit mode for the selected note.</sub></td>
+    <td align="center"><img src="docs/screenshots/foldable/06_edit_note_light_folded.png" height="240" alt="Edit note, light, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/06_edit_note_light_unfolded.png" height="240" alt="Edit note, light, unfolded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/06_edit_note_dark_folded.png" height="240" alt="Edit note, dark, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/06_edit_note_dark_unfolded.png" height="240" alt="Edit note, dark, unfolded"/></td>
+  </tr>
+  <tr>
+    <td><b>7. Reader mode</b><br/><sub>Full-screen reading; landscape on the cover screen.</sub></td>
+    <td align="center"><img src="docs/screenshots/foldable/07_reader_mode_light_folded.png" height="240" alt="Reader mode, light, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/07_reader_mode_light_unfolded.png" height="240" alt="Reader mode, light, unfolded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/07_reader_mode_dark_folded.png" height="240" alt="Reader mode, dark, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/07_reader_mode_dark_unfolded.png" height="240" alt="Reader mode, dark, unfolded"/></td>
+  </tr>
+  <tr>
+    <td><b>8. Add note</b><br/><sub>New note in the detail pane.</sub></td>
+    <td align="center"><img src="docs/screenshots/foldable/08_add_note_light_folded.png" height="240" alt="Add note, light, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/08_add_note_light_unfolded.png" height="240" alt="Add note, light, unfolded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/08_add_note_dark_folded.png" height="240" alt="Add note, dark, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/08_add_note_dark_unfolded.png" height="240" alt="Add note, dark, unfolded"/></td>
+  </tr>
+  <tr>
+    <td><b>9. Settings</b><br/><sub>Sync interval, sync now, logout; shown as an extra pane.</sub></td>
+    <td align="center"><img src="docs/screenshots/foldable/09_settings_light_folded.png" height="240" alt="Settings, light, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/09_settings_light_unfolded.png" height="240" alt="Settings, light, unfolded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/09_settings_dark_folded.png" height="240" alt="Settings, dark, folded"/></td>
+    <td align="center"><img src="docs/screenshots/foldable/09_settings_dark_unfolded.png" height="240" alt="Settings, dark, unfolded"/></td>
+  </tr>
+</table>
+
 ## Project Structure
 
 ```
