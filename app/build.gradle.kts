@@ -80,6 +80,12 @@ android {
     // One consolidated report that also covers the library modules.
     checkDependencies = true
   }
+  compileSdk {
+    version =
+      release(libs.versions.compileSdk.get().toInt()) {
+        minorApiLevel = libs.versions.minorApiLevel.get().toInt()
+      }
+  }
 }
 
 dependencies {
