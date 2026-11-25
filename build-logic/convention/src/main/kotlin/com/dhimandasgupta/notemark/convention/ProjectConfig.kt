@@ -15,6 +15,9 @@ internal val Project.libs: VersionCatalog
 internal val Project.compileSdk: Int
   get() = libs.intVersion("compileSdk")
 
+internal val Project.compileSdkMinor: Int
+  get() = libs.intVersion("minorApiLevel")
+
 internal val Project.minSdk: Int
   get() = libs.intVersion("minSdk")
 

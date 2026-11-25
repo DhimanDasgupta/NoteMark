@@ -17,12 +17,15 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
       // Read from the catalog up front: inside the DSL blocks these names resolve to the
       // extensions' own properties (e.g. `compilerOptions.jvmTarget`).
       val compileSdkLevel = compileSdk
+      val compileSdkMinorLevel = compileSdkMinor
       val minSdkLevel = minSdk
       val targetSdkLevel = targetSdk
       val javaVersionTarget = javaVersion
       val kotlinJvmTarget = jvmTarget
       extensions.configure<ApplicationExtension> {
-        compileSdk = compileSdkLevel
+        compileSdk {
+          version = release(compileSdkLevel) { minorApiLevel = compileSdkMinorLevel }
+        }
         defaultConfig {
           minSdk = minSdkLevel
           targetSdk = targetSdkLevel
