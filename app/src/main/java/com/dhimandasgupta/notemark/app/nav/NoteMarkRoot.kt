@@ -12,6 +12,8 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -31,16 +33,20 @@ fun NoteMarkRoot(
   modifier: Modifier,
   style: Style = Style,
   initialKeys: PersistentList<NavKey> = persistentListOf(LauncherNavKey),
+  pendingDeepLinkKeys: PersistentList<NavKey>? = null,
+  onDeepLinkConsumed: () -> Unit = {},
 ) {
   val backStack = rememberNavBackStack(*initialKeys.toTypedArray())
   val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
   val decorators = listOf(rememberSaveableStateHolderNavEntryDecorator<NavKey>())
 
-  LaunchedEffect(initialKeys) {
-    if (initialKeys.isNotEmpty() && initialKeys != persistentListOf(LauncherNavKey)) {
-      backStack.clear()
-      backStack.addAll(initialKeys)
-    }
+  val currentOnDeepLinkConsumed by rememberUpdatedState(newValue = onDeepLinkConsumed)
+  LaunchedEffect(pendingDeepLinkKeys) {
+    if (pendingDeepLinkKeys.isNullOrEmpty()) return@LaunchedEffect
+    backStack.clear()
+    backStack.addAll(pendingDeepLinkKeys)
+    // Make sure to mark the deep link as consumed. Otherwise, the same link will not work again
+    currentOnDeepLinkConsumed()
   }
 
   SharedTransitionLayout(modifier = modifier.styleable(null, style)) {

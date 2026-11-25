@@ -5,7 +5,7 @@
 //   ./gradlew :app:stabilityDump
 
 @Composable
-public fun com.dhimandasgupta.notemark.app.nav.NoteMarkRoot(entryInstallers: kotlinx.collections.immutable.PersistentSet<com.dhimandasgupta.notemark.common.navigation.EntryInstaller>, modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, initialKeys: kotlinx.collections.immutable.PersistentList<androidx.navigation3.runtime.NavKey>): kotlin.Unit
+public fun com.dhimandasgupta.notemark.app.nav.NoteMarkRoot(entryInstallers: kotlinx.collections.immutable.PersistentSet<com.dhimandasgupta.notemark.common.navigation.EntryInstaller>, modifier: androidx.compose.ui.Modifier, style: androidx.compose.foundation.style.Style, initialKeys: kotlinx.collections.immutable.PersistentList<androidx.navigation3.runtime.NavKey>, pendingDeepLinkKeys: kotlinx.collections.immutable.PersistentList<androidx.navigation3.runtime.NavKey>?, onDeepLinkConsumed: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -13,4 +13,6 @@ public fun com.dhimandasgupta.notemark.app.nav.NoteMarkRoot(entryInstallers: kot
     - modifier: STABLE (marked @Stable or @Immutable)
     - style: STABLE (stability configuration file type)
     - initialKeys: STABLE (stability configuration file type)
+    - pendingDeepLinkKeys: STABLE (stability configuration file type)
+    - onDeepLinkConsumed: STABLE (function type)
 

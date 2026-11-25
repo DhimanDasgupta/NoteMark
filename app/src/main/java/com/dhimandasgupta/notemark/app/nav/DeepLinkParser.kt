@@ -1,26 +1,39 @@
 package com.dhimandasgupta.notemark.app.nav
 
-import android.net.Uri
+import android.content.Intent
+import androidx.core.net.toUri
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.deeplink.BackStackMatcher
+import androidx.navigation3.runtime.deeplink.DeepLinkRequest
+import androidx.navigation3.runtime.deeplink.UriDeepLinkMatcher
+import androidx.navigation3.runtime.deeplink.invoke
+import androidx.navigation3.runtime.deeplink.withBackStack
 import com.dhimandasgupta.notemark.common.navigation.NoteCreateNavKey
 import com.dhimandasgupta.notemark.common.navigation.NoteListNavKey
 import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 
 object DeepLinkParser {
-  fun parse(uri: Uri?): PersistentList<NavKey>? {
-    if (uri == null) return null
+  /** Every supported deep link, with the back stack to show when it matches. */
+  private val matchers: List<BackStackMatcher<NavKey, NavKey>> =
+    listOf(
+      UriDeepLinkMatcher(
+          uriPattern = "notemark://notes/new".toUri(),
+          serializer = NoteCreateNavKey.serializer(),
+        )
+        .withBackStack { match -> listOf(NoteListNavKey, match.key) }
+    )
 
-    val isCustomScheme = uri.scheme == "notemark" && uri.host == "notes"
-    val isHttpScheme = (uri.scheme == "https" || uri.scheme == "http")
+  /** Returns the back stack for the deep link in [intent], or null if it has no supported one. */
+  fun parse(intent: Intent?): PersistentList<NavKey>? {
+    // DeepLinkRequest throws for an intent without data, action, type and extras.
+    if (intent?.data == null) return null
 
-    if (!isCustomScheme && !isHttpScheme) return null
-    val isNewNotePath = uri.path == "/notes/new" || uri.path == "/new"
-
-    return if (isNewNotePath) {
-      persistentListOf(NoteListNavKey, NoteCreateNavKey)
-    } else {
-      null
-    }
+    val request = DeepLinkRequest(intent)
+    return matchers
+      .mapNotNull { matcher -> matcher.match(request) }
+      .maxOrNull()
+      ?.backStack
+      ?.toPersistentList()
   }
 }

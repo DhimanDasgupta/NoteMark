@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.NavKey
 import com.dhimandasgupta.notemark.app.NoteMarkApp
 import com.dhimandasgupta.notemark.app.nav.DeepLinkParser
@@ -24,30 +25,49 @@ import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentSet
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
-  private var initialNavKeys by mutableStateOf<PersistentList<NavKey>?>(null)
+  /** Null while the deep link that started the activity is still being resolved. */
+  private var initialKeys by mutableStateOf<PersistentList<NavKey>?>(null)
+
+  /** A deep link received by the running activity, until it has replaced the back stack. */
+  private var pendingDeepLinkKeys by mutableStateOf<PersistentList<NavKey>?>(null)
+
+  private val deepLinkLoginGuard by lazy {
+    (application as NoteMarkApp).getGraph().deepLinkLoginGuard
+  }
 
   @OptIn(ExperimentalFoundationApi::class)
   override fun onCreate(savedInstanceState: Bundle?) {
-    installSplashScreen()
+    val splashScreen = installSplashScreen()
     ComposeFoundationFlags.isInheritedTextStyleEnabled = true
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
 
-    initialNavKeys = DeepLinkParser.parse(intent?.data)
+    // A recreated activity restores its back stack. Its intent has been handled already.
+    val deepLinkKeys = if (savedInstanceState == null) DeepLinkParser.parse(intent) else null
+    if (deepLinkKeys == null) {
+      initialKeys = persistentListOf(LauncherNavKey)
+    } else {
+      lifecycleScope.launch { initialKeys = deepLinkLoginGuard.guard(deepLinkKeys) }
+    }
+    splashScreen.setKeepOnScreenCondition { initialKeys == null }
 
     val entryInstallers = (application as NoteMarkApp).getGraph().entryInstallers.toPersistentSet()
 
     setContent {
-      val initialKeys = initialNavKeys ?: persistentListOf(LauncherNavKey)
       NoteMarkTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-          NoteMarkRoot(
-            entryInstallers = entryInstallers,
-            modifier = Modifier.consumeWindowInsets(paddingValues = innerPadding),
-            initialKeys = initialKeys,
-          )
+          initialKeys?.let { keys ->
+            NoteMarkRoot(
+              entryInstallers = entryInstallers,
+              modifier = Modifier.consumeWindowInsets(paddingValues = innerPadding),
+              initialKeys = keys,
+              pendingDeepLinkKeys = pendingDeepLinkKeys,
+              onDeepLinkConsumed = { pendingDeepLinkKeys = null },
+            )
+          }
         }
       }
     }
@@ -56,8 +76,8 @@ class MainActivity : ComponentActivity() {
   override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
     setIntent(intent)
-    DeepLinkParser.parse(intent.data)?.let { keys ->
-      initialNavKeys = keys
+    DeepLinkParser.parse(intent)?.let { keys ->
+      lifecycleScope.launch { pendingDeepLinkKeys = deepLinkLoginGuard.guard(keys) }
     }
   }
 }

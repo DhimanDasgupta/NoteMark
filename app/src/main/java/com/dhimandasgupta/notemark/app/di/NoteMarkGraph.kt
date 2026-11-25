@@ -11,6 +11,7 @@ import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.dhimandasgupta.notemark.BuildConfig
 import com.dhimandasgupta.notemark.app.extension.ShortcutManagerAppShortcuts
 import com.dhimandasgupta.notemark.app.extension.WorkManagerSyncScheduler
+import com.dhimandasgupta.notemark.app.nav.DeepLinkLoginGuard
 import com.dhimandasgupta.notemark.common.android.AppShortcuts
 import com.dhimandasgupta.notemark.common.android.ConnectivityObserver
 import com.dhimandasgupta.notemark.common.android.SyncScheduler
@@ -73,6 +74,8 @@ interface NoteMarkGraph : AppModule {
    * Every feature's navigation entries, contributed with `@ContributesIntoSet(AppScope::class)`.
    */
   val entryInstallers: Set<EntryInstaller>
+
+  val deepLinkLoginGuard: DeepLinkLoginGuard
 
   fun workerFactory(): MetroWorkerFactory
 }
