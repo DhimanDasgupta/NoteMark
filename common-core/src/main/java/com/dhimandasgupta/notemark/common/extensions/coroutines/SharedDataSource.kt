@@ -24,7 +24,7 @@ import kotlinx.coroutines.internal.SynchronizedObject
  * @property builder A function that defines how to build a Flow when a requested key is not already
  *   present in the collection.
  */
-class SharedDataSource<K, V>(
+internal class SharedDataSource<K, V>(
   private val scope: CoroutineScope,
   private val replayExpiration: Duration = Duration.INFINITE,
   private val stopTimeout: Duration = Duration.ZERO,

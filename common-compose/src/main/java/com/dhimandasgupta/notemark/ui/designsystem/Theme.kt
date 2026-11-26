@@ -18,7 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
-val LightColorScheme =
+private val LightColorScheme =
   lightColorScheme(
     primary = Primary,
     surface = Surface,
@@ -40,7 +40,7 @@ private val DarkColorScheme =
     error = ErrorDark,
   )
 
-val Shapes =
+internal val Shapes =
   Shapes(
     extraSmall = RoundedCornerShape(5.dp),
     medium = RoundedCornerShape(15.dp),
@@ -51,12 +51,12 @@ val Shapes =
  * own composition locals internal, so the active scheme is re-provided here for Styles to consume.
  */
 @Immutable
-class NoteMarkThemeTokens(
+internal class NoteMarkThemeTokens(
   val colorScheme: ColorScheme,
   val shapes: Shapes,
 )
 
-val LocalNoteMarkTheme = compositionLocalOf {
+internal val LocalNoteMarkTheme = compositionLocalOf {
   NoteMarkThemeTokens(colorScheme = LightColorScheme, shapes = Shapes)
 }
 

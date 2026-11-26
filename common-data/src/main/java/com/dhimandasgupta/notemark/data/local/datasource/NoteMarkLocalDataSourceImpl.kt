@@ -8,14 +8,20 @@ import app.cash.sqldelight.paging3.QueryPagingSource
 import com.dhimandasgupta.notemark.core.di.AppBackgroundDispatcher
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.database.NoteMarkDatabase
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 @Inject
-class NoteMarkLocalDataSourceImpl(
+class NoteMarkLocalDataSourceImpl
+internal constructor(
   database: Lazy<NoteMarkDatabase>,
   @AppBackgroundDispatcher private val applicationDispatcher: CoroutineDispatcher,
 ) : NoteMarkLocalDataSource {

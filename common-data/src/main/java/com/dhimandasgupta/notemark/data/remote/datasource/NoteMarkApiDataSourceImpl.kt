@@ -3,10 +3,16 @@ package com.dhimandasgupta.notemark.data.remote.datasource
 import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.database.NoteEntity
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 @Inject
-class NoteMarkApiDataSourceImpl(noteMarkApi: Lazy<NoteMarkApi>) : NoteMarkApiDataSource {
+class NoteMarkApiDataSourceImpl internal constructor(noteMarkApi: Lazy<NoteMarkApi>) :
+  NoteMarkApiDataSource {
   private val noteMarkApi by noteMarkApi
 
   override suspend fun getAllNotes(page: Int, size: Int) =

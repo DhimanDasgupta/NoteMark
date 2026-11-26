@@ -7,10 +7,6 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import androidx.annotation.RequiresPermission
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.produceState
-import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -23,14 +19,6 @@ sealed interface ConnectionState {
 
   @Serializable @SerialName("unavailable") data object Unavailable : ConnectionState
 }
-
-/** Network utility to get the current state of internet connection */
-val Context.currentConnectivityState: ConnectionState
-  @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
-  get() {
-    val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    return getCurrentConnectivityState(connectivityManager)
-  }
 
 @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
 private fun getCurrentConnectivityState(connectivityManager: ConnectivityManager): ConnectionState {
@@ -97,21 +85,6 @@ private fun networkCallback(
 
       val connected = hasInternetCapability && isConnected
       callback(if (connected) ConnectionState.Available else ConnectionState.Unavailable)
-    }
-  }
-}
-
-// Utility Composable to use ConnectionState from Compose UI...
-@RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
-@Composable
-fun connectivityState(): State<ConnectionState> {
-  val context = LocalContext.current.applicationContext
-
-  // Creates a State<ConnectionState> with the current connectivity state as the initial value
-  return produceState(initialValue = context.currentConnectivityState) {
-    // In a coroutine, can make suspend calls
-    context.observeConnectivityAsFlow().collect { connectivityState ->
-      value = connectivityState
     }
   }
 }

@@ -8,7 +8,7 @@ import com.dhimandasgupta.notemark.database.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
 /** Notes held in memory per page by [NoteMarkRepository.getPagedNotes]. */
-const val NOTES_PAGE_SIZE: Int = 10
+internal const val NOTES_PAGE_SIZE: Int = 10
 
 interface NoteMarkRepository {
   /**

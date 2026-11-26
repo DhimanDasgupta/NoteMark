@@ -33,7 +33,7 @@ private val Inter =
     ),
   )
 
-val Typography: Typography
+internal val Typography: Typography
   @Composable
   get() =
     Typography(

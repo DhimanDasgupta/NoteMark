@@ -5,13 +5,19 @@ import com.dhimandasgupta.notemark.common.extensions.coroutines.runCatchingCance
 import com.dhimandasgupta.notemark.core.di.UserDataStore
 import com.dhimandasgupta.notemark.data.storage.defaultUserValue
 import com.dhimandasgupta.notemark.proto.User
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 @Inject
-class UserDataSourceImpl(@UserDataStore userDataStore: Lazy<DataStore<User>>) : UserDataSource {
+class UserDataSourceImpl internal constructor(@UserDataStore userDataStore: Lazy<DataStore<User>>) :
+  UserDataSource {
   private val userDataStore by userDataStore
 
   override fun getUser(): Flow<User?> =

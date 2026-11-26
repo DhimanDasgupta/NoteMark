@@ -10,13 +10,19 @@ import com.dhimandasgupta.notemark.data.remote.model.NoteResponse
 import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.data.remote.model.extension.toNoteEntity
 import com.dhimandasgupta.notemark.database.NoteEntity
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 @Inject
-class NoteMarkRepositoryImpl(
+class NoteMarkRepositoryImpl
+internal constructor(
   localDataSource: Lazy<NoteMarkLocalDataSource>,
   remoteDataSource: Lazy<NoteMarkApiDataSource>,
 ) : NoteMarkRepository {

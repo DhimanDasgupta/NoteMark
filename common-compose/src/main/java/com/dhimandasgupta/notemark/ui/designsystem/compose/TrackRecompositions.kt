@@ -13,10 +13,10 @@ import androidx.compose.ui.semantics.semantics
 
 val RecompositionCountKey = SemanticsPropertyKey<Int>(name = "RecompositionCount")
 
-var SemanticsPropertyReceiver.recompositionCount by RecompositionCountKey
+private var SemanticsPropertyReceiver.recompositionCount by RecompositionCountKey
 
 @Composable
-fun Modifier.trackRecompositions(): Modifier {
+internal fun Modifier.trackRecompositions(): Modifier {
   var recompositions by remember { mutableIntStateOf(0) }
 
   SideEffect { recompositions++ }

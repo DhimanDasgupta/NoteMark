@@ -7,9 +7,10 @@ import com.dhimandasgupta.notemark.data.remote.model.RefreshRequest
 import com.dhimandasgupta.notemark.data.remote.model.RegisterRequest
 import com.dhimandasgupta.notemark.database.NoteEntity
 
-class UserAlreadyExistsException(message: String = "User already exists") : Exception(message)
+internal class UserAlreadyExistsException(message: String = "User already exists") :
+  Exception(message)
 
-class ApiGenericException(
+internal class ApiGenericException(
   message: String = "Something went wrong with the API request",
   cause: Throwable? = null,
 ) : Exception(message, cause)

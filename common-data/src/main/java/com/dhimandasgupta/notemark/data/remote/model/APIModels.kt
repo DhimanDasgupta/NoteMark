@@ -17,7 +17,7 @@ data class LoginRequest(
 )
 
 @Serializable
-data class AuthResponse(
+internal data class AuthResponse(
   @SerialName("accessToken") val accessToken: String,
   @SerialName("refreshToken") val refreshToken: String,
   @SerialName("username") val username: String,
@@ -26,7 +26,7 @@ data class AuthResponse(
 @Serializable data class RefreshRequest(@SerialName("refreshToken") val refreshToken: String)
 
 @Serializable
-data class RefreshResponse(
+internal data class RefreshResponse(
   @SerialName("accessToken") val accessToken: String,
   @SerialName("refreshToken") val refreshToken: String,
 )

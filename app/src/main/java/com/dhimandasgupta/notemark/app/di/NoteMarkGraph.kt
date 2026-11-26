@@ -21,24 +21,8 @@ import com.dhimandasgupta.notemark.core.di.AppBackgroundDispatcher
 import com.dhimandasgupta.notemark.core.di.AppBackgroundScope
 import com.dhimandasgupta.notemark.core.di.SyncDataStore
 import com.dhimandasgupta.notemark.core.di.UserDataStore
-import com.dhimandasgupta.notemark.data.local.datasource.NoteMarkLocalDataSource
-import com.dhimandasgupta.notemark.data.local.datasource.NoteMarkLocalDataSourceImpl
-import com.dhimandasgupta.notemark.data.local.datasource.NoteSyncDataSource
-import com.dhimandasgupta.notemark.data.local.datasource.NoteSyncDataSourceImpl
-import com.dhimandasgupta.notemark.data.local.datasource.UserDataSource
-import com.dhimandasgupta.notemark.data.local.datasource.UserDataSourceImpl
-import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApi
-import com.dhimandasgupta.notemark.data.remote.api.NoteMarkApiImpl
 import com.dhimandasgupta.notemark.data.remote.client.NoteMarkHttpClientFactory
 import com.dhimandasgupta.notemark.data.remote.client.NoteMarkHttpConfig
-import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSource
-import com.dhimandasgupta.notemark.data.remote.datasource.NoteMarkApiDataSourceImpl
-import com.dhimandasgupta.notemark.data.repository.NoteMarkRepository
-import com.dhimandasgupta.notemark.data.repository.NoteMarkRepositoryImpl
-import com.dhimandasgupta.notemark.data.repository.SyncRepository
-import com.dhimandasgupta.notemark.data.repository.SyncRepositoryImpl
-import com.dhimandasgupta.notemark.data.repository.UserRepository
-import com.dhimandasgupta.notemark.data.repository.UserRepositoryImpl
 import com.dhimandasgupta.notemark.data.storage.SyncSerializer
 import com.dhimandasgupta.notemark.data.storage.UserSerializer
 import com.dhimandasgupta.notemark.database.NoteMarkDatabase
@@ -201,39 +185,6 @@ interface AppModule {
   @SingleIn(AppScope::class)
   fun provideNoteMarkDatabase(driver: SqlDriver): NoteMarkDatabase =
     NoteMarkDatabase(driver = driver)
-
-  @Provides
-  @SingleIn(AppScope::class)
-  fun provideUserDataSource(impl: UserDataSourceImpl): UserDataSource = impl
-
-  @Provides
-  @SingleIn(AppScope::class)
-  fun provideUserRepository(impl: UserRepositoryImpl): UserRepository = impl
-
-  @Provides
-  @SingleIn(AppScope::class)
-  fun provideNoteSyncDataSource(impl: NoteSyncDataSourceImpl): NoteSyncDataSource = impl
-
-  @Provides
-  @SingleIn(AppScope::class)
-  fun provideSyncRepository(impl: SyncRepositoryImpl): SyncRepository = impl
-
-  @Provides
-  @SingleIn(AppScope::class)
-  fun provideNoteMarkApi(impl: NoteMarkApiImpl): NoteMarkApi = impl
-
-  @Provides
-  @SingleIn(AppScope::class)
-  fun provideNoteMarkApiDataSource(impl: NoteMarkApiDataSourceImpl): NoteMarkApiDataSource = impl
-
-  @Provides
-  @SingleIn(AppScope::class)
-  fun provideNoteMarkLocalDataSource(impl: NoteMarkLocalDataSourceImpl): NoteMarkLocalDataSource =
-    impl
-
-  @Provides
-  @SingleIn(AppScope::class)
-  fun provideNoteMarkRepository(impl: NoteMarkRepositoryImpl): NoteMarkRepository = impl
 
   @Provides
   @SingleIn(AppScope::class)

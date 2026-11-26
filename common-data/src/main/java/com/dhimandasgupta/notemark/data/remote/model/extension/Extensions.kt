@@ -3,7 +3,7 @@ package com.dhimandasgupta.notemark.data.remote.model.extension
 import com.dhimandasgupta.notemark.data.remote.model.Note
 import com.dhimandasgupta.notemark.database.NoteEntity
 
-fun Note.toNoteEntity(synced: Boolean) =
+internal fun Note.toNoteEntity(synced: Boolean) =
   NoteEntity(
     id = 0L,
     title = title,

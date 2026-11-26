@@ -353,7 +353,7 @@ private fun NoteListFab(
 }
 
 @Composable
-fun LoadingPane(
+private fun LoadingPane(
   modifier: Modifier = Modifier,
   style: Style = Style,
   showLoading: Boolean,

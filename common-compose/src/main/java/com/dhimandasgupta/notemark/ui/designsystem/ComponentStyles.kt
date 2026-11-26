@@ -24,13 +24,14 @@ import androidx.compose.ui.unit.dp
 val StyleScope.colorScheme: ColorScheme
   get() = LocalNoteMarkTheme.currentValue.colorScheme
 
-val StyleScope.shapes: Shapes
+internal val StyleScope.shapes: Shapes
   get() = LocalNoteMarkTheme.currentValue.shapes
 
 /** Set on a component's style state while the device has no network connection. */
-val DisconnectedStateKey = StyleStateKey(defaultValue = false)
+internal val DisconnectedStateKey = StyleStateKey(defaultValue = false)
 
-fun StyleScope.disconnected(block: StyleScope.() -> Unit) = state(DisconnectedStateKey) { block() }
+private fun StyleScope.disconnected(block: StyleScope.() -> Unit) =
+  state(DisconnectedStateKey) { block() }
 
 object NoteMarkStyles {
   /** Default surface behind a full screen. */

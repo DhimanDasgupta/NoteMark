@@ -4,12 +4,17 @@ import androidx.datastore.core.DataStore
 import com.dhimandasgupta.notemark.core.di.SyncDataStore
 import com.dhimandasgupta.notemark.data.storage.defaultSyncValue
 import com.dhimandasgupta.notemark.proto.Sync
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.Flow
 
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 @Inject
-class NoteSyncDataSourceImpl(@SyncDataStore syncDataStore: Lazy<DataStore<Sync>>) :
-  NoteSyncDataSource {
+class NoteSyncDataSourceImpl
+internal constructor(@SyncDataStore syncDataStore: Lazy<DataStore<Sync>>) : NoteSyncDataSource {
   private val syncDataStore by syncDataStore
 
   override fun getSync(): Flow<Sync> = syncDataStore.data

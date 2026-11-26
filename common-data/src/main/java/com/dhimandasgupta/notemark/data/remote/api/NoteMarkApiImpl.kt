@@ -10,7 +10,10 @@ import com.dhimandasgupta.notemark.data.remote.model.RegisterRequest
 import com.dhimandasgupta.notemark.data.remote.model.extension.toNote
 import com.dhimandasgupta.notemark.database.NoteEntity
 import com.dhimandasgupta.notemark.proto.User
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
@@ -28,8 +31,11 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 @Inject
-class NoteMarkApiImpl(
+class NoteMarkApiImpl
+internal constructor(
   client: Lazy<HttpClient>,
   userDataSource: Lazy<UserDataSource>,
 ) : NoteMarkApi {
