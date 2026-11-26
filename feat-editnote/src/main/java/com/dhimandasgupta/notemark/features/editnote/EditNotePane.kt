@@ -63,7 +63,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
@@ -391,7 +390,6 @@ private fun EditNoteBody(
         textStyle = typography.titleLarge,
         modifier =
           Modifier.fillMaxWidth().wrapContentHeight(align = Alignment.Top).alignToSafeDrawing(),
-        visualTransformation = VisualTransformation.None,
         placeholder = { Text(text = "Note title", style = typography.titleLarge) },
         colors =
           OutlinedTextFieldDefaults.colors()
@@ -447,7 +445,6 @@ private fun EditNoteBody(
             .fillMaxWidth()
             .wrapContentHeight(align = Alignment.Top)
             .alignToSafeDrawing(),
-        visualTransformation = VisualTransformation.None,
         placeholder = {
           Text(
             text = "Tap to enter note content",

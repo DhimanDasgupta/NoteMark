@@ -49,7 +49,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
@@ -272,7 +271,6 @@ private fun AddNoteTitleField(
     onValueChange = { value -> title = value },
     textStyle = typography.titleLarge,
     modifier = modifier.styleable(null, style),
-    visualTransformation = VisualTransformation.None,
     placeholder = { Text(text = "Note title", style = typography.titleLarge) },
     colors = addNoteTextFieldColors(),
     keyboardOptions =
@@ -306,7 +304,6 @@ private fun AddNoteContentField(
     onValueChange = { value -> body = value },
     textStyle = typography.bodyLarge,
     modifier = modifier.styleable(null, style),
-    visualTransformation = VisualTransformation.None,
     placeholder = {
       Text(
         text = "Tap to enter note content",

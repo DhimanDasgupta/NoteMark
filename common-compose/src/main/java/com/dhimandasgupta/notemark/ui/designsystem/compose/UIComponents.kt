@@ -32,6 +32,9 @@ import androidx.compose.foundation.style.rememberUpdatedStyleState
 import androidx.compose.foundation.style.styleable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextObfuscationMode
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -45,10 +48,12 @@ import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SecureTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +61,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -73,8 +79,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
@@ -86,6 +90,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dhimandasgupta.notemark.common.compose.R
 import com.dhimandasgupta.notemark.ui.designsystem.DisconnectedStateKey
 import com.dhimandasgupta.notemark.ui.designsystem.NoteMarkTheme
+import kotlinx.coroutines.flow.drop
 
 @Composable
 fun NoteMarkButton(
@@ -173,7 +178,6 @@ fun NoteMarkTextField(
           .onFocusChanged { focusState ->
             if (focusState.hasFocus) onFocusGained() else onFocusLost()
           },
-      visualTransformation = VisualTransformation.None,
       placeholder = { Text(hintText) },
       maxLines = 1,
       colors =
@@ -239,6 +243,19 @@ fun NoteMarkPasswordTextField(
   val interactionSource = remember { MutableInteractionSource() }
   val fieldStyleState = rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }
 
+  val textFieldState = rememberTextFieldState(initialText = enteredText)
+  val updatedOnTextChanged by rememberUpdatedState(newValue = onTextChanged)
+  LaunchedEffect(key1 = textFieldState) {
+    snapshotFlow { textFieldState.text.toString() }
+      .drop(count = 1)
+      .collect { text -> updatedOnTextChanged(text) }
+  }
+  LaunchedEffect(key1 = enteredText) {
+    if (textFieldState.text.toString() != enteredText) {
+      textFieldState.setTextAndPlaceCursorAtEnd(text = enteredText)
+    }
+  }
+
   Column(
     modifier = modifier.styleable(null, style),
     verticalArrangement = Arrangement.spacedBy(space = 4.dp),
@@ -253,10 +270,9 @@ fun NoteMarkPasswordTextField(
       }
     }
 
-    TextField(
+    SecureTextField(
       enabled = enabled,
-      value = enteredText,
-      onValueChange = onTextChanged,
+      state = textFieldState,
       trailingIcon = {
         if (showPassword) {
           Icon(
@@ -287,10 +303,9 @@ fun NoteMarkPasswordTextField(
           .onFocusChanged { focusState ->
             if (focusState.hasFocus) onFocusGained() else onFocusLost()
           },
-      visualTransformation =
-        if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+      textObfuscationMode =
+        if (showPassword) TextObfuscationMode.Visible else TextObfuscationMode.Hidden,
       placeholder = { Text(hintText) },
-      maxLines = 1,
       colors =
         OutlinedTextFieldDefaults.colors()
           .copy(
@@ -306,13 +321,12 @@ fun NoteMarkPasswordTextField(
       keyboardOptions =
         KeyboardOptions(
           keyboardType = KeyboardType.Password,
+          autoCorrectEnabled = false,
           imeAction = onDoneClicked?.let { ImeAction.Done } ?: ImeAction.Next,
         ),
-      keyboardActions =
-        KeyboardActions(
-          onNext = { onNextClicked?.invoke() },
-          onDone = { onDoneClicked?.invoke() },
-        ),
+      onKeyboardAction = {
+        if (onDoneClicked != null) onDoneClicked() else onNextClicked?.invoke()
+      },
     )
 
     AnimatedVisibility(visible = explanationText.isNotEmpty()) {
